@@ -1,5 +1,5 @@
  
-If not using the GUI, Auto-WEKA can define experiments either on the command line through a rather tedious process (only documented in the code), or `experiment definition batches' can be made. An experiment definition batch is an XML file that contains a list of datasets to perform experiments on, and one or more experiment prototypes that contain information such as the type of optimisation method to use or the way to partition the provided training data. These files were designed for performing large comparisons of different settings on multiple datasets, but they can easily be applied to situations where you have a single dataset. Section~\ref{sec:experimentdefs} provides a description of how to write these files, but you can also look at the \classname{autoweka.ExperimentBatch} class and its JavaDocs to see how to use them. The GUI also provides a way to generate a simple version of these files, which you can then modify by hand. These experiment definitions also select the choice of optimisation method (see section~\ref{sec:smbo}), and the way to partition the training data using an `InstanceGenerator' (see section~\ref{sec:instancegenerators}).
+If not using the GUI, Auto-WEKA can define experiments by two methods. A simpler way of defining experiments on command line is by making `experiment definition batches'. An experiment definition batch is an XML file that contains a list of datasets to perform experiments on, and one or more experiment prototypes that contain information such as the type of optimisation method to use or the way to partition the provided training data. These files were designed for performing large comparisons of different settings on multiple datasets, but they can easily be applied to situations where you have a single dataset. Section~\ref{sec:experimentdefs} provides a description of how to write these files, but you can also look at the \classname{autoweka.ExperimentBatch} class and its JavaDocs to see how to use them. The GUI also provides a way to generate a simple version of these files, which you can then modify by hand. These experiment definitions also select the choice of optimisation method (see section~\ref{sec:smbo}), and the way to partition the training data using an `InstanceGenerator' (see section~\ref{sec:instancegenerators}).
 
 Once the experiment definition has been created, Auto-WEKA needs to know what type of classification or regression algorithms and feature/attribute selection methods to used. These are all specified in \file{.param} files, detailed in section~\ref{sec:paramfiles}.
 
@@ -10,6 +10,12 @@ After the experiment definition is fully written, the main method of \classname{
   \cmdline{scripts/autoweka autoweka.ExperimentConstructor path/to/experimentbatch.xml}
 \end{aside}
 
+Another way of creating experiments on command line is by passing all the arguments separately instead of using an xml file. The names of the arguments are same as in the experiment definition batches. Although the first argument has to be the class name of the optimizer. For example, if you want to create a experiment with SMAC; the first argument has to be autoweka.smac.SMACExperimentConstructor. After that all the arguments can be passed in a any order.
+
+\begin{aside}
+  Using the provided script, this command can be executed as follows: \\
+  \cmdline{scripts/autoweka autoweka.ExperimentConstructor autoweka.smac.SMACExperimentConstructor -name exptest001 -trainTimeout 1000.0 -tunerTimeout 3600.0 -datasetString abalone.zip -instanceGenerator autoweka.instancegenerators.Default -attributeSelectionTimeout 4000 -memory 2048m -resultMetric errorRate -attributeSelection TRUE -nometa}
+\end{aside}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Experiment Definition Files}\label{sec:experimentdefs}
