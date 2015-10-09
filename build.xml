@@ -8,6 +8,8 @@
     <property name="testclass.dir"   value="${build.dir}/testclasses" />
     <property name="jar.dir"     value="${build.dir}/jar" />
     <property name="dist.dir"    value="${build.dir}/dist" />
+    <property name="doc.dir"    value="doc" />
+    <property name="man.dir"    value="${doc.dir}/manual" />
 
     <!-- Setup the classpath -->
     <path id="classpath">
@@ -40,7 +42,17 @@
     
     <!-- Build some javadoc -->
     <target name="doc" description="generate documentation">
-        <javadoc sourcepath="src/java" destdir="doc/javadoc"/>
+        <javadoc sourcepath="src/java" destdir="${doc.dir}/javadoc"/>
+    </target>
+
+    <!-- Build User guide from Tex sources -->
+	<target name="manual" description="generate user manual">
+        <exec executable="xelatex" dir='${man.dir}'>
+            <arg value="manual.tex"/>
+        </exec>
+        <exec executable="xelatex" dir='${man.dir}'>
+            <arg value="manual.tex"/>
+        </exec>
     </target>
 
     <!-- Build the actual jar -->
@@ -73,8 +85,8 @@
             <tarfileset dir="." includes="build.xml" />
             <tarfileset dir="weka" includes="autoweka.patch" />
             <!--<tarfileset dir="datasets/classification" includes="creditg.arff" prefix="datasets" />-->
-            <tarfileset dir="doc/javadoc" includes="**/*" prefix="doc" />
-            <tarfileset dir="doc/manual" includes="manual.pdf" />
+            <tarfileset dir="${doc.dir}/javadoc" includes="**/*" prefix="doc" />
+            <tarfileset dir="${man.dir}" includes="manual.pdf" />
             <tarfileset dir="defaultprops" includes="*" prefix="" />
         </tar>
     </target>
