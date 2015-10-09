@@ -1,0 +1,119 @@
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Scatter Search 
+	Init Population: 2
+	Kind of Combination: Greedy Combination
+	Random number seed: 1
+	Debug: true
+	Treshold:    0    
+	Total number of subsets evaluated: 18
+	Merit of best subset found:    0.992
+
+
+Population: 2
+merit    	subset
+ 0.99164	 [3]
+ 0.98585	 [1, 2, 3]
+
+ReferenceSet:
+----------------Most Significants Solutions--------------
+ 0.99164	 [3]
+----------------Most Diverses Solutions--------------
+ 0.98585	 [1, 2, 3]
+
+Last Reference Set Updated:
+merit    	subset
+ 0.99164	 [3]
+ 0.98585	 [1, 2, 3]
+
+Attribute Subset Evaluator (supervised, Class (numeric): 5 Class):
+	CFS Subset Evaluator
+	Including locally predictive attributes
+
+Selected attributes: 1,2,3 : 3
+                     Nominal1
+                     Nominal2
+                     Numeric1
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Scatter Search 
+	Init Population: 2
+	Kind of Combination: Greedy Combination
+	Random number seed: 1
+	Debug: true
+	Treshold:    0    
+	Total number of subsets evaluated: 21
+	Merit of best subset found:    1    
+
+
+Population: 2
+merit    	subset
+ 1      	 [1]
+ 1      	 [3]
+
+ReferenceSet:
+----------------Most Significants Solutions--------------
+ 1      	 [1]
+----------------Most Diverses Solutions--------------
+ 1      	 [3]
+
+Last Reference Set Updated:
+merit    	subset
+ 1      	 [1]
+ 1      	 [3]
+
+Attribute Subset Evaluator (supervised, Class (nominal): 5 Class):
+	CFS Subset Evaluator
+	Including locally predictive attributes
+
+Selected attributes: 1,2,3 : 3
+                     Nominal1
+                     Nominal2
+                     Numeric1
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Scatter Search 
+	Init Population: 2
+	Kind of Combination: Greedy Combination
+	Random number seed: 1
+	Debug: true
+	Treshold:    0    
+	Total number of subsets evaluated: 15
+	Merit of best subset found:    1    
+
+
+Population: 2
+merit    	subset
+ 1      	 [3]
+ 1      	 [2, 3]
+
+ReferenceSet:
+----------------Most Significants Solutions--------------
+ 1      	 [3]
+----------------Most Diverses Solutions--------------
+ 1      	 [2, 3]
+
+Last Reference Set Updated:
+merit    	subset
+ 1      	 [3]
+ 1      	 [2, 3]
+
+Attribute Subset Evaluator (supervised, Class (numeric): 5 Class):
+	CFS Subset Evaluator
+	Including locally predictive attributes
+
+Selected attributes: 2,3 : 2
+                     Nominal2
+                     Numeric1
+

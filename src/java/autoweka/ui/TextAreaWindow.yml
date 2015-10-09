@@ -1,0 +1,7 @@
+JFrame(defaultCloseOperation=disposeOnClose):
+    - JScrollPane(name=mScrollPane):
+        JTextArea(name=mTextArea,editable=false)
+    - MigLayout : |
+          [grow]
+          mScrollPane [grow]
+

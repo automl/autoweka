@@ -1,0 +1,18 @@
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (supervised, Class (nominal): 5 Class):
+	Information Gain Ranking Filter
+
+Ranked attributes:
+ 0.971  3 Numeric1
+ 0.971  1 Nominal1
+ 0.361  2 Nominal2
+ 0      4 Date1
+
+Selected attributes: 3,1,2,4 : 4
+

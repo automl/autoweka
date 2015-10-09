@@ -1,0 +1,32 @@
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Best first.
+	Start set: no attributes
+	Search direction: forward
+	Stale search after 5 node expansions
+	Total number of subsets evaluated: 13
+	Merit of best subset found:    1    
+
+Attribute Subset Evaluator (supervised, Class (nominal): 5 Class):
+CostSensitiveSubsetEval using 
+
+weka.attributeSelection.CfsSubsetEval 
+
+Evaluator
+	CFS Subset Evaluator
+	Including locally predictive attributes
+
+
+Cost Matrix
+ 0 5
+ 1 0
+
+Selected attributes: 1,2,3,4 : 4
+                     Nominal1
+                     Nominal2
+                     Numeric1
+                     Date1
+

@@ -1,0 +1,180 @@
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (unsupervised):
+	Latent Semantic Analysis Attribute Transformer
+
+Number of latent variables utilized: 1
+
+SingularValue	LatentVariable#
+12149897946236.85888	1
+
+Attribute vectors (left singular vectors) -- row vectors show
+the relation between the original attributes and the latent 
+variables computed by the singular value decomposition:
+LatentVariable#1	AttributeName
+  0      		Nominal1
+  0      		Nominal2
+  0      		Numeric1
+  1      		Date1
+
+
+Instance vectors (right singular vectors) -- column
+vectors show the relation between the original instances and the
+latent variables computed by the singular value decomposition:
+Instance#1	Instance#2	Instance#3	Instance#4	Instance#5	Instance#6	Instance#7	Instance#8	Instance#9	Instance#10	Instance#11	Instance#12	Instance#13	Instance#14	Instance#15	Instance#16	Instance#17	Instance#18	Instance#19	Instance#20	LatentVariable#
+  0.09091	  0.31687	  0.10129	  0.18441	  0.15584	  0.24414	  0.0961 	  0.22856	  0.23636	  0.32207	  0.08052	  0.23375	  0.18701	  0.28311	  0.27531	  0.2935 	  0.0883 	  0.32466	  0.21298	  0.21298	1
+
+Ranked attributes:
+ 1 1 0    Nominal1+0    Nominal2+0    Numeric1+0    Date1
+
+Selected attributes: 1 : 1
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (unsupervised):
+	Latent Semantic Analysis Attribute Transformer
+
+Number of latent variables utilized: 1
+
+SingularValue	LatentVariable#
+13535468797765.83936	1
+
+Attribute vectors (left singular vectors) -- row vectors show
+the relation between the original attributes and the latent 
+variables computed by the singular value decomposition:
+LatentVariable#1	AttributeName
+  0      		Nominal1
+  0      		Nominal2
+  0      		Numeric1
+  1      		Date1
+
+
+Instance vectors (right singular vectors) -- column
+vectors show the relation between the original instances and the
+latent variables computed by the singular value decomposition:
+Instance#1	Instance#2	Instance#3	Instance#4	Instance#5	Instance#6	Instance#7	Instance#8	Instance#9	Instance#10	Instance#11	Instance#12	Instance#13	Instance#14	Instance#15	Instance#16	Instance#17	Instance#18	Instance#19	Instance#20	LatentVariable#
+  0.0816 	  0.24713	  0.23314	  0.13056	  0.20517	  0.26812	  0.21915	  0.2448 	  0.17019	  0.10025	  0.11424	  0.29843	  0.07227	  0.27045	  0.2891 	  0.29843	  0.29143	  0.24713	  0.26345	  0.17719	1
+
+Ranked attributes:
+ 1 1 0    Nominal1+0    Nominal2+0    Numeric1+0    Date1
+
+Selected attributes: 1 : 1
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (unsupervised):
+	Latent Semantic Analysis Attribute Transformer
+
+Number of latent variables utilized: 1
+
+SingularValue	LatentVariable#
+10940596499549.85984	1
+
+Attribute vectors (left singular vectors) -- row vectors show
+the relation between the original attributes and the latent 
+variables computed by the singular value decomposition:
+LatentVariable#1	AttributeName
+  0      		Nominal1
+  0      		Nominal2
+  0      		Numeric1
+  1      		Date1
+
+
+Instance vectors (right singular vectors) -- column
+vectors show the relation between the original instances and the
+latent variables computed by the singular value decomposition:
+Instance#1	Instance#2	Instance#3	Instance#4	Instance#5	Instance#6	Instance#7	Instance#8	Instance#9	Instance#10	Instance#11	Instance#12	Instance#13	Instance#14	Instance#15	Instance#16	Instance#17	Instance#18	Instance#19	Instance#20	LatentVariable#
+  0.08653	  0.27402	  0.23652	  0.20768	  0.11826	  0.15287	  0.2221 	  0.15575	  0.2769 	  0.35767	  0.25671	  0.25671	  0.10384	  0.35479	  0.10095	  0.10672	  0.0923 	  0.0923 	  0.28267	  0.34036	1
+
+Ranked attributes:
+ 1 1 0    Nominal1+0    Nominal2+0    Numeric1+0    Date1
+
+Selected attributes: 1 : 1
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (unsupervised):
+	Latent Semantic Analysis Attribute Transformer
+
+Number of latent variables utilized: 1
+
+SingularValue	LatentVariable#
+47631112273572.13696	1
+
+Attribute vectors (left singular vectors) -- row vectors show
+the relation between the original attributes and the latent 
+variables computed by the singular value decomposition:
+LatentVariable#1	AttributeName
+  0      		Nominal1
+  0      		Nominal2
+  0.96576		Numeric1
+  0.25945		Date1
+
+
+Instance vectors (right singular vectors) -- column
+vectors show the relation between the original instances and the
+latent variables computed by the singular value decomposition:
+Instance#1	Instance#2	Instance#3	Instance#4	Instance#5	Instance#6	Instance#7	Instance#8	Instance#9	Instance#10	Instance#11	Instance#12	Instance#13	Instance#14	Instance#15	Instance#16	Instance#17	Instance#18	Instance#19	Instance#20	LatentVariable#
+  0.15958	  0.14107	  0.32943	  0.19646	  0.12518	  0.31921	  0.13645	  0.29702	  0.17635	  0.3222 	  0.2362 	  0.23187	  0.13073	  0.23237	  0.25166	  0.10646	  0.30046	  0.246  	  0.16786	  0.11799	1
+
+Ranked attributes:
+ 0.986 1 0    Nominal1+0    Nominal2+0    Numeric1+0    Date1
+
+Selected attributes: 1 : 1
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (unsupervised):
+	Latent Semantic Analysis Attribute Transformer
+
+Number of latent variables utilized: 1
+
+SingularValue	LatentVariable#
+13204726207175.25248	1
+
+Attribute vectors (left singular vectors) -- row vectors show
+the relation between the original attributes and the latent 
+variables computed by the singular value decomposition:
+LatentVariable#1	AttributeName
+  0      		Nominal1
+  0      		Nominal2
+  0      		Numeric1
+  1      		Date1
+
+
+Instance vectors (right singular vectors) -- column
+vectors show the relation between the original instances and the
+latent variables computed by the singular value decomposition:
+Instance#1	Instance#2	Instance#3	Instance#4	Instance#5	Instance#6	Instance#7	Instance#8	Instance#9	Instance#10	Instance#11	Instance#12	Instance#13	Instance#14	Instance#15	Instance#16	Instance#17	Instance#18	Instance#19	Instance#20	LatentVariable#
+  0.23898	  0.1171 	  0.29156	  0.23898	  0.22225	  0.16968	  0.18163	  0.27483	  0.29395	  0.22704	  0.08842	  0.16728	  0.10276	  0.1171 	  0.29634	  0.28678	  0.15056	  0.29395	  0.17207	  0.3059 	1
+
+Ranked attributes:
+ 1 1 0    Nominal1+0    Nominal2+0    Numeric1+0    Date1
+
+Selected attributes: 1 : 1
+

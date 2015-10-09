@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  Test setup for EnsembleSelection tests.
+
+  author:  FracPete (fracpete at waikato dot ac dot nz)
+  version: $Revision: 8034 $
+-->
+
+<!DOCTYPE object
+[
+   <!ELEMENT object (#PCDATA | object)*>
+   <!ATTLIST object name      CDATA #REQUIRED>
+   <!ATTLIST object class     CDATA #REQUIRED>
+   <!ATTLIST object primitive CDATA "no">
+   <!ATTLIST object array     CDATA "no">   <!-- the dimensions of the array; no=0, yes=1 -->
+   <!ATTLIST object null      CDATA "no">
+   <!ATTLIST object version   CDATA "3.5.3">
+]
+>
+
+<object class="java.util.Vector" name="__root__" version="3.5.3">
+   <object class="weka.classifiers.rules.ZeroR" name="0">
+      <object array="yes" class="java.lang.String" name="options"/>
+   </object>
+   <object class="weka.classifiers.rules.ZeroR" name="1">
+      <object array="yes" class="java.lang.String" name="options">
+         <object class="java.lang.String" name="0">-D</object>
+      </object>
+   </object>
+</object>

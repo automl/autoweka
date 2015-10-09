@@ -1,0 +1,10 @@
+num_HIDDEN {0,1}[0]
+    1_INT_A {-1}[-1]
+    2_INT_A [1, 1024][32]il
+1_C {REMOVED,REMOVE_PREV}[REMOVE_PREV]
+2_R [0.5, 1.0][0.95]
+3_O {REMOVED,REMOVE_PREV}[REMOVE_PREV]
+
+Conditionals:
+1_INT_A |num_HIDDEN in {0}
+2_INT_A |num_HIDDEN in {1}

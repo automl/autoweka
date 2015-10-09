@@ -1,0 +1,31 @@
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (supervised, Class (nominal): 5 Class):
+CostSensitiveAttributeEval using 
+
+weka.attributeSelection.ReliefFAttributeEval -M -1 -D 1 -K 10
+
+Evaluator
+	ReliefF Ranking Filter
+	Instances sampled: all
+	Number of nearest neighbours (k): 10
+	Equal influence nearest neighbours
+
+
+Cost Matrix
+ 0 5
+ 1 0
+
+Ranked attributes:
+ 1      1 Nominal1
+ 0.763  3 Numeric1
+ 0.438  2 Nominal2
+ 0      4 Date1
+
+Selected attributes: 1,3,2,4 : 4
+

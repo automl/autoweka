@@ -1,0 +1,16 @@
+JDialog(title="TPE Options", size=packed):
+    - JTextField(name=mExecutableText)
+    - JButton(name=openExecutableButton, text="Open", onAction=[openExecutable])
+    - JTextField(name=mPythonPathText)
+    - JTextField(name=mTPERunnerText)
+    - JButton(name=openTPERunnerButton, text="Open", onAction=[openTPERunner])
+    - JButton(name=okButton, text="Close", onAction=[close])
+    - MigLayout : |
+        []                      [grow, 200]               [grow]
+        "Pyton Executable"      mExecutableText           openExecutableButton
+        "PYTHONPATH"            mPythonPathText+*
+        "tperunner.py"          mTPERunnerText            openTPERunnerButton
+        |okButton+* 
+
+
+

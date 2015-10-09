@@ -1,0 +1,19 @@
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Greedy Stepwise (forwards).
+	Start set: no attributes
+	Merit of best subset found:    0    
+
+Attribute Subset Evaluator (supervised, Class (nominal): 5 Class):
+	Classifier Subset Evaluator
+	Learning scheme: weka.classifiers.trees.J48
+	Scheme options: -C 0.25 -M 2             
+	Hold out/test set: Training data
+	Accuracy estimation: classification error
+
+Selected attributes: 1 : 1
+                     Nominal1
+

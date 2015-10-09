@@ -1,0 +1,14 @@
+INT_I [2, 256][10]il
+features_HIDDEN {0,1}[0]
+    1_INT_K {0}[0]
+    2_INT_K [1, 32][2]il
+depth_HIDDEN {0,1}[0]
+    1_INT_depth {0}[0]
+    2_INT_depth [1, 20][2]i
+
+Conditionals:
+1_INT_K | features_HIDDEN in {0}
+2_INT_K | features_HIDDEN in {1}
+1_INT_depth |depth_HIDDEN in {0}
+2_INT_depth |depth_HIDDEN in {1}
+

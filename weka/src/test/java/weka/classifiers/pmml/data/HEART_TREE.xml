@@ -1,0 +1,622 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PMML version="3.0" xmlns="http://www.dmg.org/PMML-3_0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<Header copyright="Copyright (c) Integral Solutions Ltd., 1994 - 2005. All rights reserved.">
+<Application name="Clementine" version="10.0"/>
+<Annotation>Exported with PMML extensions for use with SPSS SmartScore</Annotation>
+</Header>
+<DataDictionary numberOfFields="15">
+<DataField name="age" optype="continuous" dataType="integer">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="sex" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Value value="female" property="valid"/>
+<Value value="male" property="valid"/>
+</DataField>
+<DataField name="cp" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Value value="asympt" property="valid"/>
+<Value value="atyp_angina" property="valid"/>
+<Value value="non_anginal" property="valid"/>
+<Value value="typ_angina" property="valid"/>
+</DataField>
+<DataField name="trestbps" optype="continuous" dataType="integer">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="chol" optype="continuous" dataType="integer">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="fbs" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Value value="f" property="valid"/>
+<Value value="t" property="valid"/>
+</DataField>
+<DataField name="restecg" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Value value="left_vent_hyper" property="valid"/>
+<Value value="normal" property="valid"/>
+<Value value="st_t_wave_abnormality" property="valid"/>
+</DataField>
+<DataField name="thalach" optype="continuous" dataType="integer">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="exang" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Value value="no" property="valid"/>
+<Value value="yes" property="valid"/>
+</DataField>
+<DataField name="oldpeak" optype="continuous" dataType="double">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="slope" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Value value="down" property="valid"/>
+<Value value="flat" property="valid"/>
+<Value value="up" property="valid"/>
+</DataField>
+<DataField name="ca" optype="continuous" dataType="integer">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="thal" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Value value="fixed_defect" property="valid"/>
+<Value value="normal" property="valid"/>
+<Value value="reversable_defect" property="valid"/>
+</DataField>
+<DataField name="$R-num" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Value value="&lt;50" property="valid"/>
+<Value value="&gt;50_1" property="valid"/>
+</DataField>
+<DataField name="$RC-num" optype="continuous" dataType="double">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+</DataDictionary>
+<TreeModel modelName="HEART_TREE" functionName="classification" algorithmName="C&amp;R Tree">
+<Extension name="missingValueStrategy" value="defaultChild"/>
+<Extension name="missingValuePenalty" value="0.9"/>
+<MiningSchema>
+<MiningField name="age" usageType="active"/>
+<MiningField name="sex" usageType="active"/>
+<MiningField name="cp" usageType="active"/>
+<MiningField name="trestbps" usageType="active"/>
+<MiningField name="chol" usageType="active"/>
+<MiningField name="fbs" usageType="active"/>
+<MiningField name="restecg" usageType="active"/>
+<MiningField name="thalach" usageType="active"/>
+<MiningField name="exang" usageType="active"/>
+<MiningField name="oldpeak" usageType="active"/>
+<MiningField name="slope" usageType="active"/>
+<MiningField name="ca" usageType="active"/>
+<MiningField name="thal" usageType="active"/>
+<MiningField name="$R-num" usageType="predicted"/>
+<MiningField name="$RC-num" usageType="supplementary"/>
+</MiningSchema>
+<Node score="&lt;50" recordCount="303" id="0">
+<Extension name="defaultChild" value="0"/>
+<Extension name="nrCorrect" value="165.0891089108911"/>
+<True/>
+<ScoreDistribution value="&lt;50" recordCount="165">
+<Extension name="confidence" value="0.544262295081967"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="138">
+<Extension name="confidence" value="0.455737704918033"/>
+</ScoreDistribution>
+<Node score="&lt;50" recordCount="167" id="1">
+<Extension name="defaultChild" value="0"/>
+<Extension name="nrCorrect" value="130.5568862275449"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimpleSetPredicate field="thal" booleanOperator="isIn">
+<Array n="1" type="string">"normal"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="thalach" operator="greaterThan" value="150.5"/>
+<SimpleSetPredicate field="cp" booleanOperator="isIn">
+<Array n="3" type="string">"atyp_angina" "non_anginal" "typ_angina"</Array>
+</SimpleSetPredicate>
+<SimpleSetPredicate field="exang" booleanOperator="isIn">
+<Array n="1" type="string">"no"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="oldpeak" operator="lessOrEqual" value="1.55"/>
+<SimpleSetPredicate field="sex" booleanOperator="isIn">
+<Array n="1" type="string">"female"</Array>
+</SimpleSetPredicate>
+<True/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="130">
+<Extension name="confidence" value="0.775147928994083"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="37">
+<Extension name="confidence" value="0.224852071005917"/>
+</ScoreDistribution>
+<Node score="&lt;50" recordCount="118" id="2">
+<Extension name="defaultChild" value="0"/>
+<Extension name="nrCorrect" value="105.77966101694915"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="ca" operator="lessOrEqual" value="0.5"/>
+<SimplePredicate field="age" operator="lessOrEqual" value="66.5"/>
+<SimplePredicate field="thalach" operator="greaterThan" value="134"/>
+<SimplePredicate field="chol" operator="lessOrEqual" value="405.5"/>
+<SimplePredicate field="oldpeak" operator="lessOrEqual" value="3.55"/>
+<SimpleSetPredicate field="cp" booleanOperator="isIn">
+<Array n="3" type="string">"asympt" "atyp_angina" "non_anginal"</Array>
+</SimpleSetPredicate>
+<True/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="105">
+<Extension name="confidence" value="0.883333333333333"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="13">
+<Extension name="confidence" value="0.116666666666667"/>
+</ScoreDistribution>
+<Node score="&lt;50" recordCount="113" id="3">
+<Extension name="nrCorrect" value="103.82300884955752"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="trestbps" operator="lessOrEqual" value="158"/>
+<True/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="103">
+<Extension name="confidence" value="0.904347826086956"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="10">
+<Extension name="confidence" value="0.095652173913043"/>
+</ScoreDistribution>
+</Node>
+<Node score="&gt;50_1" recordCount="5" id="4">
+<Extension name="nrCorrect" value="3.2"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="trestbps" operator="greaterThan" value="158"/>
+<False/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="2">
+<Extension name="confidence" value="0.428571428571429"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="3">
+<Extension name="confidence" value="0.571428571428571"/>
+</ScoreDistribution>
+</Node>
+</Node>
+<Node score="&lt;50" recordCount="49" id="5">
+<Extension name="defaultChild" value="1"/>
+<Extension name="nrCorrect" value="25.020408163265305"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="ca" operator="greaterThan" value="0.5"/>
+<SimplePredicate field="age" operator="greaterThan" value="66.5"/>
+<SimplePredicate field="thalach" operator="lessOrEqual" value="134"/>
+<SimplePredicate field="chol" operator="greaterThan" value="405.5"/>
+<SimplePredicate field="oldpeak" operator="greaterThan" value="3.55"/>
+<SimpleSetPredicate field="cp" booleanOperator="isIn">
+<Array n="1" type="string">"typ_angina"</Array>
+</SimpleSetPredicate>
+<False/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="25">
+<Extension name="confidence" value="0.509803921568627"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="24">
+<Extension name="confidence" value="0.490196078431373"/>
+</ScoreDistribution>
+<Node score="&gt;50_1" recordCount="20" id="6">
+<Extension name="nrCorrect" value="17.7"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimpleSetPredicate field="cp" booleanOperator="isIn">
+<Array n="1" type="string">"asympt"</Array>
+</SimpleSetPredicate>
+<SimpleSetPredicate field="exang" booleanOperator="isIn">
+<Array n="1" type="string">"yes"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="thalach" operator="lessOrEqual" value="125.5"/>
+<SimpleSetPredicate field="slope" booleanOperator="isIn">
+<Array n="2" type="string">"down" "flat"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="oldpeak" operator="greaterThan" value="0.85"/>
+<SimplePredicate field="trestbps" operator="lessOrEqual" value="115"/>
+<False/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="3">
+<Extension name="confidence" value="0.181818181818182"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="17">
+<Extension name="confidence" value="0.818181818181818"/>
+</ScoreDistribution>
+</Node>
+<Node score="&lt;50" recordCount="29" id="7">
+<Extension name="defaultChild" value="1"/>
+<Extension name="nrCorrect" value="22.517241379310345"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimpleSetPredicate field="cp" booleanOperator="isIn">
+<Array n="3" type="string">"atyp_angina" "non_anginal" "typ_angina"</Array>
+</SimpleSetPredicate>
+<SimpleSetPredicate field="exang" booleanOperator="isIn">
+<Array n="1" type="string">"no"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="thalach" operator="greaterThan" value="125.5"/>
+<SimpleSetPredicate field="slope" booleanOperator="isIn">
+<Array n="1" type="string">"up"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="oldpeak" operator="lessOrEqual" value="0.85"/>
+<SimplePredicate field="trestbps" operator="greaterThan" value="115"/>
+<True/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="22">
+<Extension name="confidence" value="0.741935483870968"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="7">
+<Extension name="confidence" value="0.258064516129032"/>
+</ScoreDistribution>
+<Node score="&lt;50" recordCount="11" id="8">
+<Extension name="defaultChild" value="1"/>
+<Extension name="nrCorrect" value="6.09090909090909"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="chol" operator="lessOrEqual" value="237.5"/>
+<SimpleSetPredicate field="cp" booleanOperator="isIn">
+<Array n="2" type="string">"atyp_angina" "typ_angina"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="trestbps" operator="greaterThan" value="153"/>
+<SimplePredicate field="oldpeak" operator="greaterThan" value="2.25"/>
+<SimpleSetPredicate field="sex" booleanOperator="isIn">
+<Array n="1" type="string">"male"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="age" operator="lessOrEqual" value="41.5"/>
+<False/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="6">
+<Extension name="confidence" value="0.538461538461538"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="5">
+<Extension name="confidence" value="0.461538461538462"/>
+</ScoreDistribution>
+<Node score="&lt;50" recordCount="5" id="9">
+<Extension name="nrCorrect" value="4.6"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="age" operator="lessOrEqual" value="55.5"/>
+<SimplePredicate field="chol" operator="lessOrEqual" value="202.5"/>
+<SimplePredicate field="trestbps" operator="lessOrEqual" value="127.5"/>
+<SimpleSetPredicate field="slope" booleanOperator="isIn">
+<Array n="1" type="string">"up"</Array>
+</SimpleSetPredicate>
+<SimpleSetPredicate field="cp" booleanOperator="isIn">
+<Array n="1" type="string">"non_anginal"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="thalach" operator="lessOrEqual" value="128.5"/>
+<False/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="4">
+<Extension name="confidence" value="0.714285714285714"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="1">
+<Extension name="confidence" value="0.285714285714286"/>
+</ScoreDistribution>
+</Node>
+<Node score="&gt;50_1" recordCount="6" id="10">
+<Extension name="nrCorrect" value="4.333333333333333"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="age" operator="greaterThan" value="55.5"/>
+<SimplePredicate field="chol" operator="greaterThan" value="202.5"/>
+<SimplePredicate field="trestbps" operator="greaterThan" value="127.5"/>
+<SimpleSetPredicate field="slope" booleanOperator="isIn">
+<Array n="1" type="string">"flat"</Array>
+</SimpleSetPredicate>
+<SimpleSetPredicate field="cp" booleanOperator="isIn">
+<Array n="2" type="string">"atyp_angina" "typ_angina"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="thalach" operator="greaterThan" value="128.5"/>
+<True/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="2">
+<Extension name="confidence" value="0.375"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="4">
+<Extension name="confidence" value="0.625"/>
+</ScoreDistribution>
+</Node>
+</Node>
+<Node score="&lt;50" recordCount="18" id="11">
+<Extension name="nrCorrect" value="16.77777777777778"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="chol" operator="greaterThan" value="237.5"/>
+<SimpleSetPredicate field="cp" booleanOperator="isIn">
+<Array n="1" type="string">"non_anginal"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="trestbps" operator="lessOrEqual" value="153"/>
+<SimplePredicate field="oldpeak" operator="lessOrEqual" value="2.25"/>
+<SimpleSetPredicate field="sex" booleanOperator="isIn">
+<Array n="1" type="string">"female"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="age" operator="greaterThan" value="41.5"/>
+<True/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="16">
+<Extension name="confidence" value="0.85"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="2">
+<Extension name="confidence" value="0.15"/>
+</ScoreDistribution>
+</Node>
+</Node>
+</Node>
+</Node>
+<Node score="&gt;50_1" recordCount="136" id="12">
+<Extension name="defaultChild" value="0"/>
+<Extension name="nrCorrect" value="101.48529411764706"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimpleSetPredicate field="thal" booleanOperator="isIn">
+<Array n="2" type="string">"fixed_defect" "reversable_defect"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="thalach" operator="lessOrEqual" value="150.5"/>
+<SimpleSetPredicate field="cp" booleanOperator="isIn">
+<Array n="1" type="string">"asympt"</Array>
+</SimpleSetPredicate>
+<SimpleSetPredicate field="exang" booleanOperator="isIn">
+<Array n="1" type="string">"yes"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="oldpeak" operator="greaterThan" value="1.55"/>
+<SimpleSetPredicate field="sex" booleanOperator="isIn">
+<Array n="1" type="string">"male"</Array>
+</SimpleSetPredicate>
+<False/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="35">
+<Extension name="confidence" value="0.260869565217391"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="101">
+<Extension name="confidence" value="0.739130434782609"/>
+</ScoreDistribution>
+<Node score="&gt;50_1" recordCount="90" id="13">
+<Extension name="defaultChild" value="1"/>
+<Extension name="nrCorrect" value="80.77777777777777"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimpleSetPredicate field="cp" booleanOperator="isIn">
+<Array n="1" type="string">"asympt"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="thalach" operator="lessOrEqual" value="172"/>
+<SimpleSetPredicate field="exang" booleanOperator="isIn">
+<Array n="1" type="string">"yes"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="trestbps" operator="greaterThan" value="106.5"/>
+<SimplePredicate field="age" operator="lessOrEqual" value="66.5"/>
+<SimplePredicate field="chol" operator="greaterThan" value="128.5"/>
+<True/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="10">
+<Extension name="confidence" value="0.119565217391304"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="80">
+<Extension name="confidence" value="0.880434782608696"/>
+</ScoreDistribution>
+<Node score="&gt;50_1" recordCount="22" id="14">
+<Extension name="defaultChild" value="0"/>
+<Extension name="nrCorrect" value="14.272727272727273"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="oldpeak" operator="lessOrEqual" value="0.55"/>
+<SimplePredicate field="thalach" operator="greaterThan" value="146.5"/>
+<SimpleSetPredicate field="slope" booleanOperator="isIn">
+<Array n="1" type="string">"up"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="trestbps" operator="lessOrEqual" value="109"/>
+<False/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="8">
+<Extension name="confidence" value="0.375"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="14">
+<Extension name="confidence" value="0.625"/>
+</ScoreDistribution>
+<Node score="&lt;50" recordCount="12" id="15">
+<Extension name="defaultChild" value="1"/>
+<Extension name="nrCorrect" value="7.166666666666668"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="chol" operator="lessOrEqual" value="237.5"/>
+<SimpleSetPredicate field="restecg" booleanOperator="isIn">
+<Array n="1" type="string">"normal"</Array>
+</SimpleSetPredicate>
+<SimpleSetPredicate field="exang" booleanOperator="isIn">
+<Array n="1" type="string">"no"</Array>
+</SimpleSetPredicate>
+<SimpleSetPredicate field="slope" booleanOperator="isIn">
+<Array n="1" type="string">"up"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="ca" operator="lessOrEqual" value="1.5"/>
+<SimplePredicate field="trestbps" operator="lessOrEqual" value="122"/>
+<True/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="7">
+<Extension name="confidence" value="0.571428571428571"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="5">
+<Extension name="confidence" value="0.428571428571429"/>
+</ScoreDistribution>
+<Node score="&lt;50" recordCount="4" id="16">
+<Extension name="nrCorrect" value="5"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="thalach" operator="lessOrEqual" value="152"/>
+<SimpleSetPredicate field="thal" booleanOperator="isIn">
+<Array n="1" type="string">"fixed_defect"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="oldpeak" operator="greaterThan" value="0.05"/>
+<SimplePredicate field="age" operator="greaterThan" value="63"/>
+<SimpleSetPredicate field="fbs" booleanOperator="isIn">
+<Array n="1" type="string">"t"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="ca" operator="greaterThan" value="2"/>
+<False/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="4">
+<Extension name="confidence" value="0.833333333333333"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="0">
+<Extension name="confidence" value="0"/>
+</ScoreDistribution>
+</Node>
+<Node score="&gt;50_1" recordCount="8" id="17">
+<Extension name="nrCorrect" value="5.25"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="thalach" operator="greaterThan" value="152"/>
+<SimpleSetPredicate field="thal" booleanOperator="isIn">
+<Array n="1" type="string">"reversable_defect"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="oldpeak" operator="lessOrEqual" value="0.05"/>
+<SimplePredicate field="age" operator="lessOrEqual" value="63"/>
+<SimpleSetPredicate field="fbs" booleanOperator="isIn">
+<Array n="1" type="string">"f"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="ca" operator="lessOrEqual" value="2"/>
+<True/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="3">
+<Extension name="confidence" value="0.4"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="5">
+<Extension name="confidence" value="0.6"/>
+</ScoreDistribution>
+</Node>
+</Node>
+<Node score="&gt;50_1" recordCount="10" id="18">
+<Extension name="nrCorrect" value="9.8"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="chol" operator="greaterThan" value="237.5"/>
+<SimpleSetPredicate field="restecg" booleanOperator="isIn">
+<Array n="1" type="string">"left_vent_hyper"</Array>
+</SimpleSetPredicate>
+<SimpleSetPredicate field="exang" booleanOperator="isIn">
+<Array n="1" type="string">"yes"</Array>
+</SimpleSetPredicate>
+<SimpleSetPredicate field="slope" booleanOperator="isIn">
+<Array n="1" type="string">"flat"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="ca" operator="greaterThan" value="1.5"/>
+<SimplePredicate field="trestbps" operator="greaterThan" value="122"/>
+<False/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="1">
+<Extension name="confidence" value="0.166666666666667"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="9">
+<Extension name="confidence" value="0.833333333333333"/>
+</ScoreDistribution>
+</Node>
+</Node>
+<Node score="&gt;50_1" recordCount="68" id="19">
+<Extension name="nrCorrect" value="66.94117647058823"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="oldpeak" operator="greaterThan" value="0.55"/>
+<SimplePredicate field="thalach" operator="lessOrEqual" value="146.5"/>
+<SimpleSetPredicate field="slope" booleanOperator="isIn">
+<Array n="2" type="string">"down" "flat"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="trestbps" operator="greaterThan" value="109"/>
+<True/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="2">
+<Extension name="confidence" value="0.042857142857143"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="66">
+<Extension name="confidence" value="0.957142857142857"/>
+</ScoreDistribution>
+</Node>
+</Node>
+<Node score="&lt;50" recordCount="46" id="20">
+<Extension name="defaultChild" value="0"/>
+<Extension name="nrCorrect" value="25.08695652173913"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimpleSetPredicate field="cp" booleanOperator="isIn">
+<Array n="3" type="string">"atyp_angina" "non_anginal" "typ_angina"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="thalach" operator="greaterThan" value="172"/>
+<SimpleSetPredicate field="exang" booleanOperator="isIn">
+<Array n="1" type="string">"no"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="trestbps" operator="lessOrEqual" value="106.5"/>
+<SimplePredicate field="age" operator="greaterThan" value="66.5"/>
+<SimplePredicate field="chol" operator="lessOrEqual" value="128.5"/>
+<False/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="25">
+<Extension name="confidence" value="0.541666666666667"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="21">
+<Extension name="confidence" value="0.458333333333333"/>
+</ScoreDistribution>
+<Node score="&lt;50" recordCount="29" id="21">
+<Extension name="nrCorrect" value="21.448275862068964"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="ca" operator="lessOrEqual" value="0.5"/>
+<SimplePredicate field="thalach" operator="greaterThan" value="113.5"/>
+<SimplePredicate field="oldpeak" operator="lessOrEqual" value="1.95"/>
+<SimpleSetPredicate field="cp" booleanOperator="isIn">
+<Array n="2" type="string">"atyp_angina" "typ_angina"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="age" operator="lessOrEqual" value="67.5"/>
+<SimplePredicate field="trestbps" operator="greaterThan" value="97.5"/>
+<True/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="21">
+<Extension name="confidence" value="0.709677419354839"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="8">
+<Extension name="confidence" value="0.290322580645161"/>
+</ScoreDistribution>
+</Node>
+<Node score="&gt;50_1" recordCount="17" id="22">
+<Extension name="defaultChild" value="0"/>
+<Extension name="nrCorrect" value="13.52941176470588"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="ca" operator="greaterThan" value="0.5"/>
+<SimplePredicate field="thalach" operator="lessOrEqual" value="113.5"/>
+<SimplePredicate field="oldpeak" operator="greaterThan" value="1.95"/>
+<SimpleSetPredicate field="cp" booleanOperator="isIn">
+<Array n="1" type="string">"non_anginal"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="age" operator="greaterThan" value="67.5"/>
+<SimplePredicate field="trestbps" operator="lessOrEqual" value="97.5"/>
+<False/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="4">
+<Extension name="confidence" value="0.263157894736842"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="13">
+<Extension name="confidence" value="0.736842105263158"/>
+</ScoreDistribution>
+<Node score="&gt;50_1" recordCount="12" id="23">
+<Extension name="nrCorrect" value="11.833333333333332"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimpleSetPredicate field="slope" booleanOperator="isIn">
+<Array n="1" type="string">"flat"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="thalach" operator="lessOrEqual" value="150.5"/>
+<SimplePredicate field="oldpeak" operator="greaterThan" value="0.3"/>
+<SimplePredicate field="trestbps" operator="greaterThan" value="103"/>
+<SimplePredicate field="chol" operator="greaterThan" value="157"/>
+<True/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="1">
+<Extension name="confidence" value="0.142857142857143"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="11">
+<Extension name="confidence" value="0.857142857142857"/>
+</ScoreDistribution>
+</Node>
+<Node score="&lt;50" recordCount="5" id="24">
+<Extension name="nrCorrect" value="3.2"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimpleSetPredicate field="slope" booleanOperator="isIn">
+<Array n="1" type="string">"up"</Array>
+</SimpleSetPredicate>
+<SimplePredicate field="thalach" operator="greaterThan" value="150.5"/>
+<SimplePredicate field="oldpeak" operator="lessOrEqual" value="0.3"/>
+<SimplePredicate field="trestbps" operator="lessOrEqual" value="103"/>
+<SimplePredicate field="chol" operator="lessOrEqual" value="157"/>
+<False/>
+</CompoundPredicate>
+<ScoreDistribution value="&lt;50" recordCount="3">
+<Extension name="confidence" value="0.571428571428571"/>
+</ScoreDistribution>
+<ScoreDistribution value="&gt;50_1" recordCount="2">
+<Extension name="confidence" value="0.428571428571429"/>
+</ScoreDistribution>
+</Node>
+</Node>
+</Node>
+</Node>
+</Node>
+</TreeModel>
+</PMML>

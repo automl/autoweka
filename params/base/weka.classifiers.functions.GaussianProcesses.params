@@ -1,0 +1,25 @@
+L [0.0001, 1] [0.1]l
+N {0,1,2} [0]
+
+K {weka.classifiers.functions.supportVector.NormalizedPolyKernel,weka.classifiers.functions.supportVector.PolyKernel,weka.classifiers.functions.supportVector.Puk,weka.classifiers.functions.supportVector.RBFKernel}[weka.classifiers.functions.supportVector.NormalizedPolyKernel]
+    #Normalized Poly Kernel
+    npoly_E [0.2, 5] [1.0]
+    npoly_L {REMOVED,REMOVE_PREV}[REMOVE_PREV]
+    #Poly Kernel
+    poly_E [0.2, 5] [1.0]
+    poly_L {REMOVED,REMOVE_PREV}[REMOVE_PREV]
+    #Puk
+    puk_S [0.1, 10] [1.0]
+    puk_O [0.1, 1] [1.0]
+    #RBF
+    rbf_C [0.0001,1] [0.01]l
+
+Conditionals
+npoly_E| K in {weka.classifiers.functions.supportVector.NormalizedPolyKernel}
+npoly_L| K in {weka.classifiers.functions.supportVector.NormalizedPolyKernel}
+poly_E| K in {weka.classifiers.functions.supportVector.PolyKernel}
+poly_L| K in {weka.classifiers.functions.supportVector.PolyKernel}
+puk_S | K in {weka.classifiers.functions.supportVector.Puk}
+puk_O | K in {weka.classifiers.functions.supportVector.Puk}
+rbf_C | K in {weka.classifiers.functions.supportVector.RBFKernel}
+

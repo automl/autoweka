@@ -1,0 +1,23 @@
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	RankSearch :
+	Attribute evaluator : weka.attributeSelection.GainRatioAttributeEval  
+	Attribute ranking : 
+	 3 Numeric1
+	 1 Nominal1
+	 2 Nominal2
+	 4 Date1
+	Merit of best subset found : 1   
+
+Attribute Subset Evaluator (supervised, Class (nominal): 5 Class):
+	CFS Subset Evaluator
+	Including locally predictive attributes
+
+Selected attributes: 1,2,3 : 3
+                     Nominal1
+                     Nominal2
+                     Numeric1
+

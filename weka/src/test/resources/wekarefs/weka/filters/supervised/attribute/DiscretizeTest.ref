@@ -1,0 +1,32 @@
+@relation FilterTest-weka.filters.supervised.attribute.Discretize-Rfirst-last
+
+@attribute StringAtt1 string
+@attribute NominalAtt1 {r,g,b}
+@attribute NumericAtt1 {'\'All\''}
+@attribute StringAtt2 string
+@attribute NominalAtt2 {a,b,c,d}
+@attribute NumericAtt2 {'\'All\''}
+@attribute DateAtt1 {'\'All\''}
+
+@data
+humpty,g,'\'All\'',the,a,'\'All\'','\'All\''
+dumpty,b,'\'All\'',quick,b,'\'All\'','\'All\''
+sat,r,'\'All\'',brown,c,'\'All\'','\'All\''
+on,r,'\'All\'',fox,d,'\'All\'','\'All\''
+a,b,'\'All\'',jumped,a,'\'All\'','\'All\''
+wall,r,'\'All\'',over,b,'\'All\'','\'All\''
+humpty,r,'\'All\'',the,c,'\'All\'','\'All\''
+dumpty,g,'\'All\'',lazy,d,'\'All\'','\'All\''
+had,b,'\'All\'',dog,?,'\'All\'','\'All\''
+a,r,'\'All\'',?,?,'\'All\'','\'All\''
+great,r,'\'All\'',the,a,'\'All\'','\'All\''
+fall,b,'\'All\'',quick,b,'\'All\'','\'All\''
+all,r,'\'All\'',brown,c,?,'\'All\''
+the,r,'\'All\'',fox,d,'\'All\'','\'All\''
+kings,g,'\'All\'',jumped,?,'\'All\'','\'All\''
+horses,b,'\'All\'',over,b,'\'All\'','\'All\''
+and,r,'\'All\'',the,c,'\'All\'','\'All\''
+all,r,'\'All\'',lazy,d,'\'All\'','\'All\''
+the,r,'\'All\'',?,a,'\'All\'','\'All\''
+{0 wall,3 the,4 d}
+{0 humpty,1 b,3 lazy}

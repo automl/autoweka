@@ -1,0 +1,10 @@
+INT_M [1, 64][2]il
+V [1e-5, 1e-1][1e-3]l
+depth_HIDDEN {0,1}[0]
+    1_INT_L {-1}[-1]
+    2_INT_L [2, 20][2]i
+P {REMOVED,REMOVE_PREV}[REMOVE_PREV]
+
+Conditionals:
+1_INT_L | depth_HIDDEN in {0}
+2_INT_L | depth_HIDDEN in {1}

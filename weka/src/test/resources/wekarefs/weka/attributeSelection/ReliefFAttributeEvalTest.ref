@@ -1,0 +1,63 @@
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (supervised, Class (numeric): 5 Class):
+	ReliefF Ranking Filter
+	Instances sampled: all
+	Number of nearest neighbours (k): 10
+	Equal influence nearest neighbours
+
+Ranked attributes:
+ 0.4939  3 Numeric1
+ 0.0914  2 Nominal2
+ 0.0649  1 Nominal1
+ 0       4 Date1
+
+Selected attributes: 3,2,1,4 : 4
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (supervised, Class (nominal): 5 Class):
+	ReliefF Ranking Filter
+	Instances sampled: all
+	Number of nearest neighbours (k): 10
+	Equal influence nearest neighbours
+
+Ranked attributes:
+ 1.00000000000000064   1 Nominal1
+ 0.75220852485632192   3 Numeric1
+ 0.473571428571428544  2 Nominal2
+ 0                     4 Date1
+
+Selected attributes: 1,3,2,4 : 4
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (supervised, Class (numeric): 5 Class):
+	ReliefF Ranking Filter
+	Instances sampled: all
+	Number of nearest neighbours (k): 10
+	Equal influence nearest neighbours
+
+Ranked attributes:
+NaN  2 Nominal2
+NaN  1 Nominal1
+NaN  4 Date1
+NaN  3 Numeric1
+
+Selected attributes: 2,1,4,3 : 4
+

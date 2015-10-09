@@ -1,0 +1,73 @@
+FilteredAssociator using weka.associations.Apriori -N 10 -T 0 -C 0.9 -D 0.05 -U 1.0 -M 0.1 -S -1.0 -c -1 on data filtered through weka.filters.MultiFilter -F "weka.filters.unsupervised.attribute.ReplaceMissingValues "
+
+Filtered Header
+@relation Testdata-weka.filters.unsupervised.attribute.ReplaceMissingValues-weka.filters.MultiFilter-Fweka.filters.unsupervised.attribute.ReplaceMissingValues
+
+@attribute Nominal1 {att1val1,att1val2}
+@attribute Nominal2 {att2val1,att2val2}
+@attribute Class {class1,class2}
+
+@data
+
+
+Associator Model
+
+Apriori
+=======
+
+Minimum support: 0.25 (5 instances)
+Minimum metric <confidence>: 0.9
+Number of cycles performed: 15
+
+Generated sets of large itemsets:
+
+Size of set of large itemsets L(1): 6
+
+Size of set of large itemsets L(2): 6
+
+Size of set of large itemsets L(3): 2
+
+Best rules found:
+
+ 1. Nominal2=att2val2 12 ==> Class=class2 12    <conf:(1)> lift:(1.43) lev:(0.18) [3] conv:(3.6)
+ 2. Nominal1=att1val2 Nominal2=att2val2 11 ==> Class=class2 11    <conf:(1)> lift:(1.43) lev:(0.17) [3] conv:(3.3)
+ 3. Class=class1 6 ==> Nominal2=att2val1 6    <conf:(1)> lift:(2.5) lev:(0.18) [3] conv:(3.6)
+ 4. Nominal1=att1val1 Class=class1 5 ==> Nominal2=att2val1 5    <conf:(1)> lift:(2.5) lev:(0.15) [3] conv:(3)
+ 5. Nominal1=att1val1 Nominal2=att2val1 5 ==> Class=class1 5    <conf:(1)> lift:(3.33) lev:(0.18) [3] conv:(3.5)
+ 6. Class=class2 14 ==> Nominal1=att1val2 13    <conf:(0.93)> lift:(1.33) lev:(0.16) [3] conv:(2.1)
+ 7. Nominal1=att1val2 14 ==> Class=class2 13    <conf:(0.93)> lift:(1.33) lev:(0.16) [3] conv:(2.1)
+ 8. Nominal2=att2val2 12 ==> Nominal1=att1val2 11    <conf:(0.92)> lift:(1.31) lev:(0.13) [2] conv:(1.8)
+ 9. Nominal2=att2val2 Class=class2 12 ==> Nominal1=att1val2 11    <conf:(0.92)> lift:(1.31) lev:(0.13) [2] conv:(1.8)
+10. Nominal2=att2val2 12 ==> Nominal1=att1val2 Class=class2 11    <conf:(0.92)> lift:(1.41) lev:(0.16) [3] conv:(2.1)
+
+FilteredAssociator using weka.associations.Apriori -N 10 -T 0 -C 0.9 -D 0.05 -U 1.0 -M 0.1 -S -1.0 -c -1 on data filtered through weka.filters.MultiFilter -F "weka.filters.unsupervised.attribute.ReplaceMissingValues "
+
+Filtered Header
+@relation Testdata-weka.filters.unsupervised.attribute.ReplaceMissingValues-weka.filters.MultiFilter-Fweka.filters.unsupervised.attribute.ReplaceMissingValues
+
+@attribute Nominal1 {att1val1,att1val2}
+@attribute Nominal2 {att2val1,att2val2}
+
+@data
+
+
+Associator Model
+
+Apriori
+=======
+
+Minimum support: 0.1 (2 instances)
+Minimum metric <confidence>: 0.9
+Number of cycles performed: 18
+
+Generated sets of large itemsets:
+
+Size of set of large itemsets L(1): 4
+
+Size of set of large itemsets L(2): 3
+
+Best rules found:
+
+ 1. Nominal2=att2val2 2 ==> Nominal1=att1val1 2    <conf:(1)> lift:(1.11) lev:(0.01) [0] conv:(0.2)
+ 2. Nominal1=att1val2 2 ==> Nominal2=att2val1 2    <conf:(1)> lift:(1.11) lev:(0.01) [0] conv:(0.2)
+

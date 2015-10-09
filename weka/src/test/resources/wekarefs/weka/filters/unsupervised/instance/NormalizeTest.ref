@@ -1,0 +1,32 @@
+@relation FilterTest-weka.filters.unsupervised.instance.Normalize-N1.0-L2.0
+
+@attribute StringAtt1 string
+@attribute NominalAtt1 {r,g,b}
+@attribute NumericAtt1 numeric
+@attribute StringAtt2 string
+@attribute NominalAtt2 {a,b,c,d}
+@attribute NumericAtt2 numeric
+@attribute DateAtt1 date yyyy-MM-dd
+
+@data
+humpty,g,0,the,a,0,1970-01-01
+dumpty,b,0,quick,b,0,1970-01-01
+sat,r,0,brown,c,0,1970-01-01
+on,r,0,fox,d,0,1970-01-01
+a,b,0,jumped,a,0,1970-01-01
+wall,r,0,over,b,0,1970-01-01
+humpty,r,0,the,c,0,1970-01-01
+dumpty,g,0,lazy,d,0,1970-01-01
+had,b,0,dog,?,0,1970-01-01
+a,r,0,?,?,0,1970-01-01
+great,r,0,the,a,0,1970-01-01
+fall,b,0,quick,b,0,1970-01-01
+all,r,?,brown,c,?,?
+the,r,0,fox,d,0,1970-01-01
+kings,g,0,jumped,?,0,1970-01-01
+horses,b,0,over,b,0,1970-01-01
+and,r,0,the,c,0,1970-01-01
+all,r,0,lazy,d,0,1970-01-01
+the,r,0,?,a,0,1970-01-01
+{0 wall,2 1,3 the,4 d}
+{0 humpty,1 b,3 lazy,5 1}

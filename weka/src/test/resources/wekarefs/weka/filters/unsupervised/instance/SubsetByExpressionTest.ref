@@ -1,0 +1,30 @@
+@relation FilterTest-weka.filters.unsupervised.instance.SubsetByExpression-Etrue
+
+@attribute NominalAtt1 {r,g,b}
+@attribute NumericAtt1 numeric
+@attribute NominalAtt2 {a,b,c,d}
+@attribute NumericAtt2 numeric
+@attribute DateAtt1 date yyyy-MM-dd
+
+@data
+g,1,a,-2.3,2001-04-03
+b,2,b,-3.3,2001-04-03
+r,3,c,-2.4,2001-04-03
+r,4,d,-5.3,2001-04-03
+b,5,a,-2.6,2001-04-03
+r,6,b,-7.3,2001-04-04
+r,7,c,-2.8,2001-04-04
+g,8,d,-9.3,2001-04-04
+b,9,?,-2,2001-05-04
+r,9.4,?,-9,2001-05-04
+r,1.4,a,-8.3,2001-05-05
+b,2.3,b,-7.3,2001-05-05
+r,3.3,c,?,2001-05-05
+r,4.3,d,-5.3,2001-05-05
+g,5.3,?,-5.6,2001-05-06
+b,6.5,b,-4.3,2001-05-06
+r,7.5,c,-3.8,2001-06-06
+r,8.5,d,-2.3,2001-06-06
+r,9.4,a,-1,2001-06-07
+{1 4.3,2 d}
+{0 b,3 3.4}

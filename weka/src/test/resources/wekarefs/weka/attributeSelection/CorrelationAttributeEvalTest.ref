@@ -1,0 +1,95 @@
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (supervised, Class (numeric): 7 Class):
+	Correlation Ranking Filter
+Ranked attributes:
+ 0.992  3 Numeric1
+ 0.709  2 Nominal2
+ 0.625  1 Nominal1
+ 0      4 String1
+ 0      6 Relational1
+-0.102  5 Date1
+
+Selected attributes: 3,2,1,4,6,5 : 6
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (supervised, Class (nominal): 7 Class):
+	Correlation Ranking Filter
+Ranked attributes:
+ 0.989  3 Numeric1
+ 0.802  2 Nominal2
+ 0.663  1 Nominal1
+ 0.162  5 Date1
+ 0      4 String1
+ 0      6 Relational1
+
+Selected attributes: 3,2,1,5,4,6 : 6
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (supervised, Class (nominal): 7 Class):
+	Correlation Ranking Filter
+Ranked attributes:
+ 0.228  2 Nominal2
+ 0.228  1 Nominal1
+ 0.205  5 Date1
+ 0.199  3 Numeric1
+ 0      6 Relational1
+ 0      4 String1
+
+Selected attributes: 2,1,5,3,6,4 : 6
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (supervised, Class (numeric): 7 Class):
+	Correlation Ranking Filter
+Ranked attributes:
+ 1      3 Numeric1
+ 0.249  5 Date1
+ 0.238  2 Nominal2
+ 0.214  1 Nominal1
+ 0      4 String1
+ 0      6 Relational1
+
+Selected attributes: 3,5,2,1,4,6 : 6
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (supervised, Class (nominal): 7 Class):
+	Correlation Ranking Filter
+Ranked attributes:
+ 0.228  1 Nominal1
+ 0.225  2 Nominal2
+ 0.199  5 Date1
+ 0.199  3 Numeric1
+ 0      6 Relational1
+ 0      4 String1
+
+Selected attributes: 1,2,5,3,6,4 : 6
+

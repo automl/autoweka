@@ -1,0 +1,29 @@
+@relation 'FilterTest-weka.filters.unsupervised.attribute.RemoveType-Tstring-weka.filters.supervised.attribute.AttributeSelection-Eweka.attributeSelection.CfsSubsetEval-Sweka.attributeSelection.BestFirst -D 1 -N 5'
+
+@attribute NumericAtt1 numeric
+@attribute NominalAtt2 {a,b,c,d}
+@attribute NumericAtt2 numeric
+@attribute DateAtt1 date yyyy-MM-dd
+
+@data
+1,a,-2.3,2001-04-03
+2,b,-3.3,2001-04-03
+3,c,-2.4,2001-04-03
+4,d,-5.3,2001-04-03
+5,a,-2.6,2001-04-03
+6,b,-7.3,2001-04-04
+7,c,-2.8,2001-04-04
+8,d,-9.3,2001-04-04
+9,?,-2,2001-05-04
+9.4,?,-9,2001-05-04
+1.4,a,-8.3,2001-05-05
+2.3,b,-7.3,2001-05-05
+3.3,c,?,2001-05-05
+4.3,d,-5.3,2001-05-05
+5.3,?,-5.6,2001-05-06
+6.5,b,-4.3,2001-05-06
+7.5,c,-3.8,2001-06-06
+8.5,d,-2.3,2001-06-06
+9.4,a,-1,2001-06-07
+{0 4.3,1 d}
+{2 3.4}

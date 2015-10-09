@@ -1,0 +1,31 @@
+@relation 'FilterTest-weka.filters.unsupervised.attribute.FirstOrder-R6,3'
+
+@attribute StringAtt1 string
+@attribute NominalAtt1 {r,g,b}
+@attribute StringAtt2 string
+@attribute NominalAtt2 {a,b,c,d}
+@attribute '\'FO NumericAtt1\'' numeric
+@attribute DateAtt1 date yyyy-MM-dd
+
+@data
+humpty,g,the,a,-3.3,2001-04-03
+dumpty,b,quick,b,-5.3,2001-04-03
+sat,r,brown,c,-5.4,2001-04-03
+on,r,fox,d,-9.3,2001-04-03
+a,b,jumped,a,-7.6,2001-04-03
+wall,r,over,b,-13.3,2001-04-04
+humpty,r,the,c,-9.8,2001-04-04
+dumpty,g,lazy,d,-17.3,2001-04-04
+had,b,dog,?,-11,2001-05-04
+a,r,?,?,-18.4,2001-05-04
+great,r,the,a,-9.7,2001-05-05
+fall,b,quick,b,-9.6,2001-05-05
+all,r,brown,c,?,2001-05-05
+the,r,fox,d,-9.6,2001-05-05
+kings,g,jumped,?,-10.9,2001-05-06
+horses,b,over,b,-10.8,2001-05-06
+and,r,the,c,-11.3,2001-06-06
+all,r,lazy,d,-10.8,2001-06-06
+the,r,?,a,-10.4,2001-06-07
+{0 wall,2 the,3 d,4 -4.3}
+{0 humpty,1 b,2 lazy,4 3.4}

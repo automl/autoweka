@@ -1,0 +1,35 @@
+@relation FilterTest-weka.filters.unsupervised.attribute.Copy-R1-3
+
+@attribute StringAtt1 string
+@attribute NominalAtt1 {r,g,b}
+@attribute NumericAtt1 numeric
+@attribute StringAtt2 string
+@attribute NominalAtt2 {a,b,c,d}
+@attribute NumericAtt2 numeric
+@attribute DateAtt1 date yyyy-MM-dd
+@attribute 'Copy of StringAtt1' string
+@attribute 'Copy of NominalAtt1' {r,g,b}
+@attribute 'Copy of NumericAtt1' numeric
+
+@data
+humpty,g,1,the,a,-2.3,2001-04-03,humpty,g,1
+dumpty,b,2,quick,b,-3.3,2001-04-03,dumpty,b,2
+sat,r,3,brown,c,-2.4,2001-04-03,sat,r,3
+on,r,4,fox,d,-5.3,2001-04-03,on,r,4
+a,b,5,jumped,a,-2.6,2001-04-03,a,b,5
+wall,r,6,over,b,-7.3,2001-04-04,wall,r,6
+humpty,r,7,the,c,-2.8,2001-04-04,humpty,r,7
+dumpty,g,8,lazy,d,-9.3,2001-04-04,dumpty,g,8
+had,b,9,dog,?,-2,2001-05-04,had,b,9
+a,r,9.4,?,?,-9,2001-05-04,a,r,9.4
+great,r,1.4,the,a,-8.3,2001-05-05,great,r,1.4
+fall,b,2.3,quick,b,-7.3,2001-05-05,fall,b,2.3
+all,r,3.3,brown,c,?,2001-05-05,all,r,3.3
+the,r,4.3,fox,d,-5.3,2001-05-05,the,r,4.3
+kings,g,5.3,jumped,?,-5.6,2001-05-06,kings,g,5.3
+horses,b,6.5,over,b,-4.3,2001-05-06,horses,b,6.5
+and,r,7.5,the,c,-3.8,2001-06-06,and,r,7.5
+all,r,8.5,lazy,d,-2.3,2001-06-06,all,r,8.5
+the,r,9.4,?,a,-1,2001-06-07,the,r,9.4
+{0 wall,2 4.3,3 the,4 d,7 wall,9 4.3}
+{0 humpty,1 b,3 lazy,5 3.4,7 humpty,8 b}

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ANT file for generating JFlex/CUP parsers.
+
+  If you want to add a new parser, you basically only need to do the
+  following two things:
+  - write JFlex and CUP files, i.e., Parser.cup and Scanner.jflex, for your 
+    parser and place them in a separated sub-package
+  - add an "antcall" to the "parsers" target, with the sub-package as parameter
+    (the sub-package your parser files reside in)
+
+  For an example, please refer to the "weka.core.mathematicalexpression" parser.
+
+  URLs:
+  - JFlex
+    http://jflex.de/
+  - CUP
+    http://www2.cs.tum.edu/projects/cup/
+
+  Author:  FracPete (fracpete at waikato dot ac dot nz)
+  Version: $Revision: 1.2 $
+-->
+
+<project name="weka-parsers" default="compile" basedir=".">
+   <property name="build.compiler" value="modern" />
+   <property name="debug"          value="on" />
+   <property name="deprecation"    value="off" />
+   <property name="optimization"   value="off" />
+   <property name="build"          value="build"/>
+   <property name="lib"            value="lib"/>
+   <property name="parserpkg"      value="" />
+   <property name="src"            value="src/main/java" />
+
+   <path id="project.class.path">
+     <fileset dir="${lib}">
+       <include name="*.jar"/>
+       <include name="*.zip"/>
+     </fileset>
+     <pathelement location="${build}/classes"/>
+     <pathelement path="${java.class.path}" />
+   </path>
+
+   <target name="init" description="Initializes the build environment.">
+      <!-- initialize Weka -->
+      <ant antfile="build.xml" target="init_compile"/>
+   </target>
+
+   <target name="compile" depends="init" description="Compiles Weka.">
+      <!-- compile Weka -->
+      <ant antfile="build.xml" target="compile"/>
+      <!-- generate parsers -->
+      <antcall target="parsers"/>
+      <!-- recompile Weka -->
+      <ant antfile="build.xml" target="compile"/>
+   </target>
+   
+   <!-- central target for calling the parser targets -->
+   <target name="parsers" depends="init" description="Generates all the parsers subsequently.">
+      <antcall target="parser">
+         <param name="parserpkg" value="weka/core/mathematicalexpression"/>
+      </antcall>
+      <antcall target="parser">
+         <param name="parserpkg" value="weka/filters/unsupervised/instance/subsetbyexpression"/>
+      </antcall>
+      <antcall target="parser">
+         <param name="parserpkg" value="weka/core/json"/>
+      </antcall>
+      <!-- add calls for more parsers here -->
+   </target>
+
+   <!-- generates a parser situated in the ${parserpkg} sub-package 
+        (using Parser.cup and Scanner.jflex). -->
+   <target name="parser" description="Generates the parser ${parserpkg}.">
+      <echo message="Generating lexer (${parserpkg})."/>
+      <java classname="JFlex.Main">
+      	 <classpath refid="project.class.path"/>
+         <arg value="--jlex"/>
+         <arg value="--quiet"/>
+         <arg value="--nobak"/>
+         <arg value="--outdir"/>
+         <arg value="${src}/${parserpkg}"/>
+         <arg value="${src}/${parserpkg}/Scanner.jflex"/>
+      </java>
+      <echo message="Generating parser (${parserpkg})."/>
+      <java classname="java_cup.Main">
+      	 <classpath refid="project.class.path"/>
+         <arg value="-parser"/>
+         <arg value="Parser"/>
+         <arg value="-interface"/>
+         <arg value="-destdir"/>
+         <arg value="${src}/${parserpkg}"/>
+         <arg value="${src}/${parserpkg}/Parser.cup"/>
+      </java>
+   </target>
+</project>

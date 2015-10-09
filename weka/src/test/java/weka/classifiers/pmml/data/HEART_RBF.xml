@@ -1,0 +1,855 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PMML version="3.0" xmlns="http://www.dmg.org/PMML-3_0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<Header copyright="Copyright (c) Integral Solutions Ltd., 1994 - 2005. All rights reserved.">
+<Application name="Clementine" version="10.0"/>
+<Annotation>Exported with PMML extensions for use with SPSS SmartScore</Annotation>
+</Header>
+<DataDictionary numberOfFields="15">
+<DataField name="age" optype="continuous" dataType="integer">
+<Extension name="storageType" value="numeric"/>
+<Extension name="measure" value="range"/>
+</DataField>
+<DataField name="ca" optype="continuous" dataType="integer">
+<Extension name="storageType" value="numeric"/>
+<Extension name="measure" value="range"/>
+</DataField>
+<DataField name="chol" optype="continuous" dataType="integer">
+<Extension name="storageType" value="numeric"/>
+<Extension name="measure" value="range"/>
+</DataField>
+<DataField name="cp" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Extension name="measure" value="set"/>
+<Value value="asympt" property="valid"/>
+<Value value="atyp_angina" property="valid"/>
+<Value value="non_anginal" property="valid"/>
+<Value value="typ_angina" property="valid"/>
+</DataField>
+<DataField name="exang" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Extension name="measure" value="set"/>
+<Value value="no" property="valid"/>
+<Value value="yes" property="valid"/>
+</DataField>
+<DataField name="fbs" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Extension name="measure" value="set"/>
+<Value value="f" property="valid"/>
+<Value value="t" property="valid"/>
+</DataField>
+<DataField name="oldpeak" optype="continuous" dataType="double">
+<Extension name="storageType" value="numeric"/>
+<Extension name="measure" value="range"/>
+</DataField>
+<DataField name="restecg" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Extension name="measure" value="set"/>
+<Value value="left_vent_hyper" property="valid"/>
+<Value value="normal" property="valid"/>
+<Value value="st_t_wave_abnormality" property="valid"/>
+</DataField>
+<DataField name="sex" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Extension name="measure" value="set"/>
+<Value value="female" property="valid"/>
+<Value value="male" property="valid"/>
+</DataField>
+<DataField name="slope" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Extension name="measure" value="set"/>
+<Value value="down" property="valid"/>
+<Value value="flat" property="valid"/>
+<Value value="up" property="valid"/>
+</DataField>
+<DataField name="thal" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Extension name="measure" value="set"/>
+<Value value="fixed_defect" property="valid"/>
+<Value value="normal" property="valid"/>
+<Value value="reversable_defect" property="valid"/>
+</DataField>
+<DataField name="thalach" optype="continuous" dataType="integer">
+<Extension name="storageType" value="numeric"/>
+<Extension name="measure" value="range"/>
+</DataField>
+<DataField name="trestbps" optype="continuous" dataType="integer">
+<Extension name="storageType" value="numeric"/>
+<Extension name="measure" value="range"/>
+</DataField>
+<DataField name="$L-num" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Extension name="measure" value="set"/>
+<Value value="&lt;50" property="valid"/>
+<Value value="&gt;50_1" property="valid"/>
+</DataField>
+<DataField name="$NC-num" optype="continuous" dataType="double">
+<Extension name="storageType" value="numeric"/>
+<Extension name="measure" value="range"/>
+</DataField>
+</DataDictionary>
+<NeuralNetwork modelName="HEART_RBF" functionName="classification" algorithmName="Neural Net" activationFunction="radialBasis">
+<Extension name="normalizationMethod" value="limitedDifference"/>
+<MiningSchema>
+<MiningField name="age" usageType="active" missingValueReplacement="53.0" missingValueTreatment="asMedian" outliers="asExtremeValues" lowValue="29.0" highValue="77.0"/>
+<MiningField name="ca" usageType="active" missingValueReplacement="1.5" missingValueTreatment="asMedian" outliers="asExtremeValues" lowValue="0.0" highValue="3.0"/>
+<MiningField name="chol" usageType="active" missingValueReplacement="345.0" missingValueTreatment="asMedian" outliers="asExtremeValues" lowValue="126.0" highValue="564.0"/>
+<MiningField name="cp" usageType="active"/>
+<MiningField name="exang" usageType="active"/>
+<MiningField name="fbs" usageType="active"/>
+<MiningField name="oldpeak" usageType="active" missingValueReplacement="3.1" missingValueTreatment="asMedian" outliers="asExtremeValues" lowValue="0.0" highValue="6.2"/>
+<MiningField name="restecg" usageType="active"/>
+<MiningField name="sex" usageType="active"/>
+<MiningField name="slope" usageType="active"/>
+<MiningField name="thal" usageType="active"/>
+<MiningField name="thalach" usageType="active" missingValueReplacement="136.5" missingValueTreatment="asMedian" outliers="asExtremeValues" lowValue="71.0" highValue="202.0"/>
+<MiningField name="trestbps" usageType="active" missingValueReplacement="147.0" missingValueTreatment="asMedian" outliers="asExtremeValues" lowValue="94.0" highValue="200.0"/>
+<MiningField name="$L-num" usageType="predicted"/>
+<MiningField name="$NC-num" usageType="supplementary"/>
+</MiningSchema>
+<NeuralInputs>
+<NeuralInput id="0">
+<DerivedField optype="continuous" dataType="double">
+<NormContinuous field="age">
+<LinearNorm orig="29" norm="0"/>
+<LinearNorm orig="77" norm="1"/>
+</NormContinuous>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="1">
+<DerivedField optype="continuous" dataType="double">
+<NormContinuous field="ca">
+<LinearNorm orig="0" norm="0"/>
+<LinearNorm orig="3" norm="1"/>
+</NormContinuous>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="2">
+<DerivedField optype="continuous" dataType="double">
+<NormContinuous field="chol">
+<LinearNorm orig="126" norm="0"/>
+<LinearNorm orig="564" norm="1"/>
+</NormContinuous>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="3">
+<DerivedField optype="continuous" dataType="double">
+<NormDiscrete field="cp" value="asympt"/>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="4">
+<DerivedField optype="continuous" dataType="double">
+<NormDiscrete field="cp" value="atyp_angina"/>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="5">
+<DerivedField optype="continuous" dataType="double">
+<NormDiscrete field="cp" value="non_anginal"/>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="6">
+<DerivedField optype="continuous" dataType="double">
+<NormDiscrete field="cp" value="typ_angina"/>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="7">
+<DerivedField optype="continuous" dataType="double">
+<NormDiscrete field="exang" value="no"/>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="8">
+<DerivedField optype="continuous" dataType="double">
+<NormDiscrete field="exang" value="yes"/>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="9">
+<DerivedField optype="continuous" dataType="double">
+<NormDiscrete field="fbs" value="f"/>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="10">
+<DerivedField optype="continuous" dataType="double">
+<NormDiscrete field="fbs" value="t"/>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="11">
+<DerivedField optype="continuous" dataType="double">
+<NormContinuous field="oldpeak">
+<LinearNorm orig="0" norm="0"/>
+<LinearNorm orig="6.2" norm="1"/>
+</NormContinuous>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="12">
+<DerivedField optype="continuous" dataType="double">
+<NormDiscrete field="restecg" value="left_vent_hyper"/>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="13">
+<DerivedField optype="continuous" dataType="double">
+<NormDiscrete field="restecg" value="normal"/>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="14">
+<DerivedField optype="continuous" dataType="double">
+<NormDiscrete field="restecg" value="st_t_wave_abnormality"/>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="15">
+<DerivedField optype="continuous" dataType="double">
+<NormDiscrete field="sex" value="female"/>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="16">
+<DerivedField optype="continuous" dataType="double">
+<NormDiscrete field="sex" value="male"/>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="17">
+<DerivedField optype="continuous" dataType="double">
+<NormDiscrete field="slope" value="down"/>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="18">
+<DerivedField optype="continuous" dataType="double">
+<NormDiscrete field="slope" value="flat"/>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="19">
+<DerivedField optype="continuous" dataType="double">
+<NormDiscrete field="slope" value="up"/>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="20">
+<DerivedField optype="continuous" dataType="double">
+<NormDiscrete field="thal" value="fixed_defect"/>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="21">
+<DerivedField optype="continuous" dataType="double">
+<NormDiscrete field="thal" value="normal"/>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="22">
+<DerivedField optype="continuous" dataType="double">
+<NormDiscrete field="thal" value="reversable_defect"/>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="23">
+<DerivedField optype="continuous" dataType="double">
+<NormContinuous field="thalach">
+<LinearNorm orig="71" norm="0"/>
+<LinearNorm orig="202" norm="1"/>
+</NormContinuous>
+</DerivedField>
+</NeuralInput>
+<NeuralInput id="24">
+<DerivedField optype="continuous" dataType="double">
+<NormContinuous field="trestbps">
+<LinearNorm orig="94" norm="0"/>
+<LinearNorm orig="200" norm="1"/>
+</NormContinuous>
+</DerivedField>
+</NeuralInput>
+</NeuralInputs>
+<NeuralLayer activationFunction="radialBasis">
+<Neuron id="25" width="2.0433125505">
+<Con from="0" weight="0.729166666667"/>
+<Con from="1" weight="0.166666666667"/>
+<Con from="2" weight="0.300228310502"/>
+<Con from="3" weight="0"/>
+<Con from="4" weight="0"/>
+<Con from="5" weight="0"/>
+<Con from="6" weight="1"/>
+<Con from="7" weight="1"/>
+<Con from="8" weight="0"/>
+<Con from="9" weight="0"/>
+<Con from="10" weight="1"/>
+<Con from="11" weight="0.298387096774"/>
+<Con from="12" weight="1"/>
+<Con from="13" weight="0"/>
+<Con from="14" weight="0"/>
+<Con from="15" weight="0"/>
+<Con from="16" weight="1"/>
+<Con from="17" weight="0.5"/>
+<Con from="18" weight="0.5"/>
+<Con from="19" weight="0"/>
+<Con from="20" weight="0.5"/>
+<Con from="21" weight="0.5"/>
+<Con from="22" weight="0"/>
+<Con from="23" weight="0.69465648855"/>
+<Con from="24" weight="0.448113207547"/>
+</Neuron>
+<Neuron id="26" width="1.53797929102">
+<Con from="0" weight="0.616666666667"/>
+<Con from="1" weight="0"/>
+<Con from="2" weight="0.318264840183"/>
+<Con from="3" weight="1"/>
+<Con from="4" weight="0"/>
+<Con from="5" weight="0"/>
+<Con from="6" weight="0"/>
+<Con from="7" weight="0.4"/>
+<Con from="8" weight="0.6"/>
+<Con from="9" weight="1"/>
+<Con from="10" weight="0"/>
+<Con from="11" weight="0.109677419355"/>
+<Con from="12" weight="0"/>
+<Con from="13" weight="0.8"/>
+<Con from="14" weight="0.2"/>
+<Con from="15" weight="1"/>
+<Con from="16" weight="0"/>
+<Con from="17" weight="0"/>
+<Con from="18" weight="0.4"/>
+<Con from="19" weight="0.6"/>
+<Con from="20" weight="0"/>
+<Con from="21" weight="1"/>
+<Con from="22" weight="0"/>
+<Con from="23" weight="0.577099236641"/>
+<Con from="24" weight="0.505660377358"/>
+</Neuron>
+<Neuron id="27" width="1.61974509641">
+<Con from="0" weight="0.5625"/>
+<Con from="1" weight="0.6"/>
+<Con from="2" weight="0.262100456621"/>
+<Con from="3" weight="0.2"/>
+<Con from="4" weight="0"/>
+<Con from="5" weight="0.6"/>
+<Con from="6" weight="0.2"/>
+<Con from="7" weight="1"/>
+<Con from="8" weight="0"/>
+<Con from="9" weight="0.6"/>
+<Con from="10" weight="0.4"/>
+<Con from="11" weight="0.187096774194"/>
+<Con from="12" weight="0"/>
+<Con from="13" weight="1"/>
+<Con from="14" weight="0"/>
+<Con from="15" weight="0"/>
+<Con from="16" weight="1"/>
+<Con from="17" weight="0"/>
+<Con from="18" weight="1"/>
+<Con from="19" weight="0"/>
+<Con from="20" weight="0"/>
+<Con from="21" weight="0"/>
+<Con from="22" weight="1"/>
+<Con from="23" weight="0.662595419847"/>
+<Con from="24" weight="0.371698113208"/>
+</Neuron>
+<Neuron id="28" width="1.45970244724">
+<Con from="0" weight="0.466666666667"/>
+<Con from="1" weight="0.466666666667"/>
+<Con from="2" weight="0.312328767123"/>
+<Con from="3" weight="1"/>
+<Con from="4" weight="0"/>
+<Con from="5" weight="0"/>
+<Con from="6" weight="0"/>
+<Con from="7" weight="0.4"/>
+<Con from="8" weight="0.6"/>
+<Con from="9" weight="0.6"/>
+<Con from="10" weight="0.4"/>
+<Con from="11" weight="0.103225806452"/>
+<Con from="12" weight="0.8"/>
+<Con from="13" weight="0.2"/>
+<Con from="14" weight="0"/>
+<Con from="15" weight="0"/>
+<Con from="16" weight="1"/>
+<Con from="17" weight="0"/>
+<Con from="18" weight="0"/>
+<Con from="19" weight="1"/>
+<Con from="20" weight="0"/>
+<Con from="21" weight="0"/>
+<Con from="22" weight="1"/>
+<Con from="23" weight="0.64427480916"/>
+<Con from="24" weight="0.260377358491"/>
+</Neuron>
+<Neuron id="29" width="1.55380666837">
+<Con from="0" weight="0.414930555556"/>
+<Con from="1" weight="0.0555555555556"/>
+<Con from="2" weight="0.278063165906"/>
+<Con from="3" weight="0.333333333333"/>
+<Con from="4" weight="0.458333333333"/>
+<Con from="5" weight="0.125"/>
+<Con from="6" weight="0.0833333333333"/>
+<Con from="7" weight="0.958333333333"/>
+<Con from="8" weight="0.0416666666667"/>
+<Con from="9" weight="0.958333333333"/>
+<Con from="10" weight="0.0416666666667"/>
+<Con from="11" weight="0.0510752688172"/>
+<Con from="12" weight="0.708333333333"/>
+<Con from="13" weight="0.291666666667"/>
+<Con from="14" weight="0"/>
+<Con from="15" weight="0.125"/>
+<Con from="16" weight="0.875"/>
+<Con from="17" weight="0"/>
+<Con from="18" weight="0"/>
+<Con from="19" weight="1"/>
+<Con from="20" weight="0.0416666666667"/>
+<Con from="21" weight="0.916666666667"/>
+<Con from="22" weight="0.0416666666667"/>
+<Con from="23" weight="0.740139949109"/>
+<Con from="24" weight="0.343553459119"/>
+</Neuron>
+<Neuron id="30" width="1.56258602904">
+<Con from="0" weight="0.535714285714"/>
+<Con from="1" weight="0.0952380952381"/>
+<Con from="2" weight="0.208088714938"/>
+<Con from="3" weight="0"/>
+<Con from="4" weight="0"/>
+<Con from="5" weight="1"/>
+<Con from="6" weight="0"/>
+<Con from="7" weight="1"/>
+<Con from="8" weight="0"/>
+<Con from="9" weight="1"/>
+<Con from="10" weight="0"/>
+<Con from="11" weight="0.108294930876"/>
+<Con from="12" weight="0.142857142857"/>
+<Con from="13" weight="0.714285714286"/>
+<Con from="14" weight="0.142857142857"/>
+<Con from="15" weight="1"/>
+<Con from="16" weight="0"/>
+<Con from="17" weight="0"/>
+<Con from="18" weight="1"/>
+<Con from="19" weight="0"/>
+<Con from="20" weight="0"/>
+<Con from="21" weight="0.857142857143"/>
+<Con from="22" weight="0.142857142857"/>
+<Con from="23" weight="0.587786259542"/>
+<Con from="24" weight="0.307277628032"/>
+</Neuron>
+<Neuron id="31" width="1.89815047743">
+<Con from="0" weight="0.53125"/>
+<Con from="1" weight="0.111111111111"/>
+<Con from="2" weight="0.252283105023"/>
+<Con from="3" weight="0.333333333333"/>
+<Con from="4" weight="0"/>
+<Con from="5" weight="0.666666666667"/>
+<Con from="6" weight="0"/>
+<Con from="7" weight="0.166666666667"/>
+<Con from="8" weight="0.833333333333"/>
+<Con from="9" weight="0.166666666667"/>
+<Con from="10" weight="0.833333333333"/>
+<Con from="11" weight="0.198924731183"/>
+<Con from="12" weight="0.5"/>
+<Con from="13" weight="0.5"/>
+<Con from="14" weight="0"/>
+<Con from="15" weight="0"/>
+<Con from="16" weight="1"/>
+<Con from="17" weight="0"/>
+<Con from="18" weight="1"/>
+<Con from="19" weight="0"/>
+<Con from="20" weight="0.166666666667"/>
+<Con from="21" weight="0.666666666667"/>
+<Con from="22" weight="0"/>
+<Con from="23" weight="0.587786259542"/>
+<Con from="24" weight="0.305031446541"/>
+</Neuron>
+<Neuron id="32" width="1.55400017452">
+<Con from="0" weight="0.673611111111"/>
+<Con from="1" weight="0.555555555556"/>
+<Con from="2" weight="0.316590563166"/>
+<Con from="3" weight="1"/>
+<Con from="4" weight="0"/>
+<Con from="5" weight="0"/>
+<Con from="6" weight="0"/>
+<Con from="7" weight="1"/>
+<Con from="8" weight="0"/>
+<Con from="9" weight="0.666666666667"/>
+<Con from="10" weight="0.333333333333"/>
+<Con from="11" weight="0.241935483871"/>
+<Con from="12" weight="0"/>
+<Con from="13" weight="1"/>
+<Con from="14" weight="0"/>
+<Con from="15" weight="1"/>
+<Con from="16" weight="0"/>
+<Con from="17" weight="0"/>
+<Con from="18" weight="1"/>
+<Con from="19" weight="0"/>
+<Con from="20" weight="0"/>
+<Con from="21" weight="1"/>
+<Con from="22" weight="0"/>
+<Con from="23" weight="0.371501272265"/>
+<Con from="24" weight="0.364779874214"/>
+</Neuron>
+<Neuron id="33" width="1.56512902078">
+<Con from="0" weight="0.615384615385"/>
+<Con from="1" weight="0.410256410256"/>
+<Con from="2" weight="0.310502283105"/>
+<Con from="3" weight="1"/>
+<Con from="4" weight="0"/>
+<Con from="5" weight="0"/>
+<Con from="6" weight="0"/>
+<Con from="7" weight="0"/>
+<Con from="8" weight="1"/>
+<Con from="9" weight="1"/>
+<Con from="10" weight="0"/>
+<Con from="11" weight="0.312655086849"/>
+<Con from="12" weight="1"/>
+<Con from="13" weight="0"/>
+<Con from="14" weight="0"/>
+<Con from="15" weight="0"/>
+<Con from="16" weight="1"/>
+<Con from="17" weight="0.0769230769231"/>
+<Con from="18" weight="0.769230769231"/>
+<Con from="19" weight="0.153846153846"/>
+<Con from="20" weight="0.0769230769231"/>
+<Con from="21" weight="0.384615384615"/>
+<Con from="22" weight="0.538461538462"/>
+<Con from="23" weight="0.472695243688"/>
+<Con from="24" weight="0.407837445573"/>
+</Neuron>
+<Neuron id="34" width="1.44140649594">
+<Con from="0" weight="0.440972222222"/>
+<Con from="1" weight="0.277777777778"/>
+<Con from="2" weight="0.20700152207"/>
+<Con from="3" weight="0.833333333333"/>
+<Con from="4" weight="0"/>
+<Con from="5" weight="0"/>
+<Con from="6" weight="0.166666666667"/>
+<Con from="7" weight="0.5"/>
+<Con from="8" weight="0.5"/>
+<Con from="9" weight="1"/>
+<Con from="10" weight="0"/>
+<Con from="11" weight="0.0672043010753"/>
+<Con from="12" weight="0"/>
+<Con from="13" weight="1"/>
+<Con from="14" weight="0"/>
+<Con from="15" weight="0"/>
+<Con from="16" weight="1"/>
+<Con from="17" weight="0"/>
+<Con from="18" weight="0"/>
+<Con from="19" weight="1"/>
+<Con from="20" weight="0"/>
+<Con from="21" weight="0"/>
+<Con from="22" weight="1"/>
+<Con from="23" weight="0.737913486005"/>
+<Con from="24" weight="0.34748427673"/>
+</Neuron>
+<Neuron id="35" width="1.53943580564">
+<Con from="0" weight="0.607142857143"/>
+<Con from="1" weight="0.142857142857"/>
+<Con from="2" weight="0.397586431833"/>
+<Con from="3" weight="0"/>
+<Con from="4" weight="0.142857142857"/>
+<Con from="5" weight="0.857142857143"/>
+<Con from="6" weight="0"/>
+<Con from="7" weight="1"/>
+<Con from="8" weight="0"/>
+<Con from="9" weight="0.428571428571"/>
+<Con from="10" weight="0.571428571429"/>
+<Con from="11" weight="0.0483870967742"/>
+<Con from="12" weight="0.714285714286"/>
+<Con from="13" weight="0.285714285714"/>
+<Con from="14" weight="0"/>
+<Con from="15" weight="1"/>
+<Con from="16" weight="0"/>
+<Con from="17" weight="0"/>
+<Con from="18" weight="0"/>
+<Con from="19" weight="1"/>
+<Con from="20" weight="0"/>
+<Con from="21" weight="1"/>
+<Con from="22" weight="0"/>
+<Con from="23" weight="0.594329334787"/>
+<Con from="24" weight="0.365229110512"/>
+</Neuron>
+<Neuron id="36" width="1.81333521429">
+<Con from="0" weight="0.319444444444"/>
+<Con from="1" weight="0"/>
+<Con from="2" weight="0.235920852359"/>
+<Con from="3" weight="0.333333333333"/>
+<Con from="4" weight="0"/>
+<Con from="5" weight="0.666666666667"/>
+<Con from="6" weight="0"/>
+<Con from="7" weight="0"/>
+<Con from="8" weight="1"/>
+<Con from="9" weight="1"/>
+<Con from="10" weight="0"/>
+<Con from="11" weight="0.0752688172043"/>
+<Con from="12" weight="1"/>
+<Con from="13" weight="0"/>
+<Con from="14" weight="0"/>
+<Con from="15" weight="1"/>
+<Con from="16" weight="0"/>
+<Con from="17" weight="0.333333333333"/>
+<Con from="18" weight="0.333333333333"/>
+<Con from="19" weight="0.333333333333"/>
+<Con from="20" weight="0"/>
+<Con from="21" weight="1"/>
+<Con from="22" weight="0"/>
+<Con from="23" weight="0.689567430025"/>
+<Con from="24" weight="0.345911949686"/>
+</Neuron>
+<Neuron id="37" width="1.71774051191">
+<Con from="0" weight="0.619791666667"/>
+<Con from="1" weight="0.291666666667"/>
+<Con from="2" weight="0.490582191781"/>
+<Con from="3" weight="0.875"/>
+<Con from="4" weight="0"/>
+<Con from="5" weight="0.125"/>
+<Con from="6" weight="0"/>
+<Con from="7" weight="0.875"/>
+<Con from="8" weight="0.125"/>
+<Con from="9" weight="1"/>
+<Con from="10" weight="0"/>
+<Con from="11" weight="0.302419354839"/>
+<Con from="12" weight="1"/>
+<Con from="13" weight="0"/>
+<Con from="14" weight="0"/>
+<Con from="15" weight="1"/>
+<Con from="16" weight="0"/>
+<Con from="17" weight="0.125"/>
+<Con from="18" weight="0.875"/>
+<Con from="19" weight="0"/>
+<Con from="20" weight="0"/>
+<Con from="21" weight="0.5"/>
+<Con from="22" weight="0.5"/>
+<Con from="23" weight="0.602099236641"/>
+<Con from="24" weight="0.377358490566"/>
+</Neuron>
+<Neuron id="38" width="1.55531002581">
+<Con from="0" weight="0.3625"/>
+<Con from="1" weight="0.2"/>
+<Con from="2" weight="0.242922374429"/>
+<Con from="3" weight="0.2"/>
+<Con from="4" weight="0.6"/>
+<Con from="5" weight="0.2"/>
+<Con from="6" weight="0"/>
+<Con from="7" weight="1"/>
+<Con from="8" weight="0"/>
+<Con from="9" weight="0.4"/>
+<Con from="10" weight="0.6"/>
+<Con from="11" weight="0.0612903225806"/>
+<Con from="12" weight="0"/>
+<Con from="13" weight="1"/>
+<Con from="14" weight="0"/>
+<Con from="15" weight="0"/>
+<Con from="16" weight="1"/>
+<Con from="17" weight="0.4"/>
+<Con from="18" weight="0"/>
+<Con from="19" weight="0.6"/>
+<Con from="20" weight="0"/>
+<Con from="21" weight="0"/>
+<Con from="22" weight="1"/>
+<Con from="23" weight="0.737404580153"/>
+<Con from="24" weight="0.167924528302"/>
+</Neuron>
+<Neuron id="39" width="1.51428832944">
+<Con from="0" weight="0.4375"/>
+<Con from="1" weight="0.111111111111"/>
+<Con from="2" weight="0.269406392694"/>
+<Con from="3" weight="0"/>
+<Con from="4" weight="0.777777777778"/>
+<Con from="5" weight="0"/>
+<Con from="6" weight="0.222222222222"/>
+<Con from="7" weight="1"/>
+<Con from="8" weight="0"/>
+<Con from="9" weight="1"/>
+<Con from="10" weight="0"/>
+<Con from="11" weight="0.132616487455"/>
+<Con from="12" weight="0"/>
+<Con from="13" weight="1"/>
+<Con from="14" weight="0"/>
+<Con from="15" weight="1"/>
+<Con from="16" weight="0"/>
+<Con from="17" weight="0.111111111111"/>
+<Con from="18" weight="0.222222222222"/>
+<Con from="19" weight="0.666666666667"/>
+<Con from="20" weight="0"/>
+<Con from="21" weight="1"/>
+<Con from="22" weight="0"/>
+<Con from="23" weight="0.65903307888"/>
+<Con from="24" weight="0.305031446541"/>
+</Neuron>
+<Neuron id="40" width="1.62268808191">
+<Con from="0" weight="0.610416666667"/>
+<Con from="1" weight="0.133333333333"/>
+<Con from="2" weight="0.27899543379"/>
+<Con from="3" weight="0.4"/>
+<Con from="4" weight="0"/>
+<Con from="5" weight="0.2"/>
+<Con from="6" weight="0.4"/>
+<Con from="7" weight="1"/>
+<Con from="8" weight="0"/>
+<Con from="9" weight="1"/>
+<Con from="10" weight="0"/>
+<Con from="11" weight="0.216129032258"/>
+<Con from="12" weight="1"/>
+<Con from="13" weight="0"/>
+<Con from="14" weight="0"/>
+<Con from="15" weight="0"/>
+<Con from="16" weight="1"/>
+<Con from="17" weight="0.1"/>
+<Con from="18" weight="0.9"/>
+<Con from="19" weight="0"/>
+<Con from="20" weight="0.1"/>
+<Con from="21" weight="0"/>
+<Con from="22" weight="0.9"/>
+<Con from="23" weight="0.651145038168"/>
+<Con from="24" weight="0.421698113208"/>
+</Neuron>
+<Neuron id="41" width="1.37624721701">
+<Con from="0" weight="0.6625"/>
+<Con from="1" weight="0.133333333333"/>
+<Con from="2" weight="0.375342465753"/>
+<Con from="3" weight="0"/>
+<Con from="4" weight="0"/>
+<Con from="5" weight="1"/>
+<Con from="6" weight="0"/>
+<Con from="7" weight="1"/>
+<Con from="8" weight="0"/>
+<Con from="9" weight="1"/>
+<Con from="10" weight="0"/>
+<Con from="11" weight="0.0387096774194"/>
+<Con from="12" weight="0"/>
+<Con from="13" weight="1"/>
+<Con from="14" weight="0"/>
+<Con from="15" weight="1"/>
+<Con from="16" weight="0"/>
+<Con from="17" weight="0"/>
+<Con from="18" weight="0"/>
+<Con from="19" weight="1"/>
+<Con from="20" weight="0"/>
+<Con from="21" weight="0.8"/>
+<Con from="22" weight="0.2"/>
+<Con from="23" weight="0.606106870229"/>
+<Con from="24" weight="0.394339622642"/>
+</Neuron>
+<Neuron id="42" width="1.64309963133">
+<Con from="0" weight="0.725"/>
+<Con from="1" weight="0.466666666667"/>
+<Con from="2" weight="0.258904109589"/>
+<Con from="3" weight="0.8"/>
+<Con from="4" weight="0"/>
+<Con from="5" weight="0"/>
+<Con from="6" weight="0.2"/>
+<Con from="7" weight="1"/>
+<Con from="8" weight="0"/>
+<Con from="9" weight="1"/>
+<Con from="10" weight="0"/>
+<Con from="11" weight="0.270967741935"/>
+<Con from="12" weight="0.4"/>
+<Con from="13" weight="0.6"/>
+<Con from="14" weight="0"/>
+<Con from="15" weight="0"/>
+<Con from="16" weight="1"/>
+<Con from="17" weight="0"/>
+<Con from="18" weight="1"/>
+<Con from="19" weight="0"/>
+<Con from="20" weight="0.4"/>
+<Con from="21" weight="0.6"/>
+<Con from="22" weight="0"/>
+<Con from="23" weight="0.381679389313"/>
+<Con from="24" weight="0.375471698113"/>
+</Neuron>
+<Neuron id="43" width="1.44508507394">
+<Con from="0" weight="0.408333333333"/>
+<Con from="1" weight="0.155555555556"/>
+<Con from="2" weight="0.256773211568"/>
+<Con from="3" weight="0"/>
+<Con from="4" weight="0.0666666666667"/>
+<Con from="5" weight="0.933333333333"/>
+<Con from="6" weight="0"/>
+<Con from="7" weight="1"/>
+<Con from="8" weight="0"/>
+<Con from="9" weight="0.933333333333"/>
+<Con from="10" weight="0.0666666666667"/>
+<Con from="11" weight="0.0870967741935"/>
+<Con from="12" weight="0.0666666666667"/>
+<Con from="13" weight="0.933333333333"/>
+<Con from="14" weight="0"/>
+<Con from="15" weight="0"/>
+<Con from="16" weight="1"/>
+<Con from="17" weight="0.2"/>
+<Con from="18" weight="0"/>
+<Con from="19" weight="0.8"/>
+<Con from="20" weight="0"/>
+<Con from="21" weight="1"/>
+<Con from="22" weight="0"/>
+<Con from="23" weight="0.72213740458"/>
+<Con from="24" weight="0.310691823899"/>
+</Neuron>
+<Neuron id="44" width="1.58238231275">
+<Con from="0" weight="0.516666666667"/>
+<Con from="1" weight="0.3"/>
+<Con from="2" weight="0.323059360731"/>
+<Con from="3" weight="1"/>
+<Con from="4" weight="0"/>
+<Con from="5" weight="0"/>
+<Con from="6" weight="0"/>
+<Con from="7" weight="0"/>
+<Con from="8" weight="1"/>
+<Con from="9" weight="1"/>
+<Con from="10" weight="0"/>
+<Con from="11" weight="0.287096774194"/>
+<Con from="12" weight="0"/>
+<Con from="13" weight="1"/>
+<Con from="14" weight="0"/>
+<Con from="15" weight="0.1"/>
+<Con from="16" weight="0.9"/>
+<Con from="17" weight="0.1"/>
+<Con from="18" weight="0.9"/>
+<Con from="19" weight="0"/>
+<Con from="20" weight="0.1"/>
+<Con from="21" weight="0"/>
+<Con from="22" weight="0.9"/>
+<Con from="23" weight="0.356488549618"/>
+<Con from="24" weight="0.366037735849"/>
+</Neuron>
+</NeuralLayer>
+<NeuralLayer activationFunction="identity">
+<Neuron id="45" bias="0.244211823198">
+<Con from="25" weight="0.40491247351"/>
+<Con from="26" weight="0.660233411984"/>
+<Con from="27" weight="-0.557872448029"/>
+<Con from="28" weight="-0.864537972738"/>
+<Con from="29" weight="0.68145567777"/>
+<Con from="30" weight="0.806874412673"/>
+<Con from="31" weight="-0.0233999285939"/>
+<Con from="32" weight="-0.257231469399"/>
+<Con from="33" weight="-0.411482704419"/>
+<Con from="34" weight="-0.238597629225"/>
+<Con from="35" weight="0.0326397091282"/>
+<Con from="36" weight="0.610340175215"/>
+<Con from="37" weight="-0.626148606469"/>
+<Con from="38" weight="0.966856878193"/>
+<Con from="39" weight="-0.0216540278491"/>
+<Con from="40" weight="0.566254999095"/>
+<Con from="41" weight="-0.214526565981"/>
+<Con from="42" weight="-0.580836037738"/>
+<Con from="43" weight="-0.100524937831"/>
+<Con from="44" weight="-0.0807023546825"/>
+</Neuron>
+<Neuron id="46" bias="0.755788176802">
+<Con from="25" weight="-0.40491247351"/>
+<Con from="26" weight="-0.660233411985"/>
+<Con from="27" weight="0.557872448028"/>
+<Con from="28" weight="0.864537972738"/>
+<Con from="29" weight="-0.68145567777"/>
+<Con from="30" weight="-0.806874412674"/>
+<Con from="31" weight="0.0233999285942"/>
+<Con from="32" weight="0.257231469401"/>
+<Con from="33" weight="0.411482704419"/>
+<Con from="34" weight="0.238597629225"/>
+<Con from="35" weight="-0.0326397091285"/>
+<Con from="36" weight="-0.610340175214"/>
+<Con from="37" weight="0.626148606469"/>
+<Con from="38" weight="-0.966856878194"/>
+<Con from="39" weight="0.0216540278489"/>
+<Con from="40" weight="-0.566254999094"/>
+<Con from="41" weight="0.214526565981"/>
+<Con from="42" weight="0.580836037737"/>
+<Con from="43" weight="0.10052493783"/>
+<Con from="44" weight="0.0807023546823"/>
+</Neuron>
+</NeuralLayer>
+<NeuralOutputs>
+<NeuralOutput outputNeuron="45">
+<DerivedField optype="categorical" dataType="string">
+<NormDiscrete field="$L-num" value="&lt;50"/>
+</DerivedField>
+</NeuralOutput>
+<NeuralOutput outputNeuron="46">
+<DerivedField optype="categorical" dataType="string">
+<NormDiscrete field="$L-num" value="&gt;50_1"/>
+</DerivedField>
+</NeuralOutput>
+</NeuralOutputs>
+</NeuralNetwork>
+</PMML>

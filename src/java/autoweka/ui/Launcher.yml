@@ -1,0 +1,14 @@
+JFrame(title="Auto-WEKA Launcher", size=350x250, defaultCloseOperation=disposeOnClose):
+    - JButton(name=launchWizard, text="Wizard", onAction=wizardClicked)
+    - JButton(name=launchBuilder, text="Experiment Builder", onAction=builderClicked)
+    - JButton(name=launchRunner, text="Experiment Runner", onAction=runnerClicked)
+    - JButton(name=launchExtractor, text="Trained Model Runner", onAction=extractorClicked)
+    - JButton(name=launchWeka, text="WEKA", onAction=wekaClicked)
+    - JLabel(name=autowekaLabel, icon="/autoweka/ui/logo.png")
+    - MigLayout : |
+          [100]               [grow]
+          -autowekaLabel+1+*  launchWizard>/       [grow]
+                              launchBuilder>/      [grow]
+                              launchRunner>/       [grow]
+                              launchExtractor>/    [grow]
+                              launchWeka>/         [grow]

@@ -1,0 +1,184 @@
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (unsupervised):
+	Principal Components Attribute Transformer
+
+Correlation matrix
+  1      0.26   0.61   0.1  
+  0.26   1      0.65   0.47 
+  0.61   0.65   1      0.18 
+  0.1    0.47   0.18   1    
+
+
+eigenvalue	proportion	cumulative
+  2.19151	  0.54788	  0.54788	0.594Numeric1+0.562Nominal2+0.456Nominal1+0.352Date1
+  1.04313	  0.26078	  0.80866	0.724Date1-0.552Nominal1+0.298Nominal2-0.287Numeric1
+  0.57149	  0.14287	  0.95153	0.591Nominal1+0.548Date1-0.516Nominal2-0.291Numeric1
+
+Eigenvectors
+ V1	 V2	 V3	
+ 0.4559	-0.5524	 0.5909	Nominal1
+ 0.5617	 0.2977	-0.5159	Nominal2
+ 0.5938	-0.2869	-0.2906	Numeric1
+ 0.3522	 0.7238	 0.548 	Date1
+
+Ranked attributes:
+ 0.4521  1 0.594Numeric1+0.562Nominal2+0.456Nominal1+0.352Date1
+ 0.1913  2 0.724Date1-0.552Nominal1+0.298Nominal2-0.287Numeric1
+ 0.0485  3 0.591Nominal1+0.548Date1-0.516Nominal2-0.291Numeric1
+
+Selected attributes: 1,2,3 : 3
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (unsupervised):
+	Principal Components Attribute Transformer
+
+Correlation matrix
+  1      0.68   0.99  -0.31 
+  0.68   1      0.67   0.06 
+  0.99   0.67   1     -0.33 
+ -0.31   0.06  -0.33   1    
+
+
+eigenvalue	proportion	cumulative
+  2.65522	  0.66381	  0.66381	-0.6Nominal1-0.6Numeric1-0.484Nominal2+0.214Date1
+  1.04961	  0.2624 	  0.92621	-0.89Date1-0.454Nominal2+0.034Numeric1+0.015Nominal1
+  0.28793	  0.07198	  0.99819	-0.748Nominal2+0.402Date1+0.376Numeric1+0.371Nominal1
+
+Eigenvectors
+ V1	 V2	 V3	
+-0.6002	 0.0151	 0.3711	Nominal1
+-0.4844	-0.4535	-0.7481	Nominal2
+-0.5996	 0.0338	 0.376 	Numeric1
+ 0.2137	-0.8905	 0.4016	Date1
+
+Ranked attributes:
+ 0.33619  1 -0.6Nominal1-0.6Numeric1-0.484Nominal2+0.214Date1
+ 0.07379  2 -0.89Date1-0.454Nominal2+0.034Numeric1+0.015Nominal1
+ 0.00181  3 -0.748Nominal2+0.402Date1+0.376Numeric1+0.371Nominal1
+
+Selected attributes: 1,2,3 : 3
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (unsupervised):
+	Principal Components Attribute Transformer
+
+Correlation matrix
+  1      0.82  -0.07  -0.18 
+  0.82   1     -0.08  -0.28 
+ -0.07  -0.08   1      0.06 
+ -0.18  -0.28   0.06   1    
+
+
+eigenvalue	proportion	cumulative
+  1.94521	  0.4863 	  0.4863 	-0.672Nominal2-0.651Nominal1+0.33 Date1+0.126Numeric1
+  0.98888	  0.24722	  0.73352	-0.972Numeric1-0.148Nominal1-0.146Date1-0.11Nominal2
+  0.89019	  0.22255	  0.95607	-0.927Date1-0.282Nominal1+0.198Numeric1-0.145Nominal2
+
+Eigenvectors
+ V1	 V2	 V3	
+-0.6508	-0.1479	-0.2825	Nominal1
+-0.6722	-0.1098	-0.1446	Nominal2
+ 0.1255	-0.972 	 0.1982	Numeric1
+ 0.3299	-0.1456	-0.9274	Date1
+
+Ranked attributes:
+ 0.5137  1 -0.672Nominal2-0.651Nominal1+0.33 Date1+0.126Numeric1
+ 0.2665  2 -0.972Numeric1-0.148Nominal1-0.146Date1-0.11Nominal2
+ 0.0439  3 -0.927Date1-0.282Nominal1+0.198Numeric1-0.145Nominal2
+
+Selected attributes: 1,2,3 : 3
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (unsupervised):
+	Principal Components Attribute Transformer
+
+Correlation matrix
+  1     -0.11   0.02  -0.33 
+ -0.11   1      0.27   0.27 
+  0.02   0.27   1      0.12 
+ -0.33   0.27   0.12   1    
+
+
+eigenvalue	proportion	cumulative
+  1.57043	  0.39261	  0.39261	0.599Date1+0.553Nominal2-0.439Nominal1+0.378Numeric1
+  1.10241	  0.2756 	  0.66821	-0.658Numeric1-0.616Nominal1-0.335Nominal2+0.273Date1
+  0.70317	  0.17579	  0.844  	-0.651Numeric1+0.645Nominal2+0.388Nominal1+0.099Date1
+  0.624  	  0.156  	  1      	-0.746Date1-0.526Nominal1+0.407Nominal2-0.024Numeric1
+
+Eigenvectors
+ V1	 V2	 V3	 V4	
+-0.4391	-0.6162	 0.3879	-0.5264	Nominal1
+ 0.5529	-0.3352	 0.6454	 0.4068	Nominal2
+ 0.3779	-0.6584	-0.6505	-0.0239	Numeric1
+ 0.599 	 0.273 	 0.099 	-0.7462	Date1
+
+Ranked attributes:
+ 0.607  1 0.599Date1+0.553Nominal2-0.439Nominal1+0.378Numeric1
+ 0.332  2 -0.658Numeric1-0.616Nominal1-0.335Nominal2+0.273Date1
+ 0.156  3 -0.651Numeric1+0.645Nominal2+0.388Nominal1+0.099Date1
+ 0      4 -0.746Date1-0.526Nominal1+0.407Nominal2-0.024Numeric1
+
+Selected attributes: 1,2,3,4 : 4
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (unsupervised):
+	Principal Components Attribute Transformer
+
+Correlation matrix
+  1      0.5   -0.1    0.36 
+  0.5    1     -0.06   0.06 
+ -0.1   -0.06   1      0.07 
+  0.36   0.06   0.07   1    
+
+
+eigenvalue	proportion	cumulative
+  1.65412	  0.41353	  0.41353	0.69 Nominal1+0.579Nominal2+0.417Date1-0.119Numeric1
+  1.06606	  0.26652	  0.68005	0.792Numeric1+0.563Date1-0.237Nominal2-0.004Nominal1
+  0.87567	  0.21892	  0.89896	0.599Date1-0.589Numeric1-0.543Nominal2-0.007Nominal1
+  0.40415	  0.10104	  1      	-0.723Nominal1+0.56 Nominal2+0.388Date1-0.112Numeric1
+
+Eigenvectors
+ V1	 V2	 V3	 V4	
+ 0.6904	-0.0044	-0.0071	-0.7234	Nominal1
+ 0.5794	-0.2373	-0.5428	 0.5597	Nominal2
+-0.1188	 0.7916	-0.5888	-0.1124	Numeric1
+ 0.4165	 0.5631	 0.5989	 0.3883	Date1
+
+Ranked attributes:
+ 0.586  1 0.69 Nominal1+0.579Nominal2+0.417Date1-0.119Numeric1
+ 0.32   2 0.792Numeric1+0.563Date1-0.237Nominal2-0.004Nominal1
+ 0.101  3 0.599Date1-0.589Numeric1-0.543Nominal2-0.007Nominal1
+ 0      4 -0.723Nominal1+0.56 Nominal2+0.388Date1-0.112Numeric1
+
+Selected attributes: 1,2,3,4 : 4
+

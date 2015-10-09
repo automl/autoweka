@@ -1,0 +1,9 @@
+@relation FilterTest-weka.filters.unsupervised.attribute.RandomSubset-N0.5-S1
+
+@attribute NominalAtt1 {r,g,b}
+@attribute NumericAtt1 numeric
+@attribute NominalAtt2 {a,b,c,d}
+@attribute NumericAtt2 numeric
+
+@data
+

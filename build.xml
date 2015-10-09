@@ -1,0 +1,95 @@
+<project name="WekaWrapper">
+    <!-- Include user specified props -->
+    <property file="build.properties" />
+    <property name="lib.dir"     value="lib" />
+    <property name="native.dir"  value="native" />
+    <property name="build.dir"   value="build" />
+    <property name="class.dir"   value="${build.dir}/classes" />
+    <property name="testclass.dir"   value="${build.dir}/testclasses" />
+    <property name="jar.dir"     value="${build.dir}/jar" />
+    <property name="dist.dir"    value="${build.dir}/dist" />
+
+    <!-- Setup the classpath -->
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="*.jar"/>
+        <fileset dir="${lib.dir}/swingbuilder" includes="*.jar"/>
+        <path location="${native.dir}"/>
+    </path>
+    <path id="test.classpath">
+        <path refid="classpath" />
+        <path location="${junit.location}" />
+        <fileset dir="${lib.dir}/test" includes="*.jar"/>
+        <pathelement path="${testclass.dir}" /> 
+        <pathelement path="${class.dir}" /> 
+    </path>
+
+    <!-- Clean target -->
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <!-- Compile all the Autoweka code -->
+    <target name="compile">
+        <mkdir dir="${class.dir}"/>
+        <javac srcdir="src/java" destdir="${class.dir}" classpathref="classpath" includeantruntime="false" target="1.6" source="1.6" debug="true" />
+        <copy todir="${class.dir}">
+            <fileset dir="src/java" includes="**/*.yml"/>
+            <fileset dir="src/java" includes="**/*.png"/>
+        </copy>
+    </target>
+    
+    <!-- Build some javadoc -->
+    <target name="doc" description="generate documentation">
+        <javadoc sourcepath="src/java" destdir="doc/javadoc"/>
+    </target>
+
+    <!-- Build the actual jar -->
+    <target name="jar" depends='compile'>
+        <jar destfile="${jar.dir}/autoweka.jar" basedir="${class.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="autoweka.ui.Launcher"/>
+            </manifest>
+            <zipgroupfileset dir="lib" includes="*.jar" />
+            <zipgroupfileset dir="lib/swingbuilder" includes="*.jar" />
+        </jar>
+    </target>
+    
+    <target name="jar-light" depends='compile'>
+        <jar destfile="${jar.dir}/autoweka-light.jar" basedir="${class.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="autoweka.ui.Launcher"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="dist" depends="jar,jar-light">
+        <tar destfile="autoweka-dist.tar.gz" compression="gzip">
+            <tarfileset dir="${jar.dir}" includes="*.jar" />
+            <tarfileset dir="${lib.dir}" includes="*.jar" prefix="lib" />
+            <tarfileset dir="${lib.dir}/swingbuilder" includes="**/*" prefix="lib/swingbuilder" />
+            <tarfileset dir="params" includes="**/*" prefix="params" />
+            <tarfileset dir="scripts" includes="**/*" prefix="scripts" filemode="755" />
+            <tarfileset dir="src" includes="**/*" prefix="src" />
+            <tarfileset dir="." includes="build.xml" />
+            <tarfileset dir="weka" includes="autoweka.patch" />
+            <!--<tarfileset dir="datasets/classification" includes="creditg.arff" prefix="datasets" />-->
+            <tarfileset dir="doc/javadoc" includes="**/*" prefix="doc" />
+            <tarfileset dir="doc/manual" includes="manual.pdf" />
+            <tarfileset dir="defaultprops" includes="*" prefix="" />
+        </tar>
+    </target>
+
+    <!-- Run some tests -->
+    <target name="compile-tests" depends="compile">
+        <mkdir dir="${testclass.dir}"/>
+        <javac srcdir="test/java" destdir="${testclass.dir}" classpathref="test.classpath" includeantruntime="false" target="1.6"  source="1.6" debug="true"/>
+    </target>
+    <!-- Run some tests -->
+    <target name="test" depends="compile-tests">
+        <junit fork="yes" showoutput="false"> 
+            <classpath refid="test.classpath"/>			
+            <test name="autoweka.AutoWEKATestSuite"/>
+            <formatter type="plain" usefile="false" />
+        </junit>
+    </target>
+</project>

@@ -1,0 +1,27 @@
+@relation FilterTest_clusterMembership-weka.filters.unsupervised.attribute.ClusterMembership-Wweka.clusterers.EM---I100-N-1-M1.0E-6-S100
+
+@attribute pCluster_0_0 numeric
+@attribute NumericAtt1 numeric
+
+@data
+1,1
+1,2
+1,3
+1,4
+1,5
+1,6
+1,7
+1,8
+1,9
+1,9.4
+1,1.4
+1,2.3
+1,3.3
+1,4.3
+1,5.3
+1,6.5
+1,7.5
+1,8.5
+1,9.4
+1,4.3
+1,0

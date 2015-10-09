@@ -1,0 +1,87 @@
+\documentclass[11pt,letterpaper,oneside]{article}
+\usepackage{fullpage}
+\usepackage{setspace}
+%\usepackage{subfiles}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{mdframed}
+\usepackage{caption}
+\usepackage{graphicx}
+
+\newenvironment{aside}
+  {\begin{mdframed}[style=0,%
+      leftline=false,rightline=false,leftmargin=2em,rightmargin=2em,%
+          innerleftmargin=0pt,innerrightmargin=0pt,linewidth=0.75pt,%
+      skipabove=7pt,skipbelow=7pt]\small\vspace{0.1cm}}
+  {\end{mdframed}}
+  
+\newenvironment{tabover}
+  {\begin{mdframed}[style=0,%
+      leftline=false,rightline=false,leftmargin=2em,topline=false,bottomline=false,rightmargin=2em,innertopmargin=0em,skipabove=0pt,%
+          innerleftmargin=0pt,innerrightmargin=0pt]}
+  {\end{mdframed}}
+
+
+\newcommand{\file}[1]{{{\texttt{#1}}}}
+\newcommand{\cmdline}[1]{{{\mbox{\texttt{#1}}}}} 
+\newcommand{\classname}[1]{{{\texttt{#1}}}} 
+  
+\begin{document}
+
+\title{User Guide for Auto-WEKA \input{version}}
+
+\author{
+Chris~Thornton \& Frank~Hutter\\
+Department of Computer Science\\
+University of British Columbia\\
+Vancouver, BC\ \ V6T~1Z4, Canada\\
+\texttt{\{cwthornt,hutter\}@cs.ubc.ca}
+}
+
+\maketitle
+
+\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}\label{sec:intro}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\input{manual-intro}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Auto-WEKA Overview}\label{sec:overview}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{overview}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\section{Using the GUI}\label{sec:gui}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\input{gui}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\section{Defining Experiments}\label{sec:defining}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{defining}
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\section{Running Experiments Using the CLI}\label{sec:running}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{running}
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\section{Analyzing Experiments Using the CLI}\label{sec:analyzing}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{analyzing}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\section{CLI Sample Experiment Walkthrough}\label{sec:analyzing}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{samplechecklist}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Extending Auto-WEKA}\label{sec:developercomments}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{developercomments}
+
+\end{document}

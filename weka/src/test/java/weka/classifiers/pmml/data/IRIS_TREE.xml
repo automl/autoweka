@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PMML version="3.0" xmlns="http://www.dmg.org/PMML-3_0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<Header copyright="Copyright (c) Integral Solutions Ltd., 1994 - 2005. All rights reserved.">
+<Application name="Clementine" version="10.0"/>
+<Annotation>Exported with PMML extensions for use with SPSS SmartScore</Annotation>
+</Header>
+<DataDictionary numberOfFields="6">
+<DataField name="sepal_length" optype="continuous" dataType="double">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="sepal_width" optype="continuous" dataType="double">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="petal_length" optype="continuous" dataType="double">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="petal_width" optype="continuous" dataType="double">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="class" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Value value="Iris-setosa" property="valid"/>
+<Value value="Iris-versicolor" property="valid"/>
+<Value value="Iris-virginica" property="valid"/>
+</DataField>
+<DataField name="$RC-SPECIES" optype="continuous" dataType="double">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+</DataDictionary>
+<TreeModel modelName="IRIS_TREE" functionName="classification" algorithmName="C&amp;R Tree">
+<Extension name="missingValueStrategy" value="defaultChild"/>
+<Extension name="missingValuePenalty" value="0.9"/>
+<MiningSchema>
+<MiningField name="sepal_length" usageType="active"/>
+<MiningField name="sepal_width" usageType="active"/>
+<MiningField name="petal_length" usageType="active"/>
+<MiningField name="petal_width" usageType="active"/>
+<MiningField name="class" usageType="predicted"/>
+<MiningField name="$RC-SPECIES" usageType="supplementary"/>
+</MiningSchema>
+<Node score="Iris-setosa" recordCount="150" id="0">
+<Extension name="defaultChild" value="1"/>
+<Extension name="nrCorrect" value="49.666666666666664"/>
+<True/>
+<ScoreDistribution value="Iris-setosa" recordCount="50">
+<Extension name="confidence" value="0.333333333333333"/>
+</ScoreDistribution>
+<ScoreDistribution value="Iris-versicolor" recordCount="50">
+<Extension name="confidence" value="0.333333333333333"/>
+</ScoreDistribution>
+<ScoreDistribution value="Iris-virginica" recordCount="50">
+<Extension name="confidence" value="0.333333333333333"/>
+</ScoreDistribution>
+<Node score="Iris-setosa" recordCount="50" id="1">
+<Extension name="nrCorrect" value="51"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="petal_length" operator="lessOrEqual" value="2.45"/>
+<SimplePredicate field="petal_width" operator="lessOrEqual" value="0.8"/>
+<SimplePredicate field="sepal_length" operator="lessOrEqual" value="5.45"/>
+<SimplePredicate field="sepal_width" operator="greaterThan" value="3.35"/>
+<False/>
+</CompoundPredicate>
+<ScoreDistribution value="Iris-setosa" recordCount="50">
+<Extension name="confidence" value="0.962264150943396"/>
+</ScoreDistribution>
+<ScoreDistribution value="Iris-versicolor" recordCount="0">
+<Extension name="confidence" value="0"/>
+</ScoreDistribution>
+<ScoreDistribution value="Iris-virginica" recordCount="0">
+<Extension name="confidence" value="0"/>
+</ScoreDistribution>
+</Node>
+<Node score="Iris-versicolor" recordCount="100" id="2">
+<Extension name="defaultChild" value="0"/>
+<Extension name="nrCorrect" value="50"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="petal_length" operator="greaterThan" value="2.45"/>
+<SimplePredicate field="petal_width" operator="greaterThan" value="0.8"/>
+<SimplePredicate field="sepal_length" operator="greaterThan" value="5.45"/>
+<SimplePredicate field="sepal_width" operator="lessOrEqual" value="3.35"/>
+<True/>
+</CompoundPredicate>
+<ScoreDistribution value="Iris-setosa" recordCount="0">
+<Extension name="confidence" value="0"/>
+</ScoreDistribution>
+<ScoreDistribution value="Iris-versicolor" recordCount="50">
+<Extension name="confidence" value="0.495145631067961"/>
+</ScoreDistribution>
+<ScoreDistribution value="Iris-virginica" recordCount="50">
+<Extension name="confidence" value="0.495145631067961"/>
+</ScoreDistribution>
+<Node score="Iris-versicolor" recordCount="54" id="3">
+<Extension name="defaultChild" value="0"/>
+<Extension name="nrCorrect" value="49.81481481481482"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="petal_width" operator="lessOrEqual" value="1.75"/>
+<SimplePredicate field="petal_length" operator="lessOrEqual" value="4.75"/>
+<SimplePredicate field="sepal_length" operator="lessOrEqual" value="6.15"/>
+<SimplePredicate field="sepal_width" operator="lessOrEqual" value="2.95"/>
+<True/>
+</CompoundPredicate>
+<ScoreDistribution value="Iris-setosa" recordCount="0">
+<Extension name="confidence" value="0"/>
+</ScoreDistribution>
+<ScoreDistribution value="Iris-versicolor" recordCount="49">
+<Extension name="confidence" value="0.87719298245614"/>
+</ScoreDistribution>
+<ScoreDistribution value="Iris-virginica" recordCount="5">
+<Extension name="confidence" value="0.105263157894737"/>
+</ScoreDistribution>
+<Node score="Iris-versicolor" recordCount="48" id="4">
+<Extension name="nrCorrect" value="47.95833333333333"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="petal_length" operator="lessOrEqual" value="4.95"/>
+<SimplePredicate field="sepal_length" operator="lessOrEqual" value="7.1"/>
+<True/>
+</CompoundPredicate>
+<ScoreDistribution value="Iris-setosa" recordCount="0">
+<Extension name="confidence" value="0"/>
+</ScoreDistribution>
+<ScoreDistribution value="Iris-versicolor" recordCount="47">
+<Extension name="confidence" value="0.941176470588235"/>
+</ScoreDistribution>
+<ScoreDistribution value="Iris-virginica" recordCount="1">
+<Extension name="confidence" value="0.03921568627451"/>
+</ScoreDistribution>
+</Node>
+<Node score="Iris-virginica" recordCount="6" id="5">
+<Extension name="defaultChild" value="0"/>
+<Extension name="nrCorrect" value="4.333333333333333"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="petal_length" operator="greaterThan" value="4.95"/>
+<SimplePredicate field="sepal_length" operator="greaterThan" value="7.1"/>
+<False/>
+</CompoundPredicate>
+<ScoreDistribution value="Iris-setosa" recordCount="0">
+<Extension name="confidence" value="0"/>
+</ScoreDistribution>
+<ScoreDistribution value="Iris-versicolor" recordCount="2">
+<Extension name="confidence" value="0.333333333333333"/>
+</ScoreDistribution>
+<ScoreDistribution value="Iris-virginica" recordCount="4">
+<Extension name="confidence" value="0.555555555555556"/>
+</ScoreDistribution>
+<Node score="Iris-virginica" recordCount="3" id="6">
+<Extension name="nrCorrect" value="4"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="petal_width" operator="lessOrEqual" value="1.55"/>
+<SimplePredicate field="sepal_width" operator="lessOrEqual" value="2.65"/>
+<SimplePredicate field="sepal_length" operator="lessOrEqual" value="6.5"/>
+<SimplePredicate field="petal_length" operator="lessOrEqual" value="5.7"/>
+<True/>
+</CompoundPredicate>
+<ScoreDistribution value="Iris-setosa" recordCount="0">
+<Extension name="confidence" value="0"/>
+</ScoreDistribution>
+<ScoreDistribution value="Iris-versicolor" recordCount="0">
+<Extension name="confidence" value="0"/>
+</ScoreDistribution>
+<ScoreDistribution value="Iris-virginica" recordCount="3">
+<Extension name="confidence" value="0.666666666666667"/>
+</ScoreDistribution>
+</Node>
+<Node score="Iris-versicolor" recordCount="3" id="7">
+<Extension name="nrCorrect" value="2.333333333333333"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="petal_width" operator="greaterThan" value="1.55"/>
+<SimplePredicate field="sepal_width" operator="greaterThan" value="2.65"/>
+<SimplePredicate field="sepal_length" operator="greaterThan" value="6.5"/>
+<SimplePredicate field="petal_length" operator="greaterThan" value="5.7"/>
+<False/>
+</CompoundPredicate>
+<ScoreDistribution value="Iris-setosa" recordCount="0">
+<Extension name="confidence" value="0"/>
+</ScoreDistribution>
+<ScoreDistribution value="Iris-versicolor" recordCount="2">
+<Extension name="confidence" value="0.5"/>
+</ScoreDistribution>
+<ScoreDistribution value="Iris-virginica" recordCount="1">
+<Extension name="confidence" value="0.333333333333333"/>
+</ScoreDistribution>
+</Node>
+</Node>
+</Node>
+<Node score="Iris-virginica" recordCount="46" id="8">
+<Extension name="nrCorrect" value="45.95652173913044"/>
+<CompoundPredicate booleanOperator="surrogate">
+<SimplePredicate field="petal_width" operator="greaterThan" value="1.75"/>
+<SimplePredicate field="petal_length" operator="greaterThan" value="4.75"/>
+<SimplePredicate field="sepal_length" operator="greaterThan" value="6.15"/>
+<SimplePredicate field="sepal_width" operator="greaterThan" value="2.95"/>
+<False/>
+</CompoundPredicate>
+<ScoreDistribution value="Iris-setosa" recordCount="0">
+<Extension name="confidence" value="0"/>
+</ScoreDistribution>
+<ScoreDistribution value="Iris-versicolor" recordCount="1">
+<Extension name="confidence" value="0.040816326530612"/>
+</ScoreDistribution>
+<ScoreDistribution value="Iris-virginica" recordCount="45">
+<Extension name="confidence" value="0.938775510204082"/>
+</ScoreDistribution>
+</Node>
+</Node>
+</Node>
+</TreeModel>
+</PMML>

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PMML xmlns="http://www.dmg.org/PMML-3_2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.dmg.org/PMML-3_2 http://www.dmg.org/v3-2/pmml-3-2.xsd" version="3.2">
+    <Header copyright="Copyright (c) 2008 Zementis, Inc. (www.zementis.com)"
+        description="Neural Network using the El Nino dataset">
+        <Timestamp>Feb 15, 2008</Timestamp>
+    </Header>
+    <DataDictionary numberOfFields="7">
+        <DataField name="airtemp" optype="continuous" dataType="double" />
+        <DataField name="latitude" optype="continuous" dataType="double" />
+        <DataField name="longitude" optype="continuous" dataType="double" />
+        <DataField name="zon_winds" optype="continuous" dataType="double" />
+        <DataField name="mer_winds" optype="continuous" dataType="double" />
+        <DataField name="humidity" optype="continuous" dataType="double" />
+        <DataField name="s_s_temp" optype="continuous" dataType="double" />
+    </DataDictionary>
+    <TransformationDictionary>
+        <DerivedField name="derived_latitude" dataType="double" optype="continuous">
+            <NormContinuous field="latitude">
+                <LinearNorm orig="-8.28" norm="0" />
+                <LinearNorm orig="8.97" norm="1" />
+            </NormContinuous>
+        </DerivedField>
+        <DerivedField name="derived_longitude" dataType="double" optype="continuous">
+            <NormContinuous field="longitude">
+                <LinearNorm orig="-179.87" norm="0" />
+                <LinearNorm orig="179.8" norm="1" />
+            </NormContinuous>
+        </DerivedField>
+        <DerivedField name="derived_zon_winds" dataType="double" optype="continuous">
+            <NormContinuous field="zon_winds">
+                <LinearNorm orig="-8.1" norm="0" />
+                <LinearNorm orig="3.4" norm="1" />
+            </NormContinuous>
+        </DerivedField>
+        <DerivedField name="derived_mer_winds" dataType="double" optype="continuous">
+            <NormContinuous field="mer_winds">
+                <LinearNorm orig="-6.2" norm="0" />
+                <LinearNorm orig="7.1" norm="1" />
+            </NormContinuous>
+        </DerivedField>
+        <DerivedField name="derived_humidity" dataType="double" optype="continuous">
+            <NormContinuous field="humidity">
+                <LinearNorm orig="72.3" norm="0" />
+                <LinearNorm orig="99.4" norm="1" />
+            </NormContinuous>
+        </DerivedField>
+        <DerivedField name="derived_s_s_temp" dataType="double" optype="continuous">
+            <NormContinuous field="s_s_temp">
+                <LinearNorm orig="22.56" norm="0" />
+                <LinearNorm orig="30.15" norm="1" />
+            </NormContinuous>
+        </DerivedField>
+    </TransformationDictionary>
+    <NeuralNetwork modelName="ElNino_NN" functionName="regression" activationFunction="tanh">
+        <MiningSchema>
+            <MiningField name="latitude" />
+            <MiningField name="longitude" />
+            <MiningField name="zon_winds" />
+            <MiningField name="mer_winds" />
+            <MiningField name="humidity" />
+            <MiningField name="s_s_temp" />
+            <MiningField name="airtemp" usageType="predicted" />
+        </MiningSchema>
+        <NeuralInputs>
+            <NeuralInput id="0">
+                <DerivedField dataType="double" optype="continuous">
+                    <FieldRef field="derived_latitude" />
+                </DerivedField>
+            </NeuralInput>
+            <NeuralInput id="1">
+                <DerivedField dataType="double" optype="continuous">
+                    <FieldRef field="derived_longitude" />
+                </DerivedField>
+            </NeuralInput>
+            <NeuralInput id="2">
+                <DerivedField dataType="double" optype="continuous">
+                    <FieldRef field="derived_zon_winds" />
+                </DerivedField>
+            </NeuralInput>
+            <NeuralInput id="3">
+                <DerivedField dataType="double" optype="continuous">
+                    <FieldRef field="derived_mer_winds" />
+                </DerivedField>
+            </NeuralInput>
+            <NeuralInput id="4">
+                <DerivedField dataType="double" optype="continuous">
+                    <FieldRef field="derived_humidity" />
+                </DerivedField>
+            </NeuralInput>
+            <NeuralInput id="5">
+                <DerivedField dataType="double" optype="continuous">
+                    <FieldRef field="derived_s_s_temp" />
+                </DerivedField>
+            </NeuralInput>
+        </NeuralInputs>
+        <NeuralLayer numberOfNeurons="2">
+            <Neuron id="6" bias="-0.731304966362333">
+                <Con from="0" weight="0.522049533017919" />
+                <Con from="1" weight="-0.399145207255475" />
+                <Con from="2" weight="-0.415583881817118" />
+                <Con from="3" weight="-0.309808298543379" />
+                <Con from="4" weight="-0.662674572566683" />
+                <Con from="5" weight="1.72273121708294" />
+            </Neuron>
+            <Neuron id="7" bias="-0.458013009318407">
+                <Con from="0" weight="-0.90117395341808" />
+                <Con from="1" weight="0.756005664311791" />
+                <Con from="2" weight="0.283296146246296" />
+                <Con from="3" weight="0.0416906660285602" />
+                <Con from="4" weight="0.728091902786551" />
+                <Con from="5" weight="1.12654398373213" />
+            </Neuron>
+        </NeuralLayer>
+        <NeuralLayer numberOfNeurons="1" activationFunction="identity">
+            <Neuron id="8" bias="-1.04868830796614">
+                <Con from="6" weight="2.18331080616068" />
+                <Con from="7" weight="1.6406152439558" />
+            </Neuron>
+        </NeuralLayer>
+        <NeuralOutputs>
+            <NeuralOutput outputNeuron="8">
+                <DerivedField name="derived_airtemp" dataType="double" optype="continuous">
+                    <NormContinuous field="airtemp">
+                        <LinearNorm orig="22.74" norm="-3.68637198807044" />
+                        <LinearNorm orig="30.04" norm="2.0133756415681" />
+                    </NormContinuous>
+                </DerivedField>
+            </NeuralOutput>
+        </NeuralOutputs>
+    </NeuralNetwork>
+</PMML>

@@ -1,0 +1,32 @@
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (supervised, Class (nominal): 5 Class):
+Filtered Attribute Evaluator
+Filter: weka.filters.supervised.instance.SpreadSubsample -M 0.0 -X 0.0 -S 1
+Attribute evaluator: weka.attributeSelection.InfoGainAttributeEval 
+
+Filtered header:
+@relation Testdata-weka.filters.supervised.instance.SpreadSubsample-M0.0-X0.0-S1
+
+@attribute Nominal1 {att1val1,att1val2}
+@attribute Nominal2 {att2val1,att2val2}
+@attribute Numeric1 numeric
+@attribute Date1 date yyyy-mm-dd
+@attribute Class {class1,class2}
+
+@data
+
+
+Ranked attributes:
+ 0.971  3 Numeric1
+ 0.971  1 Nominal1
+ 0.361  2 Nominal2
+ 0      4 Date1
+
+Selected attributes: 3,1,2,4 : 4
+

@@ -1,0 +1,62 @@
+ 
+Include in the distribution is a sample experiment definition that runs SMAC on the German Credit dataset from the UCI repository, this section will show you how to run a typical Auto-WEKA experiment.
+
+First, navigate to the \texttt{autoweka} directory that contains the \texttt{autoweka.jar} file. First, we need to build the actual experiment by running the \texttt{ExperimentConstructor}
+
+\begin{aside}
+ For all the following Java commands, we assume that you run them inside the \texttt{autoweka} directory, and add both \texttt{autoweka.jar} and \texttt{weka.jar} to the Java's class path.
+\end{aside}
+
+\begin{verbatim}
+  java -cp autoweka.jar  autoweka.ExperimentConstructor sampleexperiment.xml
+\end{verbatim}
+
+This will load the dataset in \texttt{sampledata/creditg.zip}, determine what classifiers and feature selectors that are defined in the \texttt{params} directory can be used, and write out the experiment into the \texttt{experiments} directory.
+
+\begin{aside}
+ Note that you will have to modify \texttt{autoweka.smac.SMACExperimentConstructor.properties} to point to your distribution of SMAC, if you are not using the version that came bundled with Auto-WEKA.
+\end{aside}
+
+Next, we need to run our experiments by invoking the \texttt{Experiment} with different seeds
+
+\begin{verbatim}
+  java -cp autoweka.jar autoweka.Experiment experiments/SMAC-CV10-GermanCredit 0
+  java -cp autoweka.jar autoweka.Experiment experiments/SMAC-CV10-GermanCredit 1
+  java -cp autoweka.jar autoweka.Experiment experiments/SMAC-CV10-GermanCredit 2
+  ...
+\end{verbatim}
+
+After watching some paint dry (and the experiments have completed), we now need to generate and combine all the trajectories into a single file using the \texttt{TrajectoryMerger}
+
+\begin{verbatim}
+  java -cp autoweka.jar autoweka.TrajectoryParser experiments/SMAC-CV10-GermanCredit 0
+  java -cp autoweka.jar autoweka.TrajectoryParser experiments/SMAC-CV10-GermanCredit 1
+  java -cp autoweka.jar autoweka.TrajectoryParser experiments/SMAC-CV10-GermanCredit 2
+  ...
+  java -cp autoweka.jar autoweka.TrajectoryMerger experiments/SMAC-CV10-GermanCredit
+\end{verbatim}
+
+\begin{aside}
+ If you've defined a number of \texttt{trajectoryPointExtras} in your experiment definition, you'll want to invoke 
+ \begin{verbatim}
+  java -cp autoweka.jar  autoweka.TrajectoryPointExtraRunner \
+              experiments/SMAC-CV10-GermanCredit/SMAC-CV10-GermanCredit.trajectories.0
+ \end{verbatim}
+ for each completed trajectory before you run the merger.
+\end{aside}
+
+Now, you can perform any kind of analysis on this merged trajectory file, but the most common operation you'd want is to find the classifier/hyperparameters that have the best performance using \texttt{GetBestFromTrajectoryGroup}
+
+\begin{verbatim}
+  java -cp autoweka.jar  autoweka.tools.GetBestFromTrajectoryGroup \
+             experiments/SMAC-CV10-GermanCredit/SMAC-CV10-GermanCredit.trajectory
+\end{verbatim}
+
+Additionally, if you use the \classname{autoweka.tools.ExperimentRunner} to execute your experiments, you can use the class \classname{autoweka.tools.TrainedModelPredictionRunner} to make predictions on new data:
+\begin{verbatim}
+  java -cp autoweka.jar  autoweka.tools.TrainedModelPredictionRunner \
+             -model path/to/trained.SEED.model \
+             -attributeselection path/to/trained.SEED.attributeselection \
+             -dataset path/to/test.arff \
+             -predictionpath path/to/predictions.csv
+\end{verbatim}

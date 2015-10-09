@@ -1,0 +1,25 @@
+0_C [0.5,1.5][1.0]
+1_N {0,1,2} [0]
+2_M {REMOVED,REMOVE_PREV}[REMOVE_PREV]
+3_REG_IGNORE_QUOTE_START_K {weka.classifiers.functions.supportVector.NormalizedPolyKernel,weka.classifiers.functions.supportVector.PolyKernel,weka.classifiers.functions.supportVector.Puk,weka.classifiers.functions.supportVector.RBFKernel}[weka.classifiers.functions.supportVector.NormalizedPolyKernel]
+    #Normalized Poly Kernel
+    4_npoly_E [0.2, 5] [1.0]
+    4_npoly_L {REMOVED,REMOVE_PREV}[REMOVE_PREV]
+    #Poly Kernel
+    4_poly_E [0.2, 5] [1.0]
+    4_poly_L {REMOVED,REMOVE_PREV}[REMOVE_PREV]
+    #Puk
+    4_puk_S [0.1, 10] [1.0]
+    4_puk_O [0.1, 1] [1.0]
+    #RBF
+    4_rbf_G [0.0001,1] [0.01]l
+5_QUOTE_END {REMOVED} [REMOVED]
+
+Conditionals:
+4_npoly_E| 3_REG_IGNORE_QUOTE_START_K in {weka.classifiers.functions.supportVector.NormalizedPolyKernel}
+4_npoly_L| 3_REG_IGNORE_QUOTE_START_K in {weka.classifiers.functions.supportVector.NormalizedPolyKernel}
+4_poly_E| 3_REG_IGNORE_QUOTE_START_K in {weka.classifiers.functions.supportVector.PolyKernel}
+4_poly_L| 3_REG_IGNORE_QUOTE_START_K in {weka.classifiers.functions.supportVector.PolyKernel}
+4_puk_S | 3_REG_IGNORE_QUOTE_START_K in {weka.classifiers.functions.supportVector.Puk}
+4_puk_O | 3_REG_IGNORE_QUOTE_START_K in {weka.classifiers.functions.supportVector.Puk}
+4_rbf_G | 3_REG_IGNORE_QUOTE_START_K in {weka.classifiers.functions.supportVector.RBFKernel}

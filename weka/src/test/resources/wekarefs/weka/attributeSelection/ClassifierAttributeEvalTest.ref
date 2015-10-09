@@ -1,0 +1,21 @@
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (supervised, Class (nominal): 5 Class):
+	Classifier feature evaluator.
+
+	Using 10 fold cross validation for evaluating attributes.
+	Classifier in use: weka.classifiers.rules.OneR -B 6
+
+Ranked attributes:
+100.0                  3 Numeric1
+100.0                  1 Nominal1
+ 85                    2 Nominal2
+ 55.00000000000001024  4 Date1
+
+Selected attributes: 3,1,2,4 : 4
+

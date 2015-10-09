@@ -1,0 +1,4 @@
+INT_B [1,100] [20]i
+E {REMOVED,REMOVE_PREV}[REMOVE_PREV]
+M {a,d,m,n} [a]
+

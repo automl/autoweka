@@ -1,0 +1,40 @@
+
+PredictiveApriori
+===================
+
+
+Best rules found:
+
+  1. Nominal2=att2val2 12 ==> Class=class2 12    acc:(0.96581)
+  2. Class=class1 6 ==> Nominal2=att2val1 6    acc:(0.92754)
+  3. Nominal1=att1val1 Nominal2=att2val1 5 ==> Class=class1 5    acc:(0.91583)
+  4. Nominal1=att1val2 14 ==> Class=class2 13    acc:(0.87529)
+  5. Class=class2 14 ==> Nominal1=att1val2 13    acc:(0.87529)
+  6. Nominal2=att2val2 12 ==> Nominal1=att1val2 Class=class2 11    acc:(0.86053)
+  7. Class=class2 14 ==> Nominal2=att2val2 12    acc:(0.82167)
+  8. Nominal1=att1val1 6 ==> Nominal2=att2val1 Class=class1 5    acc:(0.7884)
+  9. Class=class1 6 ==> Nominal1=att1val1 Nominal2=att2val1 5    acc:(0.7884)
+ 10. Nominal1=att1val2 14 ==> Nominal2=att2val2 Class=class2 11    acc:(0.77583)
+ 11. Class=class2 14 ==> Nominal1=att1val2 Nominal2=att2val2 11    acc:(0.77583)
+ 12. Nominal2=att2val1 8 ==> Class=class1 6    acc:(0.74648)
+ 13. Nominal2=att2val1 8 ==> Nominal1=att1val1 Class=class1 5    acc:(0.66702)
+ 14. Nominal2=att2val1 8 ==> Nominal1=att1val2 3    acc:(0.42441)
+ 15. Nominal2=att2val1 8 ==> Nominal1=att1val2 Class=class2 2    acc:(0.29278)
+ 16. Nominal1=att1val2 14 ==> Nominal2=att2val1 3    acc:(0.2379)
+ 17. Nominal1=att1val2 14 ==> Nominal2=att2val1 Class=class2 2    acc:(0.19079)
+ 18. Class=class2 14 ==> Nominal1=att1val2 Nominal2=att2val1 2    acc:(0.19079)
+
+
+PredictiveApriori
+===================
+
+
+Best rules found:
+
+  1. Nominal1=att1val2 2 ==> Nominal2=att2val1 2    acc:(0.90704)
+  2. Nominal2=att2val2 2 ==> Nominal1=att1val1 2    acc:(0.90704)
+  3. Nominal1=att1val1 18 ==> Nominal2=att2val1 16    acc:(0.87068)
+  4. Nominal2=att2val1 18 ==> Nominal1=att1val1 16    acc:(0.87068)
+  5. Nominal1=att1val1 18 ==> Nominal2=att2val2 2    acc:(0.09817)
+  6. Nominal2=att2val1 18 ==> Nominal1=att1val2 2    acc:(0.09817)
+

@@ -1,0 +1,62 @@
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Best first.
+	Start set: no attributes
+	Search direction: forward
+	Stale search after 5 node expansions
+	Total number of subsets evaluated: 11
+	Merit of best subset found:    0.992
+
+Attribute Subset Evaluator (supervised, Class (numeric): 5 Class):
+	CFS Subset Evaluator
+	Including locally predictive attributes
+
+Selected attributes: 1,2,3 : 3
+                     Nominal1
+                     Nominal2
+                     Numeric1
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Best first.
+	Start set: no attributes
+	Search direction: forward
+	Stale search after 5 node expansions
+	Total number of subsets evaluated: 13
+	Merit of best subset found:    1    
+
+Attribute Subset Evaluator (supervised, Class (nominal): 5 Class):
+	CFS Subset Evaluator
+	Including locally predictive attributes
+
+Selected attributes: 1,2,3 : 3
+                     Nominal1
+                     Nominal2
+                     Numeric1
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Best first.
+	Start set: no attributes
+	Search direction: forward
+	Stale search after 5 node expansions
+	Total number of subsets evaluated: 11
+	Merit of best subset found:    1    
+
+Attribute Subset Evaluator (supervised, Class (numeric): 5 Class):
+	CFS Subset Evaluator
+	Including locally predictive attributes
+
+Selected attributes: 2,3 : 2
+                     Nominal2
+                     Numeric1
+

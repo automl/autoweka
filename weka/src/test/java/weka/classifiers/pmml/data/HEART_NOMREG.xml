@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PMML version="3.0" xmlns="http://www.dmg.org/PMML-3_0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<Header copyright="Copyright (c) Integral Solutions Ltd., 1994 - 2005. All rights reserved.">
+<Application name="Clementine" version="10.0"/>
+<Annotation>Exported with PMML extensions for use with SPSS SmartScore</Annotation>
+</Header>
+<DataDictionary numberOfFields="15">
+<DataField name="age" optype="continuous" dataType="integer">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="sex" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Value value="female" property="valid"/>
+<Value value="male" property="valid"/>
+</DataField>
+<DataField name="cp" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Value value="asympt" property="valid"/>
+<Value value="atyp_angina" property="valid"/>
+<Value value="non_anginal" property="valid"/>
+<Value value="typ_angina" property="valid"/>
+</DataField>
+<DataField name="trestbps" optype="continuous" dataType="integer">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="chol" optype="continuous" dataType="integer">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="fbs" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Value value="f" property="valid"/>
+<Value value="t" property="valid"/>
+</DataField>
+<DataField name="restecg" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Value value="left_vent_hyper" property="valid"/>
+<Value value="normal" property="valid"/>
+<Value value="st_t_wave_abnormality" property="valid"/>
+</DataField>
+<DataField name="thalach" optype="continuous" dataType="integer">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="exang" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Value value="no" property="valid"/>
+<Value value="yes" property="valid"/>
+</DataField>
+<DataField name="oldpeak" optype="continuous" dataType="double">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="slope" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Value value="down" property="valid"/>
+<Value value="flat" property="valid"/>
+<Value value="up" property="valid"/>
+</DataField>
+<DataField name="ca" optype="continuous" dataType="integer">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="thal" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Value value="fixed_defect" property="valid"/>
+<Value value="normal" property="valid"/>
+<Value value="reversable_defect" property="valid"/>
+</DataField>
+<DataField name="$L-num" optype="categorical" dataType="string">
+<Extension name="storageType" value="string"/>
+<Value value="&lt;50" property="valid"/>
+<Value value="&gt;50_1" property="valid"/>
+</DataField>
+<DataField name="$LP-num" optype="continuous" dataType="double">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+</DataDictionary>
+<GeneralRegressionModel modelName="HEART_NOMREG" functionName="classification" modelType="multinomialLogistic" targetVariableName="$L-num">
+<MiningSchema>
+<MiningField name="age" usageType="active"/>
+<MiningField name="sex" usageType="active"/>
+<MiningField name="cp" usageType="active"/>
+<MiningField name="trestbps" usageType="active"/>
+<MiningField name="chol" usageType="active"/>
+<MiningField name="fbs" usageType="active"/>
+<MiningField name="restecg" usageType="active"/>
+<MiningField name="thalach" usageType="active"/>
+<MiningField name="exang" usageType="active"/>
+<MiningField name="oldpeak" usageType="active"/>
+<MiningField name="slope" usageType="active"/>
+<MiningField name="ca" usageType="active"/>
+<MiningField name="thal" usageType="active"/>
+<MiningField name="$L-num" usageType="predicted"/>
+<MiningField name="$LP-num" usageType="supplementary"/>
+</MiningSchema>
+<ParameterList>
+<Parameter name="P0000001" label="&lt;&lt;Intercept&gt;&gt;"/>
+<Parameter name="P0000002" label="age"/>
+<Parameter name="P0000003" label="trestbps"/>
+<Parameter name="P0000004" label="chol"/>
+<Parameter name="P0000005" label="thalach"/>
+<Parameter name="P0000006" label="oldpeak"/>
+<Parameter name="P0000007" label="ca"/>
+<Parameter name="P0000008" label="sex=female"/>
+<Parameter name="P0000009" label="cp=asympt"/>
+<Parameter name="P0000010" label="cp=atyp_angina"/>
+<Parameter name="P0000011" label="cp=non_anginal"/>
+<Parameter name="P0000012" label="fbs=f"/>
+<Parameter name="P0000013" label="restecg=left_vent_hyper"/>
+<Parameter name="P0000014" label="restecg=normal"/>
+<Parameter name="P0000015" label="exang=no"/>
+<Parameter name="P0000016" label="slope=down"/>
+<Parameter name="P0000017" label="slope=flat"/>
+<Parameter name="P0000018" label="thal=fixed_defect"/>
+<Parameter name="P0000019" label="thal=normal"/>
+</ParameterList>
+<FactorList>
+<Predictor name="sex"/>
+<Predictor name="cp"/>
+<Predictor name="fbs"/>
+<Predictor name="restecg"/>
+<Predictor name="exang"/>
+<Predictor name="slope"/>
+<Predictor name="thal"/>
+</FactorList>
+<CovariateList>
+<Predictor name="age"/>
+<Predictor name="trestbps"/>
+<Predictor name="chol"/>
+<Predictor name="thalach"/>
+<Predictor name="oldpeak"/>
+<Predictor name="ca"/>
+</CovariateList>
+<PPMatrix>
+<PPCell value="1" predictorName="age" parameterName="P0000002"/>
+<PPCell value="1" predictorName="trestbps" parameterName="P0000003"/>
+<PPCell value="1" predictorName="chol" parameterName="P0000004"/>
+<PPCell value="1" predictorName="thalach" parameterName="P0000005"/>
+<PPCell value="1" predictorName="oldpeak" parameterName="P0000006"/>
+<PPCell value="1" predictorName="ca" parameterName="P0000007"/>
+<PPCell value="female" predictorName="sex" parameterName="P0000008"/>
+<PPCell value="asympt" predictorName="cp" parameterName="P0000009"/>
+<PPCell value="atyp_angina" predictorName="cp" parameterName="P0000010"/>
+<PPCell value="non_anginal" predictorName="cp" parameterName="P0000011"/>
+<PPCell value="f" predictorName="fbs" parameterName="P0000012"/>
+<PPCell value="left_vent_hyper" predictorName="restecg" parameterName="P0000013"/>
+<PPCell value="normal" predictorName="restecg" parameterName="P0000014"/>
+<PPCell value="no" predictorName="exang" parameterName="P0000015"/>
+<PPCell value="down" predictorName="slope" parameterName="P0000016"/>
+<PPCell value="flat" predictorName="slope" parameterName="P0000017"/>
+<PPCell value="fixed_defect" predictorName="thal" parameterName="P0000018"/>
+<PPCell value="normal" predictorName="thal" parameterName="P0000019"/>
+</PPMatrix>
+<ParamMatrix>
+<PCell targetCategory="&lt;50" parameterName="P0000001" beta="1.6485487678691" df="1"/>
+<PCell targetCategory="&lt;50" parameterName="P0000002" beta="0.0151565581042763" df="1"/>
+<PCell targetCategory="&lt;50" parameterName="P0000003" beta="-0.0225084989930953" df="1"/>
+<PCell targetCategory="&lt;50" parameterName="P0000004" beta="-0.00419117211781928" df="1"/>
+<PCell targetCategory="&lt;50" parameterName="P0000005" beta="0.0180150657377129" df="1"/>
+<PCell targetCategory="&lt;50" parameterName="P0000006" beta="-0.367556853173032" df="1"/>
+<PCell targetCategory="&lt;50" parameterName="P0000007" beta="-1.36424396636098" df="1"/>
+<PCell targetCategory="&lt;50" parameterName="P0000008" beta="1.67198506988112" df="1"/>
+<PCell targetCategory="&lt;50" parameterName="P0000009" beta="-2.04471844493608" df="1"/>
+<PCell targetCategory="&lt;50" parameterName="P0000010" beta="-1.32650416964461" df="1"/>
+<PCell targetCategory="&lt;50" parameterName="P0000011" beta="-0.250806888282369" df="1"/>
+<PCell targetCategory="&lt;50" parameterName="P0000012" beta="-0.590972410710686" df="1"/>
+<PCell targetCategory="&lt;50" parameterName="P0000013" beta="0.473799892611073" df="1"/>
+<PCell targetCategory="&lt;50" parameterName="P0000014" beta="0.891255785241992" df="1"/>
+<PCell targetCategory="&lt;50" parameterName="P0000015" beta="0.775025945804079" df="1"/>
+<PCell targetCategory="&lt;50" parameterName="P0000016" beta="-0.586625828643728" df="1"/>
+<PCell targetCategory="&lt;50" parameterName="P0000017" beta="-1.26372382902138" df="1"/>
+<PCell targetCategory="&lt;50" parameterName="P0000018" beta="1.45815536993899" df="1"/>
+<PCell targetCategory="&lt;50" parameterName="P0000019" beta="1.41587437989704" df="1"/>
+<PCell targetCategory="&gt;50_1" parameterName="P0000001" beta="0.0" df="1"/>
+</ParamMatrix>
+</GeneralRegressionModel>
+</PMML>

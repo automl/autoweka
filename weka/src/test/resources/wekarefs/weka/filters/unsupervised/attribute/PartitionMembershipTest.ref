@@ -1,0 +1,27 @@
+@relation FilterTest_partitionMembership-weka.filters.unsupervised.attribute.PartitionMembership-Wweka.classifiers.trees.J48---C0.25-M2
+
+@attribute partition_0 numeric
+@attribute NominalAtt1 {r,g,b}
+
+@data
+{0 1,1 g}
+{0 1,1 b}
+{0 1}
+{0 1}
+{0 1,1 b}
+{0 1}
+{0 1}
+{0 1,1 g}
+{0 1,1 b}
+{0 1}
+{0 1}
+{0 1,1 b}
+{0 1}
+{0 1}
+{0 1,1 g}
+{0 1,1 b}
+{0 1}
+{0 1}
+{0 1}
+{0 1}
+{0 1,1 b}

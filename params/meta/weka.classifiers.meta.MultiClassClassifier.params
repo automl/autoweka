@@ -1,0 +1,4 @@
+M {0,1,2,3} [0]
+R [0.5,4][2.0]
+P {REMOVED,REMOVE_PREV}[REMOVE_PREV]
+S {1}[1]

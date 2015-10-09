@@ -1,0 +1,9 @@
+s_HIDDEN {0,1}[0]
+    1_S {1}[1]
+    2_S [0,1.0][1]
+INT_I [2,128][10]il
+
+Conditionals:
+1_S | s_HIDDEN in {0}
+2_S | s_HIDDEN in {1}
+

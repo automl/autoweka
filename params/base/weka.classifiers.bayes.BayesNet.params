@@ -1,0 +1,3 @@
+D {REMOVED,REMOVE_PREV}[REMOVE_PREV]
+Q {weka.classifiers.bayes.net.search.local.K2,weka.classifiers.bayes.net.search.local.HillClimber,weka.classifiers.bayes.net.search.local.LAGDHillClimber,weka.classifiers.bayes.net.search.local.SimulatedAnnealing,weka.classifiers.bayes.net.search.local.TabuSearch,weka.classifiers.bayes.net.search.local.TAN} [weka.classifiers.bayes.net.search.local.K2]
+

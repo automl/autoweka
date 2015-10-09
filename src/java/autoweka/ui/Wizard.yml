@@ -1,0 +1,17 @@
+JFrame(name=frame, title="Auto-WEKA Wizard", size=810x270, defaultCloseOperation=disposeOnClose):
+    - JTextArea(name=datasetTitleText, lineWrap=true, wrapStyleWord=true, editable=false, opaque=false, text="Auto-WEKA assumes that the attribute you are trying to predict is the last column in your training data ARFF file, and all other attributes will be used for prediction. You can use the WEKA explorer to modify your ARFF file to have these properties.\nIf the value to be predicted in your dataset is numeric, Auto-WEKA will perform regression (minimizing RMSE); otherwise it will perform classification (minimizing error rate).\nIn wizard mode, Auto-WEKA will optimise your hyperparameters using SMAC and 10-fold cross-validation. To use different options, use the Experiment Builder accessible from the launcher.")
+    - JTextField(name=mExperimentNameText, text="MyExperiment")
+    - JTextField(name=mTrainingArffText)
+    - JButton(name=openTrainingButton, text="Open", onAction=[openTrainingFile])
+    - JComboBox(name=mTimingPresetsCombo)
+    - JButton(name=runExperimentButton, text="Run Experiment", onAction=[runExperiment])
+    - MigLayout : |
+        []                           [grow]                    []
+        >datasetTitleText+*
+        >""
+        >"Experiment Name: "         mExperimentNameText+*
+        >"Training Data: "           mTrainingArffText         openTrainingButton>
+        >"Preset: "                  mTimingPresetsCombo+* 
+        >""
+        runExperimentButton+*>
+

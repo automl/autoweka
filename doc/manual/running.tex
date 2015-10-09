@@ -1,0 +1,8 @@
+
+After generating your experiment using the main method of the \texttt{ExperimentConstructor}, execute the main method of \texttt{autoweka.Experiment} with two parameters - the path to the experiment folder and an initial seed for the random number generator of the SMBO method. Auto-WEKA has been designed to execute many optimisation runs in parallel, simply change the seed that you pass to each invocation of \texttt{autoweka.Experiment}. Auto-WEKA will now grind away for a while until the \texttt{tunerTimeout} has been hit as specified in the experiment definition.
+
+Optionally, you can instead invoke the \classname{autoweka.tools.ExperimentRunner} with the same arguments as above. This class does the extra step at the end of an experiment to produce a trained model on the entire training dataset so that it can be easily used to make further predictions. (This class performs the same operations as the Experiment Runner window in the GUI).
+
+\begin{aside}
+ Once your generate the experiment by running the \classname{ExperimentConstructor}, Auto-WEKA tries to resolve path names fully, so it is unlikely that you can move these folders around and still run the experiment.
+\end{aside}

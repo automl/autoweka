@@ -1,0 +1,15 @@
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Greedy Stepwise (forwards).
+	Start set: no attributes
+	Merit of best subset found:    1    
+
+Attribute Subset Evaluator (supervised, Class (nominal): 5 Class):
+	Consistency Subset Evaluator
+
+Selected attributes: 1 : 1
+                     Nominal1
+

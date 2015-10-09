@@ -1,0 +1,290 @@
+ 
+If not using the GUI, Auto-WEKA can define experiments either on the command line through a rather tedious process (only documented in the code), or `experiment definition batches' can be made. An experiment definition batch is an XML file that contains a list of datasets to perform experiments on, and one or more experiment prototypes that contain information such as the type of optimisation method to use or the way to partition the provided training data. These files were designed for performing large comparisons of different settings on multiple datasets, but they can easily be applied to situations where you have a single dataset. Section~\ref{sec:experimentdefs} provides a description of how to write these files, but you can also look at the \classname{autoweka.ExperimentBatch} class and its JavaDocs to see how to use them. The GUI also provides a way to generate a simple version of these files, which you can then modify by hand. These experiment definitions also select the choice of optimisation method (see section~\ref{sec:smbo}), and the way to partition the training data using an `InstanceGenerator' (see section~\ref{sec:instancegenerators}).
+
+Once the experiment definition has been created, Auto-WEKA needs to know what type of classification or regression algorithms and feature/attribute selection methods to used. These are all specified in \file{.param} files, detailed in section~\ref{sec:paramfiles}.
+
+After the experiment definition is fully written, the main method of \classname{autoweka.ExperimentConstructor} can be invoked on the experiment definition file to determine which algorithms can be used on your datasets, and will generate the files needed under the \file{experiments} folder from the current working directory. 
+
+\begin{aside}
+  Using the provided script, this command can be executed as follows: \\
+  \cmdline{scripts/autoweka autoweka.ExperimentConstructor path/to/experimentbatch.xml}
+\end{aside}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Experiment Definition Files}\label{sec:experimentdefs}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Experiment definitions are done in XML files, with a root node of an \texttt{experimentBatch}. Inside the experiment batch, there can be any number of \texttt{datasetComponent} and \texttt{experimentComponent} elements - this allows for quickly making experiments with multiple different settings on a variety of datasets. You can produce a template file by running the main method \texttt{autoweka.ExperimentBatch} with the name of the template file you wish to create, or saving a definition from the GUI.
+
+\subsubsection{datasetComponent}
+
+The \texttt{datasetComponent} defines a dataset that you want to perform experiments on. Auto-WEKA can take two formats for input. The first requires that datasets are a compressed zip containing exactly two files, \texttt{train.arff} and \texttt{test.arff}. Auto-WEKA will perform all of its experiments on the training data in \texttt{train.arff}, and will use the test data in \texttt{test.arff} for analysis after the experiment has completed. (If you don't have any test data, you can just create a dummy dataset file or use the training data again). A \texttt{datasetComponent} has the following form in the XML file with self explanatory names
+
+\begin{verbatim}
+<datasetComponent>
+  <zipFile>path/to/zip/file.zip</zipFile>
+  <name>DatasetName</name>
+</datasetComponent>
+\end{verbatim}
+
+Additionally, Auto-WEKA can be pointed to the \texttt{train.arff} and \texttt{test.arff} individually. These datasetCompoments have the following form
+
+\begin{verbatim}
+<datasetComponent>
+  <trainArff>path/to/train.arff</trainArff>
+  <testArff>path/to/train.arff</testArff>
+  <name>DatasetName</name>
+</datasetComponent>
+\end{verbatim}
+
+\subsubsection{experimentComponent}\label{sec:experimentdefs:excomp}
+
+The \texttt{experimentComponent} element contains the parameters that you want to use in an experiment on all of the \texttt{datasetComponent}s defined in the same file. 
+
+\begin{verbatim}
+<experimentComponent>
+  <name>SMAC-CV10</name>
+  <resultMetric>errorRate</resultMetric>
+  <experimentConstructor>autoweka.smac.SMACExperimentConstructor</experimentConstructor>
+  <instanceGenerator>autoweka.instancegenerators.CrossValidation</instanceGenerator>
+  <instanceGeneratorArgs>numFolds=10:seed=0</instanceGeneratorArgs>
+  <tunerTimeout>108000</tunerTimeout>
+  <trainTimeout>9000.0</trainTimeout>
+  <attributeSelection>true</attributeSelection>
+  <attributeSelectionTimeout>900</attributeSelectionTimeout>
+  <memory>3072m</memory>
+  <extraProps></extraProps>
+</experimentComponent>
+\end{verbatim}
+    
+    
+\begin{description}
+ \item [name] The name of the experiment component, this will be combined with the data set when the full experiment is created.
+ \item [resultMetric] The resultMetric to use. Most likely \texttt{errorRate} for classification. \texttt{rmse}, \texttt{rrse}, \texttt{meanAbsoluteErrorMetric} and  \texttt{relativeAbsoluteErrorMetric} are also supported. See the source for \classname{autoweka.ClassifierResult} for more.
+ \item [experimentConstructor] The name of the class to be used to build the experiment - see \ref{sec:smbo} for a list of what values are supported.
+ \item [instanceGenerator] The name of the class to be used for partitioning the training data, see \ref{sec:instancegenerators} for what classes are implemented.
+ \item [instanceGeneratorArgs] A property string (\texttt{var1=val1:var2=val2...}) with arguments to the instance generator.
+ \item [tunerTimeout] The number of seconds to run the optimisation method.
+ \item [trainTimeout] The number of seconds to spend training an algorithm with a set of hyperparameters on a given partition of the training set.
+ \item [attributeSelection] \texttt{true} if you want to consider using different feature/attribute selectors, \texttt{false} otherwise (or don't include it).
+ \item [attributeSelectionTimeout] Number of seconds to spend doing feature/attribute selection.
+ \item [memory] The memory limit that is passed to the Java instance that is training the classifier or regression method
+ \item [extraProps] Optional extra arguments that can be passed to an experiment
+ \item [allowedClassifiers] Optional argument that restricts what methods can be considered. Specify it multiple times to include a subset of methods, or don't specify it at all to make Auto-WEKA chose all possible methods.  
+\end{description}
+
+It is also possible to indicate in an experiment if some extra computations should be done on all points in the trajectory during the analysis stage. In your \texttt{experimentComponent}, you can create any number of \texttt{trajectoryPointExtras}:
+
+\begin{verbatim}
+<trajectoryPointExtras>
+  <name>humanReadableName</name>
+  <instance>instanceString</instance>
+</trajectoryPointExtras>
+\end{verbatim}
+
+Here, the \texttt{name} is a human readable name the corresponds to the \texttt{instanceString} that is being executed. The instance string is what is passed to the instance generator, covered in section~\ref{sec:instancegenerators}. For example, if you want to see how the selected hyperparameters perform over time, you can add the following into your \texttt{experimentComponent}.% The contents of the \texttt{instance} node are explained in Section~\ref{sec:instancegenerators}.
+
+\begin{verbatim}
+<trajectoryPointExtras>
+  <name>Test Performance</name>
+  <instance>default</instance>
+</trajectoryPointExtras>
+\end{verbatim}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Instance Generators}\label{sec:instancegenerators}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Auto-WEKA uses an instance generator to partition the training and test data provided into new sets of training and test data for the optimisation method to use, e.g. the training data is broken up into 10 folds in cross validation. Each partition of the data is called an `instance', and can be specified through a string, often in the form of a property string (\texttt{var1=val1:var2=val2:...}). Additionally, each Instance Generator also has a string of \texttt{instanceGeneratorArgs} that determine what instances will be created in your experiment. For the most common instance generators Auto-WEKA provides, these strings are detailed below.
+
+\begin{aside}
+The instance string \texttt{default} however has a the special meaning that the training and test data are unmodified.
+\end{aside}
+
+\subsubsection{Default}
+
+The most boring of instance generators - it does nothing to the input training and test data, it ignores any arguments and returns the unmodified partition of instances.
+
+\subsubsection{Cross Validation}
+
+Performs $k$-fold cross validation on the training set. Implemented in \\ \texttt{autoweka.instancegenerators.CrossValidation}. 
+
+\textbf{Generator Args}:
+\begin{tabover}
+A property string containing the following two elements:
+\begin{description}
+ \item [seed] The seed to use for randomizing the dataset
+ \item [numFolds] The number of folds to generate
+\end{description}
+\end{tabover}
+
+\textbf{Instance String}
+\begin{tabover}
+A property string containing the following three elements:
+\begin{description}
+ \item [seed] The seed to use for randomizing the dataset
+ \item [numFolds] The number of folds total
+ \item [fold] The instance's fold number
+\end{description}
+\end{tabover}
+
+
+\subsubsection{Random Sub-Sampling}
+
+Performs generates an arbitrary number of folds by randomly making a partition of the training data of a fixed percentage. Implemented in \texttt{autoweka.instancegenerators.RandomSubSampling}. 
+
+\textbf{Generator Args}:
+\begin{tabover}
+A property string containing the following the following elements:
+\begin{description}
+ \item [startingSeed] The seed to use for randomizing the dataset
+ \item [numSamples] The number of subsamples to generate
+ \item [percent] The percent of the training data to use as `new training data'
+ \item [bias] Optional: The bias towards a uniform class distribution
+\end{description}
+\end{tabover}
+
+
+\textbf{Instance String}
+\begin{tabover}
+A property string containing the following three elements:
+\begin{description}
+ \item [seed] The seed to use for randomizing the dataset
+ \item [percent] The percent of the training data to use as `new training data'
+ \item [bias] Optional: The bias towards a uniform class distribution
+\end{description}
+\end{tabover}
+
+\subsubsection{Termination Holdout}
+
+A meta instance generator that removes a random percentage of the training data before passing it on to the target instance generator. Implemented in \texttt{autoweka.instancegenerators.TerminationHoldout}. 
+
+\textbf{Generator Args}:
+\begin{tabover}
+A string with three components, separated by \texttt{[\$]}. The first component contains the parameters for the holdout method (described below), while the second component contains the name of the target instance generator that will receive the subsampled dataset. The final component contains all the arguments that will be passed on to the generator of the target 
+A property string containing the following the following elements:
+\begin{description}
+ \item [terminationSeed] The seed to use for randomizing the dataset
+ \item [terminationPercent] The percent of the training data to use hold back
+ \item [terminationBias] Optional: The bias towards a uniform class distribution
+\end{description}
+\end{tabover}
+
+\textbf{Instance String}
+\begin{tabover}
+A string with three components, separated by \texttt{[\$]}. The first component contains the parameters for the holdout method (described below), while the second component contains the name of the target instance generator that will receive the subsampled dataset. The final component contains all the arguments that will be passed on to the generator of the target 
+\begin{description}
+ \item [terminationSeed] The seed to use for randomizing the dataset
+ \item [terminationPercent] The percent of the training data to use as `new training data'
+ \item [terminationBias] Optional: The bias towards a uniform class distribution
+\end{description}
+\end{tabover}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Optimisation Methods}\label{sec:smbo}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Currently Auto-WEKA supports three different optimisation methods, the Tree based Parzen Estimator (TPE), Sequential Model-based Algorithm Configuration (SMAC) and Iterated F-Race (IRace). Each method requires some initial set up with Auto-WEKA so that it can be used smoothly, namely by creating \texttt{.properties} files that tell Auto-WEKA where to find each method (These files must be in the current working directory when you invoke any of the experiment constructor commands. The syntax of a properties file is of the form \texttt{var=value}, with one variable per line). Each of the following sections mentions how to tell Auto-WEKA to use SMBO method, as well as the name and contents of the \texttt{.properties} file that must be created.
+
+\subsubsection{SMAC}
+
+\href{http://www.cs.ubc.ca/labs/beta/Projects/SMAC/}{SMAC} was designed for algorithm configuration, but can easily be used in other cases of black box optimisation. The Auto-WEKA distribution comes with a development version of SMAC v2.06.01. To build an experiment with SMAC, you use the \texttt{autoweka.smac.SMACExperimentConstructor}. 
+
+\textbf{autoweka.smac.SMACExperimentConstructor.properties}
+\begin{description}
+ \item[\texttt{smacexecutable}]: The path to the \file{smac} script (with no \texttt{.bat} extension on Windows) inside the SMAC distribution. 
+\end{description}
+
+\begin{aside}
+A few of SMAC's options are also supported by Auto-WEKA (e.g. \texttt{initialIncumbent} and \texttt{executionMode}), look inside the \\\classname{autoweka.smac.SMACExperimentConstructor} class to see what variables are supported in the \texttt{extraProps} of an experiment definition.
+\end{aside}
+
+\subsubsection{TPE}
+
+TPE is provided by the \href{http://jaberg.github.com/hyperopt/}{Hyperopt} project, written for Python 2.7. To build an experiment with TPE, you use the \texttt{autoweka.tpe.TPEExperimentConstructor}. 
+
+\textbf{autoweka.smac.SMACExperimentConstructor.properties}
+\begin{description}
+ \item[\texttt{tperunner}]: Path to the \texttt{tperunner.py} file in the Auto-WEKA source directory
+ \item[\texttt{python}] (Optional): The Python you want to use - defaults to trying to find a \texttt{python} on the system path.
+ \item[\texttt{pythonpath}] (Optional): Sets the PYTHONPATH environment variable before invoking python (useful if you don't have hyperopt inside your site-packages).
+\end{description}
+
+\subsubsection{IRace}
+
+\href{http://iridia.ulb.ac.be/irace/}{IRace} is another tool that was designed for algorithm configuration, with an implementation in R. To build an experiment with IRace, you use the \texttt{autoweka.irace.IRaceExperimentConstructor}. 
+\begin{aside}
+  Note that IRace defines its budget in terms of the number of evaluations of different hyperparmeter settings, not in total time. As such, the number of seconds that Auto-WEKA uses for the \texttt{tunerTimeout} will be used as the number of evaluations.
+\end{aside}
+
+\textbf{autoweka.smac.IRaceExperimentConstructor.properties}
+\begin{description}
+  \item[\texttt{iraceexecutable}]: Path to the \texttt{irace} script inside the R package.
+\end{description}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Parameter Files}\label{sec:paramfiles}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Auto-WEKA groups classification and regression algorithms into 3 categories: base, meta and ensemble. Meta methods are methods that take a single base method and use it to perform classification (like AdaBoost), while ensemble methods use a number of base methods to perform classification. Additionally, Auto-WEKA supports feature/attribute selection, through the use of search and evaluator methods. Many of these methods have parameters that influence their behaviour, and these parameters are exposed through the use of \texttt{.param} files. The name of the file contains the full class name of the method that we are exposing to Auto-WEKA (so for WEKA's SVM implementation, the file would be called \texttt{weka.classifiers.functions.SMO.params}), and it is placed inside the subfolder of the \texttt{params} directory corresponding to the method (so the SVM implementation goes inside the \texttt{base} subfolder, while the param file for AdaBoost would go inside the \texttt{meta} subfolder).
+
+The contents of these files can be broken down into two parts: parameter definitions and conditional statements. For examples for a number of different classification, regression and feature selection methods, see the the provided \texttt{.param} files that come with Auto-WEKA.
+
+\subsubsection{Parameter Definitions}
+
+For each parameter exposed to Auto-WEKA is written on its own line, and has the following form. 
+\begin{center}
+ \texttt{<FLAGS>\_<NAME> <DOMAIN> <DEFAULT><TYPEFLAGS>}
+\end{center}
+
+\begin{description}
+  \item[\texttt{FLAGS}] These will all be stripped by Auto-WEKA before they are passed to WEKA. The flags are defined up until the last underscore before the \texttt{NAME}. Summary of valid flags:
+  \begin{description}
+    \item[\texttt{HIDDEN}] The parameter will be never be seen by the WEKA method.
+    \item[\texttt{INT}] The parameter will be forced to an integer when it is passed on to WEKA.
+    \item[\texttt{QUOTE\_START}] A quote character will be inserted after this parameter, up until the next \texttt{QUOTE\_END}
+    \item[\texttt{QUOTE\_END}] Inserts a quotation character and removes the parameter
+    \item[\texttt{DASHDASH}] Inserts a double dash (\texttt{--}) into the call string
+  \end{description}
+  \item{\texttt{NAME}} The name of the argument that WEKA expects on the command line. Note that in most cases, these are single capital letters (and never contain an underscore)
+  \item{\texttt{DOMAIN}} The domain of this parameter, which is either numeric or categorical.
+  \begin{description}
+    \item[Categorical] The domain is specified as a comma separated list of strings in between two curly braces, eg. \texttt{\{v1, v2, ... vk\}}
+    \item[Numeric] The domain is specified as two comma separated numbers for the lower and upper range of the domain between two square brackets, eg. \texttt{[0.1, 10]}
+  \end{description}
+  \item[\texttt{DEFAULT}] The default value of the parameter (which must be inside the domain) is specified between two square brackets eg. \texttt{[1.0]}
+  \item[\texttt{TYPEFLAGS}] Optional type flags for numeric domains. If you want to recommend to the SMBO method that this parameter should be treated as an integer, add an \texttt{i}. If the parameter should be sampled on a logarithmic scale, add a \texttt{l}
+\end{description}
+
+%EXAMPLE
+For example, the parameter file for random forests contains the line:
+\begin{verbatim}
+  INT_I [2, 256][10]il
+\end{verbatim}
+This indicates that there is a parameter \texttt{I} that must be treated as an integer, with values ranging between 2 and 256 (a default value of 10), and should be sampled log-uniformly.
+
+Additionally, Auto-WEKA defines special treatment to the categorical domain of \texttt{\{REMOVED, REMOVE\_PREV\}}, which can be best demonstarted through an example. Suppose we have a parameter \texttt{M} which is a flag of a classifier that enables aggressive memory caching. If \texttt{M} is set to \texttt{REMOVED}, by Auto-WEKA, then WEKA will receive the argument \texttt{-M}. In the case that \texttt{M} is set to \texttt{REMOVE\_PREV}, then Auto-WEKA will completely hide the \texttt{-M} flag from the WEKA classifier.
+
+\begin{aside}
+ Note: Arguments are sorted alphabetically by Auto-WEKA before they are passed on to the WEKA method.
+\end{aside}
+
+\subsubsection{Conditionals}
+
+For many methods, only some parameters make sense once another parameter takes on a certain value. If this is the case, after all the parameters have been defined in the \texttt{.param} file, you need to inform Auto-WEKA of these conditionals. All conditionals must appear after a \texttt{Conditionals:} line. The format of a conditional line is as follows
+
+\begin{center}
+ \texttt{<PARAMETER> | <PARENT> in \{<VALUE1>, <VALUE2>, ...\}}
+\end{center}
+
+\begin{description}
+  \item[\texttt{PARAMETER}] The name of the child parameter that is active based on the value of the parent
+  \item[\texttt{PARENT}] The name of the parent parameter that the conditional depends on
+  \item[\texttt{VALUE*}] If the parent parameter takes on one of the values in this list, then the child parameter will be enabled, Otherwise, the child parameter is disabled.
+\end{description}
+
+
+%\subsection{List Experiments}
+
+%Auto-WEKA also supports additional types of experiments where all the hyperparameter/classifier combinations are fixed in advance, these experiments are implemented as \texttt{ListExperiments}. They have a nearly identical process for creation/execution as regular experiments, 

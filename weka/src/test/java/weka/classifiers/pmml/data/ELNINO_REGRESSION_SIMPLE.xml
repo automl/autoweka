@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PMML version="3.0" xmlns="http://www.dmg.org/PMML-3_0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<Header copyright="Copyright (c) Integral Solutions Ltd., 1994 - 2005. All rights reserved.">
+<Application name="Clementine" version="10.0"/>
+</Header>
+<DataDictionary numberOfFields="7">
+<DataField name="airtemp" optype="continuous" dataType="double">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="humidity" optype="continuous" dataType="double">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="latitude" optype="continuous" dataType="double">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="longitude" optype="continuous" dataType="double">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="mer_winds" optype="continuous" dataType="double">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="zon_winds" optype="continuous" dataType="double">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+<DataField name="s_s_temp" optype="continuous" dataType="double">
+<Extension name="storageType" value="numeric"/>
+</DataField>
+</DataDictionary>
+<TransformationDictionary/>
+<RegressionModel modelName="ELNINO_REGRESSION" functionName="regression" modelType="linearRegression" targetFieldName="s_s_temp">
+<MiningSchema>
+<MiningField name="airtemp" usageType="active"/>
+<MiningField name="humidity" usageType="active"/>
+<MiningField name="latitude" usageType="active"/>
+<MiningField name="longitude" usageType="active"/>
+<MiningField name="mer_winds" usageType="active"/>
+<MiningField name="zon_winds" usageType="active"/>
+<MiningField name="s_s_temp" usageType="predicted"/>
+</MiningSchema>
+<RegressionTable intercept="-0.757882724967734">
+<NumericPredictor name="airtemp" exponent="1" coefficient="1.07398117216966"/>
+<NumericPredictor name="humidity" exponent="1" coefficient="-0.00159258520813778"/>
+<NumericPredictor name="latitude" exponent="1" coefficient="-0.00178010147179902"/>
+<NumericPredictor name="longitude" exponent="1" coefficient="3.36308061253596E-4"/>
+<NumericPredictor name="mer_winds" exponent="1" coefficient="0.0226072055602688"/>
+<NumericPredictor name="zon_winds" exponent="1" coefficient="0.0893743540953581"/>
+</RegressionTable>
+</RegressionModel>
+</PMML>

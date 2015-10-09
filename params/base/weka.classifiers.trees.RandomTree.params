@@ -1,0 +1,20 @@
+INT_M [1, 64][1]il
+features_HIDDEN {0,1}[0]
+    1_INT_K {0}[0]
+    2_INT_K [2, 32][2]il
+depth_HIDDEN {0,1}[0]
+    1_INT_depth {0}[0]
+    2_INT_depth [2, 20][2]i
+back_HIDDEN {0,1}[0]
+    1_INT_N {0}[0]
+    2_INT_N [2, 5][3]i
+U {REMOVED,REMOVE_PREV}[REMOVE_PREV]
+
+Conditionals:
+1_INT_K |features_HIDDEN in {0}
+2_INT_K |features_HIDDEN in {1}
+1_INT_depth |depth_HIDDEN in {0}
+2_INT_depth |depth_HIDDEN in {1}
+1_INT_N |back_HIDDEN in {0}
+2_INT_N |back_HIDDEN in {1}
+

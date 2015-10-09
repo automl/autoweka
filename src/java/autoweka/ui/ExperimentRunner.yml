@@ -1,0 +1,15 @@
+JFrame(title="Experiment Runner", size=500x300, defaultCloseOperation=disposeOnClose):
+    - JTextField(name=mExpFolderText)
+    - JButton(name=mOpenExpFolderButton, text="Open", onAction=[openExpFolder])
+    - JTextField(name=mSeedText, text="0")
+    - JScrollPane(name=mTextScroll):
+        JTextArea(name=mOutputText,editable=false)
+    - JButton(name=mRunButton,text="Run", onAction=[runClicked])
+    - JButton(name=mStopButton,text="Stop", enabled=false, onAction=[stopClicked])
+    - MigLayout : | 
+        []                   [grow]           []
+        >"Experiment Folder" mExpFolderText   mOpenExpFolderButton 
+        >"Seed"              mSeedText
+        mTextScroll+*                                                [grow]
+        <mRunButton          >mStopButton+*
+
