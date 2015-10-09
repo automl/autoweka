@@ -256,7 +256,7 @@ public class ClassifierRunner
         {
             throw new RuntimeException("Failed to instantiate '" + targetClassifierName + "': " + e.getMessage(), e);
         }
-        //Give the classifier it's options
+        //Give the classifier its options
         try
         {
             classifier.setOptions(argsArray);
