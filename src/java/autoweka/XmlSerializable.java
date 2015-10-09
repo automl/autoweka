@@ -174,6 +174,19 @@ public class XmlSerializable
             mField.set(obj, Integer.parseInt(args.poll()));
         }
     };
+
+    private static class BooleanParser extends ParamParser
+    {
+        public BooleanParser(Field field){
+            super(field);
+        }
+
+        void setParameter(Object obj, Deque<String> args) throws IllegalAccessException
+        {
+            mField.set(obj, Boolean.parseBoolean(args.poll()));
+        }
+    };
+
     
     private static class FloatParser extends ParamParser
     {
@@ -248,6 +261,8 @@ public class XmlSerializable
         msParserMap.put(short.class, IntParser.class);
         msParserMap.put(int.class, IntParser.class);
         msParserMap.put(long.class, IntParser.class);
+
+        msParserMap.put(boolean.class, BooleanParser.class);
         
         msParserMap.put(float.class, FloatParser.class);
         msParserMap.put(double.class, FloatParser.class);

@@ -147,15 +147,15 @@ public class Experiment extends XmlSerializable
         if(this.name == null)
             throw new RuntimeException("No experiment -name was defined!");
         if(this.trainTimeout < 0 )
-            throw new RuntimeException("Need a -traintimeout > 0!");
+            throw new RuntimeException("Need a -trainTimeout > 0!");
         if(this.tunerTimeout < 0 )
-            throw new RuntimeException("Need a -tunertimeout > 0!");
+            throw new RuntimeException("Need a -tunerTimeout > 0!");
         if(this.datasetString == null)
-            throw new RuntimeException("Need an -instancezip file!");
+            throw new RuntimeException("Need a -datasetString for the zipfile!");
         if(this.instanceGenerator == null)
-            throw new RuntimeException("Need an -instancegenerator");
+            throw new RuntimeException("Need an -instanceGenerator");
         if(this.attributeSelection && this.attributeSelectionTimeout < 0 )
-            throw new RuntimeException("Need a -attributeselectiontimeout > 0 since attribute selection is on!");
+            throw new RuntimeException("Need a -attributeSelectionTimeout > 0 since attribute selection is on!");
     }
 
     /**
@@ -176,7 +176,7 @@ public class Experiment extends XmlSerializable
     /**
      * Main method to actually run an experiment with a given seed.
      * 
-     * This requires two command line arguments, the path to the experiment folder (but not the actuall .experiment itself)
+     * This requires two command line arguments, the path to the experiment folder (but not the actual .experiment itself)
      * and the seed on which you want to run this experiment. The seed is passed to the SMBO method to allow for easy paralellization of
      * each SMBO method.
      *
@@ -201,7 +201,7 @@ public class Experiment extends XmlSerializable
             {
                 //Get the experiment folder
                 expFolder = new File(args[i]).getAbsoluteFile();
-                //Get the actuall experiment
+                //Get the actual experiment
                 experiment = new File(expFolder.getAbsolutePath() + File.separator + expFolder.getName() + ".experiment");
             }
             else if(seed == null)

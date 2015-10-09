@@ -49,11 +49,11 @@ class ListExperiment extends XmlSerializable
         if(this.name == null)
             throw new RuntimeException("No experiment -name was defined!");
         if(this.trainTimeout < 0 )
-            throw new RuntimeException("Need a -traintimeout > 0!");
+            throw new RuntimeException("Need a -trainTimeout > 0!");
         if(this.datasetString == null)
             throw new RuntimeException("Need an -datasetString!");
         if(this.instanceGenerator == null)
-            throw new RuntimeException("Need an -instancegenerator");
+            throw new RuntimeException("Need an -instanceGenerator");
     }
 
     public static void main(String[] args)

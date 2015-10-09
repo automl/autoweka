@@ -75,8 +75,12 @@ public abstract class ExperimentConstructor
      */
     public static void main(String[] args)
     {
+        if(args.length < 0) 
+        {
+            System.err.println("Arguments missing. Please refer to manual for help.");
+        }
         //Is the first argument a -batch? If it is, then we need to load the given xml files and use those to generate things
-        if(args[0].equals("-batch") || new File(args[0]).isFile())
+        else if(args[0].equals("-batch") || new File(args[0]).isFile())
         {
             for(int i = 0; i < args.length; i++)
             {
@@ -265,7 +269,7 @@ public abstract class ExperimentConstructor
      * Process a constructor argument, and suck out stuff from the arg queue
      */
     public void processArg(String arg, Queue<String> args){
-        //Don't do anything by default
+        System.err.println("Ignoring unknown argument" + arg);
     }
 
     /**
