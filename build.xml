@@ -9,6 +9,7 @@
     <property name="jar.dir"     value="${build.dir}/jar" />
     <property name="dist.dir"    value="${build.dir}/dist" />
     <property name="doc.dir"    value="doc" />
+    <property name="javadoc.dir"    value="${doc.dir}/javadoc" />
     <property name="man.dir"    value="${doc.dir}/manual" />
 
     <!-- Setup the classpath -->
@@ -42,12 +43,15 @@
     
     <!-- Build some javadoc -->
     <target name="doc" description="generate documentation">
-        <mkdir dir="${doc.dir}/javadoc"/>
-        <javadoc sourcepath="src/java" destdir="${doc.dir}/javadoc"/>
+        <mkdir dir="${doc.dir}"/>
+        <mkdir dir="${javadoc.dir}"/>
+        <javadoc sourcepath="src/java" destdir="${javadoc.dir}"/>
     </target>
 
     <!-- Build User guide from Tex sources -->
 	<target name="manual" description="generate user manual">
+        <mkdir dir="${doc.dir}"/>
+        <mkdir dir="${man.dir}"/>
         <exec executable="xelatex" dir='${man.dir}'>
             <arg value="manual.tex"/>
         </exec>
@@ -99,10 +103,10 @@
     </target>
     <!-- Run some tests -->
     <target name="test" depends="compile-tests">
-        <junit fork="yes" showoutput="false"> 
-            <classpath refid="test.classpath"/>			
+        <junit fork="yes" showoutput="false">
+            <classpath refid="test.classpath"/>
             <test name="autoweka.AutoWEKATestSuite"/>
-            <formatter type="plain" usefile="false" />
+            <formatter type="plain" usefile="false"/>
         </junit>
     </target>
 </project>
