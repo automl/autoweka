@@ -26,16 +26,6 @@ public class UtilTester
     }
 
     @Test
-    public void absFile(){
-        assertEquals("/home/larsko", Util.expandPath("~"));
-
-        /*String exec = "ls";
-        File f = Util.findExecutableOnPath(exec);
-        assertEquals(f, new File(exec));
-        assertEquals(f.getAbsolutePath(), "/usr/bin/ls");*/
-    }
-    
-    @Test
     public void splitTest(){
         for(String s : Util.splitQuotedString(" This is \"my split\" string\" \"with lotsC:\\foath\\fishof\\ o\' fish \\\"and even escaped\\\" ")){
             System.out.println(s + ",");
