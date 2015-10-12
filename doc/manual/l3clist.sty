@@ -1,0 +1,451 @@
+%%
+%% This is file `l3clist.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% l3clist.dtx  (with options: `package')
+%% 
+%% EXPERIMENTAL CODE
+%% 
+%% Do not distribute this file without also distributing the
+%% source files specified above.
+%% 
+%% Do not distribute a modified version of this file.
+%% 
+%% File: l3clist.dtx Copyright (C) 2004-2011 Frank Mittelbach,
+%%                                 The LaTeX3 project
+%%                             (C) 2012 The LaTeX3 Project
+%%
+%% It may be distributed and/or modified under the conditions of the
+%% LaTeX Project Public License (LPPL), either version 1.3c of this
+%% license or (at your option) any later version.  The latest version
+%% of this license is in the file
+%%
+%%    http://www.latex-project.org/lppl.txt
+%%
+%% This file is part of the "l3kernel bundle" (The Work in LPPL)
+%% and all files in that bundle must be distributed together.
+%%
+%% The released version of this bundle is available from CTAN.
+%%
+%% -----------------------------------------------------------------------
+%%
+%% The development version of the bundle can be found at
+%%
+%%    http://www.latex-project.org/svnroot/experimental/trunk/
+%%
+%% for those people who are interested.
+%%
+%%%%%%%%%%%
+%% NOTE: %%
+%%%%%%%%%%%
+%%
+%%   Snapshots taken from the repository represent work in progress and may
+%%   not work or may contain conflicting material!  We therefore ask
+%%   people _not_ to put them into distributions, archives, etc. without
+%%   prior consultation with the LaTeX3 Project.
+%%
+%% -----------------------------------------------------------------------
+\RequirePackage{l3names}
+\GetIdInfo$Id: l3clist.dtx 3986 2012-07-15 19:23:51Z joseph $
+  {L3 Comma separated lists}
+\ProvidesExplPackage
+  {\ExplFileName}{\ExplFileDate}{\ExplFileVersion}{\ExplFileDescription}
+\__expl_package_check:
+\cs_new_eq:NN \c_empty_clist \c_empty_tl
+\tl_new:N \l__clist_internal_clist
+\cs_new_protected:Npn \__clist_tmp:w { }
+\cs_new_eq:NN \clist_new:N \tl_new:N
+\cs_new_eq:NN \clist_new:c \tl_new:c
+\cs_new_eq:NN \clist_clear:N  \tl_clear:N
+\cs_new_eq:NN \clist_clear:c  \tl_clear:c
+\cs_new_eq:NN \clist_gclear:N \tl_gclear:N
+\cs_new_eq:NN \clist_gclear:c \tl_gclear:c
+\cs_new_eq:NN \clist_clear_new:N  \tl_clear_new:N
+\cs_new_eq:NN \clist_clear_new:c  \tl_clear_new:c
+\cs_new_eq:NN \clist_gclear_new:N \tl_gclear_new:N
+\cs_new_eq:NN \clist_gclear_new:c \tl_gclear_new:c
+\cs_new_eq:NN \clist_set_eq:NN  \tl_set_eq:NN
+\cs_new_eq:NN \clist_set_eq:Nc  \tl_set_eq:Nc
+\cs_new_eq:NN \clist_set_eq:cN  \tl_set_eq:cN
+\cs_new_eq:NN \clist_set_eq:cc  \tl_set_eq:cc
+\cs_new_eq:NN \clist_gset_eq:NN \tl_gset_eq:NN
+\cs_new_eq:NN \clist_gset_eq:Nc \tl_gset_eq:Nc
+\cs_new_eq:NN \clist_gset_eq:cN \tl_gset_eq:cN
+\cs_new_eq:NN \clist_gset_eq:cc \tl_gset_eq:cc
+\cs_new_protected_nopar:Npn \clist_concat:NNN
+  { \__clist_concat:NNNN \tl_set:Nx }
+\cs_new_protected_nopar:Npn \clist_gconcat:NNN
+  { \__clist_concat:NNNN \tl_gset:Nx }
+\cs_new_protected:Npn \__clist_concat:NNNN #1#2#3#4
+  {
+    #1 #2
+      {
+        \exp_not:o #3
+        \clist_if_empty:NF #3 { \clist_if_empty:NF #4 { , } }
+        \exp_not:o #4
+      }
+  }
+\cs_generate_variant:Nn \clist_concat:NNN  { ccc }
+\cs_generate_variant:Nn \clist_gconcat:NNN { ccc }
+\cs_new_eq:NN \clist_if_exist:NTF \cs_if_exist:NTF
+\cs_new_eq:NN \clist_if_exist:NT  \cs_if_exist:NT
+\cs_new_eq:NN \clist_if_exist:NF  \cs_if_exist:NF
+\cs_new_eq:NN \clist_if_exist_p:N \cs_if_exist_p:N
+\cs_new_eq:NN \clist_if_exist:cTF \cs_if_exist:cTF
+\cs_new_eq:NN \clist_if_exist:cT  \cs_if_exist:cT
+\cs_new_eq:NN \clist_if_exist:cF  \cs_if_exist:cF
+\cs_new_eq:NN \clist_if_exist_p:c \cs_if_exist_p:c
+\cs_new:Npn \__clist_trim_spaces_generic:nw #1#2 ,
+  {
+    \__tl_trim_spaces:nn {#2}
+      { \exp_args:No \__clist_trim_spaces_generic:nn } {#1}
+  }
+\cs_new:Npn \__clist_trim_spaces_generic:nn #1#2 { #2 {#1} }
+\cs_new:Npn \__clist_trim_spaces:n #1
+  {
+    \__clist_trim_spaces_generic:nw
+      { \__clist_trim_spaces_ii:nn { } }
+      \q_mark #1 ,
+    \q_recursion_tail, \q_recursion_stop
+  }
+\cs_new:Npn \__clist_trim_spaces_ii:nn #1 #2
+  {
+    \quark_if_recursion_tail_stop:n {#2}
+    \tl_if_empty:nTF {#2}
+      {
+        \__clist_trim_spaces_generic:nw
+          { \__clist_trim_spaces_ii:nn {#1} } \q_mark
+      }
+      {
+        #1 \exp_not:n {#2}
+        \__clist_trim_spaces_generic:nw
+          { \__clist_trim_spaces_ii:nn { , } } \q_mark
+      }
+  }
+\cs_new_protected:Npn \clist_set:Nn #1#2
+  { \tl_set:Nx #1 { \__clist_trim_spaces:n {#2} } }
+\cs_new_protected:Npn \clist_gset:Nn #1#2
+  { \tl_gset:Nx #1 { \__clist_trim_spaces:n {#2} } }
+\cs_generate_variant:Nn \clist_set:Nn  { NV , No , Nx , c , cV , co , cx }
+\cs_generate_variant:Nn \clist_gset:Nn { NV , No , Nx , c , cV , co , cx }
+\cs_new_protected_nopar:Npn \clist_put_left:Nn
+  { \__clist_put_left:NNNn \clist_concat:NNN \clist_set:Nn }
+\cs_new_protected_nopar:Npn \clist_gput_left:Nn
+  { \__clist_put_left:NNNn \clist_gconcat:NNN \clist_set:Nn }
+\cs_new_protected:Npn \__clist_put_left:NNNn #1#2#3#4
+  {
+    #2 \l__clist_internal_clist {#4}
+    #1 #3 \l__clist_internal_clist #3
+  }
+\cs_generate_variant:Nn \clist_put_left:Nn  {     NV , No , Nx }
+\cs_generate_variant:Nn \clist_put_left:Nn  { c , cV , co , cx }
+\cs_generate_variant:Nn \clist_gput_left:Nn {     NV , No , Nx }
+\cs_generate_variant:Nn \clist_gput_left:Nn { c , cV , co , cx }
+\cs_new_protected_nopar:Npn \clist_put_right:Nn
+  { \__clist_put_right:NNNn \clist_concat:NNN \clist_set:Nn }
+\cs_new_protected_nopar:Npn \clist_gput_right:Nn
+  { \__clist_put_right:NNNn \clist_gconcat:NNN \clist_gset:Nn }
+\cs_new_protected:Npn \__clist_put_right:NNNn #1#2#3#4
+  {
+    #2 \l__clist_internal_clist {#4}
+    #1 #3 #3 \l__clist_internal_clist
+  }
+\cs_generate_variant:Nn \clist_put_right:Nn  {     NV , No , Nx }
+\cs_generate_variant:Nn \clist_put_right:Nn  { c , cV , co , cx }
+\cs_generate_variant:Nn \clist_gput_right:Nn {     NV , No , Nx }
+\cs_generate_variant:Nn \clist_gput_right:Nn { c , cV , co , cx }
+\cs_new_protected:Npn \clist_get:NN #1#2
+  {
+    \if_meaning:w #1 \c_empty_clist
+      \tl_set:Nn #2 { \q_no_value }
+    \else:
+      \exp_after:wN \__clist_get:wN #1 , \q_stop #2
+    \fi:
+  }
+\cs_new_protected:Npn \__clist_get:wN #1 , #2 \q_stop #3
+  { \tl_set:Nn #3 {#1} }
+\cs_generate_variant:Nn \clist_get:NN { c }
+\cs_new_protected_nopar:Npn \clist_pop:NN
+  { \__clist_pop:NNN \tl_set:Nx }
+\cs_new_protected_nopar:Npn \clist_gpop:NN
+  { \__clist_pop:NNN \tl_gset:Nx }
+\cs_new_protected:Npn \__clist_pop:NNN #1#2#3
+  {
+    \if_meaning:w #2 \c_empty_clist
+      \tl_set:Nn #3 { \q_no_value }
+    \else:
+      \exp_after:wN \__clist_pop:wwNNN #2 , \q_mark \q_stop #1#2#3
+    \fi:
+  }
+\cs_new_protected:Npn \__clist_pop:wwNNN #1 , #2 \q_stop #3#4#5
+  {
+    \tl_set:Nn #5 {#1}
+    #3 #4
+      {
+        \__clist_pop:wN \prg_do_nothing:
+          #2 \exp_not:o
+          , \q_mark \use_none:n
+        \q_stop
+      }
+  }
+\cs_new:Npn \__clist_pop:wN #1 , \q_mark #2 #3 \q_stop { #2 {#1} }
+\cs_generate_variant:Nn \clist_pop:NN  { c }
+\cs_generate_variant:Nn \clist_gpop:NN { c }
+\prg_new_protected_conditional:Npnn \clist_get:NN #1#2 { T , F , TF }
+  {
+    \if_meaning:w #1 \c_empty_clist
+      \prg_return_false:
+    \else:
+      \exp_after:wN \__clist_get:wN #1 , \q_stop #2
+      \prg_return_true:
+    \fi:
+  }
+\cs_generate_variant:Nn \clist_get:NNT  { c }
+\cs_generate_variant:Nn \clist_get:NNF  { c }
+\cs_generate_variant:Nn \clist_get:NNTF { c }
+\prg_new_protected_conditional:Npnn \clist_pop:NN #1#2 { T , F , TF }
+  { \__clist_pop_TF:NNN \tl_set:Nx #1 #2 }
+\prg_new_protected_conditional:Npnn \clist_gpop:NN #1#2 { T , F , TF }
+  { \__clist_pop_TF:NNN \tl_gset:Nx #1 #2 }
+\cs_new_protected:Npn \__clist_pop_TF:NNN #1#2#3
+  {
+    \if_meaning:w #2 \c_empty_clist
+      \prg_return_false:
+    \else:
+      \exp_after:wN \__clist_pop:wwNNN #2 , \q_mark \q_stop #1#2#3
+      \prg_return_true:
+    \fi:
+  }
+\cs_generate_variant:Nn \clist_pop:NNT   { c }
+\cs_generate_variant:Nn \clist_pop:NNF   { c }
+\cs_generate_variant:Nn \clist_pop:NNTF  { c }
+\cs_generate_variant:Nn \clist_gpop:NNT  { c }
+\cs_generate_variant:Nn \clist_gpop:NNF  { c }
+\cs_generate_variant:Nn \clist_gpop:NNTF { c }
+\cs_new_eq:NN \clist_push:Nn  \clist_put_left:Nn
+\cs_new_eq:NN \clist_push:NV  \clist_put_left:NV
+\cs_new_eq:NN \clist_push:No  \clist_put_left:No
+\cs_new_eq:NN \clist_push:Nx  \clist_put_left:Nx
+\cs_new_eq:NN \clist_push:cn  \clist_put_left:cn
+\cs_new_eq:NN \clist_push:cV  \clist_put_left:cV
+\cs_new_eq:NN \clist_push:co  \clist_put_left:co
+\cs_new_eq:NN \clist_push:cx  \clist_put_left:cx
+\cs_new_eq:NN \clist_gpush:Nn \clist_gput_left:Nn
+\cs_new_eq:NN \clist_gpush:NV \clist_gput_left:NV
+\cs_new_eq:NN \clist_gpush:No \clist_gput_left:No
+\cs_new_eq:NN \clist_gpush:Nx \clist_gput_left:Nx
+\cs_new_eq:NN \clist_gpush:cn \clist_gput_left:cn
+\cs_new_eq:NN \clist_gpush:cV \clist_gput_left:cV
+\cs_new_eq:NN \clist_gpush:co \clist_gput_left:co
+\cs_new_eq:NN \clist_gpush:cx \clist_gput_left:cx
+\clist_new:N \l__clist_internal_remove_clist
+\cs_new_protected:Npn \clist_remove_duplicates:N
+  { \__clist_remove_duplicates:NN \clist_set_eq:NN }
+\cs_new_protected:Npn \clist_gremove_duplicates:N
+  { \__clist_remove_duplicates:NN \clist_gset_eq:NN }
+\cs_new_protected:Npn \__clist_remove_duplicates:NN #1#2
+  {
+    \clist_clear:N \l__clist_internal_remove_clist
+    \clist_map_inline:Nn #2
+      {
+        \clist_if_in:NnF \l__clist_internal_remove_clist {##1}
+          { \clist_put_right:Nn \l__clist_internal_remove_clist {##1} }
+      }
+    #1 #2 \l__clist_internal_remove_clist
+  }
+\cs_generate_variant:Nn \clist_remove_duplicates:N  { c }
+\cs_generate_variant:Nn \clist_gremove_duplicates:N { c }
+\cs_new_protected:Npn \clist_remove_all:Nn
+  { \__clist_remove_all:NNn \tl_set:Nx }
+\cs_new_protected:Npn \clist_gremove_all:Nn
+  { \__clist_remove_all:NNn \tl_gset:Nx }
+\cs_new_protected:Npn \__clist_remove_all:NNn #1#2#3
+  {
+    \cs_set:Npn \__clist_tmp:w ##1 , #3 ,
+      {
+        ##1
+        , \q_mark , \use_none_delimit_by_q_stop:w ,
+        \__clist_remove_all:
+      }
+    #1 #2
+      {
+        \exp_after:wN \__clist_remove_all:
+        #2 , \q_mark , #3 , \q_stop
+      }
+    \clist_if_empty:NF #2
+      {
+        #1 #2
+          {
+            \exp_args:No \exp_not:o
+              { \exp_after:wN \use_none:n #2 }
+          }
+      }
+  }
+\cs_new:Npn \__clist_remove_all:
+  { \exp_after:wN \__clist_remove_all:w \__clist_tmp:w , }
+\cs_new:Npn \__clist_remove_all:w #1 , \q_mark , #2 , { \exp_not:n {#1} }
+\cs_generate_variant:Nn \clist_remove_all:Nn  { c }
+\cs_generate_variant:Nn \clist_gremove_all:Nn { c }
+\prg_new_eq_conditional:NNn \clist_if_empty:N \tl_if_empty:N { p , T , F , TF }
+\prg_new_eq_conditional:NNn \clist_if_empty:c \tl_if_empty:c { p , T , F , TF }
+\prg_new_protected_conditional:Npnn \clist_if_in:Nn #1#2 { T  , F , TF }
+  {
+    \exp_args:No \__clist_if_in_return:nn #1 {#2}
+  }
+\prg_new_protected_conditional:Npnn \clist_if_in:nn #1#2 { T  , F , TF }
+  {
+    \clist_set:Nn \l__clist_internal_clist {#1}
+    \exp_args:No \__clist_if_in_return:nn \l__clist_internal_clist {#2}
+  }
+\cs_new_protected:Npn \__clist_if_in_return:nn #1#2
+  {
+    \cs_set:Npn \__clist_tmp:w ##1 ,#2, { }
+    \tl_if_empty:oTF
+      { \__clist_tmp:w ,#1, {} {} ,#2, }
+      { \prg_return_false: } { \prg_return_true: }
+  }
+\cs_generate_variant:Nn \clist_if_in:NnT  {     NV , No }
+\cs_generate_variant:Nn \clist_if_in:NnT  { c , cV , co }
+\cs_generate_variant:Nn \clist_if_in:NnF  {     NV , No }
+\cs_generate_variant:Nn \clist_if_in:NnF  { c , cV , co }
+\cs_generate_variant:Nn \clist_if_in:NnTF {     NV , No }
+\cs_generate_variant:Nn \clist_if_in:NnTF { c , cV , co }
+\cs_generate_variant:Nn \clist_if_in:nnT  {     nV , no }
+\cs_generate_variant:Nn \clist_if_in:nnF  {     nV , no }
+\cs_generate_variant:Nn \clist_if_in:nnTF {     nV , no }
+\cs_new:Npn \clist_map_function:NN #1#2
+  {
+    \clist_if_empty:NF #1
+      {
+        \exp_last_unbraced:NNo \__clist_map_function:Nw #2 #1
+          , \q_recursion_tail ,
+        \__prg_break_point:Nn \clist_map_break: { }
+      }
+  }
+\cs_new:Npn \__clist_map_function:Nw #1#2 ,
+  {
+    \__quark_if_recursion_tail_break:nN {#2} \clist_map_break:
+    #1 {#2}
+    \__clist_map_function:Nw #1
+  }
+\cs_generate_variant:Nn \clist_map_function:NN { c }
+\cs_new:Npn \clist_map_function:nN #1#2
+  {
+    \__clist_trim_spaces_generic:nw { \__clist_map_function_n:Nn #2 }
+    \q_mark #1, \q_recursion_tail,
+    \__prg_break_point:Nn \clist_map_break: { }
+  }
+\cs_new:Npn \__clist_map_function_n:Nn #1 #2
+  {
+    \__quark_if_recursion_tail_break:nN {#2} \clist_map_break:
+    \tl_if_empty:nF {#2} { \__clist_map_unbrace:Nw #1 #2, }
+    \__clist_trim_spaces_generic:nw { \__clist_map_function_n:Nn #1 }
+    \q_mark
+  }
+\cs_new:Npn \__clist_map_unbrace:Nw #1 #2, { #1 {#2} }
+\cs_new_protected:Npn \clist_map_inline:Nn #1#2
+  {
+    \clist_if_empty:NF #1
+      {
+        \int_gincr:N \g__prg_map_int
+        \cs_gset:cpn { __prg_map_ \int_use:N \g__prg_map_int :w } ##1 {#2}
+        \exp_last_unbraced:Nco \__clist_map_function:Nw
+          { __prg_map_ \int_use:N \g__prg_map_int :w }
+          #1 , \q_recursion_tail ,
+        \__prg_break_point:Nn \clist_map_break:
+          { \int_gdecr:N \g__prg_map_int }
+      }
+  }
+\cs_new_protected:Npn \clist_map_inline:nn #1
+  {
+    \clist_set:Nn \l__clist_internal_clist {#1}
+    \clist_map_inline:Nn \l__clist_internal_clist
+  }
+\cs_generate_variant:Nn \clist_map_inline:Nn { c }
+\cs_new_protected:Npn \clist_map_variable:NNn #1#2#3
+  {
+    \clist_if_empty:NF #1
+      {
+        \exp_args:Nno \use:nn
+          { \__clist_map_variable:Nnw #2 {#3} }
+          #1
+          , \q_recursion_tail , \q_recursion_stop
+        \__prg_break_point:Nn \clist_map_break: { }
+      }
+  }
+\cs_new_protected:Npn \clist_map_variable:nNn #1
+  {
+    \clist_set:Nn \l__clist_internal_clist {#1}
+    \clist_map_variable:NNn \l__clist_internal_clist
+  }
+\cs_new_protected:Npn \__clist_map_variable:Nnw #1#2#3,
+  {
+    \tl_set:Nn #1 {#3}
+    \quark_if_recursion_tail_stop:N #1
+    \use:n {#2}
+    \__clist_map_variable:Nnw #1 {#2}
+  }
+\cs_generate_variant:Nn \clist_map_variable:NNn { c }
+\cs_new_nopar:Npn \clist_map_break:
+  { \__prg_map_break:Nn \clist_map_break: { } }
+\cs_new_nopar:Npn \clist_map_break:n
+  { \__prg_map_break:Nn \clist_map_break: }
+\cs_new:Npn \clist_count:N #1
+  {
+    \int_eval:n
+      {
+        0
+        \clist_map_function:NN #1 \__clist_count:n
+      }
+  }
+\cs_generate_variant:Nn \clist_count:N { c }
+\cs_new:Npx \clist_count:n #1
+  {
+    \exp_not:N \int_eval:n
+      {
+        0
+        \exp_not:N \__clist_count:w \c_space_tl
+        #1 \exp_not:n { , \q_recursion_tail , \q_recursion_stop }
+      }
+  }
+\cs_new:Npn \__clist_count:n #1 { + \c_one }
+\cs_new:Npx \__clist_count:w #1 ,
+  {
+    \exp_not:n { \exp_args:Nf \quark_if_recursion_tail_stop:n } {#1}
+    \exp_not:N \tl_if_blank:nF {#1} { + \c_one }
+    \exp_not:N \__clist_count:w \c_space_tl
+  }
+\cs_new_protected:Npn \clist_show:N #1
+  {
+    \__msg_show_variable:Nnn
+      #1
+      { clist }
+      { \clist_map_function:NN #1 \__msg_show_item:n }
+  }
+\cs_new_protected:Npn \clist_show:n #1
+  {
+    \clist_set:Nn \l__clist_internal_clist {#1}
+    \__msg_show_variable:Nnn
+      \l__clist_internal_clist
+      { clist }
+      { \clist_map_function:NN \l__clist_internal_clist \__msg_show_item:n }
+  }
+\cs_generate_variant:Nn \clist_show:N { c }
+\clist_new:N \l_tmpa_clist
+\clist_new:N \l_tmpb_clist
+\clist_new:N \g_tmpa_clist
+\clist_new:N \g_tmpb_clist
+\prg_new_eq_conditional:NNn \clist__if_eq:NN \tl_if_eq:NN { p , T , F , TF }
+\prg_new_eq_conditional:NNn \clist_if_eq:Nc \tl_if_eq:Nc { p , T , F , TF }
+\prg_new_eq_conditional:NNn \clist_if_eq:cN \tl_if_eq:cN { p , T , F , TF }
+\prg_new_eq_conditional:NNn \clist_if_eq:cc \tl_if_eq:cc { p , T , F , TF }
+\cs_new_eq:NN \clist_length:N \clist_count:N
+\cs_new_eq:NN \clist_length:n \clist_count:c
+\cs_new_eq:NN \clist_length:c \clist_count:n
+\cs_new_eq:NN \clist_use:N \tl_use:N
+\cs_new_eq:NN \clist_use:c \tl_use:c
+%% 
+%%
+%% End of file `l3clist.sty'.
