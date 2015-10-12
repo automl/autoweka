@@ -1,5 +1,11 @@
 language: java
 
+addons:
+    apt:
+        packages:
+        - texlive-xetex
+        - texlive-latex-recommended
+
 script:
     - ant test
     - ant dist

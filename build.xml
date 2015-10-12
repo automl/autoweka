@@ -43,15 +43,12 @@
     
     <!-- Build some javadoc -->
     <target name="doc" description="generate documentation">
-        <mkdir dir="${doc.dir}"/>
         <mkdir dir="${javadoc.dir}"/>
         <javadoc sourcepath="src/java" destdir="${javadoc.dir}"/>
     </target>
 
     <!-- Build User guide from Tex sources -->
 	<target name="manual" description="generate user manual">
-        <mkdir dir="${doc.dir}"/>
-        <mkdir dir="${man.dir}"/>
         <exec executable="xelatex" dir='${man.dir}'>
             <arg value="manual.tex"/>
         </exec>
@@ -79,7 +76,7 @@
         </jar>
     </target>
 
-    <target name="dist" depends="jar,jar-light">
+    <target name="dist" depends="doc,manual,jar,jar-light">
         <tar destfile="autoweka-dist.tar.gz" compression="gzip">
             <tarfileset dir="${jar.dir}" includes="*.jar" />
             <tarfileset dir="${lib.dir}" includes="*.jar" prefix="lib" />
