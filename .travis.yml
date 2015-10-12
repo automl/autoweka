@@ -5,6 +5,7 @@ addons:
         packages:
         - texlive-xetex
         - texlive-latex-recommended
+        - texlive-latex-extra
 
 script:
     - ant test
