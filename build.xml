@@ -42,6 +42,7 @@
     
     <!-- Build some javadoc -->
     <target name="doc" description="generate documentation">
+        <mkdir dir="${doc.dir}/javadoc"/>
         <javadoc sourcepath="src/java" destdir="${doc.dir}/javadoc"/>
     </target>
 
