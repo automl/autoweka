@@ -6,6 +6,10 @@ addons:
         - texlive-xetex
         - texlive-latex-recommended
         - texlive-latex-extra
+        - texlive-fonts-extra
+        - texlive-formats-extra
+        - texlive-extra-utils
+        - texlive-generic-extra
 
 script:
     - ant test
