@@ -44,7 +44,7 @@
     <!-- Build some javadoc -->
     <target name="doc" description="generate documentation">
         <mkdir dir="${javadoc.dir}"/>
-        <javadoc sourcepath="src/java" destdir="${javadoc.dir}"/>
+        <javadoc sourcepath="src/java" classpathref="classpath" destdir="${javadoc.dir}"/>
     </target>
 
     <!-- Build User guide from Tex sources -->
