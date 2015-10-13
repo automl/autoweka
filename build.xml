@@ -35,6 +35,8 @@
     <target name="compile">
         <mkdir dir="${class.dir}"/>
         <javac srcdir="src/java" destdir="${class.dir}" classpathref="classpath" includeantruntime="false" target="1.6" source="1.6" debug="true" />
+        <!-- exclude this for now, to be removed later -->
+        <exclude>weka</exclude>
         <copy todir="${class.dir}">
             <fileset dir="src/java" includes="**/*.yml"/>
             <fileset dir="src/java" includes="**/*.png"/>
