@@ -85,7 +85,7 @@ public class ClassParams
      * Given a map of parameter,value pairs, only returns a new map that has only params that are active based on the conditional rules
      *
      * @param inputMap The map consisting of parameter name to values that need to be filtered
-     * @returns Map with only hte active parameters in it
+     * @return Map with only hte active parameters in it
      */
     public Map<String, String> filterParams(Map<String, String> inputMap){
         Map<String, String> argMap = new HashMap<String, String>(inputMap);
