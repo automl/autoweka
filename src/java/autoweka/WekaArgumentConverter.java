@@ -186,6 +186,7 @@ public class WekaArgumentConverter
         ArrayList<ArgumentPair> argPairs = new ArrayList<ArgumentPair>();
         for(int i = 0; i < args.size(); i+=2)
         {
+            if(i + 1 == args.size()) break;
             ArgumentPair arg = new ArgumentPair(args.get(i), args.get(i+1));
             //Is the name actually a double dash?
             argPairs.add(arg);

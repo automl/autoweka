@@ -17,7 +17,7 @@ import javax.swing.text.Document;
 
 import org.javabuilders.swing.SwingJavaBuilder;
 
-class ExperimentRunner extends JFrame
+public class ExperimentRunner extends JFrame
 {
     private JTextField mExpFolderText;
     private JTextField mSeedText;
@@ -31,6 +31,8 @@ class ExperimentRunner extends JFrame
     private Process mProc;
     private String mCurrentExperimentFolder;
     private String mCurrentSeed;
+
+    private Thread worker;
     
     public static void main(String[] args)
     {
@@ -40,6 +42,7 @@ class ExperimentRunner extends JFrame
 
     public ExperimentRunner()
     {
+        worker = null;
         SwingJavaBuilder.build(this);
     }
 
@@ -90,7 +93,7 @@ class ExperimentRunner extends JFrame
             mCurrentSeed = mSeedText.getText();
             
             //We passed all the checks, actually run it
-            new Thread( new Runnable() {
+            worker = new Thread( new Runnable() {
                 public void run() {
                     try {
                         ProcessBuilder pb = new ProcessBuilder(autoweka.Util.getJavaExecutable(), "-Xmx128m", "-cp", autoweka.Util.getAbsoluteClasspath(), "autoweka.tools.ExperimentRunner", mExpFolderText.getText(), mSeedText.getText());
@@ -110,6 +113,7 @@ class ExperimentRunner extends JFrame
                         Document doc = mOutputText.getDocument();
                         while ((line = reader.readLine ()) != null) {
                             doc.insertString(doc.getLength(), line + "\n", null);
+                            System.err.println(line);
                             mTextScroll.getVerticalScrollBar().setValue(mTextScroll.getVerticalScrollBar().getMaximum());
                         }
                         mRunButton.setEnabled(true);
@@ -123,7 +127,8 @@ class ExperimentRunner extends JFrame
                             mObserver.update(null, null); 
                         }
                     }
-                } }).start();
+                } });
+            worker.start();
             mRunButton.setEnabled(false);
             mStopButton.setEnabled(true);
         }catch(Exception e){
@@ -162,6 +167,12 @@ class ExperimentRunner extends JFrame
             }
             mRunButton.setEnabled(true);
             mProc = null;
+        }
+    }
+
+    public void join() throws InterruptedException {
+        if(worker != null) {
+            worker.join();
         }
     }
 }

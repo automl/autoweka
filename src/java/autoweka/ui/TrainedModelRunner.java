@@ -33,7 +33,7 @@ import autoweka.TrajectoryParser;
 import autoweka.tools.GetBestFromTrajectoryGroup;
 import autoweka.tools.TrainedModelPredictionMaker;
 
-class TrainedModelRunner extends JFrame
+public class TrainedModelRunner extends JFrame
 {
 
     private JTextField mExperimentText;
