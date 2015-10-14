@@ -1,3 +1,21 @@
+package weka.classifiers.meta;
+
+import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
+import weka.core.Capabilities;
+import weka.core.Drawable;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
+
+import java.io.Serializable;
+
 public class AutoWEKAClassifier extends AbstractClassifier {
 
     /** for serialization */
@@ -23,6 +41,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     }
 
     public double classifyInstance(Instance i) throws Exception {
+        return 0;
     }
 
     /**
@@ -82,5 +101,6 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     }
 
     public String toString() {
+        return classifier.toString();
     }
 }
