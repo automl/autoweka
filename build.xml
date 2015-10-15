@@ -103,6 +103,7 @@
         <junit fork="yes" showoutput="false">
             <classpath refid="test.classpath"/>
             <test name="autoweka.AutoWEKATestSuite"/>
+            <test name="weka.classifiers.meta.AutoWEKAClassifierTest"/>
             <formatter type="plain" usefile="false"/>
         </junit>
     </target>
