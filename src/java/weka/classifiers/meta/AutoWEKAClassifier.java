@@ -154,8 +154,8 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         attributeEvalArgs = mBest.attributeEvalArgs.split(" ");
 
         // train model on entire dataset and save
-        ASSearch asSearch = (ASSearch) Class.forName(attributeSearchClass).newInstance();
-        ASEvaluation asEval = (ASEvaluation) Class.forName(attributeEvalClass).newInstance();
+        ASSearch asSearch = ASSearch.forName(attributeSearchClass, attributeSearchArgs.clone());
+        ASEvaluation asEval = ASEvaluation.forName(attributeEvalClass, attributeEvalArgs.clone());
 
         as = new AttributeSelection();
         as.setSearch(asSearch);
@@ -173,6 +173,14 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         }
         i = as.reduceDimensionality(i);
         return classifier.classifyInstance(i);
+    }
+
+    public double[] distributionForInstance(Instance i) throws Exception {
+        if(classifierClass == null) {
+            throw new Exception("Auto-WEKA has not been run yet to get a model!");
+        }
+        i = as.reduceDimensionality(i);
+        return classifier.distributionForInstance(i);
     }
 
     /**
