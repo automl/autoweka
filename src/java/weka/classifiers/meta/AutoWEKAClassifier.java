@@ -21,7 +21,9 @@ import weka.core.Utils;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 
 import java.util.Arrays;
@@ -40,9 +42,6 @@ import autoweka.TrajectoryGroup;
 import autoweka.TrajectoryMerger;
 
 import autoweka.tools.GetBestFromTrajectoryGroup;
-
-import autoweka.ui.ExperimentRunner;
-import autoweka.ui.TrainedModelRunner;
 
 public class AutoWEKAClassifier extends AbstractClassifier {
 
@@ -63,8 +62,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     protected static String msExperimentPath = "wizardexperiments" + File.separator;
     protected static String expName = "Auto-WEKA";
 
-    protected TrainedModelRunner mTrainedModelRunner;
-    protected ExperimentRunner mRunner;
+    private Process mProc;
 
     /**
      * Main method for testing this class.
@@ -102,7 +100,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         Properties props = Util.parsePropertyString("type=trainTestArff:testArff=__dummy__");
         ArffSaver saver = new ArffSaver();
         saver.setInstances(is);
-        File fp = new File(msExperimentPath + expName + File.separator + "Auto-WEKA-train.arff");
+        File fp = new File(msExperimentPath + expName + File.separator + expName + ".arff");
         saver.setFile(fp);
         saver.writeBatch();
         props.setProperty("trainArff", fp.getAbsolutePath());
@@ -111,7 +109,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         exp.instanceGeneratorArgs = "numFolds=10";
         exp.attributeSelection = true;
 
-        // hardcode for now to 1 hour-ish
+        // hardcode for now to 1 minute-ish
         exp.attributeSelectionTimeout = 10;
         exp.tunerTimeout = 60;
         exp.trainTimeout = 10;
@@ -127,21 +125,30 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         //Make the thing
         ExperimentConstructor.buildSingle("autoweka.smac.SMACExperimentConstructor", exp, args);
 
-        mRunner = new ExperimentRunner();
-        mRunner.setFolderSeedAndObserver(msExperimentPath + expName, "0", new Observer() {
-            @Override
-            public void update(Observable o, Object arg) {
-                mRunner.dispose();
-                mTrainedModelRunner.setVisible(true);
-                mTrainedModelRunner.openExperiment(msExperimentPath + expName);
-            }
-        });
-        mRunner.setVisible(true);
-        mTrainedModelRunner = new TrainedModelRunner();
-        mRunner.runClicked();
+        // run experiment
+        Thread worker = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    ProcessBuilder pb = new ProcessBuilder(autoweka.Util.getJavaExecutable(), "-Xmx128m", "-cp", autoweka.Util.getAbsoluteClasspath(), "autoweka.tools.ExperimentRunner", msExperimentPath + expName, "0");
+                    pb.redirectErrorStream(true);
 
-        // wait for worker to finish
-        mRunner.join();
+                    mProc = pb.start();
+
+                    Thread killerHook = new autoweka.Util.ProcessKillerShutdownHook(mProc);
+                    Runtime.getRuntime().addShutdownHook(killerHook);
+
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(mProc.getInputStream()));
+                    String line;
+                    while ((line = reader.readLine ()) != null) {
+                        System.err.println(line);
+                    }
+                    Runtime.getRuntime().removeShutdownHook(killerHook);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } });
+        worker.start();
+        worker.join();
 
         // get results
         TrajectoryGroup group = TrajectoryMerger.mergeExperimentFolder(msExperimentPath + expName);
