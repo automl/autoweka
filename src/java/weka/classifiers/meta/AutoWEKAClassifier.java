@@ -24,6 +24,7 @@ import weka.core.TechnicalInformation.Type;
 import java.io.File;
 import java.io.Serializable;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Observable;
@@ -37,7 +38,6 @@ import autoweka.instancegenerators.CrossValidation;
 import autoweka.Util;
 import autoweka.TrajectoryGroup;
 import autoweka.TrajectoryMerger;
-import autoweka.WekaArgumentConverter;
 
 import autoweka.tools.GetBestFromTrajectoryGroup;
 
@@ -54,11 +54,11 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     protected AttributeSelection as;
 
     protected String classifierClass;
-    protected String classifierArgs;
+    protected String[] classifierArgs;
     protected String attributeSearchClass;
-    protected String attributeSearchArgs;
+    protected String[] attributeSearchArgs;
     protected String attributeEvalClass;
-    protected String attributeEvalArgs;
+    protected String[] attributeEvalArgs;
 
     protected static String msExperimentPath = "wizardexperiments" + File.separator;
     protected static String expName = "Auto-WEKA";
@@ -147,12 +147,11 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         TrajectoryGroup group = TrajectoryMerger.mergeExperimentFolder(msExperimentPath + expName);
         GetBestFromTrajectoryGroup mBest = new GetBestFromTrajectoryGroup(group);
         classifierClass = mBest.classifierClass;
-        classifierArgs = mBest.classifierArgs;
-        //WekaArgumentConverter.Arguments wekaArgs = WekaArgumentConverter.convert(classifierArgs);
+        classifierArgs = mBest.classifierArgs.split(" ");
         attributeSearchClass = mBest.attributeSearchClass;
-        attributeSearchArgs = mBest.attributeSearchArgs;
+        attributeSearchArgs = mBest.attributeSearchArgs.split(" ");
         attributeEvalClass = mBest.attributeEvalClass;
-        attributeEvalArgs = mBest.attributeEvalArgs;
+        attributeEvalArgs = mBest.attributeEvalArgs.split(" ");
 
         // train model on entire dataset and save
         ASSearch asSearch = (ASSearch) Class.forName(attributeSearchClass).newInstance();
@@ -164,8 +163,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         as.SelectAttributes(is);
         is = as.reduceDimensionality(is);
 
-        classifier = (Classifier) Class.forName(classifierClass).newInstance();
-        //classifier.setOptions(wekaArgs);
+        classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
         classifier.buildClassifier(is);
     }
 
@@ -235,10 +233,10 @@ public class AutoWEKAClassifier extends AbstractClassifier {
 
     public String toString() {
         return "classifier: " + classifierClass + "\n" +
-            "arguments: " + classifierArgs + "\n" +
+            "arguments: " + (classifierArgs != null ? Arrays.toString(classifierArgs) : "[]") + "\n" +
             "attribute search: " + attributeSearchClass + "\n" +
-            "attribute search arguments: " + attributeSearchArgs + "\n" +
+            "attribute search arguments: " + (attributeSearchArgs != null ? Arrays.toString(attributeSearchArgs) : "[]") + "\n" +
             "attribute evaluation: " + attributeEvalClass + "\n" +
-            "attribute evaluation arguments: " + attributeEvalArgs + "\n";
+            "attribute evaluation arguments: " + (attributeEvalArgs != null ? Arrays.toString(attributeEvalArgs) : "[]") + "\n";
     }
 }
