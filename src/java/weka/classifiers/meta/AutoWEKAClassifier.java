@@ -15,11 +15,12 @@ import weka.core.Drawable;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Option;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,11 +28,14 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Properties;
+import java.util.Vector;
 
 import autoweka.Experiment;
 import autoweka.ExperimentConstructor;
@@ -48,6 +52,8 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     /** for serialization */
     static final long serialVersionUID = 2907034203562786373L;
 
+    static final int DEFAULT_TIME_LIMIT = 60;
+
     /* The Chosen One. */
     protected Classifier classifier;
     protected AttributeSelection as;
@@ -62,6 +68,8 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     protected static String msExperimentPath = "wizardexperiments" + File.separator;
     protected static String expName = "Auto-WEKA";
 
+    protected int timeLimit = DEFAULT_TIME_LIMIT;
+
     private Process mProc;
 
     /**
@@ -74,6 +82,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     }
 
     public AutoWEKAClassifier() {
+        classifier = null;
         classifierClass = null;
         classifierArgs = null;
         attributeSearchClass = null;
@@ -109,10 +118,9 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         exp.instanceGeneratorArgs = "numFolds=10";
         exp.attributeSelection = true;
 
-        // hardcode for now to 1 minute-ish
-        exp.attributeSelectionTimeout = 10;
-        exp.tunerTimeout = 60;
-        exp.trainTimeout = 10;
+        exp.attributeSelectionTimeout = timeLimit * 1;
+        exp.tunerTimeout = timeLimit * 60;
+        exp.trainTimeout = timeLimit * 5;
 
         exp.memory = "500m";
         exp.extraPropsString = "initialIncumbent=RANDOM:acq-func=EI";
@@ -175,7 +183,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     }
 
     public double classifyInstance(Instance i) throws Exception {
-        if(classifierClass == null) {
+        if(classifier == null) {
             throw new Exception("Auto-WEKA has not been run yet to get a model!");
         }
         i = as.reduceDimensionality(i);
@@ -183,11 +191,58 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     }
 
     public double[] distributionForInstance(Instance i) throws Exception {
-        if(classifierClass == null) {
+        if(classifier == null) {
             throw new Exception("Auto-WEKA has not been run yet to get a model!");
         }
         i = as.reduceDimensionality(i);
         return classifier.distributionForInstance(i);
+    }
+
+    /**
+     * Gets an enumeration describing the available options.
+     *
+     * @return an enumeration of all the available options.
+     */
+    @Override
+    public Enumeration<Option> listOptions() {
+        Vector<Option> result = new Vector<Option>();
+        result.addElement(
+            new Option("\tThe time limit for tuning in minutes (approximately).\n"
+                        + "\t(default: 60)", "timeLimit", 60,
+                        "-timeLimit <limit>"));
+        return result.elements();
+    }
+
+    /**
+     * returns the options of the current setup.
+     *
+     * @return the current options
+     */
+    @Override
+    public String[] getOptions() {
+        Vector<String> result = new Vector<String>();
+
+        result.add("-timeLimit");
+        result.add("" + timeLimit);
+
+        Collections.addAll(result, super.getOptions());
+        return result.toArray(new String[result.size()]);
+    }
+
+    @Override
+    public void setOptions(String[] options) throws Exception {
+        String tmpStr;
+        String[] tmpOptions;
+
+        tmpStr = Utils.getOption("timeLimit", options);
+        if (tmpStr.length() != 0) {
+            timeLimit = Integer.parseInt(tmpStr);
+        } else {
+            timeLimit = DEFAULT_TIME_LIMIT;
+        }
+
+        super.setOptions(options);
+        Utils.checkForRemainingOptions(options);
     }
 
     /**
