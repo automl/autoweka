@@ -31,6 +31,14 @@
         <delete dir="${build.dir}"/>
     </target>
 
+    <target name="weka-plugin" depends='doc,manual,jar'>
+        <zip destfile="autoweka.zip"
+             basedir="."
+             excludes=".git/, weka/, .travis.yml, *.sh, wizardexperiments/, scripts/, *.tar.gz">
+            <zipfileset dir="build/jar" includes="autoweka.jar" fullpath="autoweka.jar"/>
+        </zip>
+    </target>
+    
     <!-- Compile all the Autoweka code -->
     <target name="compile">
         <mkdir dir="${class.dir}"/>

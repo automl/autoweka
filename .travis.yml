@@ -13,4 +13,4 @@ addons:
 
 script:
     - ant test
-    - ant dist
+    - ant weka-plugin
