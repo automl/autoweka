@@ -151,13 +151,7 @@ public class Util
      */
     static public String getAbsoluteClasspath()
     {
-        Properties systemProps = System.getProperties();
-        String[] paths = systemProps.getProperty("java.class.path").split(systemProps.getProperty("path.separator"));
-        
-        for(int i = 0; i < paths.length; i++) {
-            paths[i] = new java.io.File(paths[i]).getAbsolutePath();
-        }
-        return joinStrings(systemProps.getProperty("path.separator"), paths);
+        return Util.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     }
     
     /**

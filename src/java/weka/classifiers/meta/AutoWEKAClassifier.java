@@ -27,6 +27,8 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 
+import java.nio.file.Files;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -52,7 +54,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     /** for serialization */
     static final long serialVersionUID = 2907034203562786373L;
 
-    static final int DEFAULT_TIME_LIMIT = 60;
+    static final int DEFAULT_TIME_LIMIT = 1;
 
     /* The Chosen One. */
     protected Classifier classifier;
@@ -65,12 +67,10 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     protected String attributeEvalClass;
     protected String[] attributeEvalArgs;
 
-    protected static String msExperimentPath = "wizardexperiments" + File.separator;
+    protected static String msExperimentPath;
     protected static String expName = "Auto-WEKA";
 
     protected int timeLimit = DEFAULT_TIME_LIMIT;
-
-    private Process mProc;
 
     /**
      * Main method for testing this class.
@@ -86,12 +86,13 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         classifierClass = null;
         classifierArgs = null;
         attributeSearchClass = null;
-        attributeSearchArgs = null;
+        attributeSearchArgs = new String[0];
         attributeEvalClass = null;
-        attributeEvalArgs = null;
+        attributeEvalArgs = new String[0];
     }
 
     public void buildClassifier(Instances is) throws Exception {
+        msExperimentPath = Files.createTempDirectory("autoweka").toString() + File.separator;
         getCapabilities().testWithFail(is);
 
         //Populate the experiment fields
@@ -130,6 +131,8 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         args.add("-experimentpath");
         args.add(msExperimentPath);
 
+        final String jarPath = AutoWEKAClassifier.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+
         //Make the thing
         ExperimentConstructor.buildSingle("autoweka.smac.SMACExperimentConstructor", exp, args);
 
@@ -137,10 +140,10 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         Thread worker = new Thread(new Runnable() {
             public void run() {
                 try {
-                    ProcessBuilder pb = new ProcessBuilder(autoweka.Util.getJavaExecutable(), "-Xmx128m", "-cp", autoweka.Util.getAbsoluteClasspath(), "autoweka.tools.ExperimentRunner", msExperimentPath + expName, "0");
+                    ProcessBuilder pb = new ProcessBuilder(autoweka.Util.getJavaExecutable(), "-Xmx128m", "-cp", jarPath, "autoweka.tools.ExperimentRunner", msExperimentPath + expName, "0");
                     pb.redirectErrorStream(true);
 
-                    mProc = pb.start();
+                    final Process mProc = pb.start();
 
                     Thread killerHook = new autoweka.Util.ProcessKillerShutdownHook(mProc);
                     Runtime.getRuntime().addShutdownHook(killerHook);
@@ -164,19 +167,23 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         classifierClass = mBest.classifierClass;
         classifierArgs = mBest.classifierArgs.split(" ");
         attributeSearchClass = mBest.attributeSearchClass;
-        attributeSearchArgs = mBest.attributeSearchArgs.split(" ");
+        if(mBest.attributeSearchArgs != null) {
+            attributeSearchArgs = mBest.attributeSearchArgs.split(" ");
+        }
         attributeEvalClass = mBest.attributeEvalClass;
-        attributeEvalArgs = mBest.attributeEvalArgs.split(" ");
+        if(mBest.attributeEvalArgs != null) {
+            attributeEvalArgs = mBest.attributeEvalArgs.split(" ");
+        }
 
         // train model on entire dataset and save
-        ASSearch asSearch = ASSearch.forName(attributeSearchClass, attributeSearchArgs.clone());
-        ASEvaluation asEval = ASEvaluation.forName(attributeEvalClass, attributeEvalArgs.clone());
+        //ASSearch asSearch = ASSearch.forName(attributeSearchClass, attributeSearchArgs.clone());
+        //ASEvaluation asEval = ASEvaluation.forName(attributeEvalClass, attributeEvalArgs.clone());
 
-        as = new AttributeSelection();
-        as.setSearch(asSearch);
-        as.setEvaluator(asEval);
-        as.SelectAttributes(is);
-        is = as.reduceDimensionality(is);
+        //as = new AttributeSelection();
+        //as.setEvaluator(asEval);
+        //as.setSearch(asSearch);
+        //as.SelectAttributes(is);
+        //is = as.reduceDimensionality(is);
 
         classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
         classifier.buildClassifier(is);
@@ -186,7 +193,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         if(classifier == null) {
             throw new Exception("Auto-WEKA has not been run yet to get a model!");
         }
-        i = as.reduceDimensionality(i);
+        //i = as.reduceDimensionality(i);
         return classifier.classifyInstance(i);
     }
 
@@ -194,7 +201,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         if(classifier == null) {
             throw new Exception("Auto-WEKA has not been run yet to get a model!");
         }
-        i = as.reduceDimensionality(i);
+        //i = as.reduceDimensionality(i);
         return classifier.distributionForInstance(i);
     }
 
@@ -208,7 +215,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         Vector<Option> result = new Vector<Option>();
         result.addElement(
             new Option("\tThe time limit for tuning in minutes (approximately).\n"
-                        + "\t(default: 60)", "timeLimit", 60,
+                        + "\t(default: " + DEFAULT_TIME_LIMIT + ")", "timeLimit", DEFAULT_TIME_LIMIT,
                         "-timeLimit <limit>"));
         return result.elements();
     }

@@ -27,8 +27,6 @@ class ExperimentRunner
         String expFolder = expFolderFile.getAbsolutePath();
         String expName = expFolderFile.getName();
 
-        System.out.println(expFolder + " " + expName);
-
         //Remove the old trajectory and model
         String[] oldFiles = new String[]{
             expName + ".trajectories." + seed ,
