@@ -31,7 +31,8 @@
         <delete dir="${build.dir}"/>
     </target>
 
-    <target name="weka-plugin" depends='doc,manual,jar'>
+    <target name="weka-package" depends='doc,manual,jar'>
+        <delete file="autoweka.zip"/>
         <zip destfile="autoweka.zip"
              basedir="."
              excludes=".git/, weka/, .travis.yml, *.sh, wizardexperiments/, scripts/, *.tar.gz">

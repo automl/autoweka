@@ -176,14 +176,19 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         }
 
         // train model on entire dataset and save
-        //ASSearch asSearch = ASSearch.forName(attributeSearchClass, attributeSearchArgs.clone());
-        //ASEvaluation asEval = ASEvaluation.forName(attributeEvalClass, attributeEvalArgs.clone());
+        as = new AttributeSelection();
 
-        //as = new AttributeSelection();
-        //as.setEvaluator(asEval);
-        //as.setSearch(asSearch);
-        //as.SelectAttributes(is);
-        //is = as.reduceDimensionality(is);
+        if(attributeSearchClass != null) {
+            ASSearch asSearch = ASSearch.forName(attributeSearchClass, attributeSearchArgs.clone());
+            as.setSearch(asSearch);
+        }
+        if(attributeEvalClass != null) {
+            ASEvaluation asEval = ASEvaluation.forName(attributeEvalClass, attributeEvalArgs.clone());
+            as.setEvaluator(asEval);
+        }
+
+        as.SelectAttributes(is);
+        is = as.reduceDimensionality(is);
 
         classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
         classifier.buildClassifier(is);
@@ -193,7 +198,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         if(classifier == null) {
             throw new Exception("Auto-WEKA has not been run yet to get a model!");
         }
-        //i = as.reduceDimensionality(i);
+        i = as.reduceDimensionality(i);
         return classifier.classifyInstance(i);
     }
 
@@ -201,7 +206,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         if(classifier == null) {
             throw new Exception("Auto-WEKA has not been run yet to get a model!");
         }
-        //i = as.reduceDimensionality(i);
+        i = as.reduceDimensionality(i);
         return classifier.distributionForInstance(i);
     }
 
