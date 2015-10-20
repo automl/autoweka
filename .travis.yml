@@ -12,8 +12,4 @@ addons:
         - texlive-generic-extra
         - weka
 
-script:
-    - ant test
-    - ant weka-package
-    - java -cp lib/weka.jar weka.core.WekaPackageManager -install-package autoweka.zip
-    - java -cp build/jar/autoweka.jar weka.classifiers.meta.AutoWEKAClassifier -t test/iris.arff -no-cv -timeLimit 15
+script: ant test && ant weka-package && java -cp lib/weka.jar weka.core.WekaPackageManager -install-package autoweka.zip && java -cp build/jar/autoweka.jar weka.classifiers.meta.AutoWEKAClassifier -t test/iris.arff -no-cv -timeLimit 15
