@@ -149,7 +149,7 @@ public class Util
 
     static public String getAbsoluteClasspath()
     {
-        return System.getProperty("java.class.path");
+        return System.getProperty("java.class.path") + java.io.File.pathSeparatorChar + Util.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     }
     
     /**

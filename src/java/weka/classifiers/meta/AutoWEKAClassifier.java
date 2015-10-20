@@ -78,6 +78,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
      * @param argv should contain command line options (see setOptions)
      */
     public static void main(String[] argv) {
+        // this always succeeds...
         runClassifier(new AutoWEKAClassifier(), argv);
     }
 
