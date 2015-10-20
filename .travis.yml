@@ -15,4 +15,5 @@ addons:
 script:
     - ant test
     - ant weka-package
+    - find / -name 'weka.jar'
     - java -cp /usr/share/java/weka.jar weka.core.WekaPackageManager -install-package autoweka.zip
