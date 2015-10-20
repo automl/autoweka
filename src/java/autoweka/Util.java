@@ -146,12 +146,10 @@ public class Util
             throw new RuntimeException("Failed to create directory:" + basePath);
         }
     }
-    /**
-     * Tries to get the current classpath of the running JVM and build a classpath that removes all relative paths
-     */
+
     static public String getAbsoluteClasspath()
     {
-        return Util.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        return System.getProperty("java.class.path");
     }
     
     /**

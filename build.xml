@@ -2,7 +2,6 @@
     <!-- Include user specified props -->
     <property file="build.properties" />
     <property name="lib.dir"     value="lib" />
-    <property name="native.dir"  value="native" />
     <property name="build.dir"   value="build" />
     <property name="class.dir"   value="${build.dir}/classes" />
     <property name="testclass.dir"   value="${build.dir}/testclasses" />
@@ -16,11 +15,9 @@
     <path id="classpath">
         <fileset dir="${lib.dir}" includes="*.jar"/>
         <fileset dir="${lib.dir}/swingbuilder" includes="*.jar"/>
-        <path location="${native.dir}"/>
     </path>
     <path id="test.classpath">
         <path refid="classpath" />
-        <path location="${junit.location}" />
         <fileset dir="${lib.dir}/test" includes="*.jar"/>
         <pathelement path="${testclass.dir}" /> 
         <pathelement path="${class.dir}" /> 

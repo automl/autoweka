@@ -131,8 +131,6 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         args.add("-experimentpath");
         args.add(msExperimentPath);
 
-        final String jarPath = AutoWEKAClassifier.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-
         //Make the thing
         ExperimentConstructor.buildSingle("autoweka.smac.SMACExperimentConstructor", exp, args);
 
@@ -140,7 +138,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         Thread worker = new Thread(new Runnable() {
             public void run() {
                 try {
-                    ProcessBuilder pb = new ProcessBuilder(autoweka.Util.getJavaExecutable(), "-Xmx128m", "-cp", jarPath, "autoweka.tools.ExperimentRunner", msExperimentPath + expName, "0");
+                    ProcessBuilder pb = new ProcessBuilder(autoweka.Util.getJavaExecutable(), "-Xmx128m", "-cp", autoweka.Util.getAbsoluteClasspath(), "autoweka.tools.ExperimentRunner", msExperimentPath + expName, "0");
                     pb.redirectErrorStream(true);
 
                     final Process mProc = pb.start();
