@@ -13,4 +13,9 @@ addons:
         - weka
 
 script: >
-    ant test && ant weka-package && java -cp lib/weka.jar weka.core.WekaPackageManager -install-package autoweka.zip && java -cp build/jar/autoweka.jar weka.classifiers.meta.AutoWEKAClassifier -t test/iris.arff -no-cv -timeLimit 15 2>&1 | grep "classifier: weka.classifiers."
+    ant test && \
+    ant weka-package && \
+    java -cp lib/weka.jar weka.core.WekaPackageManager -install-package autoweka.zip && \
+    export TMPF=`mktemp` && \
+    java -cp build/jar/autoweka.jar weka.classifiers.meta.AutoWEKAClassifier -t test/iris.arff -no-cv -timeLimit 15 2>&1 | tee $TMPF | grep "Configuration Time Budget used:" && \
+    grep "classifier: weka.classifiers." $TMPF
