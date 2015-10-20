@@ -54,7 +54,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     /** for serialization */
     static final long serialVersionUID = 2907034203562786373L;
 
-    static final int DEFAULT_TIME_LIMIT = 1;
+    static final int DEFAULT_TIME_LIMIT = 60;
 
     /* The Chosen One. */
     protected Classifier classifier;
@@ -255,6 +255,22 @@ public class AutoWEKAClassifier extends AbstractClassifier {
 
         super.setOptions(options);
         Utils.checkForRemainingOptions(options);
+    }
+
+    public void setTimeLimit(int tl) {
+        timeLimit = tl;
+    }
+
+    public int getTimeLimit() {
+        return timeLimit;
+    }
+
+    /**
+     * Returns the tip text for this property.
+     * @return tip text for this property
+     */
+    public String timeLimitTipText() {
+        return "the time limit for tuning (in minutes)";
     }
 
     /**
