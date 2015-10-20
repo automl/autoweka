@@ -46,7 +46,6 @@ public class RandomSubSampling extends InstanceGenerator
             return result;
         }
 
-        @Override
         public void createSubsampleWithReplacement(Random random, int origSize, int sampleSize, int _, int[] classIndices) {
             throw new RuntimeException("This should not happen....");
             /*
@@ -56,7 +55,6 @@ public class RandomSubSampling extends InstanceGenerator
             }*/
         }
 
-        @Override
         public void createSubsampleWithoutReplacement(Random random, int origSize, int sampleSize, int _, int[] classIndices) {
             if (sampleSize > origSize) {
                 sampleSize = origSize;
