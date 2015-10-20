@@ -107,9 +107,10 @@
         <mkdir dir="${testclass.dir}"/>
         <javac srcdir="test/java" destdir="${testclass.dir}" classpathref="test.classpath" includeantruntime="false" target="1.6"  source="1.6" debug="true"/>
     </target>
+
     <!-- Run some tests -->
     <target name="test" depends="compile-tests">
-        <junit fork="yes" showoutput="false">
+        <junit haltonfailure="yes" fork="yes" showoutput="false">
             <classpath refid="test.classpath"/>
             <test name="autoweka.AutoWEKATestSuite"/>
             <test name="weka.classifiers.meta.AutoWEKAClassifierTest"/>
