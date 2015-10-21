@@ -10,7 +10,6 @@ addons:
         - texlive-formats-extra
         - texlive-extra-utils
         - texlive-generic-extra
-        - weka
 
 script: >
     ant test &&
@@ -19,6 +18,3 @@ script: >
     export TMPF=`mktemp` &&
     java -cp build/jar/autoweka.jar weka.classifiers.meta.AutoWEKAClassifier -t test/iris.arff -no-cv -timeLimit 15 2>&1 | tee $TMPF | grep "Configuration Time Budget used:" &&
     grep "classifier: weka.classifiers." $TMPF
-
-after_script:
-    - java -cp /usr/share/java/weka.jar weka.classifiers.meta.AutoWEKAClassifier -t test/iris.arff -no-cv -timeLimit 1
