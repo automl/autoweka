@@ -15,6 +15,7 @@ addons:
 script: >
     ant test &&
     ant weka-package &&
+    find / -name 'weka.jar' &&
     java -cp /usr/share/java/weka.jar weka.core.WekaPackageManager -install-package autoweka.zip &&
     export TMPF=`mktemp` &&
     java -cp /usr/share/java/weka.jar weka.classifiers.meta.AutoWEKAClassifier -t test/iris.arff -no-cv -timeLimit 15 2>&1 | tee $TMPF | grep "Configuration Time Budget used:" &&
