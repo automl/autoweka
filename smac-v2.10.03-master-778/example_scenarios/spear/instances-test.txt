@@ -1,0 +1,5 @@
+example_scenarios/spear/instances/test/qcplin2006.6215.cnf
+example_scenarios/spear/instances/test/qcplin2006.37487.cnf
+example_scenarios/spear/instances/test/qcplin2006.4455.cnf
+example_scenarios/spear/instances/test/qcplin2006.48775.cnf
+example_scenarios/spear/instances/test/qcplin2006.34621.cnf

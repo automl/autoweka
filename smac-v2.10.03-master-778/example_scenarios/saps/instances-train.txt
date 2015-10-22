@@ -1,0 +1,5 @@
+instances/train/SWlin2006.10286.cnf
+instances/train/SWlin2006.19724.cnf
+instances/train/SWlin2006.2705.cnf
+instances/train/SWlin2006.4072.cnf
+instances/train/SWlin2006.8287.cnf

@@ -1,0 +1,9 @@
+pcs-file = example_scenarios/spear-generic-wrapper/params.pcs
+runObj = RUNTIME
+cutoffTime = 1
+wallclock-limit = 30
+deterministic = 0
+instance_file = example_scenarios/spear-generic-wrapper/instances-train.txt
+test_instance_file = example_scenarios/spear-generic-wrapper/instances-test.txt
+algo = ./example_scenarios/spear-generic-wrapper/spearWrapper.py --runsolver example_scenarios/spear-generic-wrapper/runsolver --
+

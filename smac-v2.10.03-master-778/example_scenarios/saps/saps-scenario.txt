@@ -1,0 +1,11 @@
+algo = ruby saps_wrapper.rb
+execdir = example_scenarios/saps/
+deterministic = 0
+run_obj = runtime
+overall_obj = mean
+cputime_limit = 30
+cutoff_length = max
+target_run_cputime_limit = 5
+paramfile = example_scenarios/saps/saps-params.pcs
+instance_file = example_scenarios/saps/instances-train.txt
+test_instance_file = example_scenarios/saps/instances-test.txt

@@ -1,0 +1,5 @@
+instances/test/SWlin2006.11218.cnf
+instances/test/SWlin2006.12713.cnf
+instances/test/SWlin2006.18830.cnf
+instances/test/SWlin2006.4166.cnf
+instances/test/SWlin2006.4435.cnf

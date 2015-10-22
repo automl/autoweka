@@ -1,0 +1,433 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>SMAC: Sequential Model-based Algorithm Configuration</title>
+  <style type="text/css">
+body {
+color: black;
+background-color: white;
+font-family: Helvetica, Verdana, Arial;
+font-size: small;
+link="#0000cc"
+vlink="9999ff"
+}
+table {
+font-size: small;
+}
+table.with_borders {
+border: 1px solid black;
+border-collapse: collapse;
+}
+table.with_borders tbody tr:first-child {
+border-top: 1px solid black;
+}
+span.note {
+color: grey;
+}
+ul li {
+padding: 5px;
+}
+.without_bullet {
+list-style: none;
+}
+.not_finished {
+display: none;
+}
+#old_software ul li {
+padding: 5px;
+}
+#old_software {
+width: 800px;
+} #applications>table {
+width: 1000px;
+}
+h3 {
+color: #000066;
+}
+code {
+   font-size: medium;
+}
+
+  </style>
+</head>
+<body link="#0000cc" vlink="#9999ff">
+<table border="0" width="100%">
+  <tbody>
+    <tr>
+      <td valign="top">
+      <h1 align="center"><b>SMAC:&nbsp;Sequential
+Model-based Algorithm
+Configuration</b></h1>
+      <p><a href="http://www.cs.ubc.ca/labs/beta/">Bioinformatics,
+and
+Empirical &amp; Theoretical Algorithmics Laboratory
+(&szlig;-Lab)</a><br>
+      <a href="http://www.cs.ubc.ca">Department
+of Computer Science</a><br>
+      <a href="http://www.ubc.ca">The
+University of British Columbia</a></p>
+      </td>
+      <td>&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+<div width="100%"
+ style="margin: 5px; padding: 10px 25pt; background-color: rgb(65, 105, 225); color: rgb(255, 255, 255);">
+<font size="2"> <b><a href="#news"><span
+ style="color: rgb(255, 255, 255);">News</span></a>
+&nbsp; <a href="#abstract"><span
+ style="color: rgb(255, 255, 255); padding-left: 20pt;">Abstract</span></a></b>&nbsp;
+&nbsp; <b> <a href="#people"><span
+ style="color: rgb(255, 255, 255); padding-left: 20pt;">People</span></a></b>&nbsp;
+&nbsp; <b><a href="#papers"><span
+ style="color: rgb(255, 255, 255); padding-left: 20pt;">Papers</span></a></b> &nbsp;
+&nbsp; <b><a href="#license"><span
+ style="color: rgb(255, 255, 255); padding-left: 20pt;">License</span></a></b>&nbsp;
+ &nbsp; <b><a href="#forum"><span
+ style="color: rgb(255, 255, 255); padding-left: 20pt;">Forum</span></a></b> &nbsp;
+&nbsp; <b><a href="#software"><span
+ style="color: rgb(255, 255, 255); padding-left: 20pt;">Software</span></a></b> 
+&nbsp; <b><a href="#quickstart"><span
+ style="color: rgb(255, 255, 255); padding-left: 20pt;">Quickstart Guide</span></a></b> 
+ </font>
+</div>
+<h3><a name="news"></a><font size="+2">Quickstart Guide to SMAC</font></h3>
+<p>
+
+You're looking for a parameter setting that minimizes some performance metric of your algorithm (such as runtime, error, or cost). To use SMAC for this purpose you need to tell it about your parameters and how to evaluate your algorithm's performance. Here, we'll show how to do this. Let's first download SMAC, on *nix this can be done by:
+<pre>
+<code>
+
+
+ wget http://www.cs.ubc.ca/labs/beta/Projects/SMAC/smac-v2.10.03-master-778.tar.gz
+ tar -xzvf smac-v2.10.03-master-778.tar.gz
+ cd smac-v2.10.03-master-778
+
+</code>
+</pre>
+
+We'll demonstrate the use of SMAC by example. We'll start with the most basic of scenarios (optimizing a continuous blackbox function) before moving to the more interesting general algorithm configuration problems SMAC specializes on (involving discrete parameters, minimization of algorithm runtime, and optimization across instances). 
+
+Here is the first, most basic, example, minimizing a standard 2-dimensional continuous test function (branin) to get started:
+<pre>
+<code>
+./smac --use-instances false --numberOfRunsLimit 100 --pcs-file example_scenarios/branin/params.pcs --algo "python example_scenarios/branin/branin.py" --run-objective QUALITY
+</code>
+</pre>
+
+
+The first parameter disables SMAC's advanced reasoning about instances (covered later), the second one tells it to terminate after 1000 runs of the algorithm being optimized, and the third tells it to minimize a quality metric (the other option is RUNTIME). The parameter --pcs-file specifies the *p*arameter *c*onfiguration *s*pace file, which lists the algorithm's parameters, their domains, and default values (one per line). Here, we have two continuous parameters, specified using the format &lt;parameter_name [lower bound, upper bound] [default]&gt;:
+<pre>
+<code>
+x1 [-5,10] [2.5]
+x2 [0,15]  [7.5]
+</code>
+</pre>
+
+Finally, "--algo python example_scenarios/branin/branin.py" specifies the *wrapper* that SMAC executes with a prespecified syntax in order to evaluate the algorithm to be optimized. 
+This wrapper script takes an instantiation of the parameters as input, runs the algorithm with these parameters, and returns how well it did; since every algorithm has a different input and output format, this wrapper acts as a mediator between the algorithm and SMAC.
+
+SMAC executes the wrapper through a command line call. For example, to evaluate the branin function at (3.141, 2.275), SMAC would make the equivalent of the following call:  
+<pre>
+<code>
+python example_scenarios/branin/branin.py 0 0 0 0 0 -x1 3.141 -x2 2.275
+</code>
+</pre>
+which yields the following result:
+<pre>
+<code>
+Result for SMAC: SUCCESS, 0, 0, 0.397889, 0
+</code>
+</pre>
+
+Both the input and the output have several place holder "0" fields that are used in more advanced cases covered later. Here, we care about a quality metric, which is the second last output field (0.397889). In our example, this wrapper can be implemented as follows:
+<pre>
+<code>
+#!/usr/bin/python
+import sys, math
+
+# For black box function optimization, we can ignore the first 5 arguments. 
+# The remaining arguments specify parameters using this format: -name value 
+
+x1 = 0 
+x2 = 0
+
+for i in range(len(sys.argv)-1):  
+  if (sys.argv[i] == '-x1'):
+    x1 = float(sys.argv[i+1])
+  elif(sys.argv[i] == '-x2'):
+    x2 = float(sys.argv[i+1])   
+
+# Compute the branin function:
+yValue = (x2 - (5.1 / (4 * math.pi * math.pi)) *x1*x1 + (5 / (math.pi)) *x1 -6) ** 2 + 10*(1- (1 / (8 * math.pi))) * math.cos(x1) + 10
+
+# SMAC has a few different output fields; here, we only need the 4th output:
+print "Result for SMAC: SUCCESS, 0, 0, %f, 0" % yValue
+</code>
+</pre>
+
+The inputs to SMAC specify an instance of the algorithm configuration problem, and it is convenient to save them in a file for future reference. Here, this is example_scenarios/branin/branin-scenario.txt:
+<pre>
+<code>
+use-instances = false
+numberOfRunsLimit = 100 
+runObj = QUALITY
+pcs-file = examples/branin/params.pcs
+algo = examples/branin/wrapper.py
+</code>
+</pre>
+
+We can then simply call SMAC like this:
+<pre>
+<code>
+./smac --scenario-file example_scenarios/branin/branin-scenario.txt --seed 1234
+</code>
+</pre>
+
+Here, we also included an extra parameter --seed, which has two functions: 1) it is the seed for the pseudo-random number generator SMAC uses internally; 2) it is used to specify SMAC's output files; for example, in this case, SMAC's log file is written to smac-output/branin-scenario/log-run1234.txt since we used seed 1234.
+
+When you run the above example, SMAC aims to find parameter settings (x1,x2) that minimize 
+the Branin function, starting from the default values specified in the pcs file.
+Whenever it finds a new better solution, it will output it, along with a sample call string 
+to the command line wrapper that can be executed on the command line.
+<pre>
+<code>
+[INFO ] Sample call for new incumbent config 1 (internal ID: 0x000B): 
+ cd .; example_scenarios/branin/branin.py no_instance 0 1.7976931348623157E308 2147483647 -1 -x1 '2.5' -x2 '7.5'
+
+</code>
+</pre>
+
+As requested, SMAC will terminate after 100 algorithm runs and output the final best solution it found.
+<pre>
+<code>
+SMAC has finished. Reason: algorithm run limit (100 runs) has been reached.   
+ Total number of runs performed: 100, total configurations tried: 100.
+ Total CPU time used: 12 s, total wallclock time used: 8 s.
+ SMAC's final incumbent: config 100 (internal ID: 0x49D0C), with estimated mean quality: 0.542677, based on 1 run(s) on 1 training instance(s).
+ Sample call for this final incumbent:
+ cd .; example_scenarios/branin/branin.py no_instance 0 1.7976931348623157E308 2147483647 -1 -x1 '3.234' -x2 '1.882'
+</code>
+</pre>
+
+After terminating, it will also re-run the algorithm with the selected parameters to validate the result:
+<pre>
+<code>
+Estimated mean quality of final incumbent config 100 (internal ID: 0x49D0C) on test set: 0.542677, based on 1 run(s) on 1 test instance(s).
+ Sample call for the final incumbent:
+ cd .; example_scenarios/branin/branin.py no_instance 0 1.7976931348623157E308 2147483647 -1 -x1 '3.234' -x2 '1.882' 
+ Additional information about run 1 in:./smac-output/branin-scenario
+</code>
+</pre>
+
+By default, we keep SMAC's console output minimal and save some more information in the output folder. However, if you would like to see all call strings and their results on the console, you could add: --log-all-calls true to the call to smac.
+
+This concludes the first, trivial example.
+
+<h3><font size="+2">A general algorithm configuration example</font></h3>
+
+Next, we'll cover a more general algorithm configuration problem that uses SMAC's full gammit of features:
+
+- Handling structured parameter spaces:
+SMAC natively handles a range of parameter types. The following example contains categorical parameters (such as choices between different heuristics), continuous parameters (such as scaling factors), integer parameters (such as step sizes), and conditional parameters (parameters that are only relevant depending on the values of other "parent" parameters).
+
+- Special features for minimization of runtime:
+When SMAC's objective is to minimize an algorithm's runtime, every algorithm call contains a cutoff limit (also called "captime") after which to terminate the latest. SMAC adaptive chooses this captime based on a maximal cutoff limit specified by the user.
+
+- Optimization of noisy objectives, and of performance across several instances:
+Strong performance in a single algorithm run with a given parameter setting does not usually imply good performance in another run with that setting, particularly not on a new problem instance. For example, it is not enough if an algorithm for the travelling salesman problem can find an effective roundtrip on a single set of cities; likewise, it is not enough for a machine learning algorithm to do well in a single cross-validation fold.
+
+Rather, in order to avoid *over-tuning*, we usually optimize on a representative set of training instances that will make it likely for the found parameter setting to *generalize* to previously unseen, yet similar, problem instances. SMAC could, of course, simply evaluate the performance of a parameter setting on all instances in the training set, but this would be needlessly expensive. Instead, it runs the algorithm on one training instance at a time and only evaluates the best-performing configurations on the entire set, saving time by discarding poor configurations early (it is not necessary to know exactly how poor a poor configuration is; we only care about the exact performance of the best ones). 
+
+In the following example, we use all these features to minimize the runtime of the SAT solver SPEAR across a training set of SAT instances:
+<pre>
+<code>
+./smac --scenario-file example_scenarios/spear/spear-scenario.txt --seed 1
+</code>
+</pre>
+Here are the contents of the scenario file:
+<pre>
+<code>
+pcs-file = example_scenarios/spear/params.pcs
+runObj = RUNTIME
+cutoffTime = 1
+wallclock-limit = 30
+deterministic = 0
+instance_file = example_scenarios/spear/instances-train.txt
+test_instance_file = example_scenarios/spear/instances-test.txt
+algo = example_scenarios/spear/wrapper.py
+</code>
+</pre>
+
+Line 1 specifies Spear's parameter configuration space file. Detailed information about how to specify parameters of the various types (continuous, integer, categorical, conditional, etc) can be found in Section 4.4 of the <a href = "http://www.cs.ubc.ca/labs/beta/Projects/SMAC/manual-latest.pdf">SMAC manual</a> (also included in the release of SMAC).
+Lines 2 and 3 specify that we're aiming to minimize runtime, with a maximal per-run cutoff of 1 second (this is a toy example; in practice, we often use 300 seconds or more).
+Line 4 sets a wall clock timeout of 30 seconds for SMAC; in practice, we often set this to 172800 seconds (2 days). 
+Line 5 specifies that the target algorithm is nondeterministic; SMAC will then execute promising configurations multiple times, using different seeds for a pseudo-random number generator. 
+Line 6 specifies a training set of SAT instances:
+<pre>
+<code>
+example_scenarios/spear/instances/train/qcplin2006.10085.cnf
+example_scenarios/spear/instances/train/qcplin2006.10218.cnf
+example_scenarios/spear/instances/train/qcplin2006.10408.cnf
+example_scenarios/spear/instances/train/qcplin2006.10422.cnf
+example_scenarios/spear/instances/train/qcplin2006.10427.cnf
+</code>
+</pre>
+Each line in this file contains a string specifying an instance, and in each algorithm run SMAC performs, it will pass one of these strings to the wrapper. Note that an instance here does not have to be an actual file. For example, in cross-validation, the instance file could simply list the number i on line i, and the wrapper could use that information to only evaluate cross-validation fold i in a single algorithm run. 
+
+Note that we only included 5 instances in this example set to keep the download size small, but normally we would choose it much larger in order to avoid over-tuning to this particular set. 
+
+Line 7 specifies a disjoint test set of instances for offline validation after SMAC finishes:
+<pre>
+<code>
+example_scenarios/spear/instances/test/qcplin2006.6215.cnf
+example_scenarios/spear/instances/test/qcplin2006.37487.cnf
+example_scenarios/spear/instances/test/qcplin2006.4455.cnf
+example_scenarios/spear/instances/test/qcplin2006.48775.cnf
+example_scenarios/spear/instances/test/qcplin2006.34621.cnf
+</code>
+</pre>
+
+As mentioned above, the strings representing instances do not have to be actual files. However, if they are, we can specify them more easily by simply naming a folder containing them. In the example above, this can be achieved by replacing 
+<pre>
+<code>
+instance_file = example_scenarios/spear/instances-train.txt
+test_instance_file = example_scenarios/spear/instances-test.txt
+</code>
+</pre>
+by
+<pre>
+<code>
+instances = example_scenarios/spear/instances/train
+test_instances = example_scenarios/spear/instances/test
+instance-suffix = cnf
+</code>
+</pre>
+SMAC will then use all files in the training and test folders and their recursive subfolders with the suffix cnf. 
+
+The final piece in this configuration scenario is the wrapper around Spear. We already discussed the simple branin wrapper above. Now, we give full details for the wrapper inputs and outputs. SMAC calls wrappers through a command line call as follows (for more information see Section 5.1.1 of the manual):  
+<pre>
+<code>
+&lt;algo&gt; &lt;instance&gt; &lt;instance_specifics&gt; &lt;runtime cutoff&gt; &lt;runlength&gt; &lt;seed&gt; &lt;solver parameters&gt;
+</code>
+</pre>
+where
+<ul>
+<li> &lt;algo&gt; is the string specified in the scenario file </li>
+<li> &lt;instance&gt; is the problem instance </li>
+<li> &lt;instance_specifics&gt; can provide extra instance information (rarely used) </li>
+ <li> &lt;runtime cutoff&gt; is the maximal runtime </li>
+ <li> &lt;runlength&gt; is a maximal runlength, e.g., number of steps (rarely used) </li>
+ <li> &lt;seed&gt; is the random seed </li>
+ <li> &lt;solver parameters&gt; is a string specifying parameters as " -&lt;param_name&gt; &lt;param_value&gt;"  </li>
+</ul> 
+Thus, SMAC would, for example, call our Spear wrapper like this (a long command since Spear has 26 parameters):
+<pre>
+<code>
+./example_scenarios/spear/wrapper.py examples/spear/instances/train/qcplin2006.10085.cnf "" 30.0 2147483647 1234 -sp-var-dec-heur 16 -sp-learned-clause-sort-heur 5 -sp-orig-clause-sort-heur 8 -sp-res-order-heur 5 -sp-clause-del-heur 2 -sp-phase-dec-heur 1 -sp-resolution 1 -sp-variable-decay 2 -sp-clause-decay 1.3 -sp-restart-inc 1.9 -sp-learned-size-factor 0.136079 -sp-learned-clauses-inc 1.1 -sp-clause-activity-inc 1.05 -sp-var-activity-inc 1.27 -sp-rand-phase-dec-freq 0.0010 -sp-rand-var-dec-freq 0.0010 -sp-rand-var-dec-scaling 1.1 -sp-rand-phase-scaling 1 -sp-max-res-lit-inc 2.33 -sp-first-restart 43 -sp-res-cutoff-cls 4 -sp-res-cutoff-lits 1176 -sp-max-res-runs 3 -sp-update-dec-queue 1 -sp-use-pure-literal-rule 0
+</code>
+</pre>
+
+This call yields the following output:
+<pre>
+<code>
+Result for SMAC: SUCCESS, 0.00868391990662, 0, 0, 1234
+</code>
+</pre>
+
+More generally, SMAC expects wrapper output in the following format (for more details see Section 5.1.2 of the manual):
+<pre>
+<code>
+Result for SMAC: &lt;status&gt;, &lt;runtime&gt;, &lt;runlength&gt;, &lt;quality&gt;, &lt;seed&gt;
+</code>
+</pre>
+where 
+<ul>
+<li> &lt;status&gt; is a string in {SUCCESS,TIMEOUT,CRASHED}. SUCCESS means the algorithm worked as expected. TIMEOUT means it was unsuccessful in the allotted time. CRASHED signal a problem with this run (which should be debugged afterwards); some problems (segfaults etc) may only occur with certain parameter settings. </li>
+ <li> &lt;runtime&gt; is the runtime the algorithm's required </li>
+ <li> &lt;runlength&gt; is the algorithm's runlength (if applicable, otherwise just use 0) </li>
+ <li> &lt;quality&gt; is the algorithm's quality (the minimization objective unless runObj is set to RUNTIME) </li>
+ <li> &lt;seed&gt; is the algorithm's seed (you can also just return 0) </li>
+</ul>
+        
+In our example, ./examples/spear/wrapper.py is implemented as follows:
+<pre>
+<code>
+#!/usr/bin/env python2.7
+# encoding: utf-8
+
+import sys, os, time, re
+from subprocess import Popen, PIPE
+ 
+# Read in first 5 arguments.
+instance = sys.argv[1]
+specifics = sys.argv[2]
+cutoff = int(float(sys.argv[3]) + 1)
+runlength = int(sys.argv[4])
+seed = int(sys.argv[5])
+ 
+# Read in parameter setting and build a dictionary mapping param_name to param_value.
+params = sys.argv[6:]
+configMap = dict((name, value) for name, value in zip(params[::2], params[1::2]))
+ 
+# Construct the call string to Spear.
+spear_binary = "examples/spear/Spear-32_1.2.1"
+cmd = "%s --seed %d --model-stdout --dimacs %s --tmout %d" %(spear_binary, seed, instance, cutoff)       
+for name, value in configMap.items():
+    cmd += " -%s %s" %(name,  value)
+    
+# Execute the call and track its runtime.
+print(cmd)
+start_time = time.time()
+io = Popen(cmd.split(" "), stdout=PIPE, stderr=PIPE)
+(stdout_, stderr_) = io.communicate()
+runtime = time.time() - start_time
+ 
+# Very simply parsing of Spear's output. Note that in practice we would check the found solution to guard against bugs.
+status = "CRASHED"
+if (re.search('s UNKNOWN', stdout_)):
+    status = 'TIMEOUT'
+if (re.search('s SATISFIABLE', stdout_)) or (re.search('s UNSATISFIABLE', stdout_)):
+    status = 'SUCCESS'
+    
+# Output result for SMAC.
+print("Result for SMAC: %s, %s, 0, 0, %s" % (status, str(runtime), str(seed)))  
+</code>
+</pre>
+
+<h3><font size="+2">Further remarks</font></h3>
+
+Note that several things could be improved in the wrapper we just discussed:
+<ul>
+<li> The wrapper relies on Spear to actually terminate after its specified cutoff time. Basically every algorithm we have encountered failed to do so in some cases, even mature commercial algorithms. Therefore, it is good practice to limit runtime and also memory by using a tool such as the runsolver tool by Olivier Roussel. </li>
+<li> The wrapper simply believes Spear's outputs instead of checking that its solutions are correct. In practice, we have encountered various bugs in many algorithms, leading to quick "solutions" that turned out to be wrong. If possible, it is therefore useful to verify the solutions in the wrapper (and return "CRASHED" in case of a bogus solution, causing SMAC to penalize the parameter setting in question. </li>
+</ul>
+
+To help you write a robust wrapper quickly, we provide a <a href= "http://aclib.net/smac/tutorial/genericwrapper/">generic wrapper that you can easily adapt to wrap your own algorithm</a>.
+
+Here are some suggestions to keep in mind when running SMAC:
+
+<ul>
+<li> We recommend to allow SMAC at least to perform several hundred runs of the target algorithm</li>
+<li> In runtime minimization, we recommend to set the cutoff_time such that the default configuration solves at least 50% of the instances.</li>
+<li> SMAC is a randomized algorithm; we therefore recommend to perform multiple independent parallel runs and pick the solution with the best training performance.</li>
+<li> The FAQ in the doc/ folder contains answers to many common questions and trouble shooting steps.</li>
+</ul>
+
+Good luck!
+If you get stuck with anything, please post to the <a href ="http://aclib.net/SMAC/#forum">SMAC forum</a>. 
+
+
+</p>
+
+
+
+</body>
+
+<script type="text/javascript">  var _gaq = _gaq || [];  _gaq.push(['_setAccount', 'UA-49508972-1']);  _gaq.push(['_trackPageview']);  (function() {    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);  })();</script>
+
+
+</html>
+
