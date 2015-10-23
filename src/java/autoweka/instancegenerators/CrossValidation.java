@@ -53,11 +53,11 @@ public class CrossValidation extends InstanceGenerator
         int numFolds = Integer.parseInt(params.getProperty("numFolds", "-1"));
         int currentFold = Integer.parseInt(params.getProperty("fold", "-1"));
 
-        if(numFolds <= 0)
-            throw new RuntimeException("numFolds must be set to something > 0");
+        if(numFolds <= 1)
+            throw new RuntimeException("numFolds must be set to something > 1");
 
         if(currentFold < 0|| numFolds <= currentFold)
-            throw new RuntimeException("fold must be set to something in [0," + numFolds + "]");
+            throw new RuntimeException("fold must be set to something in [0," + (numFolds - 1) + "]");
 
         Random rand = new Random(seed);
         Instances randData = getTraining();
@@ -85,8 +85,8 @@ public class CrossValidation extends InstanceGenerator
             throw new RuntimeException("Failed to parse numFolds", e);
         }
 
-        if(numFolds <= 0)
-            throw new RuntimeException("numFolds must be set to something > 0");
+        if(numFolds <= 1)
+            throw new RuntimeException("numFolds must be set to something > 1");
 
         List<String> instanceStrings = new ArrayList<String>(numFolds);
         for(int i = 0; i < numFolds; i++)

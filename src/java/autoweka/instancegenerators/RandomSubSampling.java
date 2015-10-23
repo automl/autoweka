@@ -20,7 +20,7 @@ import java.util.Vector;
  *
  * instanceGeneratorArguments: A property string with the following
  *   startingseed - the initial seed of the splits
- *   numsamples - the number of folds to gererate
+ *   numSamples - the number of folds to gererate
  *   percent - the percentage of data to use in the training set
  *   bias - the bias towards a uniform partition
  *  
@@ -194,7 +194,7 @@ public class RandomSubSampling extends InstanceGenerator
             throw new RuntimeException("Failed to parse percent", e);
         }
         try{
-            bias = Integer.parseInt(params.getProperty("bias", "0"));
+            bias = Double.parseDouble(params.getProperty("bias", "0"));
         }catch(Exception e){
             throw new RuntimeException("Failed to parse bias", e);
         }

@@ -32,8 +32,10 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Properties;
@@ -56,6 +58,24 @@ public class AutoWEKAClassifier extends AbstractClassifier {
 
     static final int DEFAULT_TIME_LIMIT = 60;
 
+    static enum Resampling {
+        CrossValidation,
+        //MultiLevel,
+        RandomSubSampling,
+        //TerminationHoldout
+    }
+    static final Resampling DEFAULT_RESAMPLING = Resampling.CrossValidation;
+
+    static final Map<Resampling, String> resamplingArgsMap;
+    static {
+        resamplingArgsMap = new HashMap<Resampling, String>();
+        resamplingArgsMap.put(Resampling.CrossValidation, "numFolds=10");
+        //resamplingArgsMap.put(Resampling.MultiLevel, "numLevels=2$CrossValidation$numFolds=10");
+        resamplingArgsMap.put(Resampling.RandomSubSampling, "numSamples=10:percent=66");
+        //resamplingArgsMap.put(Resampling.TerminationHoldout, "terminationPercent=66$CrossValidation$numFolds=10");
+    }
+    static final String DEFAULT_RESAMPLING_ARGS = resamplingArgsMap.get(DEFAULT_RESAMPLING);
+
     /* The Chosen One. */
     protected Classifier classifier;
     protected AttributeSelection as;
@@ -71,6 +91,8 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     protected static String expName = "Auto-WEKA";
 
     protected int timeLimit = DEFAULT_TIME_LIMIT;
+    protected Resampling resampling = DEFAULT_RESAMPLING;
+    protected String resamplingArgs = DEFAULT_RESAMPLING_ARGS;
 
     /**
      * Main method for testing this class.
@@ -116,8 +138,8 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         saver.writeBatch();
         props.setProperty("trainArff", fp.getAbsolutePath());
         exp.datasetString = Util.propertiesToString(props);
-        exp.instanceGenerator = "autoweka.instancegenerators.CrossValidation";
-        exp.instanceGeneratorArgs = "numFolds=10";
+        exp.instanceGenerator = "autoweka.instancegenerators." + String.valueOf(resampling);
+        exp.instanceGeneratorArgs = resamplingArgs;
         exp.attributeSelection = true;
 
         exp.attributeSelectionTimeout = timeLimit * 1;
@@ -218,9 +240,14 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     public Enumeration<Option> listOptions() {
         Vector<Option> result = new Vector<Option>();
         result.addElement(
-            new Option("\tThe time limit for tuning in minutes (approximately).\n"
-                        + "\t(default: " + DEFAULT_TIME_LIMIT + ")", "timeLimit", DEFAULT_TIME_LIMIT,
-                        "-timeLimit <limit>"));
+            new Option("\tThe time limit for tuning in minutes (approximately).\n" + "\t(default: " + DEFAULT_TIME_LIMIT + ")",
+                "timeLimit", 1, "-timeLimit <limit>"));
+        result.addElement(
+            new Option("\tThe type of resampling used.\n" + "\t(default: " + String.valueOf(DEFAULT_RESAMPLING) + ")",
+                "resampling", 1, "-resampling <resampling>"));
+        result.addElement(
+            new Option("\tResampling arguments.\n" + "\t(default: " + DEFAULT_RESAMPLING_ARGS + ")",
+                "resamplingArgs", 1, "-resamplingArgs <args>"));
         return result.elements();
     }
 
@@ -235,6 +262,10 @@ public class AutoWEKAClassifier extends AbstractClassifier {
 
         result.add("-timeLimit");
         result.add("" + timeLimit);
+        result.add("-resampling");
+        result.add("" + resampling);
+        result.add("-resamplingArgs");
+        result.add("" + resamplingArgs);
 
         Collections.addAll(result, super.getOptions());
         return result.toArray(new String[result.size()]);
@@ -250,6 +281,19 @@ public class AutoWEKAClassifier extends AbstractClassifier {
             timeLimit = Integer.parseInt(tmpStr);
         } else {
             timeLimit = DEFAULT_TIME_LIMIT;
+        }
+
+        tmpStr = Utils.getOption("resampling", options);
+        if (tmpStr.length() != 0) {
+            resampling = Resampling.valueOf(tmpStr);
+        } else {
+            resampling = DEFAULT_RESAMPLING;
+        }
+        resamplingArgs = resamplingArgsMap.get(resampling);
+
+        tmpStr = Utils.getOption("resamplingArgs", options);
+        if (tmpStr.length() != 0) {
+            resamplingArgs = tmpStr;
         }
 
         super.setOptions(options);
@@ -270,6 +314,39 @@ public class AutoWEKAClassifier extends AbstractClassifier {
      */
     public String timeLimitTipText() {
         return "the time limit for tuning (in minutes)";
+    }
+
+    public void setResampling(Resampling r) {
+        resampling = r;
+        resamplingArgs = resamplingArgsMap.get(r);
+    }
+
+    public Resampling getResampling() {
+        return resampling;
+    }
+
+    /**
+     * Returns the tip text for this property.
+     * @return tip text for this property
+     */
+    public String ResamplingTipText() {
+        return "the type of resampling";
+    }
+
+    public void setResamplingArgs(String args) {
+        resamplingArgs = args;
+    }
+
+    public String getResamplingArgs() {
+        return resamplingArgs;
+    }
+
+    /**
+     * Returns the tip text for this property.
+     * @return tip text for this property
+     */
+    public String resamplingArgsTipText() {
+        return "resampling arguments";
     }
 
     /**
