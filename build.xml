@@ -107,7 +107,7 @@
 
     <!-- Run some tests -->
     <target name="test" depends="compile-tests">
-        <junit haltonfailure="yes" fork="yes" showoutput="false">
+        <junit haltonfailure="yes" fork="yes" showoutput="true">
             <classpath refid="test.classpath"/>
             <test name="autoweka.AutoWEKATestSuite"/>
             <test name="weka.classifiers.meta.AutoWEKAClassifierTest"/>

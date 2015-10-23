@@ -7,11 +7,6 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class AutoWEKAClassifierTest {
-    @Before
-    public void setUp() throws Exception {
-        System.out.println("I'm keeping Travis happy.");
-    }
-
     @Test
     public void testDefaults() throws Exception {
         String[] args = {"-t", "test/iris.arff", "-no-cv", "-timeLimit", "1"};
