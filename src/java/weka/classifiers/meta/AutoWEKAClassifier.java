@@ -60,9 +60,9 @@ public class AutoWEKAClassifier extends AbstractClassifier {
 
     static enum Resampling {
         CrossValidation,
-        //MultiLevel,
+        MultiLevel,
         RandomSubSampling,
-        //TerminationHoldout
+        TerminationHoldout
     }
     static final Resampling DEFAULT_RESAMPLING = Resampling.CrossValidation;
 
@@ -70,9 +70,9 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     static {
         resamplingArgsMap = new HashMap<Resampling, String>();
         resamplingArgsMap.put(Resampling.CrossValidation, "numFolds=10");
-        //resamplingArgsMap.put(Resampling.MultiLevel, "numLevels=2$CrossValidation$numFolds=10");
+        resamplingArgsMap.put(Resampling.MultiLevel, "numLevels=2[$]autoweka.instancegenerators.CrossValidation[$]numFolds=10");
         resamplingArgsMap.put(Resampling.RandomSubSampling, "numSamples=10:percent=66");
-        //resamplingArgsMap.put(Resampling.TerminationHoldout, "terminationPercent=66$CrossValidation$numFolds=10");
+        resamplingArgsMap.put(Resampling.TerminationHoldout, "terminationPercent=66[$]autoweka.instancegenerators.CrossValidation[$]numFolds=10");
     }
     static final String DEFAULT_RESAMPLING_ARGS = resamplingArgsMap.get(DEFAULT_RESAMPLING);
 

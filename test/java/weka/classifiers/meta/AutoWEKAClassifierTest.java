@@ -29,16 +29,16 @@ public class AutoWEKAClassifierTest {
         assertTrue(out.indexOf("Total Number of Instances              150") > -1);
     }
 
-    //@Test
-    //public void testML() throws Exception {
-    //    String[] args = {"-t", "test/iris.arff", "-no-cv", "-timeLimit", "1", "-resampling", "MultiLevel"};
-    //    String out = Evaluation.evaluateModel(new AutoWEKAClassifier(), args);
+    @Test
+    public void testML() throws Exception {
+        String[] args = {"-t", "test/iris.arff", "-no-cv", "-timeLimit", "1", "-resampling", "MultiLevel"};
+        String out = Evaluation.evaluateModel(new AutoWEKAClassifier(), args);
 
-    //    assertNotNull(out);
-    //    assertTrue(out.indexOf("classifier: weka.classifiers.") > -1);
-    //    assertTrue(out.indexOf("Error on training data") > -1);
-    //    assertTrue(out.indexOf("Total Number of Instances              150") > -1);
-    //}
+        assertNotNull(out);
+        assertTrue(out.indexOf("classifier: weka.classifiers.") > -1);
+        assertTrue(out.indexOf("Error on training data") > -1);
+        assertTrue(out.indexOf("Total Number of Instances              150") > -1);
+    }
 
     @Test
     public void testRSS() throws Exception {
@@ -51,14 +51,14 @@ public class AutoWEKAClassifierTest {
         assertTrue(out.indexOf("Total Number of Instances              150") > -1);
     }
 
-    //@Test
-    //public void testTH() throws Exception {
-    //    String[] args = {"-t", "test/iris.arff", "-no-cv", "-timeLimit", "1", "-resampling", "TerminationHoldout"};
-    //    String out = Evaluation.evaluateModel(new AutoWEKAClassifier(), args);
+    @Test
+    public void testTH() throws Exception {
+        String[] args = {"-t", "test/iris.arff", "-no-cv", "-timeLimit", "1", "-resampling", "TerminationHoldout"};
+        String out = Evaluation.evaluateModel(new AutoWEKAClassifier(), args);
 
-    //    assertNotNull(out);
-    //    assertTrue(out.indexOf("classifier: weka.classifiers.") > -1);
-    //    assertTrue(out.indexOf("Error on training data") > -1);
-    //    assertTrue(out.indexOf("Total Number of Instances              150") > -1);
-    //}
+        assertNotNull(out);
+        assertTrue(out.indexOf("classifier: weka.classifiers.") > -1);
+        assertTrue(out.indexOf("Error on training data") > -1);
+        assertTrue(out.indexOf("Total Number of Instances              150") > -1);
+    }
 }

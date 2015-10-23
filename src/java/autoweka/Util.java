@@ -476,7 +476,7 @@ public class Util
         for(int i = 0; i < numLeft; i++){
             endIndex = params.indexOf(delimStr, startIndex);
             if(endIndex == -1)
-                throw new IllegalArgumentException("Could only find " + i + " left args before not finding the delimeter");
+                throw new IllegalArgumentException("Could only find " + i + " left args before not finding the delimiter");
             args.add(params.substring(startIndex, endIndex));
             startIndex = endIndex+delimStr.length();
         }
