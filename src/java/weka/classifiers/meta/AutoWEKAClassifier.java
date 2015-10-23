@@ -76,6 +76,8 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     }
     static final String DEFAULT_RESAMPLING_ARGS = resamplingArgsMap.get(DEFAULT_RESAMPLING);
 
+    static final String DEFAULT_EXTRA_ARGS = "initialIncumbent=RANDOM:acq-func=EI";
+
     /* The Chosen One. */
     protected Classifier classifier;
     protected AttributeSelection as;
@@ -93,6 +95,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     protected int timeLimit = DEFAULT_TIME_LIMIT;
     protected Resampling resampling = DEFAULT_RESAMPLING;
     protected String resamplingArgs = DEFAULT_RESAMPLING_ARGS;
+    protected String extraArgs = DEFAULT_EXTRA_ARGS;
 
     /**
      * Main method for testing this class.
@@ -147,7 +150,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         exp.trainTimeout = timeLimit * 5;
 
         exp.memory = "500m";
-        exp.extraPropsString = "initialIncumbent=RANDOM:acq-func=EI";
+        exp.extraPropsString = extraArgs;
 
         //Setup all the extra args
         List<String> args = new LinkedList<String>();
@@ -248,6 +251,9 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         result.addElement(
             new Option("\tResampling arguments.\n" + "\t(default: " + DEFAULT_RESAMPLING_ARGS + ")",
                 "resamplingArgs", 1, "-resamplingArgs <args>"));
+        result.addElement(
+            new Option("\tExtra arguments.\n" + "\t(default: " + DEFAULT_EXTRA_ARGS + ")",
+                "extraArgs", 1, "-extraArgs <args>"));
         return result.elements();
     }
 
@@ -266,6 +272,8 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         result.add("" + resampling);
         result.add("-resamplingArgs");
         result.add("" + resamplingArgs);
+        result.add("-extraArgs");
+        result.add("" + extraArgs);
 
         Collections.addAll(result, super.getOptions());
         return result.toArray(new String[result.size()]);
@@ -294,6 +302,13 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         tmpStr = Utils.getOption("resamplingArgs", options);
         if (tmpStr.length() != 0) {
             resamplingArgs = tmpStr;
+        }
+
+        tmpStr = Utils.getOption("extraArgs", options);
+        if (tmpStr.length() != 0) {
+            extraArgs = tmpStr;
+        } else {
+            extraArgs = DEFAULT_EXTRA_ARGS;
         }
 
         super.setOptions(options);
@@ -347,6 +362,22 @@ public class AutoWEKAClassifier extends AbstractClassifier {
      */
     public String resamplingArgsTipText() {
         return "resampling arguments";
+    }
+
+    public void setExtraArgs(String args) {
+        extraArgs = args;
+    }
+
+    public String getExtraArgs() {
+        return extraArgs;
+    }
+
+    /**
+     * Returns the tip text for this property.
+     * @return tip text for this property
+     */
+    public String extraArgsTipText() {
+        return "extra arguments";
     }
 
     /**
