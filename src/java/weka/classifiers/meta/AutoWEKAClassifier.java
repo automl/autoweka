@@ -163,11 +163,12 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         // run experiment
         Thread worker = new Thread(new Runnable() {
             public void run() {
+                Process mProc = null;
                 try {
                     ProcessBuilder pb = new ProcessBuilder(autoweka.Util.getJavaExecutable(), "-Xmx128m", "-cp", autoweka.Util.getAbsoluteClasspath(), "autoweka.tools.ExperimentRunner", msExperimentPath + expName, "0");
                     pb.redirectErrorStream(true);
 
-                    final Process mProc = pb.start();
+                    mProc = pb.start();
 
                     Thread killerHook = new autoweka.Util.ProcessKillerShutdownHook(mProc);
                     Runtime.getRuntime().addShutdownHook(killerHook);
@@ -176,14 +177,23 @@ public class AutoWEKAClassifier extends AbstractClassifier {
                     String line;
                     while ((line = reader.readLine ()) != null) {
                         System.err.println(line);
+                        if(Thread.currentThread().isInterrupted()) {
+                            mProc.destroy();
+                            break;
+                        }
                     }
                     Runtime.getRuntime().removeShutdownHook(killerHook);
                 } catch (Exception e) {
+                    if(mProc != null) mProc.destroy();
                     e.printStackTrace();
                 }
             } });
         worker.start();
-        worker.join();
+        try {
+            worker.join();
+        } catch(InterruptedException e) {
+            worker.interrupt();
+        }
 
         // get results
         TrajectoryGroup group = TrajectoryMerger.mergeExperimentFolder(msExperimentPath + expName);
