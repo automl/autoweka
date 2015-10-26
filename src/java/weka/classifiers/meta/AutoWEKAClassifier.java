@@ -46,6 +46,7 @@ import autoweka.ExperimentConstructor;
 import autoweka.InstanceGenerator;
 import autoweka.instancegenerators.CrossValidation;
 import autoweka.Util;
+import autoweka.Trajectory;
 import autoweka.TrajectoryGroup;
 import autoweka.TrajectoryMerger;
 
@@ -197,6 +198,13 @@ public class AutoWEKAClassifier extends AbstractClassifier {
 
         // get results
         TrajectoryGroup group = TrajectoryMerger.mergeExperimentFolder(msExperimentPath + expName);
+
+        // print trajectory information
+        System.err.println("Optimization trajectory:");
+        for(Trajectory t: group.getTrajectories()) {
+            System.err.println(t);
+        }
+
         GetBestFromTrajectoryGroup mBest = new GetBestFromTrajectoryGroup(group);
         classifierClass = mBest.classifierClass;
         classifierArgs = mBest.classifierArgs.split(" ");

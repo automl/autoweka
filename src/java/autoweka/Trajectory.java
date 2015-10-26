@@ -1,6 +1,7 @@
 package autoweka;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.xml.bind.annotation.*;
 
@@ -72,6 +73,10 @@ public class Trajectory
         public double getTime() { return mTime; }
         public double getErrorEstimate() { return mErrorEstimate; }
         public String getArgs() { return mArgs; }
+
+        public String toString() {
+            return "time: " + mTime + ", error estimate: " + mErrorEstimate + ", args: " + mArgs;
+        }
     }
 
     /**
@@ -120,6 +125,15 @@ public class Trajectory
      */
     public String getSeed() {
         return mSeed;
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for(Point p: mPoints) {
+            sb.append(p);
+            sb.append("\n");
+        }
+        return sb.toString();
     }
 
     /**
