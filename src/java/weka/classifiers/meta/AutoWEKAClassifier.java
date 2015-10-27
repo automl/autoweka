@@ -80,7 +80,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     static final String DEFAULT_EXTRA_ARGS = "initialIncumbent=RANDOM:acq-func=EI";
 
     /* The Chosen One. */
-    protected Classifier classifier;
+    protected AbstractClassifier classifier;
     protected AttributeSelection as;
 
     protected String classifierClass;
@@ -239,7 +239,8 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         as.SelectAttributes(is);
         is = as.reduceDimensionality(is);
 
-        classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
+        classifier = (AbstractClassifier) Class.forName(classifierClass).newInstance();
+        classifier.setOptions(classifierArgs.clone());
         classifier.buildClassifier(is);
     }
 
