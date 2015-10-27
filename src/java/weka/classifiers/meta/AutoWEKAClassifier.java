@@ -217,6 +217,13 @@ public class AutoWEKAClassifier extends AbstractClassifier {
             attributeEvalArgs = mBest.attributeEvalArgs.split(" ");
         }
 
+        System.err.println("classifier: " + classifierClass + "\n" +
+            "arguments: " + (classifierArgs != null ? Arrays.toString(classifierArgs) : "[]") + "\n" +
+            "attribute search: " + attributeSearchClass + "\n" +
+            "attribute search arguments: " + (attributeSearchArgs != null ? Arrays.toString(attributeSearchArgs) : "[]") + "\n" +
+            "attribute evaluation: " + attributeEvalClass + "\n" +
+            "attribute evaluation arguments: " + (attributeEvalArgs != null ? Arrays.toString(attributeEvalArgs) : "[]") + "\n");
+
         // train model on entire dataset and save
         as = new AttributeSelection();
 
