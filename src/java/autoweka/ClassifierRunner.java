@@ -241,11 +241,9 @@ public class ClassifierRunner
         String[] argsArray = argMap.get("classifier").toArray(new String[0]);
         String[] argsArraySaved = argMap.get("classifier").toArray(new String[0]);
         AbstractClassifier classifier;
-        Class<?> cls;
         try
         {
-            cls = Class.forName(targetClassifierName);
-            classifier = (AbstractClassifier)cls.newInstance();
+            classifier = (AbstractClassifier) AbstractClassifier.forName(targetClassifierName, argsArray);
             res.setClassifier(classifier);
         }
         catch(ClassNotFoundException e)
@@ -254,17 +252,7 @@ public class ClassifierRunner
         }
         catch(Exception e)
         {
-            throw new RuntimeException("Failed to instantiate '" + targetClassifierName + "': " + e.getMessage(), e);
-        }
-        //Give the classifier its options
-        try
-        {
-            classifier.setOptions(argsArray);
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to set classifier options " + Arrays.toString(argsArraySaved) + " for classifier " + targetClassifierName + ": " + e.getMessage(), e);
+            throw new RuntimeException("Failed to instantiate '" + targetClassifierName + "' with options " + Arrays.toString(argsArraySaved) + ": " + e.getMessage(), e);
         }
         /*
         try
