@@ -80,7 +80,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     static final String DEFAULT_EXTRA_ARGS = "initialIncumbent=RANDOM:acq-func=EI";
 
     /* The Chosen One. */
-    protected AbstractClassifier classifier;
+    protected Classifier classifier;
     protected AttributeSelection as;
 
     protected String classifierClass;
@@ -207,14 +207,14 @@ public class AutoWEKAClassifier extends AbstractClassifier {
 
         GetBestFromTrajectoryGroup mBest = new GetBestFromTrajectoryGroup(group);
         classifierClass = mBest.classifierClass;
-        classifierArgs = mBest.classifierArgs.split(" ");
+        classifierArgs = Util.splitQuotedString(mBest.classifierArgs).toArray(new String[0]);
         attributeSearchClass = mBest.attributeSearchClass;
         if(mBest.attributeSearchArgs != null) {
-            attributeSearchArgs = mBest.attributeSearchArgs.split(" ");
+            attributeSearchArgs = Util.splitQuotedString(mBest.attributeSearchArgs).toArray(new String[0]);
         }
         attributeEvalClass = mBest.attributeEvalClass;
         if(mBest.attributeEvalArgs != null) {
-            attributeEvalArgs = mBest.attributeEvalArgs.split(" ");
+            attributeEvalArgs = Util.splitQuotedString(mBest.attributeEvalArgs).toArray(new String[0]);
         }
 
         System.err.println("classifier: " + classifierClass + "\n" +
@@ -239,8 +239,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         as.SelectAttributes(is);
         is = as.reduceDimensionality(is);
 
-        classifier = (AbstractClassifier) Class.forName(classifierClass).newInstance();
-        classifier.setOptions(classifierArgs.clone());
+        classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
         classifier.buildClassifier(is);
     }
 
