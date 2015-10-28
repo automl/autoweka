@@ -359,7 +359,7 @@ public class ClassifierRunner
             {
                 res.setCompleted(false);
                 if(mVerbose)
-                    System.out.println("Failed to evaluate more then 90% of the data");
+                    System.out.println("Evaluated less than 90% of the data");
             }
             else if(!evalThread.terminated())
             {
@@ -368,7 +368,7 @@ public class ClassifierRunner
             }
         } catch(Exception e) {
             if(mVerbose){
-                System.out.println("Evaluating the classifier failed with the error: " + e.getMessage());
+                System.out.println("Evaluating the classifier failed with error: " + e.getMessage());
                 e.printStackTrace();
             }
             res.setCompleted(false);
