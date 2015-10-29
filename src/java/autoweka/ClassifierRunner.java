@@ -9,6 +9,10 @@ import weka.core.Instance;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Properties;
 import weka.attributeSelection.ASEvaluation;
@@ -268,6 +272,27 @@ public class ClassifierRunner
         {
             res.setCompleted(true);
             return res;
+        }
+
+        try {
+            // write out configuration info
+            Path fp = Paths.get("instantiated-configurations.txt");
+            if (!Files.exists(fp)) {
+                Files.createFile(fp);
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.append(targetClassifierName + " " + Arrays.toString(argsArraySaved));
+            sb.append("; ");
+            sb.append(attribEvalClassName + " " + Arrays.toString(argMap.get("attributeeval").toArray(new String[0])));
+            sb.append("; ");
+            sb.append(attribSearchClassName + " " + Arrays.toString(argMap.get("attributesearch").toArray(new String[0])));
+            sb.append("; ");
+            sb.append(instanceStr);
+            sb.append("\n");
+            Files.write(fp, sb.toString().getBytes(), StandardOpenOption.APPEND);
+        } catch(IOException e) {
+            e.printStackTrace();
         }
 
         //Prepare to train the critter
