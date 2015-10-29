@@ -274,27 +274,6 @@ public class ClassifierRunner
             return res;
         }
 
-        try {
-            // write out configuration info
-            Path fp = Paths.get("instantiated-configurations.txt");
-            if (!Files.exists(fp)) {
-                Files.createFile(fp);
-            }
-
-            StringBuilder sb = new StringBuilder();
-            sb.append(targetClassifierName + " " + Arrays.toString(argsArraySaved));
-            sb.append("; ");
-            sb.append(attribEvalClassName + " " + Arrays.toString(argMap.get("attributeeval").toArray(new String[0])));
-            sb.append("; ");
-            sb.append(attribSearchClassName + " " + Arrays.toString(argMap.get("attributesearch").toArray(new String[0])));
-            sb.append("; ");
-            sb.append(instanceStr);
-            sb.append("\n");
-            Files.write(fp, sb.toString().getBytes(), StandardOpenOption.APPEND);
-        } catch(IOException e) {
-            e.printStackTrace();
-        }
-
         //Prepare to train the critter
         BuilderThread builderThread = new BuilderThread(classifier, training);
 
@@ -330,6 +309,29 @@ public class ClassifierRunner
         //Get the evaluation
         if(!_evaluateClassifierOnInstances(classifier, res, testing, timeout))
             return res;
+
+        // write out configuration info
+        try {
+            Path fp = Paths.get("instantiated-configurations.txt");
+            if (!Files.exists(fp)) {
+                Files.createFile(fp);
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.append(targetClassifierName + " " + Arrays.toString(argsArraySaved));
+            sb.append("; ");
+            sb.append(attribEvalClassName + " " + Arrays.toString(argMap.get("attributeeval").toArray(new String[0])));
+            sb.append("; ");
+            sb.append(attribSearchClassName + " " + Arrays.toString(argMap.get("attributesearch").toArray(new String[0])));
+            sb.append("; ");
+            sb.append(instanceStr);
+            sb.append("; ");
+            sb.append(res.getRawScore());
+            sb.append("\n");
+            Files.write(fp, sb.toString().getBytes(), StandardOpenOption.APPEND);
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
 
         if(mVerbose)
             System.out.println("Num Training: " + training.numInstances() + ", Num Testing: " + testing.numInstances());
