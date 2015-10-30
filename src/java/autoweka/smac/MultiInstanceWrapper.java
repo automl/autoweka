@@ -44,7 +44,7 @@ public class MultiInstanceWrapper extends SMACWrapper
             props.put("instanceGenerator", mProperties.getProperty("instanceGenerator"));
             props.put("instanceGeneratorArgs", mInstance);
             props.put("resultMetric", mResultMetric);
-            SubProcessWrapper.ErrorAndTime errTime = SubProcessWrapper.getErrorAndTime(null, memory, props, mTimeout, instance, Util.joinStrings(" ", runnerArgs), false, mExperimentSeed);
+            SubProcessWrapper.ErrorAndTime errTime = SubProcessWrapper.getErrorAndTime(null, memory, props, mTimeout, instance, Util.joinStrings(" ", runnerArgs), mExperimentSeed);
             //Update the res's time and estimate
             res._setRawScore((res.getRawScore()*executedCount + errTime.error)/(executedCount+1));
             res.setTrainingTime(res.getTrainingTime() + errTime.time);
