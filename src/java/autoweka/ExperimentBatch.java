@@ -8,6 +8,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Helpful XML class that easily allows for the creation of multiple experiments.
  *
@@ -17,6 +20,8 @@ import java.util.Properties;
 @XmlAccessorType(XmlAccessType.NONE)
 public class ExperimentBatch extends XmlSerializable
 {
+    final static Logger log = LoggerFactory.getLogger(ExperimentBatch.class);
+
     /** 
      * Enscapsulates a dataset that you want to run experiments on
      */
@@ -238,8 +243,8 @@ public class ExperimentBatch extends XmlSerializable
     {
         if(args.length != 1)
         {
-            System.out.println("Useage: " + ExperimentBatch.class.getCanonicalName() + " <xmlfilename>");
-            System.out.println("Makes a template experiment batch file");
+            log.error("Usage: {} <xmlfilename>", ExperimentBatch.class.getCanonicalName());
+            log.error("Makes a template experiment batch file");
             System.exit(1);
         }
         ExperimentBatch batch = new ExperimentBatch();

@@ -10,8 +10,13 @@ import java.util.LinkedList;
 import autoweka.ClassParams;
 import autoweka.Util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 class ParamFilterer
 {
+    final static Logger log = LoggerFactory.getLogger(ParamFilterer.class);
+
     public static void main(String[] argv){
         //First argument is the .param file
         Queue<String> args = new LinkedList<String>(Arrays.asList(argv));
@@ -27,6 +32,6 @@ class ParamFilterer
             argStringMap.put((String)k, argMap.getProperty((String)k));
         }
 
-        System.out.println(Util.argMapToString(params.filterParams(argStringMap)));
+        log.debug(Util.argMapToString(params.filterParams(argStringMap)));
     }
 }

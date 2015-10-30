@@ -11,6 +11,9 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Utility class for determining what kind of methods can be applied to a set of instances.
  *
@@ -19,6 +22,8 @@ import java.util.List;
  */
 public class ApplicabilityTester
 {
+    final static Logger log = LoggerFactory.getLogger(ApplicabilityTester.class);
+
     //What are we searching for
     private enum Testable{
         CLASSIFIER,
@@ -159,24 +164,23 @@ public class ApplicabilityTester
         }
         catch(ClassNotFoundException e)
         {
-            System.out.println("No class '" + method + "' found");
+            log.warn("No class {} found", method);
         }
         catch(InstantiationException e)
         {
-            System.out.println("Failed to instantiate '" + method + "': " + e.getMessage());
+            log.warn("Failed to instantiate {}: {}", method, e.getMessage(), e);
         }
         catch(IllegalAccessException e)
         {
-            System.out.println("Illegal access exception creating '" + method + "': " + e.getMessage());
+            log.warn("Illegal access exception creating {}: {}", method, e.getMessage(), e);
         }
         catch(weka.core.UnsupportedAttributeTypeException e)
         {
-            System.out.println(method + " failed with message: " + e.getMessage());
+            log.warn("{} failed: {}", method, e.getMessage(), e);
         }
         catch(Exception e)
         {
-            e.printStackTrace();
-            System.out.println("'" + method + "' not supported");
+            log.warn("{} not supported: {}", method, e.getMessage(), e);
         }
         return false;
     }
@@ -186,11 +190,10 @@ public class ApplicabilityTester
         try{
             ASSearch search = ASSearch.forName(method, new String[0]);
         } catch(weka.core.UnsupportedAttributeTypeException e) {
-            System.out.println(method + " failed with message: " + e.getMessage());
+            log.warn("{} failed: {}", method, e.getMessage(), e);
             return false;
         }catch(Exception e){
-            e.printStackTrace();
-            System.out.println("'" + method + "' not supported");
+            log.warn("{} not supported: {}", method, e.getMessage(), e);
             return false;
         }
         return true;
@@ -202,11 +205,10 @@ public class ApplicabilityTester
             ASEvaluation eval = ASEvaluation.forName(method, new String[0]);
             eval.getCapabilities().testWithFail(instances);
         } catch(weka.core.UnsupportedAttributeTypeException e) {
-            System.out.println(method + " failed with message: " + e.getMessage());
+            log.warn("{} failed: {}", method, e.getMessage(), e);
             return false;
         }catch(Exception e){
-            e.printStackTrace();
-            System.out.println("'" + method + "' not supported");
+            log.warn("{} not supported: {}", method, e.getMessage(), e);
             return false;
         }
         return true;

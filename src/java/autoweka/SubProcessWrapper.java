@@ -11,11 +11,16 @@ import java.util.Queue;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * An implementation of a Wrapper that should ideally just be called from other Java objects - it performes the training/evaluation of a classifier on a sub process to preserve the JVM of the caller
  */
 public class SubProcessWrapper extends Wrapper
 {
+    final static Logger log = LoggerFactory.getLogger(SubProcessWrapper.class);
+
     private static Pattern mResultPattern = Pattern.compile("SubProcessWrapper: Time\\(([\\.\\d]+)\\) Score\\(([\\.\\deE+-]+)\\)");
 
     /**
@@ -60,7 +65,7 @@ public class SubProcessWrapper extends Wrapper
     @Override
     protected void _processResults(ClassifierResult res)
     {
-        System.out.print("SubProcessWrapper: Time(" + res.getTime() + ") Score(" + res.getScore() + ")");
+        log.info("SubProcessWrapper time: {}, score: {}", res.getTime(), res.getScore());
         String outputFilePrefix = mProperties.getProperty("modelOutputFilePrefix", null);
         if(outputFilePrefix != null){
             try{
@@ -106,7 +111,7 @@ public class SubProcessWrapper extends Wrapper
         props.put("instanceGeneratorArgs", exp.instanceGeneratorArgs);
         props.put("resultMetric", exp.resultMetric);
 
-        return getErrorAndTime(runDir, exp.memory, props, exp.trainTimeout, instance, args, true, autowekaSeed);
+        return getErrorAndTime(runDir, exp.memory, props, exp.trainTimeout, instance, args, autowekaSeed);
     }
     
     public static ErrorAndTime getErrorAndTime(File runDir, Experiment exp, String instance, String args, String autowekaSeed)
@@ -122,7 +127,7 @@ public class SubProcessWrapper extends Wrapper
         props.put("instanceGeneratorArgs", exp.instanceGeneratorArgs);
         props.put("resultMetric", exp.resultMetric);
 
-        return getErrorAndTime(runDir, exp.memory, props, exp.trainTimeout, instance, args, true, autowekaSeed);
+        return getErrorAndTime(runDir, exp.memory, props, exp.trainTimeout, instance, args, autowekaSeed);
     }
 
     /**
@@ -131,7 +136,7 @@ public class SubProcessWrapper extends Wrapper
      * This method is super useful to ensure that leaking doesn't happen/memory limits are enforced, since all the work is done in a subprocess - if anything
      * bad happens, it dies down there, letting your process carry on willy nilly
      */
-    public static ErrorAndTime getErrorAndTime(File runDir, String memory, Properties props, float trainTimeout, String instance, String args, boolean verbose, String autowekaSeed)
+    public static ErrorAndTime getErrorAndTime(File runDir, String memory, Properties props, float trainTimeout, String instance, String args, String autowekaSeed)
     {
         try
         {
@@ -150,8 +155,7 @@ public class SubProcessWrapper extends Wrapper
             wrapperCmd.addAll(Arrays.asList(args.split(" ")));
 
             for(String c : wrapperCmd)
-                System.out.print(c+" ");
-            System.out.println();
+                log.debug("{}", c);
 
             ProcessBuilder pb = new ProcessBuilder(wrapperCmd);
             pb.environment().put("AUTOWEKA_EXPERIMENT_SEED", autowekaSeed);
@@ -173,8 +177,7 @@ public class SubProcessWrapper extends Wrapper
             boolean foundMatch = false;
 
             while ((line = reader.readLine ()) != null) {
-                if(verbose)
-                    System.out.println(line);
+                log.debug(line);
                 Matcher matcher = mResultPattern.matcher(line);
                 if(matcher.matches())
                 {

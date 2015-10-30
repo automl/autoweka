@@ -17,8 +17,13 @@ import javax.swing.text.Document;
 
 import org.javabuilders.swing.SwingJavaBuilder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ExperimentRunner extends JFrame
 {
+    final Logger log = LoggerFactory.getLogger(ExperimentRunner.class);
+
     private JTextField mExpFolderText;
     private JTextField mSeedText;
     private JButton mOpenExpFolderButton;
@@ -113,7 +118,7 @@ public class ExperimentRunner extends JFrame
                         Document doc = mOutputText.getDocument();
                         while ((line = reader.readLine ()) != null) {
                             doc.insertString(doc.getLength(), line + "\n", null);
-                            System.err.println(line);
+                            log.debug(line);
                             mTextScroll.getVerticalScrollBar().setValue(mTextScroll.getVerticalScrollBar().getMaximum());
                         }
                         mRunButton.setEnabled(true);
@@ -121,7 +126,7 @@ public class ExperimentRunner extends JFrame
 
                         Runtime.getRuntime().removeShutdownHook(killerHook);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        log.error(e.getMessage(), e);
                     } finally {
                         if(mObserver != null){
                             mObserver.update(null, null); 

@@ -15,6 +15,9 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /** 
  * Experimental InstanceGenerator that splits the data up into random folds, with a fixed percentage used for training
  *
@@ -31,6 +34,8 @@ import java.util.Vector;
  */ 
 public class RandomSubSampling extends InstanceGenerator
 {
+    final static Logger log = LoggerFactory.getLogger(RandomSubSampling.class);
+
     private static class RegressionResample extends Resample
     {
         public Capabilities getCapabilities() {
@@ -58,7 +63,7 @@ public class RandomSubSampling extends InstanceGenerator
         public void createSubsampleWithoutReplacement(Random random, int origSize, int sampleSize, int _, int[] classIndices) {
             if (sampleSize > origSize) {
                 sampleSize = origSize;
-                System.err.println("Resampling without replacement can only use percentage <=100% - Using full dataset!");
+                log.warn("Resampling without replacement can only use percentage <=100% - Using full dataset!");
             }
 
             int[] indices = new int[origSize];

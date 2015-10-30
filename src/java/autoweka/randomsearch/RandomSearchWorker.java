@@ -14,8 +14,13 @@ import autoweka.Parameter;
 import autoweka.SubProcessWrapper;
 import autoweka.Util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 class RandomSearchWorker
 {
+    final Logger log = LoggerFactory.getLogger(RandomSearchWorker.class);
+
     String mSeed;
     Random mRand;
     float mTimeRemaining;
@@ -73,13 +78,13 @@ class RandomSearchWorker
         }
 
         res.touchResultFile(mExperimentDir);
-        System.out.println("Evaluating point with hash '" + res.argHash + "'");
+        log.info("Evaluating point with hash {}", res.argHash);
 
         for(String instance : mInstances){
             SubProcessWrapper.ErrorAndTime errAndTime = SubProcessWrapper.getErrorAndTime(mExperimentDir, mExperiment, instance, argString, mSeed);
             res.addInstanceResult(instance, errAndTime);
             mTimeRemaining -= errAndTime.time;
-            System.out.println("Spent " + errAndTime.time + " getting a response of " + errAndTime.error);
+            log.info("Took {} to get response of {}.", errAndTime.time, errAndTime.error);
         }
 
         res.saveResultFile(mExperimentDir);

@@ -7,8 +7,13 @@ import autoweka.ClassifierResult;
 import autoweka.Util;
 import autoweka.SubProcessWrapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class MultiInstanceWrapper extends SMACWrapper
 {
+    final Logger log = LoggerFactory.getLogger(MultiInstanceWrapper.class);
+
     public String mParams;
 
     public static void main(String[] args)
@@ -33,7 +38,7 @@ public class MultiInstanceWrapper extends SMACWrapper
         int failedCount = 0;
 
         for(String instance : instances){
-            System.out.println(instance);
+            log.debug("Instance: {}", instance);
             Properties props = new Properties();
             props.put("datasetString", mProperties.getProperty("datasetString"));
             props.put("instanceGenerator", mProperties.getProperty("instanceGenerator"));

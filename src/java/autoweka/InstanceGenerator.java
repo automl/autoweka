@@ -17,11 +17,16 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Abstract class for partitioning a dataset (consisting of training and testing data) into 'instances' that are given to the SMBO method
  */
 public abstract class InstanceGenerator
 {
+    final static Logger log = LoggerFactory.getLogger(InstanceGenerator.class);
+
     private Instances mTraining = null;
     private Instances mTesting = null;
 
@@ -58,7 +63,7 @@ public abstract class InstanceGenerator
             {
                 props = Util.parsePropertyString(datasetString);
             }catch(Exception e){
-                System.out.println("It looks like you're using an old experiment that doesn't indicate the type of dataset that it is using");
+                log.warn("It looks like you're using an old experiment that doesn't indicate the type of dataset that it is using");
                 loadZipFile(datasetString, "last");
                 return;
             }
@@ -244,7 +249,7 @@ public abstract class InstanceGenerator
     {
         if(className == null || className.isEmpty() || className.equals("null"))
         {
-            System.out.println("Warning: No instance generator set, using default");
+            log.warn("No instance generator set, using default");
             className = "autoweka.instancegenerators.Default";
         }
 
@@ -273,7 +278,7 @@ public abstract class InstanceGenerator
     {
         if(className == null || className.isEmpty() || className.equals("null"))
         {
-            System.out.println("Warning: No instance generator set, using default");
+            log.warn("No instance generator set, using default");
             className = "autoweka.instancegenerators.Default";
         }
 

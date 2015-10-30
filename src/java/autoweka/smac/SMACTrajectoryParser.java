@@ -13,8 +13,13 @@ import java.util.regex.Matcher;
 import java.util.Map;
 import java.util.HashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class SMACTrajectoryParser extends TrajectoryParser
 {
+    final Logger log = LoggerFactory.getLogger(SMACTrajectoryParser.class);
+
     private Pattern mTrajPattern = Pattern.compile("([\\-\\.\\d]+), ([\\-\\.\\dEef]+), [\\-\\.\\d]+, [\\-\\.\\d]+, [\\-\\.\\d]+, (.*)");
     //private Pattern mTrajPattern = Pattern.compile("([\\-\\.\\d]+),\\s*([\\-\\.\\d]+),\\s*[\\-\\.\\d]+,\\s*[\\-\\.\\d]+,\\s*[\\-\\.\\d]+,\\s*(.*)");
     private Pattern mRunsAndResultFileNamePattern = Pattern.compile("runs_and_results-it(\\d+).csv");
@@ -40,7 +45,7 @@ public class SMACTrajectoryParser extends TrajectoryParser
                     break;
                 }
             }
-            System.out.println(trajFileName);
+            log.info("Trajectory file name: {}", trajFileName);
             Scanner scanner = new Scanner(new FileInputStream(trajFileName));
 
             String line;
@@ -59,7 +64,7 @@ public class SMACTrajectoryParser extends TrajectoryParser
                     time = Float.parseFloat(matcher.group(1));
                     score = Float.parseFloat(matcher.group(2));
 
-                    //System.out.println(time + " " +score);
+                    log.debug("Time: {}, score: {}", time, score);
                     if(score != currentBest)
                     {
                         currentBest = score;
@@ -70,7 +75,7 @@ public class SMACTrajectoryParser extends TrajectoryParser
                 else
                 {
                     //This line didn't match...
-                    //System.out.println(line);
+                    log.debug("Could not match {}", line);
                 }
             }
 
@@ -98,7 +103,7 @@ public class SMACTrajectoryParser extends TrajectoryParser
                 int numEvals = 0;
                 int numMemOut = 0;
                 int numTimeOut = 0;
-                System.out.println(runsAndResultsFileName);
+                log.info("Run results file: {}", runsAndResultsFileName);
                 scanner = new Scanner(new FileInputStream(runsAndResultsFileName));
 
                 //Skip the header
@@ -123,14 +128,14 @@ public class SMACTrajectoryParser extends TrajectoryParser
                         }
                     } catch (Exception e) {
                         //Whatevs... it's wrong
-                        e.printStackTrace();
+                        log.error(e.getMessage(), e);
                     }
                 }
                 traj.setEvaluationCounts(numEvals, numMemOut, numTimeOut); 
             }
             else
             {
-                System.out.println("Could not find runs_and_results file");
+                log.warn("Could not find runs_and_results file");
             }
         }
         catch(Exception e)
@@ -148,7 +153,7 @@ public class SMACTrajectoryParser extends TrajectoryParser
         String[] splitArgs = args.split(", ");
         for(String argPair: splitArgs)
         {
-            //System.out.println(argPair);
+            log.trace(argPair);
             String[] splitArg = argPair.split("=", 2);
             String arg = splitArg[0].trim();
             String value = splitArg[1].trim();

@@ -17,8 +17,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class IRaceTrajectoryParser extends TrajectoryParser
 {
+    final Logger log = LoggerFactory.getLogger(IRaceTrajectoryParser.class);
+
     private static Pattern msParamReaderPattern = Pattern.compile("([\\S]+) \"-([\\S]+) \".*");
     private static Pattern msSelectedPattern = Pattern.compile("Selected candidate:[\\s]*([\\S]+)[\\s]*mean value:[\\s]*([\\S]+).*");
 
@@ -40,7 +45,7 @@ public class IRaceTrajectoryParser extends TrajectoryParser
                     paramMap.put(matcher.group(1), matcher.group(2));
                 }else{
                     //This line didn't match?
-                    System.out.println("Failed to match parameter line '" + line + "'");
+                    log.warn("Failed to match parameter line {}", line);
                 }
             }
         }catch(Exception e){

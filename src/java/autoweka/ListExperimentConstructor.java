@@ -10,8 +10,13 @@ import java.util.Queue;
 
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public abstract class ListExperimentConstructor 
 {
+    final static Logger log = LoggerFactory.getLogger(ListExperimentConstructor.class);
+
     //TODO: This should really become an option
     protected String mParamBaseDir = "./params";
 
@@ -69,7 +74,7 @@ public abstract class ListExperimentConstructor
         }
         catch(Exception e)
         {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw new RuntimeException("Failed to create batch for " + xmlFileName);
         }
 
@@ -80,7 +85,7 @@ public abstract class ListExperimentConstructor
         exp.validate();
 
         //The first parameter contains the full class of the experiment constructor
-        System.out.println("Making Experiment " + exp.name);
+        log.info("Making Experiment {}", exp.name);
         Class<?> cls;
         ListExperimentConstructor builder;
         try

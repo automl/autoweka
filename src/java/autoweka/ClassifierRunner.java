@@ -21,6 +21,9 @@ import weka.attributeSelection.AttributeSelection;
 import java.util.Map;
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Class that is responsible for actually running a WEKA classifier from start to finish using the Auto-WEKA argument format.
  *
@@ -29,9 +32,10 @@ import java.util.Arrays;
  */
 public class ClassifierRunner
 {
+    final Logger log = LoggerFactory.getLogger(ClassifierRunner.class);
+
     //private ParameterRegularizer mRegularizer = null;
     private InstanceGenerator mInstanceGenerator = null;
-    private boolean mVerbose = true;
     private boolean mTestOnly = false;
     private boolean mDisableOutput = false;
     private java.io.PrintStream mSavedOutput = null;
@@ -49,7 +53,6 @@ public class ClassifierRunner
         //Get the regularizer - experimental to the point of not working
         //mRegularizer = ParameterRegularizer.create(props.getProperty("regularizer"), props.getProperty("regularizerParameterFileName"), props.getProperty("regularizerParams"));
 
-        mVerbose = Boolean.valueOf(props.getProperty("verbose", "true"));
         mTestOnly = Boolean.valueOf(props.getProperty("onlyTest", "false"));
         mDisableOutput = Boolean.valueOf(props.getProperty("disableOutput", "false"));
         mPredictionsFileName = props.getProperty("predictionsFileName", null);
@@ -191,10 +194,7 @@ public class ClassifierRunner
                 if(asThread.getException() != null)
                 {
                     res.setMemOut(asThread.getException().getCause() instanceof OutOfMemoryError);
-                    if(mVerbose){
-                        asThread.getException().printStackTrace();
-                        System.out.println("Attribute selection failed with the error: " + asThread.getException().getMessage());
-                    }
+                    log.debug("Attribute selection failed: {}", asThread.getException().getMessage(), asThread.getException());
                 }
 
                 asThread = null;
@@ -207,19 +207,14 @@ public class ClassifierRunner
                 try
                 {
                     //Filter the instances
-                    if(mVerbose){
-                        int[] attrs = attribSelect.selectedAttributes();
-                        System.out.println("Using the following attributes (" + (100.0*(attrs.length) / training.numAttributes()) + "%)");
-                        for(int i = 0; i < attrs.length; i++){
-                            System.out.print(i);
-                            if(i < attrs.length-1)
-                                System.out.print(", ");
-                        }
-                        System.out.println();
+                    int[] attrs = attribSelect.selectedAttributes();
+                    log.debug("Using {}% attributes:", (100.0*(attrs.length) / training.numAttributes()));
+                    for(int i = 0; i < attrs.length; i++){
+                        log.debug("{}", i);
                     }
                     training = attribSelect.reduceDimensionality(training);
                     testing = attribSelect.reduceDimensionality(testing);
-                    System.out.println("The target class is " + training.classIndex());
+                    log.debug("Target class: {}", training.classIndex());
                 }catch(Exception e){
                     throw new RuntimeException(e);
                 }
@@ -285,8 +280,7 @@ public class ClassifierRunner
 
         if(builderThread.getException() != null)
         {
-            if(mVerbose)
-                System.out.println("Training the classifier failed with the error: " + builderThread.getException().getMessage());
+            log.debug("Training classifier failed: {}", builderThread.getException().getMessage(), builderThread.getException());
             res.setMemOut(builderThread.getException().getCause() instanceof OutOfMemoryError);
         }
 
@@ -303,38 +297,27 @@ public class ClassifierRunner
             res.setCompleted(true);
         }
 
-        if(mVerbose)
-            System.out.println("Performing evaluation on " + testing.numInstances());
+        log.debug("Performing evaluation on {} instances.", testing.numInstances());
 
         //Get the evaluation
         if(!_evaluateClassifierOnInstances(classifier, res, testing, timeout))
             return res;
 
         // write out configuration info
-        try {
-            Path fp = Paths.get("instantiated-configurations.txt");
-            if (!Files.exists(fp)) {
-                Files.createFile(fp);
-            }
+        StringBuilder sb = new StringBuilder();
+        sb.append(targetClassifierName + " " + Arrays.toString(argsArraySaved));
+        sb.append("; ");
+        sb.append(attribEvalClassName + " " + Arrays.toString(argMap.get("attributeeval").toArray(new String[0])));
+        sb.append("; ");
+        sb.append(attribSearchClassName + " " + Arrays.toString(argMap.get("attributesearch").toArray(new String[0])));
+        sb.append("; ");
+        sb.append(instanceStr);
+        sb.append("; ");
+        sb.append(res.getRawScore());
+        sb.append("\n");
+        log.debug("Instantiating {}", sb);
 
-            StringBuilder sb = new StringBuilder();
-            sb.append(targetClassifierName + " " + Arrays.toString(argsArraySaved));
-            sb.append("; ");
-            sb.append(attribEvalClassName + " " + Arrays.toString(argMap.get("attributeeval").toArray(new String[0])));
-            sb.append("; ");
-            sb.append(attribSearchClassName + " " + Arrays.toString(argMap.get("attributesearch").toArray(new String[0])));
-            sb.append("; ");
-            sb.append(instanceStr);
-            sb.append("; ");
-            sb.append(res.getRawScore());
-            sb.append("\n");
-            Files.write(fp, sb.toString().getBytes(), StandardOpenOption.APPEND);
-        } catch(IOException e) {
-            e.printStackTrace();
-        }
-
-        if(mVerbose)
-            System.out.println("Num Training: " + training.numInstances() + ", Num Testing: " + testing.numInstances());
+        log.debug("Num Training: {}, num testing: {}", training.numInstances(), testing.numInstances());
 
         return res;
     }
@@ -361,20 +344,18 @@ public class ClassifierRunner
                 throw evalThread.getException();
             }
 
-            if(mVerbose)
-                System.out.println("Completed evaluation on (" + (instances.numInstances() - eval.unclassified()) + "/" + instances.numInstances() + ")");
+            log.debug("Completed evaluation on {}/{} instances.", (instances.numInstances() - eval.unclassified()), instances.numInstances());
 
             //Make sure that if we terminated the eval, we crap out accordingly
             res.setCompleted(!evalThread.terminated());
 
             res.setPercentEvaluated(100.0f*(float)(1.0f - eval.unclassified() / instances.numInstances()));
-            System.out.println(res.getPercentEvaluated());
+            log.debug("Percent evaluated: {}", res.getPercentEvaluated());
             //Check to make sure we evaluated enough data (and if we should log it)
             if(res.getPercentEvaluated() < 90)
             {
                 res.setCompleted(false);
-                if(mVerbose)
-                    System.out.println("Evaluated less than 90% of the data");
+                log.debug("Evaluated less than 90% of the data.");
             }
             else if(!evalThread.terminated())
             {
@@ -382,26 +363,20 @@ public class ClassifierRunner
                 res.setScoreFromEval(eval, instances);
             }
         } catch(Exception e) {
-            if(mVerbose){
-                System.out.println("Evaluating the classifier failed with error: " + e.getMessage());
-                e.printStackTrace();
-            }
+            log.debug("Evaluating classifier failed: {}", e.getMessage(), e);
             res.setCompleted(false);
             res.setMemOut(e.getCause() instanceof OutOfMemoryError);
             return false;
         }
-        if(mVerbose)
+        log.debug(eval.toSummaryString("\nResults\n======\n", false));
+        try
         {
-            System.out.println(eval.toSummaryString("\nResults\n======\n", false));
-            try
-            {
-                System.out.println(eval.toMatrixString());
-            }catch(Exception e)
-            {
-                //throw new RuntimeException("Failed to get confusion matrix", e);
-            }
-            System.out.println(res.getDescription());
+            log.debug(eval.toMatrixString());
+        }catch(Exception e)
+        {
+            //throw new RuntimeException("Failed to get confusion matrix", e);
         }
+        log.debug(res.getDescription());
         return true;
     }
 

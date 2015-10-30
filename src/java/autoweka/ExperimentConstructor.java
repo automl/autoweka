@@ -13,6 +13,9 @@ import java.util.HashMap;
 
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /** 
  * Abstract class responsible for generating all the necessary stuff to run an Auto-WEKA Experiment.
  *
@@ -22,6 +25,8 @@ import java.util.ArrayList;
  */
 public abstract class ExperimentConstructor
 {
+    final static Logger log = LoggerFactory.getLogger(ExperimentConstructor.class);
+
     /**
      * The directory with all the param files in it. 
      */
@@ -77,7 +82,7 @@ public abstract class ExperimentConstructor
     {
         if(args.length < 0) 
         {
-            System.err.println("Arguments missing. Please refer to manual for help.");
+            log.error("Arguments missing. Please refer to manual for help.");
         }
         //Is the first argument a -batch? If it is, then we need to load the given xml files and use those to generate things
         else if(args[0].equals("-batch") || new File(args[0]).isFile())
@@ -129,7 +134,7 @@ public abstract class ExperimentConstructor
         exp.validate();
 
         //The first parameter contains the full class of the experiment constructor
-        System.out.println("Making Experiment " + exp.name);
+        log.info("Making Experiment {}", exp.name);
         Class<?> cls;
         ExperimentConstructor builder;
         try
@@ -160,11 +165,11 @@ public abstract class ExperimentConstructor
         }
         catch(java.io.FileNotFoundException e)
         {
-            System.out.println("No property file '" + propsFilePath + ".properties' found");
+            log.warn("No property file {}.properties found", propsFilePath);
         }
         catch(java.io.IOException e)
         {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
 
         if(exp.resultMetric == null){
@@ -269,7 +274,7 @@ public abstract class ExperimentConstructor
      * Process a constructor argument, and suck out stuff from the arg queue
      */
     public void processArg(String arg, Queue<String> args){
-        System.err.println("Ignoring unknown argument" + arg);
+        log.warn("Ignoring unknown argument {}", arg);
     }
 
     /**

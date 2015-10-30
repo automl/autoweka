@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Queue;
 import java.io.FileInputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  *  Generic class that gets called from an SMBO method, completes the evaluation, and returns the result back up to the SMBO method.
  *
@@ -28,6 +31,8 @@ public class Wrapper
     protected ClassifierRunner mRunner;
     protected Properties mProperties;
     protected String mResultMetric = null;
+
+    final Logger log = LoggerFactory.getLogger(Wrapper.class);
 
     /**
      * Runs the wrapper with the given command line arguments - see the class description for full details
@@ -85,7 +90,7 @@ public class Wrapper
         }
 
         if(mExperimentSeed == null){
-            System.out.println("WARNING: No experiment seed defined, using default of 0");
+            log.warn("No experiment seed defined, using default of 0");
             mExperimentSeed = "0";
         }
 
@@ -118,7 +123,7 @@ public class Wrapper
         //What kind of evaluation type are we using?
         mResultMetric = mProperties.getProperty("resultMetric", null);
         if(mResultMetric == null){
-            System.out.println("WARNING: No evaluation method specified, defaulting to error rate");
+            log.warn("No evaluation method specified, defaulting to error rate");
             mResultMetric = "errorRate";
         }
 
@@ -135,8 +140,6 @@ public class Wrapper
 
         //Process the result
         _processResults(res);
-
-        System.out.println();
     }
 
     /**
@@ -151,14 +154,13 @@ public class Wrapper
         res.setCompleted(false);
         com.sun.management.OperatingSystemMXBean OSBean = (com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory.getOperatingSystemMXBean();
         long startTime = OSBean.getProcessCpuTime();
-        //For debuging those stupid issues
-        //for(String s: runnerArgs)
-            //System.out.println("Adding arg " + s);
+        for(String s: runnerArgs)
+            log.trace("Adding arg {}", s);
 
         try {
             res = mRunner.run(mInstance, mResultMetric, mTimeout, mSeed, runnerArgs);
         } catch (Throwable e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             long stopTime = OSBean.getProcessCpuTime();
             res.setTrainingTime(1.0f + ((stopTime - startTime) * 1e-9f));
         }

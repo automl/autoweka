@@ -9,6 +9,9 @@ import weka.core.Instances;
 import weka.filters.supervised.instance.Resample;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /** 
  * Experimental InstanceGenerator that takes as input a child classifier, and holds back a bunch of data as a 'Termination' set from the SMBO methods.
  *
@@ -25,6 +28,8 @@ import java.util.Properties;
  */ 
 public class TerminationHoldout extends RandomSubSampling
 {
+    final Logger log = LoggerFactory.getLogger(TerminationHoldout.class);
+
     public TerminationHoldout(String instanceFileName)
     {
         super(instanceFileName);
@@ -43,7 +48,7 @@ public class TerminationHoldout extends RandomSubSampling
         InstanceGenerator.NestedArgs args = new InstanceGenerator.NestedArgs(params);
         //The Termination set is backwards - you say how much you want to reserve for the termination set...
         InstanceGenerator child = InstanceGenerator.create(args.child, getInstancesFromParamsForSubClass(args.current, true), getInstancesFromParamsForSubClass(args.current, false));
-        System.out.println(getTraining().numInstances() + " " +  child.getTrainingFromParams(args.instance).numInstances() + " " + child.getTestingFromParams(args.instance).numInstances());
+        log.debug("{} {} {}", getTraining().numInstances(), child.getTrainingFromParams(args.instance).numInstances(), child.getTestingFromParams(args.instance).numInstances());
         return child.getTestingFromParams(args.instance);
     }
 

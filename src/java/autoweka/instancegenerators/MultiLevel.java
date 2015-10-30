@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /** 
  * Experimental InstanceGenerator that takes as input a child classifier, and creates multiple levels of training data.
  *
@@ -30,6 +33,8 @@ import java.util.Properties;
  */ 
 public class MultiLevel extends RandomSubSampling
 {
+    final Logger log = LoggerFactory.getLogger(MultiLevel.class);
+
     public MultiLevel(String instanceFileName)
     {
         super(instanceFileName);
@@ -56,7 +61,7 @@ public class MultiLevel extends RandomSubSampling
     {
         InstanceGenerator.NestedArgs args = new InstanceGenerator.NestedArgs(params);
         InstanceGenerator child = InstanceGenerator.create(args.child, getInstancesFromParamsForSubClass(args.current, false), getInstancesFromParamsForSubClass(args.current, true));
-        //System.out.println(getTraining().numInstances() + " " +  child.getTrainingFromParams(args.instance).numInstances() + " " + child.getTestingFromParams(args.instance).numInstances());
+        log.debug("{} {} {}", getTraining().numInstances(), child.getTrainingFromParams(args.instance).numInstances(), child.getTestingFromParams(args.instance).numInstances());
         return child.getTestingFromParams(args.instance);
     }
 

@@ -8,28 +8,33 @@ import autoweka.TrajectoryGroup;
 import autoweka.Util;
 import autoweka.WekaArgumentConverter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class GetBestFromTrajectoryGroup
 {
+    final static Logger log = LoggerFactory.getLogger(GetBestFromTrajectoryGroup.class);
+
     /**
      * Point this main method at a .trajectory file, and be presented with what you should actually run your dataset on
      */
     public static void main(String[] args){
         GetBestFromTrajectoryGroup res = new GetBestFromTrajectoryGroup(args[0]);
-        System.out.println("Experiment: " + res.experiment.name);
-        System.out.println("Num Trajectories: " + res.numTrajectories);
-        System.out.println("Best point seed" + res.seed);
-        System.out.println("Best point error estimate: " + res.errorEstimate);
+        log.info("Experiment: {}", res.experiment.name);
+        log.info("Num Trajectories: {}", res.numTrajectories);
+        log.info("Best point seed: {}", res.seed);
+        log.info("Best point error estimate: {}", res.errorEstimate);
 
-        System.out.println("Classifier: " + res.classifierClass);
-        System.out.println(" Args: " + res.classifierArgs);
+        log.info("Classifier: {}", res.classifierClass);
+        log.info(" Args: {}", res.classifierArgs);
 
         //Is there a AS search method?
         if(res.attributeSearchClass != null && res.attributeEvalClass != null){
-            System.out.println("ASSearch: " + res.attributeSearchClass);
-            System.out.println(" Args: " + res.attributeSearchArgs);
+            log.info("ASSearch: {}", res.attributeSearchClass);
+            log.info(" Args: {}", res.attributeSearchArgs);
             
-            System.out.println("ASEval: " + res.attributeEvalClass);
-            System.out.println(" Args: " + res.attributeEvalArgs);
+            log.info("ASEval: {}", res.attributeEvalClass);
+            log.info(" Args: {}", res.attributeEvalArgs);
         }
     }
 

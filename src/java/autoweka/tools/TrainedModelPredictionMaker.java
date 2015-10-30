@@ -12,8 +12,14 @@ import weka.core.converters.ConverterUtils.DataSource;
 
 import autoweka.ClassifierRunner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class TrainedModelPredictionMaker
 {
+
+    final static Logger log = LoggerFactory.getLogger(TrainedModelPredictionMaker.class);
+
     public static void main(String[] argsArray)
     {
         String attributeSelectionObjPath = null;
@@ -48,7 +54,7 @@ public class TrainedModelPredictionMaker
 
         TrainedModelPredictionMaker tmpm = new TrainedModelPredictionMaker(attributeSelectionObjPath, modelObjPath, instancesPath, classIndex, predictionPath);
         
-        System.out.println(tmpm.eval.toSummaryString("\nResults\n======\n", false));
+        log.info(tmpm.eval.toSummaryString("\nResults\n======\n", false));
     }
 
     public Evaluation eval;

@@ -4,11 +4,16 @@ import java.io.File;
 import java.util.ArrayList;
 import java.io.FileInputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /** 
  *  Given a bunch of folders that have experiments in them, merges all the trajectories into a single file for easy analysis
  */
 public class TrajectoryMerger
 {
+    final static Logger log = LoggerFactory.getLogger(TrajectoryMerger.class);
+
     public static void main(String[] args) throws Exception
     {
         ArrayList<String> experimentFolders = new ArrayList<String>();
@@ -34,7 +39,7 @@ public class TrajectoryMerger
 
             TrajectoryGroup group = new TrajectoryGroup(experiment);
 
-            System.out.println("Experiment " + experimentPath);
+            log.info("Experiment {}", experimentPath);
             //Now, figure out what trajectories are there
             File[] experimentDirFiles = new File(experimentPath + File.separator).listFiles();
             for(File f: experimentDirFiles)

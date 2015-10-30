@@ -11,10 +11,15 @@ import java.io.BufferedWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @XmlRootElement(name="experiment")
 @XmlAccessorType(XmlAccessType.NONE)
 public class Experiment extends XmlSerializable
 {
+    final static Logger log = LoggerFactory.getLogger(Experiment.class);
+
     /**
      * The name of the experiment, designed to be human readable and contain useful ID information
      */
@@ -188,14 +193,11 @@ public class Experiment extends XmlSerializable
         //Load an experiment and seed from the args
         File experiment = null;
         String seed = null;
-        boolean silent = false;
         boolean noExit = false;
         File expFolder = null;
         for(int i = 0; i < args.length; i++)
         {
-            if(args[i].equals("-silent"))
-                silent = true;
-            else if(args[i].equals("-noexit"))
+            if(args[i].equals("-noexit"))
                 noExit = true;
             else if(experiment == null)
             {
@@ -221,10 +223,9 @@ public class Experiment extends XmlSerializable
             for(int i = 0; i < exp.callString.size(); i++)
             {
                 exp.callString.set(i, exp.callString.get(i).replace("{SEED}", seed));
-                System.out.print("'" + exp.callString.get(i) + "' ");
+                log.debug("{}", exp.callString.get(i));
             }
 
-            System.out.println();
 
             //See if we can get the path
             File executable = autoweka.Util.findExecutableOnPath(exp.callString.get(0));
@@ -242,7 +243,7 @@ public class Experiment extends XmlSerializable
             {
                 for(String s: exp.envVariables)
                 {
-                    System.out.println(s);
+                    log.debug(s);
                     String[] var = s.split("=", 2);
                     env.put(var[0], var[1]);
                 }
@@ -266,8 +267,7 @@ public class Experiment extends XmlSerializable
             BufferedWriter logOutput = new BufferedWriter(new FileWriter(experiment.getParentFile() + File.separator + "out" + File.separator + "logs" + File.separator + seed + ".log"));
 
             while ((line = reader.readLine ()) != null) {
-                if(!silent)
-                    System.out.println(line);
+                log.debug(line);
                 logOutput.write(line + "\n");
                 logOutput.flush();
             }
@@ -280,7 +280,7 @@ public class Experiment extends XmlSerializable
         }
         catch(Exception e)
         {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             System.exit(1);
         }
     }

@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Similar to an ExperimentBatch, a ListExperiment Batch provides a way of easily making ListExperiments
  */
@@ -13,6 +16,8 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.NONE)
 class ListExperimentBatch extends XmlSerializable
 {
+    final static Logger log = LoggerFactory.getLogger(ListExperimentBatch.class);
+
     @XmlRootElement(name="experiment")
     @XmlAccessorType(XmlAccessType.NONE)
     static public class ListExperimentComponent
@@ -118,8 +123,8 @@ class ListExperimentBatch extends XmlSerializable
     {
         if(args.length != 1)
         {
-            System.out.println("Useage: " + ExperimentBatch.class.getCanonicalName() + " <xmlfilename>");
-            System.out.println("Makes a template experiment batch file");
+            log.error("Useage: {} <xmlfilename>", ExperimentBatch.class.getCanonicalName());
+            log.error("Makes a template experiment batch file");
             System.exit(1);
         }
         ListExperimentBatch batch = new ListExperimentBatch();

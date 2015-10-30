@@ -5,19 +5,23 @@ import weka.core.Instances;
 
 import autoweka.InstanceGenerator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class DatasetStats
 {
+    final static Logger log = LoggerFactory.getLogger(DatasetStats.class);
+
     public static void main(String[] args)
     {
         //Go through each arg and check if it's a zip
         for(String zip : args){
-            System.out.println("Dataset: " + zip);
+            log.info("Dataset: {}", zip);
             InstanceGenerator  generator;
             try{
                 generator = InstanceGenerator.create("autoweka.instancegenerators.Default", "type=zipFile:zipFile=" + zip);
             }catch(Exception e){
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
                 continue;
             }
 
@@ -51,12 +55,12 @@ class DatasetStats
                 }
             }
 
-            System.out.println(" Num Training: " + training.size());
-            System.out.println(" Num Testing:  " + testing.size());
-            System.out.println("   Num Numeric:  " + numNumeric);
-            System.out.println("   Num Nominal:  " + numNominal);
-            System.out.println("   Num Date:     " + numDate);
-            System.out.println("   Num String:   " + numString);
+            log.info(" Num Training: {}", training.size());
+            log.info(" Num Testing:  {}", testing.size());
+            log.info("   Num Numeric:  {}", numNumeric);
+            log.info("   Num Nominal:  {}", numNominal);
+            log.info("   Num Date:     {}", numDate);
+            log.info("   Num String:   {}", numString);
         }
     }
 }

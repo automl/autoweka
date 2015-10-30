@@ -26,11 +26,16 @@ import weka.core.Instances;
 import weka.core.converters.ArffLoader;
 import weka.core.converters.Loader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Bunches of random stuff that seems to be handy in all sorts of places
  */
 public class Util
 {
+    final static Logger log = LoggerFactory.getLogger(Util.class);
+
     /**
      * Given a property string (var1=val1:var2=val2:....) convert it to a property object.
      *
@@ -142,7 +147,7 @@ public class Util
         }
         catch(Exception e)
         {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw new RuntimeException("Failed to create directory:" + basePath);
         }
     }
@@ -222,7 +227,7 @@ public class Util
             catch (java.io.IOException ex)
             {
                 // Crap....
-                System.out.println("WARNING: Failed to evaluate environment variable contents '" + var + "'");
+                log.warn("Failed to evaluate environment variable contents {}", var);
             }
         }
         else //We're probably on a posix system....
@@ -253,7 +258,7 @@ public class Util
             catch (java.io.IOException ex)
             {
                 // Crap....
-                System.out.println("WARNING: Failed to evaluate environment variable contents '" + var + "' - probably due to a lack of unix...");
+                log.warn("Failed to evaluate environment variable contents {} - probably due to a lack of unix...", var);
             }
         }
 
@@ -285,8 +290,7 @@ public class Util
             catch (java.io.IOException ex)
             {
                 // Just consider it unexpandable and return original path.
-                ex.printStackTrace();
-                System.out.println("WARNING: Failed to expand path '" + path+ "'");
+                log.warn("Failed to expand path {}", path, ex);
             }
             File f = new File(exp);
             path = f.getAbsolutePath();
@@ -313,7 +317,7 @@ public class Util
             catch (java.io.IOException ex)
             {
                 // Just consider it unexpandable and return original path.
-                System.out.println("WARNING: Failed to expand path '" + path+ "' - probably due to a lack of unix...");
+                log.warn("Failed to expand path {}", path, ex);
             }
         }
         return path;
@@ -588,14 +592,14 @@ public class Util
             File paramDir = new File(dir.getAbsolutePath() + File.separator + "params");
             if(paramDir.exists() && paramDir.isDirectory())
             {
-                //System.out.println("Found install dir: " + dir.getAbsolutePath());
+                log.trace("Found install dir: {}", dir.getAbsolutePath());
                 return dir.getAbsolutePath();
             }
 
             dir = dir.getParentFile();
         }
         if(!msFailedToFindDistributionOnce){
-            System.out.println("Warning: Could not auto-detect the location of your Auto-WEKA install - have you moved the classes away from the 'params' diectory?");
+            log.warn("Could not auto-detect the location of your Auto-WEKA install - have you moved the classes away from the 'params' diectory?");
             msFailedToFindDistributionOnce = true;
         }
         return ".";

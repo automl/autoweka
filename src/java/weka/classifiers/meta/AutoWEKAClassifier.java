@@ -41,6 +41,9 @@ import java.util.Observer;
 import java.util.Properties;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import autoweka.Experiment;
 import autoweka.ExperimentConstructor;
 import autoweka.InstanceGenerator;
@@ -56,6 +59,8 @@ public class AutoWEKAClassifier extends AbstractClassifier {
 
     /** for serialization */
     static final long serialVersionUID = 2907034203562786373L;
+
+    final Logger log = LoggerFactory.getLogger(AutoWEKAClassifier.class);
 
     static final int DEFAULT_TIME_LIMIT = 60;
 
@@ -177,7 +182,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(mProc.getInputStream()));
                     String line;
                     while ((line = reader.readLine ()) != null) {
-                        System.err.println(line);
+                        log.debug(line);
                         if(Thread.currentThread().isInterrupted()) {
                             mProc.destroy();
                             break;
@@ -186,7 +191,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
                     Runtime.getRuntime().removeShutdownHook(killerHook);
                 } catch (Exception e) {
                     if(mProc != null) mProc.destroy();
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                 }
             } });
         worker.start();
@@ -200,9 +205,9 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         TrajectoryGroup group = TrajectoryMerger.mergeExperimentFolder(msExperimentPath + expName);
 
         // print trajectory information
-        System.err.println("Optimization trajectory:");
+        log.debug("Optimization trajectory:");
         for(Trajectory t: group.getTrajectories()) {
-            System.err.println(t);
+            log.debug("{}", t);
         }
 
         GetBestFromTrajectoryGroup mBest = new GetBestFromTrajectoryGroup(group);
@@ -217,12 +222,8 @@ public class AutoWEKAClassifier extends AbstractClassifier {
             attributeEvalArgs = Util.splitQuotedString(mBest.attributeEvalArgs).toArray(new String[0]);
         }
 
-        System.err.println("classifier: " + classifierClass + "\n" +
-            "arguments: " + (classifierArgs != null ? Arrays.toString(classifierArgs) : "[]") + "\n" +
-            "attribute search: " + attributeSearchClass + "\n" +
-            "attribute search arguments: " + (attributeSearchArgs != null ? Arrays.toString(attributeSearchArgs) : "[]") + "\n" +
-            "attribute evaluation: " + attributeEvalClass + "\n" +
-            "attribute evaluation arguments: " + (attributeEvalArgs != null ? Arrays.toString(attributeEvalArgs) : "[]") + "\n");
+        log.info("classifier: {}, arguments: {}, attribute search: {}, attribute search arguments: {}, attribute evaluation: {}, attribute evaluation arguments: {}",
+            classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
 
         // train model on entire dataset and save
         as = new AttributeSelection();

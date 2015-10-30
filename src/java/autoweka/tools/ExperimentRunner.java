@@ -6,22 +6,27 @@ import autoweka.Experiment;
 import autoweka.TrajectoryParser;
 import autoweka.TrajectoryPointPredictionRunner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Utility class that just combines running an experiment, extracting a trajectory, then saving the model of the incumbent
  */
 class ExperimentRunner
 {
+    final static Logger log = LoggerFactory.getLogger(ExperimentRunner.class);
+
     public static void main(String[] args)
     {
         if(args.length != 2){
-            System.out.println("ExperimentRunner requires 2 arguments - the experiment folder and the seed");
+            log.error("ExperimentRunner requires 2 arguments - the experiment folder and the seed");
             System.exit(1);
         }
         File expFolderFile = new File(args[0]);
         String seed = args[1];
 
         if(!expFolderFile.exists() || !expFolderFile.isDirectory()){
-            System.out.println("The first argument does not appear to be an experiment folder");
+            log.error("The first argument does not appear to be an experiment folder");
             System.exit(1);
         }
         String expFolder = expFolderFile.getAbsolutePath();

@@ -1,10 +1,15 @@
 package autoweka;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Generic WorkerThread that runs for a specific amount of time, then sends an interrupt to the work once a timeout has been hit - if the thread still doesn't stop, it gets killed hard
  */
 abstract class WorkerThread extends Thread
 {
+    final Logger log = LoggerFactory.getLogger(WorkerThread.class);
+
     private com.sun.management.OperatingSystemMXBean mOSBean = (com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory.getOperatingSystemMXBean();
     private static final int msPollInterval = 5;
     private static final float msTimeoutMultiplyer = 1.5f;
@@ -104,7 +109,7 @@ abstract class WorkerThread extends Thread
             //Did the sucker complete?
             if(this.completed() || this.getException() != null)
             {
-                System.out.println(getOpName() + " completed");
+                log.info("{} completed", getOpName());
                 break;
             }
 
@@ -114,14 +119,14 @@ abstract class WorkerThread extends Thread
                 //Try to interrupt the bugger
                 this.interrupt();
                 pollInterval = (long)(timeout * Math.max(0, (msTimeoutMultiplyer - 1)))/1000000;
-                System.out.println(getOpName() + " interrupted");
+                log.info("{} interrupted", getOpName());
                 interrupted = true;
             }
             else if(!stopped && (mOSBean.getProcessCpuTime() - startTime > timeout * msTimeoutMultiplyer /*|| wallTime > timeout * mWalltimeMultiplyer * mTimeoutMultiplyer*/))
             {
                 //Try to interrupt the bugger
                 this.terminate();
-                System.out.println(getOpName() + " aborted (it's only been suspended - leaks are likely!)");
+                log.info("{} aborted (it's only been suspended - leaks are likely!)", getOpName());
                 stopped = true;
                 break;
             }

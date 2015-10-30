@@ -4,8 +4,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.io.FileInputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 class ListResultMerger
 {
+    final static Logger log = LoggerFactory.getLogger(ListResultMerger.class);
+
     public static void main(String[] args) throws Exception
     {
         ArrayList<String> experimentFolders = new ArrayList<String>();
@@ -21,7 +26,7 @@ class ListResultMerger
 
             ListResultGroup resGroup = new ListResultGroup(experiment);
 
-            System.out.println("ListExperiment " + experimentPath);
+            log.info("ListExperiment {}", experimentPath);
             //Now, figure out what trajectories are there
             File[] experimentDirFiles = new File(experimentPath + File.separator).listFiles();
             for(File f: experimentDirFiles)

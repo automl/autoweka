@@ -69,6 +69,7 @@
             <manifest>
                 <attribute name="Main-Class" value="autoweka.ui.Launcher"/>
             </manifest>
+            <zipfileset dir="lib" includes="*.properties" />
             <zipgroupfileset dir="lib" includes="*.jar" />
             <zipgroupfileset dir="lib/swingbuilder" includes="*.jar" />
         </jar>

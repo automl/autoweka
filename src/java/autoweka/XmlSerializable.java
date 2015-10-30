@@ -22,11 +22,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Deque;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Helper class to make objects easily be read to/from XML, as well as specifying them on the command line
  */
 public class XmlSerializable
 {
+    final static Logger log = LoggerFactory.getLogger(XmlSerializable.class);
+
     /**
      * Spits out the class to the given XML file
      */
@@ -71,7 +76,7 @@ public class XmlSerializable
         }
         catch(Exception e)
         {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw new RuntimeException("Failed to load from XML file");
         }
     }
@@ -124,7 +129,7 @@ public class XmlSerializable
                 
                 Class<?> parserClass = msParserMap.get(f.getType());
                 if(parserClass == null){
-                    System.out.println(f.getType());
+                    log.debug("{}", f.getType());
                     continue;
                 }
 

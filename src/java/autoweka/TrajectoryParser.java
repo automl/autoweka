@@ -5,12 +5,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /** Abstract class that SMBO Methods must provide that allows for trajectories to be extracted after a run has completed
  */
 public abstract class TrajectoryParser
 {
     /** Does the work for a specific trajectory */
     public abstract Trajectory parseTrajectory(Experiment experiment, File folder, String seed);
+
+    final static Logger log = LoggerFactory.getLogger(TrajectoryParser.class);
 
     /** Call this on a specific experiment to automatically create the correct trajectory parser that will
      *  be used to extract the data
@@ -50,7 +55,7 @@ public abstract class TrajectoryParser
 
             TrajectoryGroup group = new TrajectoryGroup(experiment);
 
-            System.out.println("Experiment " + experimentPath);
+            log.info("Experiment {}", experimentPath);
             //Now, figure out what seeds there are
             if(targetSeed == null)
             {
@@ -60,14 +65,14 @@ public abstract class TrajectoryParser
                     String logName = f.getName();
                     String seed = logName.substring(0, logName.lastIndexOf('.'));
 
-                    System.out.println("  Seed" + seed);
+                    log.debug("Seed {}", seed);
                     try
                     {
                         group.addTrajectory(getTrajectory(experiment, folder, seed));
                     }
                     catch(Exception e)
                     {
-                        e.printStackTrace();
+                        log.error(e.getMessage(), e);
                     }
                 }
 
@@ -76,7 +81,7 @@ public abstract class TrajectoryParser
             else
             {
                 //We're only doing a specific seed
-                System.out.println("  Seed" + targetSeed);
+                log.debug("Seed {}", targetSeed);
                 group.addTrajectory(getTrajectory(experiment, folder, targetSeed));
                 group.toXML(experimentPath + File.separator + folder.getName() + ".trajectories." + targetSeed);
             }
@@ -99,7 +104,7 @@ public abstract class TrajectoryParser
         }
         catch(Exception e)
         {
-            e.getCause().printStackTrace();
+            log.error(e.getMessage(), e);
             throw new RuntimeException("Failed to instantiate '" + experiment.trajectoryParserClassName + "': " + e, e);
         }
 

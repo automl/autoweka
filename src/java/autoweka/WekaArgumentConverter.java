@@ -5,11 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Utility class that can convert arguments from Auto-WEKA to WEKA
  */
 public class WekaArgumentConverter
 {
+    final static Logger log = LoggerFactory.getLogger(WekaArgumentConverter.class);
+
     /**
      * Converts arguments from the Auto-WEKA format into something that WEKA can actually understand.
      */
@@ -169,8 +174,8 @@ public class WekaArgumentConverter
                     quotedString += arg.value + " ";
             }
         }
-        //for(String s: argMap.get("classifier"))
-            //System.out.println("arg: " + s);
+        for(String s: argMap.get("classifier"))
+            log.trace("arg: {}", s);
 
         if(quotedString != null)
             throw new RuntimeException("Unbalanced QUOTE markers in arguments" + quoteDepth);
