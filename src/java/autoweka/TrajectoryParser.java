@@ -55,7 +55,7 @@ public abstract class TrajectoryParser
 
             TrajectoryGroup group = new TrajectoryGroup(experiment);
 
-            log.info("Experiment {}", experimentPath);
+            log.debug("Experiment {}", experimentPath);
             //Now, figure out what seeds there are
             if(targetSeed == null)
             {

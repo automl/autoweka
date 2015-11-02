@@ -267,7 +267,16 @@ public class Experiment extends XmlSerializable
             BufferedWriter logOutput = new BufferedWriter(new FileWriter(experiment.getParentFile() + File.separator + "out" + File.separator + "logs" + File.separator + seed + ".log"));
 
             while ((line = reader.readLine ()) != null) {
-                log.debug(line);
+                // fix nested logging...
+                if(line.matches(".*DEBUG.*")) {
+                    log.debug(line);
+                } else if(line.matches(".*WARN.*")) {
+                    log.warn(line);
+                } else if(line.matches(".*ERROR.*")) {
+                    log.error(line);
+                } else {
+                    log.info(line);
+                }
                 logOutput.write(line + "\n");
                 logOutput.flush();
             }

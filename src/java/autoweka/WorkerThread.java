@@ -109,7 +109,7 @@ abstract class WorkerThread extends Thread
             //Did the sucker complete?
             if(this.completed() || this.getException() != null)
             {
-                log.info("{} completed", getOpName());
+                log.debug("{} completed", getOpName());
                 break;
             }
 
@@ -119,14 +119,14 @@ abstract class WorkerThread extends Thread
                 //Try to interrupt the bugger
                 this.interrupt();
                 pollInterval = (long)(timeout * Math.max(0, (msTimeoutMultiplyer - 1)))/1000000;
-                log.info("{} interrupted", getOpName());
+                log.debug("{} interrupted", getOpName());
                 interrupted = true;
             }
             else if(!stopped && (mOSBean.getProcessCpuTime() - startTime > timeout * msTimeoutMultiplyer /*|| wallTime > timeout * mWalltimeMultiplyer * mTimeoutMultiplyer*/))
             {
                 //Try to interrupt the bugger
                 this.terminate();
-                log.info("{} aborted (it's only been suspended - leaks are likely!)", getOpName());
+                log.debug("{} aborted (it's only been suspended - leaks are likely!)", getOpName());
                 stopped = true;
                 break;
             }

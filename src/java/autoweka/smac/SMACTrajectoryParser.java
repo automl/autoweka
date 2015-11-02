@@ -45,7 +45,7 @@ public class SMACTrajectoryParser extends TrajectoryParser
                     break;
                 }
             }
-            log.info("Trajectory file name: {}", trajFileName);
+            log.debug("Trajectory file name: {}", trajFileName);
             Scanner scanner = new Scanner(new FileInputStream(trajFileName));
 
             String line;
@@ -103,7 +103,7 @@ public class SMACTrajectoryParser extends TrajectoryParser
                 int numEvals = 0;
                 int numMemOut = 0;
                 int numTimeOut = 0;
-                log.info("Run results file: {}", runsAndResultsFileName);
+                log.debug("Run results file: {}", runsAndResultsFileName);
                 scanner = new Scanner(new FileInputStream(runsAndResultsFileName));
 
                 //Skip the header

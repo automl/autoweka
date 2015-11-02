@@ -134,7 +134,7 @@ public abstract class ExperimentConstructor
         exp.validate();
 
         //The first parameter contains the full class of the experiment constructor
-        log.info("Making Experiment {}", exp.name);
+        log.debug("Making Experiment {}", exp.name);
         Class<?> cls;
         ExperimentConstructor builder;
         try

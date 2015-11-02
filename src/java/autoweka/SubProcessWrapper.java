@@ -65,7 +65,7 @@ public class SubProcessWrapper extends Wrapper
     @Override
     protected void _processResults(ClassifierResult res)
     {
-        log.info("SubProcessWrapper time: {}, score: {}", res.getTime(), res.getScore());
+        System.out.print("SubProcessWrapper: Time(" + res.getTime() + ") Score(" + res.getScore() + ")");
         String outputFilePrefix = mProperties.getProperty("modelOutputFilePrefix", null);
         if(outputFilePrefix != null){
             try{
@@ -177,7 +177,16 @@ public class SubProcessWrapper extends Wrapper
             boolean foundMatch = false;
 
             while ((line = reader.readLine ()) != null) {
-                log.debug(line);
+                // fix nested logging...
+                if(line.matches(".*DEBUG.*")) {
+                    log.debug(line);
+                } else if(line.matches(".*WARN.*")) {
+                    log.warn(line);
+                } else if(line.matches(".*ERROR.*")) {
+                    log.error(line);
+                } else {
+                    log.info(line);
+                }
                 Matcher matcher = mResultPattern.matcher(line);
                 if(matcher.matches())
                 {

@@ -182,7 +182,16 @@ public class AutoWEKAClassifier extends AbstractClassifier {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(mProc.getInputStream()));
                     String line;
                     while ((line = reader.readLine ()) != null) {
-                        log.info(line);
+                        // fix nested logging...
+                        if(line.matches(".*DEBUG.*")) {
+                            log.debug(line);
+                        } else if(line.matches(".*WARN.*")) {
+                            log.warn(line);
+                        } else if(line.matches(".*ERROR.*")) {
+                            log.error(line);
+                        } else {
+                            log.info(line);
+                        }
                         if(Thread.currentThread().isInterrupted()) {
                             mProc.destroy();
                             break;

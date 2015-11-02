@@ -314,8 +314,7 @@ public class ClassifierRunner
         sb.append(instanceStr);
         sb.append("; ");
         sb.append(res.getRawScore());
-        sb.append("\n");
-        log.debug("Instantiating {}", sb);
+        log.info("Instantiating {}", sb);
 
         log.debug("Num Training: {}, num testing: {}", training.numInstances(), testing.numInstances());
 
