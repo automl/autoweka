@@ -2,21 +2,10 @@ INT_I [2,128][10]il
 h_HIDDEN {0,1}[0]
     1_H {1}[1]
     2_H [0,1.0][1]
-INT_R [1,5][1]i
-f_HIDDEN {0,1}[0]
-    1_F {0}[0]
-    2_INT_F [1,5][1]i
 Q {REMOVED,REMOVE_PREV}[REMOVE_PREV]
-p_HIDDEN {0,1}[0]
-    1_P {100}[100]
-    2_INT_P [50,100][100]i
 L{1e50}[1e50]
 S{1}[1]
 
 Conditionals:
 1_H | h_HIDDEN in {0}
 2_H | h_HIDDEN in {1}
-1_F | f_HIDDEN in {0}
-2_INT_F | f_HIDDEN in {1}
-1_P | p_HIDDEN in {0}
-2_INT_P | p_HIDDEN in {1}
