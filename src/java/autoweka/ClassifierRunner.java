@@ -304,17 +304,11 @@ public class ClassifierRunner
             return res;
 
         // write out configuration info
-        StringBuilder sb = new StringBuilder();
-        sb.append(targetClassifierName + " " + Arrays.toString(argsArraySaved));
-        sb.append("; ");
-        sb.append(attribEvalClassName + " " + Arrays.toString(argMap.get("attributeeval").toArray(new String[0])));
-        sb.append("; ");
-        sb.append(attribSearchClassName + " " + Arrays.toString(argMap.get("attributesearch").toArray(new String[0])));
-        sb.append("; ");
-        sb.append(instanceStr);
-        sb.append("; ");
-        sb.append(res.getRawScore());
-        log.info("Instantiating {}", sb);
+        log.info("{};{};{};{};{};{};{};{}",
+            targetClassifierName, argsArraySaved,
+             attribEvalClassName, argMap.get("attributeeval"),
+             attribSearchClassName, argMap.get("attributesearch"),
+             instanceStr, res.getRawScore());
 
         log.debug("Num Training: {}, num testing: {}", training.numInstances(), testing.numInstances());
 
