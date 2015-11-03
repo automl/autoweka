@@ -76,10 +76,10 @@ public class SMACExperimentConstructor extends ExperimentConstructor
         args.add("autoweka.scenario");
         args.add("--logModel");
         args.add("false");
-        args.add("--console-log-level");
-        args.add("INFO");
-        //args.add("--logAllProcessOutput");
-        //args.add("TRUE");
+        //args.add("--console-log-level");
+        //args.add("INFO");
+        args.add("--logAllProcessOutput");
+        args.add("TRUE");
         args.add("--adaptiveCapping");
         args.add("false");
         args.add("--runGroupName");
