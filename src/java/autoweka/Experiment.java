@@ -268,8 +268,13 @@ public class Experiment extends XmlSerializable
 
             while ((line = reader.readLine ()) != null) {
                 // fix nested logging...
-                if(line.matches(".*Result for ParamILS:.*")) continue;
-                if(line.matches(".*DEBUG.*")) {
+                if(line.matches(".*Result for ParamILS:.*")) {
+                    log.debug(line);
+                } else if(line.matches(".*autoweka.smac.SMACWrapper.*")) {
+                    log.debug(line);
+                } else if(line.matches(".*Sample call for new incumbent.*")) {
+                    log.debug(line);
+                } else if(line.matches(".*DEBUG.*")) {
                     log.debug(line);
                 } else if(line.matches(".*WARN.*")) {
                     log.warn(line);

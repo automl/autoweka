@@ -164,23 +164,23 @@ public class ApplicabilityTester
         }
         catch(ClassNotFoundException e)
         {
-            log.warn("No class {} found", method);
+            log.info("No class {} found", method);
         }
         catch(InstantiationException e)
         {
-            log.warn("Failed to instantiate {}: {}", method, e.getMessage(), e);
+            log.info("Failed to instantiate {}: {}", method, e.getMessage(), e);
         }
         catch(IllegalAccessException e)
         {
-            log.warn("Illegal access exception creating {}: {}", method, e.getMessage(), e);
+            log.info("Illegal access exception creating {}: {}", method, e.getMessage(), e);
         }
         catch(weka.core.UnsupportedAttributeTypeException e)
         {
-            log.warn("{} failed: {}", method, e.getMessage(), e);
+            log.info("{} failed: {}", method, e.getMessage(), e);
         }
         catch(Exception e)
         {
-            log.warn("{} not supported: {}", method, e.getMessage(), e);
+            log.info("{} not supported: {}", method, e.getMessage(), e);
         }
         return false;
     }
@@ -190,10 +190,10 @@ public class ApplicabilityTester
         try{
             ASSearch search = ASSearch.forName(method, new String[0]);
         } catch(weka.core.UnsupportedAttributeTypeException e) {
-            log.warn("{} failed: {}", method, e.getMessage(), e);
+            log.info("{} failed: {}", method, e.getMessage(), e);
             return false;
         }catch(Exception e){
-            log.warn("{} not supported: {}", method, e.getMessage(), e);
+            log.info("{} not supported: {}", method, e.getMessage(), e);
             return false;
         }
         return true;
@@ -205,10 +205,10 @@ public class ApplicabilityTester
             ASEvaluation eval = ASEvaluation.forName(method, new String[0]);
             eval.getCapabilities().testWithFail(instances);
         } catch(weka.core.UnsupportedAttributeTypeException e) {
-            log.warn("{} failed: {}", method, e.getMessage(), e);
+            log.info("{} failed: {}", method, e.getMessage(), e);
             return false;
         }catch(Exception e){
-            log.warn("{} not supported: {}", method, e.getMessage(), e);
+            log.info("{} not supported: {}", method, e.getMessage(), e);
             return false;
         }
         return true;
