@@ -24,8 +24,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Wrapper
 {
-    protected String mSeed = "";
-    protected String mExperimentSeed = "0";
+    protected String mExperimentSeed = null;
     protected String mInstance = null;
     protected float mTimeout = 0;
     protected ClassifierRunner mRunner;
@@ -158,7 +157,7 @@ public class Wrapper
             log.trace("Adding arg {}", s);
 
         try {
-            res = mRunner.run(mInstance, mResultMetric, mTimeout, mSeed, runnerArgs);
+            res = mRunner.run(mInstance, mResultMetric, mTimeout, mExperimentSeed, runnerArgs);
         } catch (Throwable e) {
             log.error(e.getMessage(), e);
             long stopTime = OSBean.getProcessCpuTime();

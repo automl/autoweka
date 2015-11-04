@@ -357,10 +357,10 @@ public class ClassifierRunner
             res.setMemOut(e.getCause() instanceof OutOfMemoryError);
             return false;
         }
-        log.debug(eval.toSummaryString("\nResults\n======\n", false));
+        log.trace(eval.toSummaryString("\nResults\n======\n", false));
         try
         {
-            log.debug(eval.toMatrixString());
+            log.trace(eval.toMatrixString());
         }catch(Exception e)
         {
             //throw new RuntimeException("Failed to get confusion matrix", e);

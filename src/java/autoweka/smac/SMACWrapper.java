@@ -27,8 +27,9 @@ public class SMACWrapper extends Wrapper
         mTimeout = Float.parseFloat(args.poll());
         //The cutoff length... ignore
         args.poll();
-        //The seed
-        mSeed = args.poll();
+        // XXX: seed -- no idea how this is set or why exactly things break horribly
+        // if this isn't removed here
+        args.poll();
     }
 
     @Override
@@ -83,7 +84,7 @@ public class SMACWrapper extends Wrapper
         extraResultsSB.append(res.getPercentEvaluated());
 
         //Print the result string
-        System.out.println("Result for ParamILS: " + resultStr + ", " + res.getTime() + ", 0, " + score + ", " + mSeed + ", EXTRA " + extraResultsSB.toString());
+        System.out.println("Result for ParamILS: " + resultStr + ", " + res.getTime() + ", 0, " + score + ", " + mExperimentSeed + ", EXTRA " + extraResultsSB.toString());
         System.exit(0);
     }
 }

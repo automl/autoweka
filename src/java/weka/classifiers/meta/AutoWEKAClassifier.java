@@ -98,6 +98,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     protected static String msExperimentPath;
     protected static String expName = "Auto-WEKA";
 
+    protected int seed = 123;
     protected int timeLimit = DEFAULT_TIME_LIMIT;
     protected Resampling resampling = DEFAULT_RESAMPLING;
     protected String resamplingArgs = DEFAULT_RESAMPLING_ARGS;
@@ -135,7 +136,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         Attribute classAttr = is.classAttribute();
         if(classAttr.isNominal()){
             exp.resultMetric = "errorRate"; 
-        }else if(classAttr.isNumeric()) {
+        } else if(classAttr.isNumeric()) {
             exp.resultMetric = "rmse"; 
         }
 
@@ -148,7 +149,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         props.setProperty("trainArff", fp.getAbsolutePath());
         exp.datasetString = Util.propertiesToString(props);
         exp.instanceGenerator = "autoweka.instancegenerators." + String.valueOf(resampling);
-        exp.instanceGeneratorArgs = resamplingArgs;
+        exp.instanceGeneratorArgs = "seed=" + seed + ":" + resamplingArgs;
         exp.attributeSelection = true;
 
         exp.attributeSelectionTimeout = timeLimit * 1;
@@ -171,7 +172,7 @@ public class AutoWEKAClassifier extends AbstractClassifier {
             public void run() {
                 Process mProc = null;
                 try {
-                    ProcessBuilder pb = new ProcessBuilder(autoweka.Util.getJavaExecutable(), "-Xmx128m", "-cp", autoweka.Util.getAbsoluteClasspath(), "autoweka.tools.ExperimentRunner", msExperimentPath + expName, "0");
+                    ProcessBuilder pb = new ProcessBuilder(autoweka.Util.getJavaExecutable(), "-Xmx128m", "-cp", autoweka.Util.getAbsoluteClasspath(), "autoweka.tools.ExperimentRunner", msExperimentPath + expName, "" + seed);
                     pb.redirectErrorStream(true);
 
                     mProc = pb.start();
@@ -278,6 +279,9 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     public Enumeration<Option> listOptions() {
         Vector<Option> result = new Vector<Option>();
         result.addElement(
+            new Option("\tThe seed for the random number generator.\n" + "\t(default: " + seed + ")",
+                "seed", 1, "-seed <seed>"));
+        result.addElement(
             new Option("\tThe time limit for tuning in minutes (approximately).\n" + "\t(default: " + DEFAULT_TIME_LIMIT + ")",
                 "timeLimit", 1, "-timeLimit <limit>"));
         result.addElement(
@@ -301,6 +305,8 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     public String[] getOptions() {
         Vector<String> result = new Vector<String>();
 
+        result.add("-seed");
+        result.add("" + seed);
         result.add("-timeLimit");
         result.add("" + timeLimit);
         result.add("-resampling");
@@ -318,6 +324,11 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     public void setOptions(String[] options) throws Exception {
         String tmpStr;
         String[] tmpOptions;
+
+        tmpStr = Utils.getOption("seed", options);
+        if (tmpStr.length() != 0) {
+            seed = Integer.parseInt(tmpStr);
+        }
 
         tmpStr = Utils.getOption("timeLimit", options);
         if (tmpStr.length() != 0) {
@@ -348,6 +359,22 @@ public class AutoWEKAClassifier extends AbstractClassifier {
 
         super.setOptions(options);
         Utils.checkForRemainingOptions(options);
+    }
+
+    public void setSeed(int s) {
+        seed = s;
+    }
+
+    public int getSeed() {
+        return seed;
+    }
+
+    /**
+     * Returns the tip text for this property.
+     * @return tip text for this property
+     */
+    public String seedTipText() {
+        return "the seed for the random number generator";
     }
 
     public void setTimeLimit(int tl) {

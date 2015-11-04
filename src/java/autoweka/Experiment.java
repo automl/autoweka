@@ -185,8 +185,6 @@ public class Experiment extends XmlSerializable
      * and the seed on which you want to run this experiment. The seed is passed to the SMBO method to allow for easy paralellization of
      * each SMBO method.
      *
-     * Takes an optional argument '-silent' that doesn't print everything out to stdout
-     *
      */
     public static void main(String[] args)
     {
