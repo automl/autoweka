@@ -41,7 +41,8 @@ public class SubProcessWrapper extends Wrapper
     {
         if (arg.equals("-seed"))
         {
-            mSeed = args.poll();
+            // ignored
+            args.poll();
         }
         else if (arg.equals("-timeout"))
         {
