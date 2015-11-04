@@ -144,14 +144,15 @@ public class WekaArgumentConverter
                 //Should we pop this qoute?
                 if(arg.name.endsWith("QUOTE_END"))
                 {
-                    quotedString = quotedString.trim(); //+ "\"";
+                    quotedString = quotedString.trim();
+                    if(quoteDepth > 1) quotedString += "\"";
                     quoteDepth--;
                     if(quoteDepth == 0)
                     {
                         dest.add(quotedString);
                         quotedString = null;
-                        continue;
                     }
+                    continue;
                 }
 
                 //Should we actually be the start of a quote?
@@ -164,6 +165,7 @@ public class WekaArgumentConverter
                 else if(arg.name.contains("QUOTE_START"))
                 {
                     quotedString += sanitizedName + " \"";
+                    quoteDepth++;
                 }
                 else
                 {
@@ -211,6 +213,10 @@ public class WekaArgumentConverter
         public int compareTo(ArgumentPair rhs)
         {
             return name.compareTo(rhs.name);
+        }
+
+        public String toString() {
+            return name + ": " + value;
         }
         
         public String name;
