@@ -1,2 +1,2 @@
-S {weka.attributeSelection.BestFirst,weka.attributeSelection.GreedyStepwise,weka.attributeSelection.Ranker}[weka.attributeSelection.BestFirst]
-E {weka.attributeSelection.CfsSubsetEval,weka.attributeSelection.WrapperSubsetEval,weka.attributeSelection.OneRAttributeEval,weka.attributeSelection.InfoGainAttributeEval,weka.attributeSelection.HoldOutSubsetEvaluator,weka.attributeSelection.GainRatioAttributeEval}[weka.attributeSelection.CfsSubsetEval]
+S {weka.attributeSelection.BestFirst,weka.attributeSelection.GreedyStepwise}[weka.attributeSelection.BestFirst]
+E {weka.attributeSelection.CfsSubsetEval}[weka.attributeSelection.CfsSubsetEval]

@@ -164,7 +164,7 @@ public class ClassifierRunner
             try{
                 asEval   = ASEvaluation.forName(attribEvalClassName, argMap.get("attributeeval").toArray(new String[0]));
             }catch(Exception e){
-                throw new RuntimeException("Failed to create ASSearch " + attribEvalClassName + ": " + e.getMessage(), e);
+                throw new RuntimeException("Failed to create ASEvaluation " + attribEvalClassName + ": " + e.getMessage(), e);
             }
             try{
                 asSearch = ASSearch.forName(attribSearchClassName, argMap.get("attributesearch").toArray(new String[0]));
@@ -190,7 +190,7 @@ public class ClassifierRunner
                 if(asThread.getException() != null)
                 {
                     res.setMemOut(asThread.getException().getCause() instanceof OutOfMemoryError);
-                    log.warn("Attribute selection failed: {}", asThread.getException().getMessage(), asThread.getException());
+                    log.warn("Attribute selection (search {} {}, eval {} {}) failed: {}", attribSearchClassName, argMap.get("attributeeval"), attribEvalClassName, argMap.get("attributesearch"), asThread.getException().getMessage(), asThread.getException());
                 }
 
                 asThread = null;
@@ -276,7 +276,7 @@ public class ClassifierRunner
 
         if(builderThread.getException() != null)
         {
-            log.warn("Training classifier failed: {}", builderThread.getException().getMessage(), builderThread.getException());
+            log.warn("Training classifier ({} {}) failed: {}", targetClassifierName, argsArraySaved, builderThread.getException().getMessage(), builderThread.getException());
             res.setMemOut(builderThread.getException().getCause() instanceof OutOfMemoryError);
         }
 

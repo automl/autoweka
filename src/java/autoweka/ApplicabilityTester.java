@@ -185,7 +185,7 @@ public class ApplicabilityTester
         return false;
     }
 
-    private static boolean isApplicableAttributeSearch(String method, Instances instances){
+    private static boolean isApplicableAttributeSearch(String method, Instances instances) {
         //Build an AS...Search  (curse you bad naming scheme!) and see if it can handle the instances
         try{
             ASSearch search = ASSearch.forName(method, new String[0]);
@@ -199,15 +199,15 @@ public class ApplicabilityTester
         return true;
     }
     
-    private static boolean isApplicableAttributeEvaluator(String method, Instances instances){
+    private static boolean isApplicableAttributeEvaluator(String method, Instances instances) {
         //Build an ASE and see if it can handle the instances
-        try{
+        try {
             ASEvaluation eval = ASEvaluation.forName(method, new String[0]);
             eval.getCapabilities().testWithFail(instances);
         } catch(weka.core.UnsupportedAttributeTypeException e) {
             log.debug("{} failed: {}", method, e.getMessage(), e);
             return false;
-        }catch(Exception e){
+        } catch(Exception e) {
             log.debug("{} not supported: {}", method, e.getMessage(), e);
             return false;
         }

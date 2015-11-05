@@ -1,5 +1,5 @@
 E {acc,rmse,mae,auc} [acc]
 I {REMOVED,REMOVE_PREV}[REMOVE_PREV]
-S {weka.attributeSelection.BestFirst,weka.attributeSelection.GreedyStepwise,weka.attributeSelection.Ranker}[weka.attributeSelection.BestFirst]
+S {weka.attributeSelection.BestFirst,weka.attributeSelection.GreedyStepwise}[weka.attributeSelection.BestFirst]
 X {1,2,3,4} [1]
 
