@@ -610,17 +610,22 @@ public class Util
     static public List<String> splitQuotedString(String str)
     {
         List<String> strings = new ArrayList<String>();
-        boolean inQuotes = false;
-        boolean quoteStateChange = false;
+        int level = 0;
         StringBuffer buffer = new StringBuffer();
-        //Find some spaces, 
         for(int i = 0; i < str.length(); i++){
-            //Have we toggled the quote state?
             char c = str.charAt(i);
-            quoteStateChange = false;
-            if(c == '"' && (i == 0 || str.charAt(i-1) != '\\')){
-                inQuotes = !inQuotes;
-                quoteStateChange = true;
+            if(c == '"') {
+                if(i == 0 || str.charAt(i-1) == ' ') {
+                    // start quote
+                    level++;
+                    // don't need to append quotes for top-level things
+                    if(level == 1) continue;
+                }
+                if(i == str.length() - 1 || str.charAt(i+1) == ' ' || str.charAt(i+1) == '"') {
+                    // end quote
+                    level--;
+                    if(level == 0) continue;
+                }
             }
             //Peek at the next character - if we have a \", we need to only insert a "
             if(c == '\\' && i < str.length()-1 && str.charAt(i+1) == '"')
@@ -629,15 +634,13 @@ public class Util
                 i++;
             }
 
-            //If we're not in quotes, and we've hit a space...
-            if(!inQuotes && str.charAt(i) == ' '){
-                //Do we actually have somthing in the buffer?
-                if(buffer.length() > 0){
+            if(level == 0 && str.charAt(i) == ' ') {
+                // done with this part
+                if(buffer.length() > 0) {
                     strings.add(buffer.toString());
                     buffer.setLength(0);
                 }
-            }else if(!quoteStateChange){
-                //We only want to add stuff to the buffer if we're forced to by quotes, or we're not a "
+            } else {
                 buffer.append(c);
             }
         }
