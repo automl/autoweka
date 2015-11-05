@@ -190,7 +190,7 @@ public class ClassifierRunner
                 if(asThread.getException() != null)
                 {
                     res.setMemOut(asThread.getException().getCause() instanceof OutOfMemoryError);
-                    log.debug("Attribute selection failed: {}", asThread.getException().getMessage(), asThread.getException());
+                    log.warn("Attribute selection failed: {}", asThread.getException().getMessage(), asThread.getException());
                 }
 
                 asThread = null;
@@ -276,7 +276,7 @@ public class ClassifierRunner
 
         if(builderThread.getException() != null)
         {
-            log.debug("Training classifier failed: {}", builderThread.getException().getMessage(), builderThread.getException());
+            log.warn("Training classifier failed: {}", builderThread.getException().getMessage(), builderThread.getException());
             res.setMemOut(builderThread.getException().getCause() instanceof OutOfMemoryError);
         }
 
