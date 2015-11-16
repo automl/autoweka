@@ -293,6 +293,12 @@ public class AutoWEKAClassifier extends AbstractClassifier {
         result.addElement(
             new Option("\tExtra arguments.\n" + "\t(default: " + DEFAULT_EXTRA_ARGS + ")",
                 "extraArgs", 1, "-extraArgs <args>"));
+
+        Enumeration<Option> enu = super.listOptions();
+        while (enu.hasMoreElements()) {
+            result.addElement(enu.nextElement());
+        }
+
         return result.elements();
     }
 
