@@ -53,6 +53,9 @@ public class SMACExperimentConstructor extends ExperimentConstructor
     @Override
     public List<String> getCallString(String experimentPath)
     {
+        // assumes that autoweka.jar is at the root of the autoweka distribution
+        // (as it will be for the WEKA package)
+        String prefix = new File(SMACExperimentConstructor.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParentFile().toString();
         //Make sure that the properties we have tell us where the executable for smac lives
         if(mProperties.getProperty("smacexecutable") == null)
             throw new RuntimeException("The 'smacexecutable' property was not defined");
@@ -64,12 +67,18 @@ public class SMACExperimentConstructor extends ExperimentConstructor
             execExtension = ".bat";
         }
 
-        File f = new File(Util.expandPath(mProperties.getProperty("smacexecutable") + execExtension));
+        String smac = prefix + File.separator + mProperties.getProperty("smacexecutable") + execExtension;
+
+        File f = new File(Util.expandPath(smac));
         if(!f.exists())
             throw new RuntimeException("Could not find SMAC executable '" + f.getAbsoluteFile() + "'");
 
+        // now make it executable, it's not when extracted by the WEKA package
+        // manager...
+        f.setExecutable(true);
+
         List<String> args = new ArrayList<String>();
-        args.add(mProperties.getProperty("smacexecutable") + execExtension);
+        args.add(smac);
         args.add("--seed");
         args.add("{SEED}");
         args.add("--scenarioFile");
