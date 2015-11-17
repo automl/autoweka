@@ -100,7 +100,7 @@
     </target>
 
     <!-- Run some tests -->
-    <target name="compile-tests" depends="compile">
+    <target name="compile-tests" depends="jar">
         <mkdir dir="${testclass.dir}"/>
         <javac srcdir="test/java" destdir="${testclass.dir}" classpathref="test.classpath" includeantruntime="false" target="1.6"  source="1.6" debug="true"/>
     </target>
