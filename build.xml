@@ -17,10 +17,9 @@
         <fileset dir="${lib.dir}/swingbuilder" includes="*.jar"/>
     </path>
     <path id="test.classpath">
-        <path refid="classpath" />
+        <fileset dir="." includes="autoweka.jar"/>
         <fileset dir="${lib.dir}/test" includes="*.jar"/>
         <pathelement path="${testclass.dir}" /> 
-        <pathelement path="${class.dir}" /> 
     </path>
 
     <!-- Clean target -->
@@ -33,7 +32,6 @@
         <zip destfile="autoweka.zip"
              basedir="."
              excludes=".git/, weka/, .travis.yml, *.sh, wizardexperiments/, scripts/, *.tar.gz">
-            <zipfileset dir="build/jar" includes="autoweka.jar" fullpath="autoweka.jar"/>
         </zip>
     </target>
     
@@ -65,7 +63,7 @@
 
     <!-- Build the actual jar -->
     <target name="jar" depends='compile'>
-        <jar destfile="${jar.dir}/autoweka.jar" basedir="${class.dir}">
+        <jar destfile="autoweka.jar" basedir="${class.dir}">
             <manifest>
                 <attribute name="Main-Class" value="autoweka.ui.Launcher"/>
             </manifest>
@@ -76,7 +74,7 @@
     </target>
     
     <target name="jar-light" depends='compile'>
-        <jar destfile="${jar.dir}/autoweka-light.jar" basedir="${class.dir}">
+        <jar destfile="autoweka-light.jar" basedir="${class.dir}">
             <manifest>
                 <attribute name="Main-Class" value="autoweka.ui.Launcher"/>
             </manifest>
@@ -92,6 +90,7 @@
             <tarfileset dir="scripts" includes="**/*" prefix="scripts" filemode="755" />
             <tarfileset dir="src" includes="**/*" prefix="src" />
             <tarfileset dir="." includes="build.xml" />
+            <tarfileset dir="." includes="autoweka.jar" />
             <tarfileset dir="weka" includes="autoweka.patch" />
             <!--<tarfileset dir="datasets/classification" includes="creditg.arff" prefix="datasets" />-->
             <tarfileset dir="${doc.dir}/javadoc" includes="**/*" prefix="doc" />

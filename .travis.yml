@@ -16,5 +16,6 @@ script: >
     ant weka-package &&
     java -cp lib/weka.jar weka.core.WekaPackageManager -install-package autoweka.zip &&
     export TMPF=`mktemp` &&
-    java -cp build/jar/autoweka.jar weka.classifiers.meta.AutoWEKAClassifier -t test/iris.arff -no-cv -timeLimit 15 2>&1 | tee $TMPF &&
+    ln -sf build/jar/autoweka.jar . &&
+    java -cp autoweka.jar weka.classifiers.meta.AutoWEKAClassifier -t test/iris.arff -no-cv -timeLimit 15 2>&1 | tee $TMPF &&
     grep "classifier: weka.classifiers." $TMPF
