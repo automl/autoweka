@@ -4,10 +4,12 @@ import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
 
-import weka.classifiers.Classifier;
 import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
 
 import weka.core.Attribute;
+import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.converters.ArffSaver;
@@ -39,6 +41,8 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Vector;
 
 import org.slf4j.Logger;
@@ -55,7 +59,7 @@ import autoweka.TrajectoryMerger;
 
 import autoweka.tools.GetBestFromTrajectoryGroup;
 
-public class AutoWEKAClassifier extends AbstractClassifier {
+public class AutoWEKAClassifier extends AbstractClassifier implements AdditionalMeasureProducer {
 
     /** for serialization */
     static final long serialVersionUID = 2907034203562786373L;
@@ -103,6 +107,8 @@ public class AutoWEKAClassifier extends AbstractClassifier {
     protected Resampling resampling = DEFAULT_RESAMPLING;
     protected String resamplingArgs = DEFAULT_RESAMPLING_ARGS;
     protected String extraArgs = DEFAULT_EXTRA_ARGS;
+
+    protected double estimatedError = -1;
 
     /**
      * Main method for testing this class.
@@ -182,7 +188,11 @@ public class AutoWEKAClassifier extends AbstractClassifier {
 
                     BufferedReader reader = new BufferedReader(new InputStreamReader(mProc.getInputStream()));
                     String line;
-                    while ((line = reader.readLine ()) != null) {
+                    while((line = reader.readLine()) != null) {
+                        Matcher m = Pattern.compile(".*Estimated mean quality of final incumbent config .* on test set: ([0-9.]+).*").matcher(line);
+                        if(m.matches()) {
+                            estimatedError = Double.parseDouble(m.group(1));
+                        }
                         // fix nested logging...
                         if(line.matches(".*DEBUG.*")) {
                             log.debug(line);
@@ -510,6 +520,27 @@ public class AutoWEKAClassifier extends AbstractClassifier {
             "attribute search: " + attributeSearchClass + "\n" +
             "attribute search arguments: " + (attributeSearchArgs != null ? Arrays.toString(attributeSearchArgs) : "[]") + "\n" +
             "attribute evaluation: " + attributeEvalClass + "\n" +
-            "attribute evaluation arguments: " + (attributeEvalArgs != null ? Arrays.toString(attributeEvalArgs) : "[]") + "\n";
+            "attribute evaluation arguments: " + (attributeEvalArgs != null ? Arrays.toString(attributeEvalArgs) : "[]") + "\n" +
+            "estimated error: " + estimatedError + "\n";
+    }
+
+    public double measureEstimatedError() {
+        return estimatedError;
+    }
+
+
+    public Enumeration enumerateMeasures() {
+        Vector newVector = new Vector(1);
+        newVector.addElement("measureEstimatedError");
+        return newVector.elements();
+    }
+
+    public double getMeasure(String additionalMeasureName) {
+        if (additionalMeasureName.compareToIgnoreCase("measureEstimatedError") == 0) {
+            return measureEstimatedError();
+        } else {
+            throw new IllegalArgumentException(additionalMeasureName 
+                    + " not supported (Auto-WEKA)");
+        }
     }
 }
