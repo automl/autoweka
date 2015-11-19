@@ -222,7 +222,7 @@ public class ClassifierRunner
 
         if(targetClassifierName == null || targetClassifierName.isEmpty())
         {
-            throw new RuntimeException("No target classifier name specified");
+            throw new RuntimeException("No target classifier name specified!");
         }
 
         //Compute the regularization penalty
