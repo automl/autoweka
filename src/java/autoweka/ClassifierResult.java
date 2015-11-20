@@ -146,11 +146,9 @@ public class ClassifierResult
 
     public void setScoreFromEval(Evaluation eval, Instances testingData) {
         mRawScore = mMetric.getScore(eval, testingData);
-        System.out.println("WARN: raw score: " + mRawScore);
         if(mRawScore == Float.POSITIVE_INFINITY) {
             mRawScore = INFINITY;
         }
-        System.out.println("WARN: raw score: " + mRawScore);
         setPercentEvaluated(eval);
     }
 
