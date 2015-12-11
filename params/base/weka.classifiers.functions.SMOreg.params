@@ -25,3 +25,4 @@ Conditionals:
 6_puk_S | 5_REG_IGNORE_QUOTE_START_K in {weka.classifiers.functions.supportVector.Puk}
 6_puk_O | 5_REG_IGNORE_QUOTE_START_K in {weka.classifiers.functions.supportVector.Puk}
 6_rbf_G | 5_REG_IGNORE_QUOTE_START_K in {weka.classifiers.functions.supportVector.RBFKernel}
+3_V | 2_REG_IGNORE_QUOTE_START_I in {weka.classifiers.functions.supportVector.RegSMOImproved}
