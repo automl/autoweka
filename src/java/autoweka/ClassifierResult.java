@@ -10,7 +10,7 @@ import weka.core.Instances;
  */
 public class ClassifierResult
 {
-    private final static float INFINITY = 1e10f;
+    public final static float INFINITY = 1e10f;
 
     /**
      * Generic interface for different Metrics
@@ -24,7 +24,7 @@ public class ClassifierResult
 
     public static class ErrorRateMetric implements Metric
     {
-        public float getDefault() { return 100; }
+        public float getDefault() { return INFINITY; }
         public float getScore(Evaluation eval, Instances testingData){
             return (float)(100 - eval.pctCorrect());
         }
@@ -67,7 +67,7 @@ public class ClassifierResult
 
     public static class AreaAboveROC implements Metric
     {
-        public float getDefault() { return 1.0f; }
+        public float getDefault() { return INFINITY; }
         public float getScore(Evaluation eval, Instances testingData) {
             return (float)(1.0 - eval.areaUnderROC(1));
         }
@@ -220,7 +220,7 @@ public class ClassifierResult
 
     public String getDescription()
     {
-        return "Attribute Selection Time: " + mAttributeSelectionTime + " Training Time: " + mTrainingTime + " Evaluation Time: " + mEvaluationTime + " Score: " + getScore();
+        return "Attribute Selection Time: " + mAttributeSelectionTime + " Training Time: " + mTrainingTime + " Evaluation Time: " + mEvaluationTime + " Score: " + getScore() + " Completed: " + mCompleted;
     }
 
     public void setClassifier(AbstractClassifier cls)

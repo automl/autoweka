@@ -65,7 +65,7 @@ public class SMACTrajectoryParser extends TrajectoryParser
                     score = Float.parseFloat(matcher.group(2));
 
                     log.debug("Time: {}, score: {}", time, score);
-                    if(score != currentBest)
+                    if(score < currentBest)
                     {
                         currentBest = score;
                         argString = filterArgString(params, matcher.group(3));
@@ -118,7 +118,7 @@ public class SMACTrajectoryParser extends TrajectoryParser
                         numEvals++;
 
                         //Figure out if this one timed out
-                        if(Float.parseFloat(row[7]) >= 1.1 * experiment.trainTimeout) {
+                        if(row[9].equals("TIMEOUT")) {
                             numTimeOut++;
                         }
 

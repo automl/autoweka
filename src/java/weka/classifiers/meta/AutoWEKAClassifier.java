@@ -231,6 +231,10 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         }
 
         GetBestFromTrajectoryGroup mBest = new GetBestFromTrajectoryGroup(group);
+        if(mBest.errorEstimate == autoweka.ClassifierResult.INFINITY) {
+            throw new Exception("All runs timed out, unable to find good configuration. Please allow more time and rerun.");
+        }
+
         classifierClass = mBest.classifierClass;
         classifierArgs = Util.splitQuotedString(mBest.classifierArgs).toArray(new String[0]);
         attributeSearchClass = mBest.attributeSearchClass;
