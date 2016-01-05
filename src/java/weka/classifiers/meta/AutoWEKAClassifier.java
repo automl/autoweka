@@ -159,7 +159,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         exp.attributeSelection = true;
 
         exp.attributeSelectionTimeout = timeLimit * 1;
-        exp.tunerTimeout = timeLimit * 60;
+        exp.tunerTimeout = timeLimit * 50;
         exp.trainTimeout = timeLimit * 5;
 
         exp.memory = "1g";

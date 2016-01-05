@@ -98,6 +98,12 @@ public class SMACExperimentConstructor extends ExperimentConstructor
         args.add("--kill-runs-on-file-delete");
         args.add(experimentPath + File.separator + "out" + File.separator + "runstamps" + File.separator + "{SEED}.stamp");
 
+        args.add("--use-cpu-time-in-tunertime");
+        args.add("true");
+
+        args.add("--algo-cutoff-time");
+        args.add("" + mExperiment.trainTimeout);
+
         if(props.containsKey("deterministicInstanceOrdering"))
         {
             //throw new RuntimeException("This option only works on a hacked up version of SMAC");
@@ -225,6 +231,7 @@ public class SMACExperimentConstructor extends ExperimentConstructor
         out.println("run_obj = quality");
         out.println("overall_obj = mean");
         out.println("cutoff_time = " + (int)mExperiment.trainTimeout);
+        out.println("target_run_cputime_limit = " + (int)mExperiment.trainTimeout);
         out.println("tunerTimeout = " + (int)mExperiment.tunerTimeout);
         out.println("outdir = out");
         out.println("paramfile = autoweka.params");
