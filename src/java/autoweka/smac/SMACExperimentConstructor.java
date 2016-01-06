@@ -98,11 +98,17 @@ public class SMACExperimentConstructor extends ExperimentConstructor
         args.add("--kill-runs-on-file-delete");
         args.add(experimentPath + File.separator + "out" + File.separator + "runstamps" + File.separator + "{SEED}.stamp");
 
-        args.add("--use-cpu-time-in-tunertime");
-        args.add("true");
-
         args.add("--algo-cutoff-time");
         args.add("" + mExperiment.trainTimeout);
+
+        args.add("--wallclock-limit");
+        args.add("" + Math.round(mExperiment.tunerTimeout));
+
+        args.add("--transform-crashed-quality-value");
+        args.add("" + autoweka.ClassifierResult.INFINITY);
+
+        args.add("--kill-run-exceeding-captime-factor");
+        args.add("2.0");
 
         if(props.containsKey("deterministicInstanceOrdering"))
         {

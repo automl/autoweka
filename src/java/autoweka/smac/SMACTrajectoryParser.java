@@ -118,7 +118,7 @@ public class SMACTrajectoryParser extends TrajectoryParser
                         numEvals++;
 
                         //Figure out if this one timed out
-                        if(row[9].equals("TIMEOUT")) {
+                        if(Float.parseFloat(row[7]) >= 1.1 * experiment.trainTimeout) {
                             numTimeOut++;
                         }
 
