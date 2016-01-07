@@ -67,6 +67,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     final Logger log = LoggerFactory.getLogger(AutoWEKAClassifier.class);
 
     static final int DEFAULT_TIME_LIMIT = 60;
+    static final int DEFAULT_MEM_LIMIT = 1024;
 
     static enum Resampling {
         CrossValidation,
@@ -104,6 +105,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
     protected int seed = 123;
     protected int timeLimit = DEFAULT_TIME_LIMIT;
+    protected int memLimit = DEFAULT_MEM_LIMIT;
     protected Resampling resampling = DEFAULT_RESAMPLING;
     protected String resamplingArgs = DEFAULT_RESAMPLING_ARGS;
     protected String extraArgs = DEFAULT_EXTRA_ARGS;
@@ -162,7 +164,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         exp.tunerTimeout = timeLimit * 50;
         exp.trainTimeout = timeLimit * 5;
 
-        exp.memory = "1g";
+        exp.memory = memLimit + "m";
         exp.extraPropsString = extraArgs;
 
         //Setup all the extra args
@@ -299,6 +301,9 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             new Option("\tThe time limit for tuning in minutes (approximately).\n" + "\t(default: " + DEFAULT_TIME_LIMIT + ")",
                 "timeLimit", 1, "-timeLimit <limit>"));
         result.addElement(
+            new Option("\tThe memory limit for runs in MiB.\n" + "\t(default: " + DEFAULT_MEM_LIMIT + ")",
+                "memLimit", 1, "-memLimit <limit>"));
+        result.addElement(
             new Option("\tThe type of resampling used.\n" + "\t(default: " + String.valueOf(DEFAULT_RESAMPLING) + ")",
                 "resampling", 1, "-resampling <resampling>"));
         result.addElement(
@@ -329,6 +334,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.add("" + seed);
         result.add("-timeLimit");
         result.add("" + timeLimit);
+        result.add("-memLimit");
+        result.add("" + memLimit);
         result.add("-resampling");
         result.add("" + resampling);
         result.add("-resamplingArgs");
@@ -355,6 +362,13 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             timeLimit = Integer.parseInt(tmpStr);
         } else {
             timeLimit = DEFAULT_TIME_LIMIT;
+        }
+
+        tmpStr = Utils.getOption("memLimit", options);
+        if (tmpStr.length() != 0) {
+            memLimit = Integer.parseInt(tmpStr);
+        } else {
+            memLimit = DEFAULT_MEM_LIMIT;
         }
 
         tmpStr = Utils.getOption("resampling", options);
@@ -411,6 +425,22 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
      */
     public String timeLimitTipText() {
         return "the time limit for tuning (in minutes)";
+    }
+
+    public void setMemLimit(int tl) {
+        memLimit = tl;
+    }
+
+    public int getMemLimit() {
+        return memLimit;
+    }
+
+    /**
+     * Returns the tip text for this property.
+     * @return tip text for this property
+     */
+    public String memLimitTipText() {
+        return "the memory limit for runs (in MiB)";
     }
 
     public void setResampling(Resampling r) {
