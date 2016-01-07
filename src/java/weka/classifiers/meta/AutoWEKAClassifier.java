@@ -66,7 +66,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
     final Logger log = LoggerFactory.getLogger(AutoWEKAClassifier.class);
 
-    static final int DEFAULT_TIME_LIMIT = 60;
+    static final int DEFAULT_TIME_LIMIT = 15;
     static final int DEFAULT_MEM_LIMIT = 1024;
 
     static enum Resampling {
