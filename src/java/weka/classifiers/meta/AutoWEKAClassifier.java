@@ -190,8 +190,9 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
                     BufferedReader reader = new BufferedReader(new InputStreamReader(mProc.getInputStream()));
                     String line;
+                    Pattern p = Pattern.compile(".*Estimated mean quality of final incumbent config .* on test set: ([0-9.]+).*");
                     while((line = reader.readLine()) != null) {
-                        Matcher m = Pattern.compile(".*Estimated mean quality of final incumbent config .* on test set: ([0-9.]+).*").matcher(line);
+                        Matcher m = p.matcher(line);
                         if(m.matches()) {
                             estimatedError = Double.parseDouble(m.group(1));
                         }
