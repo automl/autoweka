@@ -10,7 +10,7 @@ import weka.core.Instances;
  */
 public class ClassifierResult
 {
-    public final static float INFINITY = 1e10f;
+    public final static double INFINITY = 1e100d;
 
     /**
      * Generic interface for different Metrics
@@ -18,40 +18,40 @@ public class ClassifierResult
      * You can define custom metrics and use them by using their full class name
      */
     public static interface Metric {
-        public float getDefault();
-        public float getScore(Evaluation eval, Instances testingData);
+        public double getDefault();
+        public double getScore(Evaluation eval, Instances testingData);
     }
 
     public static class ErrorRateMetric implements Metric
     {
-        public float getDefault() { return INFINITY; }
-        public float getScore(Evaluation eval, Instances testingData){
-            return (float)(100 - eval.pctCorrect());
+        public double getDefault() { return INFINITY; }
+        public double getScore(Evaluation eval, Instances testingData){
+            return (double)(100 - eval.pctCorrect());
         }
     }
 
     public static class MeanAbsoluteErrorMetric implements Metric
     {
-        public float getDefault() { return INFINITY; }
-        public float getScore(Evaluation eval, Instances testingData){
-            return (float)eval.meanAbsoluteError();
+        public double getDefault() { return INFINITY; }
+        public double getScore(Evaluation eval, Instances testingData){
+            return eval.meanAbsoluteError();
         }
     }
 
     public static class RootMeanSquaredErrorMetric implements Metric
     {
-        public float getDefault() { return INFINITY; }
-        public float getScore(Evaluation eval, Instances testingData){
-            return (float)eval.rootMeanSquaredError();
+        public double getDefault() { return INFINITY; }
+        public double getScore(Evaluation eval, Instances testingData){
+            return eval.rootMeanSquaredError();
         }
     }
 
     public static class RelativeAbsoluteErrorMetric implements Metric
     {
-        public float getDefault() { return INFINITY; }
-        public float getScore(Evaluation eval, Instances testingData) {
+        public double getDefault() { return INFINITY; }
+        public double getScore(Evaluation eval, Instances testingData) {
             try {
-                return (float)eval.relativeAbsoluteError();
+                return eval.relativeAbsoluteError();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -59,17 +59,17 @@ public class ClassifierResult
     }
     public static class RootRelativeSquaredErrorMetric implements Metric
     {
-        public float getDefault() { return INFINITY; }
-        public float getScore(Evaluation eval, Instances testingData) {
-            return (float)eval.rootRelativeSquaredError();
+        public double getDefault() { return INFINITY; }
+        public double getScore(Evaluation eval, Instances testingData) {
+            return eval.rootRelativeSquaredError();
         }
     }
 
     public static class AreaAboveROC implements Metric
     {
-        public float getDefault() { return INFINITY; }
-        public float getScore(Evaluation eval, Instances testingData) {
-            return (float)(1.0 - eval.areaUnderROC(1));
+        public double getDefault() { return INFINITY; }
+        public double getScore(Evaluation eval, Instances testingData) {
+            return (1.0d - eval.areaUnderROC(1));
         }
     }
 
@@ -109,16 +109,16 @@ public class ClassifierResult
         }
     }
 
-    private float mRawScore;
-    private float mTrainingTime = 0;
-    private float mEvaluationTime = 0;
-    private float mAttributeSelectionTime = 0;
-    private float mRegularizationPlenalty = 0;
+    private double mRawScore;
+    private double mTrainingTime = 0;
+    private double mEvaluationTime = 0;
+    private double mAttributeSelectionTime = 0;
+    private double mRegularizationPlenalty = 0;
     private boolean mCompleted = false;
     private AbstractClassifier mClassifier = null;
     private AttributeSelection mAttributeSelection = null;
     private Metric mMetric = null;
-    private float mPercentEvaluated = 0;
+    private double mPercentEvaluated = 0;
     private boolean mMemOut;
 
     public ClassifierResult(String typeName)
@@ -140,82 +140,82 @@ public class ClassifierResult
         mCompleted = completed;
     }
 
-    public float getRawScore(){
+    public double getRawScore(){
         return mRawScore;
     }
 
     public void setScoreFromEval(Evaluation eval, Instances testingData) {
         mRawScore = mMetric.getScore(eval, testingData);
-        if(Float.isInfinite(mRawScore)) {
+        if(Double.isInfinite(mRawScore)) {
             mRawScore = INFINITY;
         }
         setPercentEvaluated(eval);
     }
 
     public void setPercentEvaluated(Evaluation eval){
-        mPercentEvaluated = 100.0f*(float)(1.0f - eval.unclassified() / eval.numInstances());
+        mPercentEvaluated = 100.0 * (1.0 - eval.unclassified() / eval.numInstances());
     }
 
-    public void setPercentEvaluated(float pct){
+    public void setPercentEvaluated(double pct){
         mPercentEvaluated = pct;
     }
-    public float getPercentEvaluated(){
+    public double getPercentEvaluated(){
         return mPercentEvaluated;
     }
 
     /**
      * Really shouldn't use this method
      */
-    public void _setRawScore(float score) {
+    public void _setRawScore(double score) {
         mRawScore = score;
     }
 
-    public float getNormalizationPenalty() {
+    public double getNormalizationPenalty() {
         return mRegularizationPlenalty;
     }
 
-    public void setRegularizationPenalty(float penalty) {
+    public void setRegularizationPenalty(double penalty) {
         mRegularizationPlenalty = penalty;
     }
 
-    public float getTrainingTime(){
+    public double getTrainingTime(){
         return mTrainingTime;
     }
 
-    public void setTrainingTime(float time){
+    public void setTrainingTime(double time){
         mTrainingTime = time;
     }
 
-    public float getAttributeSelectionTime(){
+    public double getAttributeSelectionTime(){
         return mAttributeSelectionTime;
     }
 
-    public void setAttributeSelectionTime(float time){
+    public void setAttributeSelectionTime(double time){
         mAttributeSelectionTime = time;
     }
 
-    public float getEvaluationTime(){
+    public double getEvaluationTime(){
         return mTrainingTime;
     }
 
-    public void setEvaluationTime(float time){
+    public void setEvaluationTime(double time){
         mEvaluationTime = time;
     }
 
     /**
      * Gets the total time spent dealing with this classifier
      */
-    public float getTime(){
+    public double getTime(){
         return mAttributeSelectionTime + mTrainingTime + mEvaluationTime;
     }
 
     /**
      * Gets the 'score' for this result, which includes the regularization penalty plus the error rate
      */
-    public float getScore()
+    public double getScore()
     {
-        float score = mRegularizationPlenalty + mRawScore;
-        return Float.isNaN(score) ? mMetric.getDefault() : score;
+        double score = mRegularizationPlenalty + mRawScore;
+        return Double.isNaN(score) ? mMetric.getDefault() : score;
     }
 
     public String getDescription()

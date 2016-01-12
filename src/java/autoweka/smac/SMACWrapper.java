@@ -44,7 +44,7 @@ public class SMACWrapper extends Wrapper
     protected void _processResults(ClassifierResult res)
     {
         //Get the score
-        float score = res.getScore();
+        double score = res.getScore();
         if(mRawEval)
         {
             score = res.getRawScore();
