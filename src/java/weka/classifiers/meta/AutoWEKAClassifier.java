@@ -197,7 +197,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                             estimatedError = Double.parseDouble(m.group(1));
                         }
                         // fix nested logging...
-                        if(line.matches(".*DEBUG.*")) {
+                        if(line.matches(".*DEBUG.*") || line.matches(".*Variance is less than.*")) {
                             log.debug(line);
                         } else if(line.matches(".*WARN.*")) {
                             log.warn(line);
