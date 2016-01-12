@@ -146,7 +146,7 @@ public class ClassifierResult
 
     public void setScoreFromEval(Evaluation eval, Instances testingData) {
         mRawScore = mMetric.getScore(eval, testingData);
-        if(mRawScore == Float.POSITIVE_INFINITY) {
+        if(Float.isInfinite(mRawScore)) {
             mRawScore = INFINITY;
         }
         setPercentEvaluated(eval);
