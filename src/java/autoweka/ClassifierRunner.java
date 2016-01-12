@@ -341,10 +341,10 @@ public class ClassifierRunner
             res.setPercentEvaluated(100.0f*(float)(1.0f - eval.unclassified() / instances.numInstances()));
             log.debug("Percent evaluated: {}", res.getPercentEvaluated());
             //Check to make sure we evaluated enough data (and if we should log it)
-            if(res.getPercentEvaluated() < 90)
+            if(res.getPercentEvaluated() < 100)
             {
                 res.setCompleted(false);
-                log.debug("Evaluated less than 90% of the data.");
+                log.debug("Evaluated less than 100% of the data.");
             }
             else if(!evalThread.terminated())
             {
