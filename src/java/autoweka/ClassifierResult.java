@@ -10,7 +10,7 @@ import weka.core.Instances;
  */
 public class ClassifierResult
 {
-    public final static double INFINITY = 1e100d;
+    public final static double INFINITY = 1e6d;
 
     /**
      * Generic interface for different Metrics
@@ -148,6 +148,10 @@ public class ClassifierResult
         mRawScore = mMetric.getScore(eval, testingData);
         if(Double.isInfinite(mRawScore)) {
             mRawScore = INFINITY;
+        }
+        if(mRawScore > INFINITY) {
+            System.err.println("Score larger than our definition of infinity, adjusting.");
+            mRawScore = INFINITY - 1;
         }
         setPercentEvaluated(eval);
     }
