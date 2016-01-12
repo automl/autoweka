@@ -199,6 +199,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                         // fix nested logging...
                         if(line.matches(".*DEBUG.*") || line.matches(".*Variance is less than.*")) {
                             log.debug(line);
+                        } else if(line.matches(".*INFO.*")) {
+                            log.info(line);
                         } else if(line.matches(".*WARN.*")) {
                             log.warn(line);
                         } else if(line.matches(".*ERROR.*")) {

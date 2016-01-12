@@ -274,10 +274,14 @@ public class Experiment extends XmlSerializable
                     log.debug(line);
                 } else if(line.matches(".*DEBUG.*")) {
                     log.debug(line);
+                } else if(line.matches(".*INFO.*")) {
+                    log.info(line);
                 } else if(line.matches(".*WARN.*")) {
                     log.warn(line);
                 } else if(line.matches(".*ERROR.*")) {
                     log.error(line);
+                } else if(line.matches(".*Estimated mean quality of final incumbent config.*")) {
+                    System.out.println(line);
                 } else {
                     log.info(line);
                 }
