@@ -10,7 +10,7 @@ import weka.core.Instances;
  */
 public class ClassifierResult
 {
-    public final static double INFINITY = 1e7d;
+    public final static double INFINITY = 1e100d;
 
     /**
      * Generic interface for different Metrics
