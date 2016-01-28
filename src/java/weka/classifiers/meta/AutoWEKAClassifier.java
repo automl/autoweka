@@ -137,9 +137,9 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     }
 
     public void buildClassifier(Instances is) throws Exception {
-        StackTraceElement caller = Thread.currentThread().getStackTrace()[2];
+        StackTraceElement[] trace = Thread.currentThread().getStackTrace();
         // Do NOT try this at home.
-        if(caller.getLineNumber() > 1450) {
+        if(trace.length > 2 && trace[2].getClassName().startsWith("weka.gui.explorer.ClassifierPanel") && trace[2].getLineNumber() > 1450) {
             classifier = claz;
             as = az;
         } else {
