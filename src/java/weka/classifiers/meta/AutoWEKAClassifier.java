@@ -83,7 +83,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         resamplingArgsMap.put(Resampling.CrossValidation, "numFolds=10");
         resamplingArgsMap.put(Resampling.MultiLevel, "numLevels=2[$]autoweka.instancegenerators.CrossValidation[$]numFolds=10");
         resamplingArgsMap.put(Resampling.RandomSubSampling, "numSamples=10:percent=66");
-        resamplingArgsMap.put(Resampling.TerminationHoldout, "terminationPercent=66[$]autoweka.instancegenerators.CrossValidation[$]numFolds=10");
+        resamplingArgsMap.put(Resampling.TerminationHoldout, "terminationPercent=30[$]autoweka.instancegenerators.CrossValidation[$]numFolds=10");
     }
     static final String DEFAULT_RESAMPLING_ARGS = resamplingArgsMap.get(DEFAULT_RESAMPLING);
 
