@@ -75,7 +75,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         RandomSubSampling,
         TerminationHoldout
     }
-    static final Resampling DEFAULT_RESAMPLING = Resampling.CrossValidation;
+    static final Resampling DEFAULT_RESAMPLING = Resampling.TerminationHoldout;
 
     static final Map<Resampling, String> resamplingArgsMap;
     static {
@@ -320,15 +320,15 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.addElement(
             new Option("\tThe memory limit for runs in MiB.\n" + "\t(default: " + DEFAULT_MEM_LIMIT + ")",
                 "memLimit", 1, "-memLimit <limit>"));
-        result.addElement(
-            new Option("\tThe type of resampling used.\n" + "\t(default: " + String.valueOf(DEFAULT_RESAMPLING) + ")",
-                "resampling", 1, "-resampling <resampling>"));
-        result.addElement(
-            new Option("\tResampling arguments.\n" + "\t(default: " + DEFAULT_RESAMPLING_ARGS + ")",
-                "resamplingArgs", 1, "-resamplingArgs <args>"));
-        result.addElement(
-            new Option("\tExtra arguments.\n" + "\t(default: " + DEFAULT_EXTRA_ARGS + ")",
-                "extraArgs", 1, "-extraArgs <args>"));
+        //result.addElement(
+        //    new Option("\tThe type of resampling used.\n" + "\t(default: " + String.valueOf(DEFAULT_RESAMPLING) + ")",
+        //        "resampling", 1, "-resampling <resampling>"));
+        //result.addElement(
+        //    new Option("\tResampling arguments.\n" + "\t(default: " + DEFAULT_RESAMPLING_ARGS + ")",
+        //        "resamplingArgs", 1, "-resamplingArgs <args>"));
+        //result.addElement(
+        //    new Option("\tExtra arguments.\n" + "\t(default: " + DEFAULT_EXTRA_ARGS + ")",
+        //        "extraArgs", 1, "-extraArgs <args>"));
 
         Enumeration<Option> enu = super.listOptions();
         while (enu.hasMoreElements()) {
@@ -353,12 +353,12 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.add("" + timeLimit);
         result.add("-memLimit");
         result.add("" + memLimit);
-        result.add("-resampling");
-        result.add("" + resampling);
-        result.add("-resamplingArgs");
-        result.add("" + resamplingArgs);
-        result.add("-extraArgs");
-        result.add("" + extraArgs);
+        //result.add("-resampling");
+        //result.add("" + resampling);
+        //result.add("-resamplingArgs");
+        //result.add("" + resamplingArgs);
+        //result.add("-extraArgs");
+        //result.add("" + extraArgs);
 
         Collections.addAll(result, super.getOptions());
         return result.toArray(new String[result.size()]);
@@ -388,25 +388,25 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             memLimit = DEFAULT_MEM_LIMIT;
         }
 
-        tmpStr = Utils.getOption("resampling", options);
-        if (tmpStr.length() != 0) {
-            resampling = Resampling.valueOf(tmpStr);
-        } else {
-            resampling = DEFAULT_RESAMPLING;
-        }
-        resamplingArgs = resamplingArgsMap.get(resampling);
+        //tmpStr = Utils.getOption("resampling", options);
+        //if (tmpStr.length() != 0) {
+        //    resampling = Resampling.valueOf(tmpStr);
+        //} else {
+        //    resampling = DEFAULT_RESAMPLING;
+        //}
+        //resamplingArgs = resamplingArgsMap.get(resampling);
 
-        tmpStr = Utils.getOption("resamplingArgs", options);
-        if (tmpStr.length() != 0) {
-            resamplingArgs = tmpStr;
-        }
+        //tmpStr = Utils.getOption("resamplingArgs", options);
+        //if (tmpStr.length() != 0) {
+        //    resamplingArgs = tmpStr;
+        //}
 
-        tmpStr = Utils.getOption("extraArgs", options);
-        if (tmpStr.length() != 0) {
-            extraArgs = tmpStr;
-        } else {
-            extraArgs = DEFAULT_EXTRA_ARGS;
-        }
+        //tmpStr = Utils.getOption("extraArgs", options);
+        //if (tmpStr.length() != 0) {
+        //    extraArgs = tmpStr;
+        //} else {
+        //    extraArgs = DEFAULT_EXTRA_ARGS;
+        //}
 
         super.setOptions(options);
         Utils.checkForRemainingOptions(options);
@@ -425,7 +425,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
      * @return tip text for this property
      */
     public String seedTipText() {
-        return "the seed for the random number generator";
+        return "the seed for the random number generator (you do not usually need to change this)";
     }
 
     public void setTimeLimit(int tl) {
