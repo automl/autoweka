@@ -460,54 +460,54 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         return "the memory limit for runs (in MiB)";
     }
 
-    public void setResampling(Resampling r) {
-        resampling = r;
-        resamplingArgs = resamplingArgsMap.get(r);
-    }
+    //public void setResampling(Resampling r) {
+    //    resampling = r;
+    //    resamplingArgs = resamplingArgsMap.get(r);
+    //}
 
-    public Resampling getResampling() {
-        return resampling;
-    }
+    //public Resampling getResampling() {
+    //    return resampling;
+    //}
 
-    /**
-     * Returns the tip text for this property.
-     * @return tip text for this property
-     */
-    public String ResamplingTipText() {
-        return "the type of resampling";
-    }
+    ///**
+    // * Returns the tip text for this property.
+    // * @return tip text for this property
+    // */
+    //public String ResamplingTipText() {
+    //    return "the type of resampling";
+    //}
 
-    public void setResamplingArgs(String args) {
-        resamplingArgs = args;
-    }
+    //public void setResamplingArgs(String args) {
+    //    resamplingArgs = args;
+    //}
 
-    public String getResamplingArgs() {
-        return resamplingArgs;
-    }
+    //public String getResamplingArgs() {
+    //    return resamplingArgs;
+    //}
 
-    /**
-     * Returns the tip text for this property.
-     * @return tip text for this property
-     */
-    public String resamplingArgsTipText() {
-        return "resampling arguments";
-    }
+    ///**
+    // * Returns the tip text for this property.
+    // * @return tip text for this property
+    // */
+    //public String resamplingArgsTipText() {
+    //    return "resampling arguments";
+    //}
 
-    public void setExtraArgs(String args) {
-        extraArgs = args;
-    }
+    //public void setExtraArgs(String args) {
+    //    extraArgs = args;
+    //}
 
-    public String getExtraArgs() {
-        return extraArgs;
-    }
+    //public String getExtraArgs() {
+    //    return extraArgs;
+    //}
 
-    /**
-     * Returns the tip text for this property.
-     * @return tip text for this property
-     */
-    public String extraArgsTipText() {
-        return "extra arguments";
-    }
+    ///**
+    // * Returns the tip text for this property.
+    // * @return tip text for this property
+    // */
+    //public String extraArgsTipText() {
+    //    return "extra arguments";
+    //}
 
     /**
      * Returns default capabilities of the classifier.
@@ -560,7 +560,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
      * @return The string.
      */
     public String globalInfo() {
-        return "Automatically finds the best model with its best parameter settings for a given classification task.\n\n"
+        return "Automatically finds the best model with its best parameter settings for a given dataset.\n\n"
             + "For more information see:\n\n"
             + getTechnicalInformation().toString();
     }
