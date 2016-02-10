@@ -75,24 +75,36 @@ import autoweka.TrajectoryMerger;
 
 import autoweka.tools.GetBestFromTrajectoryGroup;
 
+/**
+ * Auto-WEKA interface for WEKA.
+ *
+ * @author Lars Kotthoff
+ */
+
 public class AutoWEKAClassifier extends AbstractClassifier implements AdditionalMeasureProducer {
 
-    /** for serialization */
+    /** For serialization. */
     static final long serialVersionUID = 2907034203562786373L;
 
+    /** For logging Auto-WEKA's output. */
     final Logger log = LoggerFactory.getLogger(AutoWEKAClassifier.class);
 
+    /** Default time limit for Auto-WEKA. */
     static final int DEFAULT_TIME_LIMIT = 15;
+    /** Default memory limit for classifiers. */
     static final int DEFAULT_MEM_LIMIT = 1024;
 
+    /** Internal evaluation method. */
     static enum Resampling {
         CrossValidation,
         MultiLevel,
         RandomSubSampling,
         TerminationHoldout
     }
+    /** Default evaluation method. */
     static final Resampling DEFAULT_RESAMPLING = Resampling.TerminationHoldout;
 
+    /** Default arguments for the different evaluation methods. */
     static final Map<Resampling, String> resamplingArgsMap;
     static {
         resamplingArgsMap = new HashMap<Resampling, String>();
@@ -101,35 +113,55 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         resamplingArgsMap.put(Resampling.RandomSubSampling, "numSamples=10:percent=66");
         resamplingArgsMap.put(Resampling.TerminationHoldout, "terminationPercent=30[$]autoweka.instancegenerators.CrossValidation[$]numFolds=10");
     }
+    /** Arguments for the default evaluation method. */
     static final String DEFAULT_RESAMPLING_ARGS = resamplingArgsMap.get(DEFAULT_RESAMPLING);
 
+    /** Default additional arguments for Auto-WEKA. */
     static final String DEFAULT_EXTRA_ARGS = "initialIncumbent=RANDOM:acq-func=EI";
 
-    /* The Chosen One. */
+    /** The chosen classifier. */
     protected Classifier classifier;
+    /** The chosen attribute selection method. */
     protected AttributeSelection as;
 
+    /** The class of the chosen classifier. */
     protected String classifierClass;
+    /** The arguments of the chosen classifier. */
     protected String[] classifierArgs;
+    /** The class of the chosen attribute search method. */
     protected String attributeSearchClass;
+    /** The arguments of the chosen attribute search method. */
     protected String[] attributeSearchArgs;
+    /** The class of the chosen attribute evaluation. */
     protected String attributeEvalClass;
+    /** The arguments of the chosen attribute evaluation method. */
     protected String[] attributeEvalArgs;
 
+    /** The path to the internal Auto-WEKA files. */
     protected static String msExperimentPath;
+    /** The internal name of the experiment. */
     protected static String expName = "Auto-WEKA";
 
+    /** The random seed. */
     protected int seed = 123;
+    /** The time limit for running Auto-WEKA. */
     protected int timeLimit = DEFAULT_TIME_LIMIT;
+    /** The memory limit for running classifiers. */
     protected int memLimit = DEFAULT_MEM_LIMIT;
+    /** The internal evaluation method. */
     protected Resampling resampling = DEFAULT_RESAMPLING;
+    /** The arguments to the evaluation method. */
     protected String resamplingArgs = DEFAULT_RESAMPLING_ARGS;
+    /** The extra arguments for Auto-WEKA. */
     protected String extraArgs = DEFAULT_EXTRA_ARGS;
 
+    /** The estimated error of the chosen method. */
     protected double estimatedError = -1;
 
     // we need those to work around WEKA's CV etc.
+    /** Hacky workaround part 1. */
     private static Classifier claz = null;
+    /** Hacky workaround part 2. */
     private static AttributeSelection az = null;
 
     /**
@@ -142,6 +174,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         runClassifier(new AutoWEKAClassifier(), argv);
     }
 
+    /** Constructs a new AutoWEKAClassifier. */
     public AutoWEKAClassifier() {
         classifier = null;
         classifierClass = null;
@@ -152,6 +185,13 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         attributeEvalArgs = new String[0];
     }
 
+    /**
+    * Find the best classifier, arguments, and attribute selection for the data.
+    *
+    * @param data the training data to be used for selecting and tuning the
+    * classifier.
+    * @throws Exception if the classifier could not be built successfully.
+    */
     public void buildClassifier(Instances is) throws Exception {
         StackTraceElement[] trace = Thread.currentThread().getStackTrace();
         // Do NOT try this at home.
@@ -303,6 +343,13 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         classifier.buildClassifier(is);
     }
 
+    /**
+    * Calculates the class membership for the given test instance.
+    *
+    * @param instance the instance to be classified
+    * @return predicted class
+    * @throws Exception if instance could not be classified successfully
+    */
     public double classifyInstance(Instance i) throws Exception {
         if(classifier == null) {
             throw new Exception("Auto-WEKA has not been run yet to get a model!");
@@ -311,6 +358,13 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         return classifier.classifyInstance(i);
     }
 
+    /**
+    * Calculates the class membership probabilities for the given test instance.
+    *
+    * @param instance the instance to be classified
+    * @return predicted class probability distribution
+    * @throws Exception if instance could not be classified successfully.
+    */
     public double[] distributionForInstance(Instance i) throws Exception {
         if(classifier == null) {
             throw new Exception("Auto-WEKA has not been run yet to get a model!");
@@ -355,7 +409,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     }
 
     /**
-     * returns the options of the current setup.
+     * Returns the options of the current setup.
      *
      * @return the current options
      */
@@ -380,6 +434,11 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         return result.toArray(new String[result.size()]);
     }
 
+    /**
+     * Set the options for the current setup.
+     *
+     * @param options the new options
+     */
     @Override
     public void setOptions(String[] options) throws Exception {
         String tmpStr;
@@ -428,10 +487,18 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         Utils.checkForRemainingOptions(options);
     }
 
+    /**
+     * Set the random seed.
+     * @param s The random seed.
+     */
     public void setSeed(int s) {
         seed = s;
     }
 
+    /**
+     * Get the random seed.
+     * @return The random seed.
+     */
     public int getSeed() {
         return seed;
     }
@@ -444,10 +511,18 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         return "the seed for the random number generator (you do not usually need to change this)";
     }
 
+    /**
+     * Set the time limit.
+     * @param tl The time limit in minutes.
+     */
     public void setTimeLimit(int tl) {
         timeLimit = tl;
     }
 
+    /**
+     * Get the time limit.
+     * @return The time limit in minutes.
+     */
     public int getTimeLimit() {
         return timeLimit;
     }
@@ -460,10 +535,18 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         return "the time limit for tuning (in minutes)";
     }
 
-    public void setMemLimit(int tl) {
-        memLimit = tl;
+    /**
+     * Set the memory limit.
+     * @param ml The memory limit in MiB.
+     */
+    public void setMemLimit(int ml) {
+        memLimit = ml;
     }
 
+    /**
+     * Get the memory limit.
+     * @return The memory limit in MiB.
+     */
     public int getMemLimit() {
         return memLimit;
     }
@@ -581,6 +664,10 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             + getTechnicalInformation().toString();
     }
 
+    /**
+     * This will return a string describing the classifier.
+     * @return The string.
+     */
     public String toString() {
         return "classifier: " + classifierClass + "\n" +
             "arguments: " + (classifierArgs != null ? Arrays.toString(classifierArgs) : "[]") + "\n" +
@@ -591,17 +678,30 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             "estimated error: " + estimatedError + "\n";
     }
 
+    /**
+     * Returns the error estimated during Auto-WEKA's internal evaluation.
+     * @return The estimated error.
+     */
     public double measureEstimatedError() {
         return estimatedError;
     }
 
-
+    /**
+    * Returns an enumeration of the additional measure names
+    * @return an enumeration of the measure names
+    */
     public Enumeration enumerateMeasures() {
         Vector newVector = new Vector(1);
         newVector.addElement("measureEstimatedError");
         return newVector.elements();
     }
 
+    /**
+    * Returns the value of the named measure
+    * @param additionalMeasureName the name of the measure to query for its value
+    * @return the value of the named measure
+    * @throws IllegalArgumentException if the named measure is not supported
+    */
     public double getMeasure(String additionalMeasureName) {
         if (additionalMeasureName.compareToIgnoreCase("measureEstimatedError") == 0) {
             return measureEstimatedError();
