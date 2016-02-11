@@ -1,0 +1,4 @@
+# Explorer.props file. Adds the AutoWEKAPanel to the Tabs key.
+
+Tabs=weka.gui.explorer.AutoWEKAPanel
+TabsPolicy=append
