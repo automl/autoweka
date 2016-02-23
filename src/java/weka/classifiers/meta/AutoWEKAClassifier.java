@@ -158,11 +158,10 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     /** The estimated error of the chosen method. */
     protected double estimatedError = -1;
 
-    // we need those to work around WEKA's CV etc.
-    /** Hacky workaround part 1. */
-    private static Classifier claz = null;
-    /** Hacky workaround part 2. */
-    private static AttributeSelection az = null;
+    /** The evaluation for the best classifier. */
+    protected Evaluation eval;
+
+    private weka.gui.Logger wLog;
 
     /**
      * Main method for testing this class.
@@ -183,6 +182,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         attributeSearchArgs = new String[0];
         attributeEvalClass = null;
         attributeEvalArgs = new String[0];
+        wLog = null;
     }
 
     /**
@@ -193,154 +193,163 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     * @throws Exception if the classifier could not be built successfully.
     */
     public void buildClassifier(Instances is) throws Exception {
-        StackTraceElement[] trace = Thread.currentThread().getStackTrace();
-        // Do NOT try this at home.
-        if(trace.length > 2 && trace[2].getClassName().startsWith("weka.gui.explorer.ClassifierPanel") && trace[2].getLineNumber() > 1450) {
-            classifier = claz;
-            as = az;
-        } else {
-            msExperimentPath = Files.createTempDirectory("autoweka").toString() + File.separator;
-            getCapabilities().testWithFail(is);
+        msExperimentPath = Files.createTempDirectory("autoweka").toString() + File.separator;
+        getCapabilities().testWithFail(is);
 
-            //Populate the experiment fields
-            Experiment exp = new Experiment();
-            exp.name = expName;
+        //Populate the experiment fields
+        Experiment exp = new Experiment();
+        exp.name = expName;
 
-            //Which result metric do we use?
-            Attribute classAttr = is.classAttribute();
-            if(classAttr.isNominal()){
-                exp.resultMetric = "errorRate";
-            } else if(classAttr.isNumeric()) {
-                exp.resultMetric = "rmse";
-            }
-
-            Properties props = Util.parsePropertyString("type=trainTestArff:testArff=__dummy__");
-            ArffSaver saver = new ArffSaver();
-            saver.setInstances(is);
-            File fp = new File(msExperimentPath + expName + File.separator + expName + ".arff");
-            saver.setFile(fp);
-            saver.writeBatch();
-            props.setProperty("trainArff", fp.getAbsolutePath());
-            exp.datasetString = Util.propertiesToString(props);
-            exp.instanceGenerator = "autoweka.instancegenerators." + String.valueOf(resampling);
-            exp.instanceGeneratorArgs = "seed=" + seed + ":" + resamplingArgs;
-            exp.attributeSelection = true;
-
-            exp.attributeSelectionTimeout = timeLimit * 1;
-            exp.tunerTimeout = timeLimit * 50;
-            exp.trainTimeout = timeLimit * 5;
-
-            exp.memory = memLimit + "m";
-            exp.extraPropsString = extraArgs;
-
-            //Setup all the extra args
-            List<String> args = new LinkedList<String>();
-            args.add("-experimentpath");
-            args.add(msExperimentPath);
-
-            //Make the thing
-            ExperimentConstructor.buildSingle("autoweka.smac.SMACExperimentConstructor", exp, args);
-
-            // run experiment
-            Thread worker = new Thread(new Runnable() {
-                public void run() {
-                    Process mProc = null;
-                    try {
-                        ProcessBuilder pb = new ProcessBuilder(autoweka.Util.getJavaExecutable(), "-Xmx128m", "-cp", autoweka.Util.getAbsoluteClasspath(), "autoweka.tools.ExperimentRunner", msExperimentPath + expName, "" + seed);
-                        pb.redirectErrorStream(true);
-
-                        mProc = pb.start();
-
-                        Thread killerHook = new autoweka.Util.ProcessKillerShutdownHook(mProc);
-                        Runtime.getRuntime().addShutdownHook(killerHook);
-
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(mProc.getInputStream()));
-                        String line;
-                        Pattern p = Pattern.compile(".*Estimated mean quality of final incumbent config .* on test set: ([0-9.]+).*");
-                        while((line = reader.readLine()) != null) {
-                            Matcher m = p.matcher(line);
-                            if(m.matches()) {
-                                estimatedError = Double.parseDouble(m.group(1));
-                            }
-                            // fix nested logging...
-                            if(line.matches(".*DEBUG.*") || line.matches(".*Variance is less than.*")) {
-                                log.debug(line);
-                            } else if(line.matches(".*INFO.*")) {
-                                log.info(line);
-                            } else if(line.matches(".*WARN.*")) {
-                                log.warn(line);
-                            } else if(line.matches(".*ERROR.*")) {
-                                log.error(line);
-                            } else {
-                                log.info(line);
-                            }
-                            if(Thread.currentThread().isInterrupted()) {
-                                mProc.destroy();
-                                break;
-                            }
-                        }
-                        Runtime.getRuntime().removeShutdownHook(killerHook);
-                    } catch (Exception e) {
-                        if(mProc != null) mProc.destroy();
-                        log.error(e.getMessage(), e);
-                    }
-                } });
-            worker.start();
-            try {
-                worker.join();
-            } catch(InterruptedException e) {
-                worker.interrupt();
-            }
-
-            // get results
-            TrajectoryGroup group = TrajectoryMerger.mergeExperimentFolder(msExperimentPath + expName);
-
-            // print trajectory information
-            log.debug("Optimization trajectory:");
-            for(Trajectory t: group.getTrajectories()) {
-                log.debug("{}", t);
-            }
-
-            GetBestFromTrajectoryGroup mBest = new GetBestFromTrajectoryGroup(group);
-            if(mBest.errorEstimate == autoweka.ClassifierResult.INFINITY) {
-                throw new Exception("All runs timed out, unable to find good configuration. Please allow more time and rerun.");
-            }
-
-            classifierClass = mBest.classifierClass;
-            classifierArgs = Util.splitQuotedString(mBest.classifierArgs).toArray(new String[0]);
-            attributeSearchClass = mBest.attributeSearchClass;
-            if(mBest.attributeSearchArgs != null) {
-                attributeSearchArgs = Util.splitQuotedString(mBest.attributeSearchArgs).toArray(new String[0]);
-            }
-            attributeEvalClass = mBest.attributeEvalClass;
-            if(mBest.attributeEvalArgs != null) {
-                attributeEvalArgs = Util.splitQuotedString(mBest.attributeEvalArgs).toArray(new String[0]);
-            }
-
-            log.info("classifier: {}, arguments: {}, attribute search: {}, attribute search arguments: {}, attribute evaluation: {}, attribute evaluation arguments: {}",
-                classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
-
-            // train model on entire dataset and save
-            as = new AttributeSelection();
-
-            if(attributeSearchClass != null) {
-                ASSearch asSearch = ASSearch.forName(attributeSearchClass, attributeSearchArgs.clone());
-                as.setSearch(asSearch);
-            }
-            if(attributeEvalClass != null) {
-                ASEvaluation asEval = ASEvaluation.forName(attributeEvalClass, attributeEvalArgs.clone());
-                as.setEvaluator(asEval);
-            }
-            as.SelectAttributes(is);
-
-            classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
-
-            claz = classifier;
-            az = as;
+        //Which result metric do we use?
+        Attribute classAttr = is.classAttribute();
+        if(classAttr.isNominal()){
+            exp.resultMetric = "errorRate";
+        } else if(classAttr.isNumeric()) {
+            exp.resultMetric = "rmse";
         }
+
+        Properties props = Util.parsePropertyString("type=trainTestArff:testArff=__dummy__");
+        ArffSaver saver = new ArffSaver();
+        saver.setInstances(is);
+        File fp = new File(msExperimentPath + expName + File.separator + expName + ".arff");
+        saver.setFile(fp);
+        saver.writeBatch();
+        props.setProperty("trainArff", fp.getAbsolutePath());
+        exp.datasetString = Util.propertiesToString(props);
+        exp.instanceGenerator = "autoweka.instancegenerators." + String.valueOf(resampling);
+        exp.instanceGeneratorArgs = "seed=" + seed + ":" + resamplingArgs;
+        exp.attributeSelection = true;
+
+        exp.attributeSelectionTimeout = timeLimit * 1;
+        exp.tunerTimeout = timeLimit * 50;
+        exp.trainTimeout = timeLimit * 5;
+
+        exp.memory = memLimit + "m";
+        exp.extraPropsString = extraArgs;
+
+        //Setup all the extra args
+        List<String> args = new LinkedList<String>();
+        args.add("-experimentpath");
+        args.add(msExperimentPath);
+
+        //Make the thing
+        ExperimentConstructor.buildSingle("autoweka.smac.SMACExperimentConstructor", exp, args);
+
+        // run experiment
+        Thread worker = new Thread(new Runnable() {
+            public void run() {
+                Process mProc = null;
+                try {
+                    ProcessBuilder pb = new ProcessBuilder(autoweka.Util.getJavaExecutable(), "-Xmx128m", "-cp", autoweka.Util.getAbsoluteClasspath(), "autoweka.tools.ExperimentRunner", msExperimentPath + expName, "" + seed);
+                    pb.redirectErrorStream(true);
+
+                    mProc = pb.start();
+
+                    Thread killerHook = new autoweka.Util.ProcessKillerShutdownHook(mProc);
+                    Runtime.getRuntime().addShutdownHook(killerHook);
+
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(mProc.getInputStream()));
+                    String line;
+                    Pattern p = Pattern.compile(".*Estimated mean quality of final incumbent config .* on test set: ([0-9.]+).*");
+                    Pattern pint = Pattern.compile(".*mean quality of.*: ([0-9E.]+);.*");
+                    int tried = 0;
+                    double bestError = -1;
+                    while((line = reader.readLine()) != null) {
+                        Matcher m = p.matcher(line);
+                        if(m.matches()) {
+                            estimatedError = Double.parseDouble(m.group(1));
+                        }
+                        m = pint.matcher(line);
+                        if(m.matches()) {
+                            bestError = Double.parseDouble(m.group(1));
+                        }
+                        // fix nested logging...
+                        if(line.matches(".*DEBUG.*") || line.matches(".*Variance is less than.*")) {
+                            //log.debug(line);
+                        } else if(line.matches(".*INFO.*")) {
+                            if(line.matches(".*ClassifierRunner - weka.classifiers.*")) {
+                                tried++;
+                                if(wLog != null) {
+                                    String msg = "Performed " + tried + " evaluations, estimated error " + bestError + "...";
+                                    wLog.statusMessage(msg);
+                                    if(tried % 10 == 0)
+                                        wLog.logMessage(msg);
+                                }
+                            }
+                            //log.info(line);
+                        } else if(line.matches(".*WARN.*")) {
+                            log.warn(line);
+                        } else if(line.matches(".*ERROR.*")) {
+                            log.error(line);
+                        } else {
+                            log.info(line);
+                        }
+                        if(Thread.currentThread().isInterrupted()) {
+                            mProc.destroy();
+                            break;
+                        }
+                    }
+                    Runtime.getRuntime().removeShutdownHook(killerHook);
+                } catch (Exception e) {
+                    if(mProc != null) mProc.destroy();
+                    log.error(e.getMessage(), e);
+                }
+            } });
+        worker.start();
+        try {
+            worker.join();
+        } catch(InterruptedException e) {
+            worker.interrupt();
+        }
+
+        // get results
+        TrajectoryGroup group = TrajectoryMerger.mergeExperimentFolder(msExperimentPath + expName);
+
+        // print trajectory information
+        log.debug("Optimization trajectory:");
+        for(Trajectory t: group.getTrajectories()) {
+            log.debug("{}", t);
+        }
+
+        GetBestFromTrajectoryGroup mBest = new GetBestFromTrajectoryGroup(group);
+        if(mBest.errorEstimate == autoweka.ClassifierResult.INFINITY) {
+            throw new Exception("All runs timed out, unable to find good configuration. Please allow more time and rerun.");
+        }
+
+        classifierClass = mBest.classifierClass;
+        classifierArgs = Util.splitQuotedString(mBest.classifierArgs).toArray(new String[0]);
+        attributeSearchClass = mBest.attributeSearchClass;
+        if(mBest.attributeSearchArgs != null) {
+            attributeSearchArgs = Util.splitQuotedString(mBest.attributeSearchArgs).toArray(new String[0]);
+        }
+        attributeEvalClass = mBest.attributeEvalClass;
+        if(mBest.attributeEvalArgs != null) {
+            attributeEvalArgs = Util.splitQuotedString(mBest.attributeEvalArgs).toArray(new String[0]);
+        }
+
+        log.info("classifier: {}, arguments: {}, attribute search: {}, attribute search arguments: {}, attribute evaluation: {}, attribute evaluation arguments: {}",
+            classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
+
+        // train model on entire dataset and save
+        as = new AttributeSelection();
+
+        if(attributeSearchClass != null) {
+            ASSearch asSearch = ASSearch.forName(attributeSearchClass, attributeSearchArgs.clone());
+            as.setSearch(asSearch);
+        }
+        if(attributeEvalClass != null) {
+            ASEvaluation asEval = ASEvaluation.forName(attributeEvalClass, attributeEvalArgs.clone());
+            as.setEvaluator(asEval);
+        }
+        as.SelectAttributes(is);
+
+        classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
 
         is = as.reduceDimensionality(is);
         classifier.buildClassifier(is);
+
+        eval = new Evaluation(is);
+        eval.evaluateModel(classifier, is);
     }
 
     /**
@@ -608,6 +617,13 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     //    return "extra arguments";
     //}
 
+    /** Set the WEKA logger.
+     * Used for providing feedback during execution.
+     */
+    public void setLog(weka.gui.Logger log) {
+        this.wLog = log;
+    }
+
     /**
      * Returns default capabilities of the classifier.
      *
@@ -669,13 +685,19 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
      * @return The string.
      */
     public String toString() {
-        return "classifier: " + classifierClass + "\n" +
+        String res = "best classifier: " + classifierClass + "\n" +
             "arguments: " + (classifierArgs != null ? Arrays.toString(classifierArgs) : "[]") + "\n" +
             "attribute search: " + attributeSearchClass + "\n" +
             "attribute search arguments: " + (attributeSearchArgs != null ? Arrays.toString(attributeSearchArgs) : "[]") + "\n" +
             "attribute evaluation: " + attributeEvalClass + "\n" +
             "attribute evaluation arguments: " + (attributeEvalArgs != null ? Arrays.toString(attributeEvalArgs) : "[]") + "\n" +
-            "estimated error: " + estimatedError + "\n";
+            "estimated error: " + estimatedError + "\n\n";
+        try {
+            res += eval.toMatrixString();
+        } catch(Exception e) {
+            res += e;
+        }
+        return res;
     }
 
     /**

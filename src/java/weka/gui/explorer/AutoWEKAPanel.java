@@ -23,6 +23,8 @@
 package weka.gui.explorer;
 
 import weka.classifiers.meta.AutoWEKAClassifier;
+import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 
 import weka.core.Attribute;
 import weka.core.Instances;
@@ -58,6 +60,9 @@ import java.io.Reader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Vector;
+
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -113,6 +118,12 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
   /** Click to stop a running experiment. */
   protected JButton m_StopBut = new JButton("Stop");
 
+  /** Lets the user configure the classifier. */
+  protected GenericObjectEditor m_ClassifierEditor = new GenericObjectEditor();
+
+  /** The panel showing the current classifier selection. */
+  protected PropertyPanel m_CEPanel = new PropertyPanel(m_ClassifierEditor, true);
+
   /** The main set of instances we're playing with. */
   protected Instances m_Instances;
   
@@ -128,20 +139,28 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
     m_OutText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     m_OutText.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
-	if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
-	    != InputEvent.BUTTON1_MASK) {
-	  m_OutText.selectAll();
-	}
+    if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
+        != InputEvent.BUTTON1_MASK) {
+      m_OutText.selectAll();
+    }
       }
     });
     
     m_History.setBorder(BorderFactory.createTitledBorder("Result list (right-click for options)"));
 
+    m_ClassifierEditor.setClassType(Classifier.class);
+    m_ClassifierEditor.setValue(new weka.classifiers.meta.AutoWEKAClassifier());
+    m_ClassifierEditor.addPropertyChangeListener(new PropertyChangeListener() {
+        public void propertyChange(PropertyChangeEvent e) {
+        repaint();
+        }
+    });
+
     m_StartBut.setToolTipText("Starts Auto-WEKA");
     m_StartBut.setEnabled(false);
     m_StartBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	startAutoWEKA();
+    startAutoWEKA();
       }
     });
     
@@ -149,7 +168,7 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
     m_StopBut.setEnabled(false);
     m_StopBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	stopAutoWEKA();
+    stopAutoWEKA();
       }
     });
    
@@ -157,16 +176,16 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
     // see if we can popup a menu for the selected result
     m_History.getList().addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
-	if (((e.getModifiers() & InputEvent.BUTTON1_MASK)
-	    != InputEvent.BUTTON1_MASK) || e.isAltDown()) {
-	  int index = m_History.getList().locationToIndex(e.getPoint());
-	  if (index != -1) {
-	    String name = m_History.getNameAtIndex(index);
-	    showPopup(name, e.getX(), e.getY());
-	  } else {
-	    showPopup(null, e.getX(), e.getY());
-	  }
-	}
+    if (((e.getModifiers() & InputEvent.BUTTON1_MASK)
+        != InputEvent.BUTTON1_MASK) || e.isAltDown()) {
+      int index = m_History.getList().locationToIndex(e.getPoint());
+      if (index != -1) {
+        String name = m_History.getNameAtIndex(index);
+        showPopup(name, e.getX(), e.getY());
+      } else {
+        showPopup(null, e.getX(), e.getY());
+      }
+    }
       }
     });
 
@@ -175,16 +194,17 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
     JLabel label;
     
     JPanel buttons = new JPanel();
-    buttons.setLayout(new GridLayout(2, 2));
-    buttons.add(m_ClassCombo);
+    buttons.setLayout(new BorderLayout());
+    buttons.add(m_ClassCombo, BorderLayout.NORTH);
     m_ClassCombo.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
     JPanel ssButs = new JPanel();
     ssButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     ssButs.setLayout(new GridLayout(1, 2, 5, 5));
     ssButs.add(m_StartBut);
     ssButs.add(m_StopBut);
 
-    buttons.add(ssButs);
+    buttons.add(ssButs, BorderLayout.SOUTH);
     
     JPanel p3 = new JPanel();
     p3.setBorder(BorderFactory.createTitledBorder("Auto-WEKA output"));
@@ -194,13 +214,13 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
     js.getViewport().addChangeListener(new ChangeListener() {
       private int lastHeight;
       public void stateChanged(ChangeEvent e) {
-	JViewport vp = (JViewport)e.getSource();
-	int h = vp.getViewSize().height; 
-	if (h != lastHeight) { // i.e. an addition not just a user scrolling
-	  lastHeight = h;
-	  int x = h - vp.getExtentSize().height;
-	  vp.setViewPosition(new Point(0, x));
-	}
+    JViewport vp = (JViewport)e.getSource();
+    int h = vp.getViewSize().height; 
+    if (h != lastHeight) { // i.e. an addition not just a user scrolling
+      lastHeight = h;
+      int x = h - vp.getExtentSize().height;
+      vp.setViewPosition(new Point(0, x));
+    }
       }
     });
     
@@ -227,13 +247,14 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
     mondo.add(p3);
 
     setLayout(new BorderLayout());
+    add(m_CEPanel, BorderLayout.NORTH);
     add(mondo, BorderLayout.CENTER);
   }
 
   /**
    * Sets the Logger to receive informational messages.
    *
-   * @param newLog 	the Logger that will now get info messages
+   * @param newLog  the Logger that will now get info messages
    */
   public void setLog(Logger newLog) {
     m_Log = newLog;
@@ -242,7 +263,7 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
   /**
    * Tells the panel to use a new set of instances.
    *
-   * @param inst 	a set of Instances
+   * @param inst    a set of Instances
    */
   public void setInstances(Instances inst) {
     m_Instances = inst;
@@ -252,31 +273,31 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
       String type = "";
       switch (m_Instances.attribute(i).type()) {
       case Attribute.NOMINAL:
-	type = "(Nom) ";
-	break;
+    type = "(Nom) ";
+    break;
       case Attribute.NUMERIC:
-	type = "(Num) ";
-	break;
+    type = "(Num) ";
+    break;
       case Attribute.STRING:
-	type = "(Str) ";
-	break;
+    type = "(Str) ";
+    break;
       case Attribute.DATE:
-	type = "(Dat) ";
-	break;
+    type = "(Dat) ";
+    break;
       case Attribute.RELATIONAL:
-	type = "(Rel) ";
-	break;
+    type = "(Rel) ";
+    break;
       default:
-	type = "(???) ";
+    type = "(???) ";
       }
       attribNames[i] = type + m_Instances.attribute(i).name();
     }
     m_ClassCombo.setModel(new DefaultComboBoxModel(attribNames));
     if (attribNames.length > 0) {
       if (inst.classIndex() == -1)
-	m_ClassCombo.setSelectedIndex(attribNames.length - 1);
+    m_ClassCombo.setSelectedIndex(attribNames.length - 1);
       else
-	m_ClassCombo.setSelectedIndex(inst.classIndex());
+    m_ClassCombo.setSelectedIndex(inst.classIndex());
       m_ClassCombo.setEnabled(true);
       m_StartBut.setEnabled(m_RunThread == null);
       m_StopBut.setEnabled(m_RunThread != null);
@@ -290,10 +311,10 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
   /**
    * Handles constructing a popup menu with visualization options.
    * 
-   * @param name 	the name of the result history list entry clicked on by
-   * 			the user
-   * @param x 		the x coordinate for popping up the menu
-   * @param y 		the y coordinate for popping up the menu
+   * @param name    the name of the result history list entry clicked on by
+   *            the user
+   * @param x       the x coordinate for popping up the menu
+   * @param y       the y coordinate for popping up the menu
    */
   protected void showPopup(String name, int x, int y) {
     final String selectedName = name;
@@ -302,9 +323,9 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
     JMenuItem viewMainBuffer = new JMenuItem("View in main window");
     if (selectedName != null) {
       viewMainBuffer.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  m_History.setSingle(selectedName);
-	}
+    public void actionPerformed(ActionEvent e) {
+      m_History.setSingle(selectedName);
+    }
       });
     }
     else {
@@ -315,9 +336,9 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
     JMenuItem viewSepBuffer = new JMenuItem("View in separate window");
     if (selectedName != null) {
       viewSepBuffer.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  m_History.openFrame(selectedName);
-	}
+    public void actionPerformed(ActionEvent e) {
+      m_History.openFrame(selectedName);
+    }
       });
     }
     else {
@@ -328,9 +349,9 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
     JMenuItem saveOutput = new JMenuItem("Save result buffer");
     if (selectedName != null) {
       saveOutput.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  saveBuffer(selectedName);
-	}
+    public void actionPerformed(ActionEvent e) {
+      saveBuffer(selectedName);
+    }
       });
     }
     else {
@@ -341,9 +362,9 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
     JMenuItem deleteOutput = new JMenuItem("Delete result buffer");
     if (selectedName != null) {
       deleteOutput.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  m_History.removeResult(selectedName);
-	}
+    public void actionPerformed(ActionEvent e) {
+      m_History.removeResult(selectedName);
+    }
       });
     }
     else {
@@ -362,59 +383,61 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
   protected void startAutoWEKA() {
     if (m_RunThread == null) {
       synchronized (this) {
-	m_StartBut.setEnabled(false);
-	m_StopBut.setEnabled(true);
+    m_StartBut.setEnabled(false);
+    m_StopBut.setEnabled(true);
       }
       
       m_RunThread = new Thread() {
-	public void run() {
-	  // set up everything:
-	  m_Log.statusMessage("Setting up...");
+    public void run() {
+      // set up everything:
+      m_Log.statusMessage("Setting up...");
 
-	  try {
-	    m_Log.logMessage("Started Auto-WEKA for " + m_Instances.relationName());
-	    if (m_Log instanceof TaskLogger)
-	      ((TaskLogger)m_Log).taskStarted();
+      try {
+        m_Log.logMessage("Started Auto-WEKA for " + m_Instances.relationName());
+        if (m_Log instanceof TaskLogger)
+          ((TaskLogger)m_Log).taskStarted();
 
-	    // running the experiment
-	    m_Log.statusMessage("Auto-WEKA started...");
-	    AutoWEKAClassifier aw = new AutoWEKAClassifier();
-	    m_Instances.setClassIndex(m_ClassCombo.getSelectedIndex());
-	    aw.buildClassifier(m_Instances);
+        // running the experiment
+        m_Log.statusMessage("Auto-WEKA started...");
+        String name = "Auto-WEKA: " + m_Instances.relationName();
+        SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
+        name = df.format(new Date()) + " - " + name;
+        AutoWEKAClassifier aw = (AutoWEKAClassifier) AbstractClassifier.makeCopy((AutoWEKAClassifier)(m_ClassifierEditor.getValue()));
+        m_Instances.setClassIndex(m_ClassCombo.getSelectedIndex());
+        aw.setLog(m_Log);
+        aw.buildClassifier(m_Instances);
 
-	    // pad and assemble values
-	    StringBuffer outBuff = new StringBuffer();
-	    outBuff.append(aw.toString());
+        // pad and assemble values
+        StringBuffer outBuff = new StringBuffer();
+        outBuff.append("Auto-WEKA result:\n");
+        outBuff.append(aw.toString());
 
-	    String name = "Auto-WEKA: " + m_Instances.relationName();
-	    SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
-	    name = df.format(new Date()) + " - " + name;
-	    m_History.addResult(name, outBuff);
-	    m_History.setSingle(name);
-	    m_Log.logMessage("Auto-WEKA finished for " + m_Instances.relationName());
-	    m_Log.statusMessage("OK");
-	  }
-	  catch (Exception ex) {
-	    ex.printStackTrace();
-	    m_Log.logMessage(ex.getMessage());
-	    JOptionPane.showMessageDialog(
-		AutoWEKAPanel.this,
-		"Problem running Auto-WEKA:\n" + ex.getMessage(),
-		"Running Auto-WEKA",
-		JOptionPane.ERROR_MESSAGE);
-	    m_Log.statusMessage("Problem running Auto-WEKA");
-	  }
-	  finally {
-	    synchronized (this) {
-	      m_StartBut.setEnabled(true);
-	      m_StopBut.setEnabled(false);
-	      m_RunThread = null;
-	    }
-	    
-	    if (m_Log instanceof TaskLogger)
+        m_History.addResult(name, outBuff);
+        m_History.setSingle(name);
+        m_Log.logMessage("Auto-WEKA finished for " + m_Instances.relationName());
+        m_Log.statusMessage("OK");
+      }
+      catch (Exception ex) {
+        ex.printStackTrace();
+        m_Log.logMessage(ex.getMessage());
+        JOptionPane.showMessageDialog(
+          AutoWEKAPanel.this,
+          "Problem running Auto-WEKA:\n" + ex.getMessage(),
+          "Running Auto-WEKA",
+          JOptionPane.ERROR_MESSAGE);
+        m_Log.statusMessage("Problem running Auto-WEKA");
+      }
+      finally {
+        synchronized (this) {
+          m_StartBut.setEnabled(true);
+          m_StopBut.setEnabled(false);
+          m_RunThread = null;
+        }
+        
+        if (m_Log instanceof TaskLogger)
               ((TaskLogger)m_Log).taskFinished();
-	  }
-	}
+      }
+    }
       };
       m_RunThread.setPriority(Thread.MIN_PRIORITY);
       m_RunThread.start();
@@ -424,13 +447,13 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
   /**
    * Save the currently selected experiment output to a file.
    * 
-   * @param name 	the name of the buffer to save
+   * @param name    the name of the buffer to save
    */
   protected void saveBuffer(String name) {
     StringBuffer sb = m_History.getNamedBuffer(name);
     if (sb != null) {
       if (m_SaveOut.save(sb))
-	m_Log.logMessage("Save successful.");
+    m_Log.logMessage("Save successful.");
     }
   }
 
@@ -450,7 +473,7 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
    * Sets the Explorer to use as parent frame (used for sending notifications
    * about changes in the data).
    * 
-   * @param parent	the parent frame
+   * @param parent  the parent frame
    */
   public void setExplorer(Explorer parent) {
     m_Explorer = parent;
@@ -459,7 +482,7 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
   /**
    * returns the parent Explorer frame.
    * 
-   * @return		the parent
+   * @return        the parent
    */
   public Explorer getExplorer() {
     return m_Explorer;
@@ -468,7 +491,7 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
   /**
    * Returns the title for the tab in the Explorer.
    * 
-   * @return 		the title of this tab
+   * @return        the title of this tab
    */
   public String getTabTitle() {
     return "Auto-WEKA";
@@ -477,7 +500,7 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
   /**
    * Returns the tooltip for the tab in the Explorer.
    * 
-   * @return 		the tooltip of this tab
+   * @return        the tooltip of this tab
    */
   public String getTabTitleToolTip() {
     return "Run Auto-WEKA";
@@ -486,7 +509,7 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
   /**
    * Tests out the Auto-WEKA panel from the command line.
    *
-   * @param args 	may optionally contain the name of a dataset to load.
+   * @param args    may optionally contain the name of a dataset to load.
    */
   public static void main(String[] args) {
     try {
@@ -498,19 +521,19 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
       sp.setLog(lp);
       jf.getContentPane().add(lp, BorderLayout.SOUTH);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
-	public void windowClosing(java.awt.event.WindowEvent e) {
-	  jf.dispose();
-	  System.exit(0);
-	}
+    public void windowClosing(java.awt.event.WindowEvent e) {
+      jf.dispose();
+      System.exit(0);
+    }
       });
       jf.pack();
       jf.setSize(800, 600);
       jf.setVisible(true);
       if (args.length == 1) {
-	System.err.println("Loading instances from " + args[0]);
-	Reader r = new java.io.BufferedReader(new java.io.FileReader(args[0]));
-	Instances i = new Instances(r);
-	sp.setInstances(i);
+    System.err.println("Loading instances from " + args[0]);
+    Reader r = new java.io.BufferedReader(new java.io.FileReader(args[0]));
+    Instances i = new Instances(r);
+    sp.setInstances(i);
       }
     }
     catch (Exception ex) {
