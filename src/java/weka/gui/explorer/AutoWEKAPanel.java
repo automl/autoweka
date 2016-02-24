@@ -249,6 +249,9 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
     setLayout(new BorderLayout());
     add(m_CEPanel, BorderLayout.NORTH);
     add(mondo, BorderLayout.CENTER);
+    Dimension pref = m_CEPanel.getPreferredSize();
+    pref.height = pref.height + 5;
+    m_CEPanel.setPreferredSize(pref);
   }
 
   /**
@@ -425,7 +428,7 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
           "Problem running Auto-WEKA:\n" + ex.getMessage(),
           "Running Auto-WEKA",
           JOptionPane.ERROR_MESSAGE);
-        m_Log.statusMessage("Problem running Auto-WEKA");
+        m_Log.statusMessage("Problem running Auto-WEKA!");
       }
       finally {
         synchronized (this) {
