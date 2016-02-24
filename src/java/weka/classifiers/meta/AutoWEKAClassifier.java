@@ -161,7 +161,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     /** The evaluation for the best classifier. */
     protected Evaluation eval;
 
-    private weka.gui.Logger wLog;
+    private transient weka.gui.Logger wLog;
 
     /**
      * Main method for testing this class.
