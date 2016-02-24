@@ -693,7 +693,11 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             "attribute evaluation arguments: " + (attributeEvalArgs != null ? Arrays.toString(attributeEvalArgs) : "[]") + "\n" +
             "estimated error: " + estimatedError + "\n\n";
         try {
+            res += eval.toSummaryString();
+            res += "\n";
             res += eval.toMatrixString();
+            res += "\n";
+            res += eval.toClassDetailsString();
         } catch(Exception e) {
             res += e;
         }
