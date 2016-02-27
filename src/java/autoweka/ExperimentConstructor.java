@@ -343,7 +343,7 @@ public abstract class ExperimentConstructor
                 String prefix = getPrefix(param.getTargetClass());
                 if(prefixes.contains(prefix))
                 {
-                    throw new RuntimeException("Prefix '" + prefix + "' (" + param.getTargetClass() + ") is already in used by somebody");
+                    throw new RuntimeException("Prefix '" + prefix + "' (" + param.getTargetClass() + ") is already in use.");
                 }
                 prefixes.add(prefix);
             }

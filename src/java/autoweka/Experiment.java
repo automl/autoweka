@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 @XmlAccessorType(XmlAccessType.NONE)
 public class Experiment extends XmlSerializable
 {
-    final static Logger log = LoggerFactory.getLogger(Experiment.class);
+    final transient static Logger log = LoggerFactory.getLogger(Experiment.class);
 
     /**
      * The name of the experiment, designed to be human readable and contain useful ID information
