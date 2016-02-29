@@ -698,9 +698,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             res += eval.toMatrixString();
             res += "\n";
             res += eval.toClassDetailsString();
-        } catch(Exception e) {
-            res += e;
-        }
+        } catch(Exception e) { }
         return res;
     }
 

@@ -355,20 +355,7 @@ public abstract class ExperimentConstructor
      */
     public String getPrefix(String classifierName)
     {
-        String prefix = "";
-        boolean readDot = true;
-        for(int i = 0; i < classifierName.length(); i++)
-        {
-            char currentChar = classifierName.charAt(i);
-            if(readDot || currentChar >= 'A' && currentChar <= 'Z')
-            {
-                readDot = false;
-                prefix += currentChar;
-            }
-            if(currentChar == '.')
-                readDot = true;
-        }
-        return prefix.toLowerCase();
+        return classifierName.replaceAll("\\.", "").toLowerCase();
     }
     
     
