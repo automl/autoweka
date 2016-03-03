@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import java.net.URLDecoder;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,14 +79,14 @@ public class ExperimentBatch extends XmlSerializable
             if(zipFile != null)
             {
                 props.setProperty("type", "zipFile");
-                props.setProperty("zipFile", new File(zipFile).getAbsolutePath());
+                props.setProperty("zipFile", URLDecoder.decode(new File(zipFile).getAbsolutePath()));
             }
             
             if(trainArff != null && testArff != null) 
             {
                 props.setProperty("type", "trainTestArff");
-                props.setProperty("trainArff", new File(trainArff).getAbsolutePath());
-                props.setProperty("testArff", new File(testArff).getAbsolutePath());
+                props.setProperty("trainArff", URLDecoder.decode(new File(trainArff).getAbsolutePath()));
+                props.setProperty("testArff", URLDecoder.decode(new File(testArff).getAbsolutePath()));
             }
 
             if(props.getProperty("type") == null)

@@ -13,6 +13,8 @@ import java.util.HashMap;
 
 import java.util.ArrayList;
 
+import java.net.URLDecoder;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -230,7 +232,7 @@ public abstract class ExperimentConstructor
         Util.makePath(mExperimentPath + File.separator + mExperiment.name);
 
         //Generate all the stuff that needs to be created alongside the experiment file
-        String absExperimentDir = new File(mExperimentPath + File.separator + mExperiment.name + File.separator).getAbsolutePath() + File.separator;
+        String absExperimentDir = URLDecoder.decode(new File(mExperimentPath + File.separator + mExperiment.name + File.separator).getAbsolutePath()) + File.separator;
         prepareExperiment(absExperimentDir);
 
         //Populate the experiment object

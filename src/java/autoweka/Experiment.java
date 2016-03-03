@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -202,7 +203,7 @@ public class Experiment extends XmlSerializable
                 //Get the experiment folder
                 expFolder = new File(args[i]).getAbsoluteFile();
                 //Get the actual experiment
-                experiment = new File(expFolder.getAbsolutePath() + File.separator + expFolder.getName() + ".experiment");
+                experiment = new File(URLDecoder.decode(expFolder.getAbsolutePath()) + File.separator + expFolder.getName() + ".experiment");
             }
             else if(seed == null)
                 seed = args[i];
@@ -230,7 +231,7 @@ public class Experiment extends XmlSerializable
             if(executable == null)
                 throw new RuntimeException("Failed to find the executable '" + exp.callString.get(0) + "'");
 
-            exp.callString.set(0, executable.getAbsolutePath());
+            exp.callString.set(0, URLDecoder.decode(executable.getAbsolutePath()));
 
             ProcessBuilder pb = new ProcessBuilder(exp.callString);
             pb.directory(experiment.getParentFile());
@@ -290,7 +291,7 @@ public class Experiment extends XmlSerializable
             }
 
             //And we might as well do the trajectory parse
-            TrajectoryParser.main(new String[]{"-single", expFolder.getAbsolutePath(), seed});
+            TrajectoryParser.main(new String[]{"-single", URLDecoder.decode(expFolder.getAbsolutePath()), seed});
 
             if(!noExit)
                 System.exit(proc.waitFor());
@@ -304,7 +305,7 @@ public class Experiment extends XmlSerializable
 
     public static Experiment createFromFolder(File folder)
     {
-        File experiment = new File(folder.getAbsolutePath() + File.separator + folder.getName() + ".experiment");
+        File experiment = new File(URLDecoder.decode(folder.getAbsolutePath()) + File.separator + folder.getName() + ".experiment");
         try {
             return Experiment.fromXML(new FileInputStream(experiment));
         }catch(Exception e){

@@ -5,13 +5,14 @@ import autoweka.Parameter;
 import autoweka.Trajectory;
 import autoweka.TrajectoryParser;
 import autoweka.Experiment;
-import java.util.Scanner;
 import java.io.FileInputStream;
 import java.io.File;
+import java.net.URLDecoder;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Scanner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,7 @@ public class SMACTrajectoryParser extends TrajectoryParser
     public Trajectory parseTrajectory(Experiment experiment, File folder, String seed)
     {
         //Load up the conditional params
-        ClassParams params = new ClassParams(folder.getAbsolutePath() + File.separator + "autoweka.params");
+        ClassParams params = new ClassParams(URLDecoder.decode(folder.getAbsolutePath()) + File.separator + "autoweka.params");
 
         Trajectory traj = new Trajectory(seed);
 
@@ -35,13 +36,13 @@ public class SMACTrajectoryParser extends TrajectoryParser
         {
             //We need to go get this trajectory file
             String trajFileName = "";
-            File[] files = new File(folder.getAbsolutePath() + File.separator + "out" + File.separator + "autoweka").listFiles();
+            File[] files = new File(URLDecoder.decode(folder.getAbsolutePath()) + File.separator + "out" + File.separator + "autoweka").listFiles();
             for(File f: files)
             {
                 String s = f.getName();
                 if(s.startsWith("traj") && s.endsWith("-" + seed + ".txt"))
                 {
-                    trajFileName = f.getAbsolutePath();
+                    trajFileName = URLDecoder.decode(f.getAbsolutePath());
                     break;
                 }
             }
@@ -82,7 +83,7 @@ public class SMACTrajectoryParser extends TrajectoryParser
             //Now, we need to parse the runs_and_results file to get some other statistics
             String runsAndResultsFileName = null;
             int runsAndResultsIteration = -1;
-            files = new File(folder.getAbsolutePath() + File.separator + "out" + File.separator + "autoweka" + File.separator + "state-run" + seed + File.separator).listFiles();
+            files = new File(URLDecoder.decode(folder.getAbsolutePath()) + File.separator + "out" + File.separator + "autoweka" + File.separator + "state-run" + seed + File.separator).listFiles();
             for(File f: files)
             {
                 String s = f.getName();
@@ -91,7 +92,7 @@ public class SMACTrajectoryParser extends TrajectoryParser
                 {
                     int itr = Integer.parseInt(matcher.group(1));
                     if(itr > runsAndResultsIteration){
-                        runsAndResultsFileName = f.getAbsolutePath();
+                        runsAndResultsFileName = URLDecoder.decode(f.getAbsolutePath());
                         runsAndResultsIteration = itr;
                     }
                 }

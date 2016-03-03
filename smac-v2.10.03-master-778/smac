@@ -10,14 +10,4 @@ fi
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$DIR/lib/native/:$DIR/lib/:$DIR/
 DYLD_FALLBACK_LIBRARY_PATH=$DYLD_FALLBACK_LIBRARY_PATH:$DIR/lib/native/:$DIR/lib/:$DIR/
 
-for f in $DIR/lib/*.jar
-do
-	jarconcat=$jarconcat:$f
-done
-for f in $DIR/*.jar
-do
-	jarconcat=$jarconcat:$f
-done
-jarconcat=${jarconcat:1}
-
-exec java -Xmx"$SMACMEM"m -cp "$DIR/conf/:$DIR/patches/:$jarconcat:$DIR/patches/" ca.ubc.cs.beta.aeatk.ant.execscript.Launcher $EXEC "$@"
+exec java -Xmx"$SMACMEM"m -cp "$DIR/conf/:$DIR/patches/:$DIR/*:$DIR/lib/*:$DIR/patches/" ca.ubc.cs.beta.aeatk.ant.execscript.Launcher $EXEC "$@"

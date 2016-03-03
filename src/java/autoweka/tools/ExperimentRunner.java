@@ -1,6 +1,7 @@
 package autoweka.tools;
 
 import java.io.File;
+import java.net.URLDecoder;
 
 import autoweka.Experiment;
 import autoweka.TrajectoryParser;
@@ -29,7 +30,7 @@ class ExperimentRunner
             log.error("The first argument does not appear to be an experiment folder");
             System.exit(1);
         }
-        String expFolder = expFolderFile.getAbsolutePath();
+        String expFolder = URLDecoder.decode(expFolderFile.getAbsolutePath());
         String expName = expFolderFile.getName();
 
         //Remove the old trajectory and model

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.io.InputStream;
 import java.util.List;
 import java.io.File;
+import java.net.URLDecoder;
 
 @XmlRootElement(name="listsexperiment")
 @XmlAccessorType(XmlAccessType.NONE)
@@ -84,7 +85,7 @@ class ListExperiment extends XmlSerializable
                 if(experiment != null)
                     throw new RuntimeException("Only one ListExperiment can be specified at a time");
                 experimentDir = new File(args[i]).getAbsoluteFile();
-                experiment = ListExperiment.fromXML(experimentDir.getAbsolutePath() + File.separator + experimentDir.getName() + ".listexperiment");
+                experiment = ListExperiment.fromXML(URLDecoder.decode(experimentDir.getAbsolutePath()) + File.separator + experimentDir.getName() + ".listexperiment");
             }
         }
 
@@ -93,7 +94,7 @@ class ListExperiment extends XmlSerializable
         instanceStrings.add("default");
         for(String s: InstanceGenerator.create(experiment.instanceGenerator, "__dummy__").getAllInstanceStrings(experiment.instanceGeneratorArgs))
             instanceStrings.add(s);
-        outputFileName = experimentDir.getAbsolutePath() + File.separator + experimentDir.getName() + ".listresults";
+        outputFileName = URLDecoder.decode(experimentDir.getAbsolutePath()) + File.separator + experimentDir.getName() + ".listresults";
 
         ArrayList<String> argStrings = new ArrayList<String>(experiment.argStrings);
 

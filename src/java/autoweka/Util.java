@@ -154,7 +154,7 @@ public class Util
 
     static public String getAbsoluteClasspath()
     {
-        return System.getProperty("java.class.path") + java.io.File.pathSeparatorChar + Util.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        return System.getProperty("java.class.path") + java.io.File.pathSeparatorChar + URLDecoder.decode(Util.class.getProtectionDomain().getCodeSource().getLocation().getPath());
     }
     
     /**
@@ -293,7 +293,7 @@ public class Util
                 log.warn("Failed to expand path {}", path, ex);
             }
             File f = new File(exp);
-            path = f.getAbsolutePath();
+            path = URLDecoder.decode(f.getAbsolutePath());
         }
         else //We're probably on a posix system....
         {
@@ -589,11 +589,11 @@ public class Util
 
         //Walk up the path of the directory file hunting this one down
         while(dir != null){
-            File paramDir = new File(dir.getAbsolutePath() + File.separator + "params");
+            File paramDir = new File(URLDecoder.decode(dir.getAbsolutePath()) + File.separator + "params");
             if(paramDir.exists() && paramDir.isDirectory())
             {
-                log.trace("Found install dir: {}", dir.getAbsolutePath());
-                return dir.getAbsolutePath();
+                log.trace("Found install dir: {}", URLDecoder.decode(dir.getAbsolutePath()));
+                return URLDecoder.decode(dir.getAbsolutePath());
             }
 
             dir = dir.getParentFile();

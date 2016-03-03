@@ -3,6 +3,7 @@ package autoweka.smac;
 import java.util.ArrayList;
 import java.io.File;
 import java.io.PrintStream;
+import java.net.URLDecoder;
 import java.util.Collections;
 import autoweka.Conditional;
 import autoweka.ExperimentConstructor;
@@ -23,6 +24,7 @@ public class SMACExperimentConstructor extends ExperimentConstructor
 
     public void prepareExperiment(String path)
     {
+        path = URLDecoder.decode(path);
         try
         {
             //Print out the param file
@@ -55,7 +57,7 @@ public class SMACExperimentConstructor extends ExperimentConstructor
     {
         // assumes that autoweka.jar is at the root of the autoweka distribution
         // (as it will be for the WEKA package)
-        String prefix = new File(SMACExperimentConstructor.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParentFile().toString();
+        String prefix = new File(URLDecoder.decode(SMACExperimentConstructor.class.getProtectionDomain().getCodeSource().getLocation().getPath())).getParentFile().toString();
         //Make sure that the properties we have tell us where the executable for smac lives
         if(mProperties.getProperty("smacexecutable") == null)
             throw new RuntimeException("The 'smacexecutable' property was not defined");

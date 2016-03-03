@@ -47,6 +47,8 @@ import java.io.Serializable;
 
 import java.nio.file.Files;
 
+import java.net.URLDecoder;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -214,7 +216,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         File fp = new File(msExperimentPath + expName + File.separator + expName + ".arff");
         saver.setFile(fp);
         saver.writeBatch();
-        props.setProperty("trainArff", fp.getAbsolutePath());
+        props.setProperty("trainArff", URLDecoder.decode(fp.getAbsolutePath()));
         exp.datasetString = Util.propertiesToString(props);
         exp.instanceGenerator = "autoweka.instancegenerators." + String.valueOf(resampling);
         exp.instanceGeneratorArgs = "seed=" + seed + ":" + resamplingArgs;
