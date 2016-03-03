@@ -1,6 +1,0 @@
-JDialog(title="Default Instance Generator Options", size=packed):
-    - JButton(name=okButton, text="Close", onAction=[close])
-    - MigLayout : |
-        [grow]
-        "The default instance generator has no options."
-        |okButton 

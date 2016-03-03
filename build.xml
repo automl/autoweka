@@ -63,22 +63,11 @@
     <!-- Build the actual jar -->
     <target name="jar" depends='compile'>
         <jar destfile="autoweka.jar" basedir="${class.dir}">
-            <manifest>
-                <attribute name="Main-Class" value="autoweka.ui.Launcher"/>
-            </manifest>
             <zipfileset dir="lib" includes="*.properties" />
             <zipgroupfileset dir="lib" includes="*.jar" />
         </jar>
     </target>
     
-    <target name="jar-light" depends='compile'>
-        <jar destfile="autoweka-light.jar" basedir="${class.dir}">
-            <manifest>
-                <attribute name="Main-Class" value="autoweka.ui.Launcher"/>
-            </manifest>
-        </jar>
-    </target>
-
     <target name="dist" depends="doc,manual,jar,jar-light">
         <tar destfile="autoweka-dist.tar.gz" compression="gzip">
             <tarfileset dir="${jar.dir}" includes="*.jar" />
