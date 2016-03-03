@@ -14,7 +14,6 @@
     <!-- Setup the classpath -->
     <path id="classpath">
         <fileset dir="${lib.dir}" includes="*.jar"/>
-        <fileset dir="${lib.dir}/swingbuilder" includes="*.jar"/>
     </path>
     <path id="test.classpath">
         <fileset dir="." includes="autoweka.jar"/>
@@ -31,7 +30,7 @@
         <delete file="autoweka.zip"/>
         <zip destfile="autoweka.zip"
              basedir="."
-             excludes=".git/, weka/, .travis.yml, *.sh, wizardexperiments/, scripts/, *.tar.gz">
+             excludes=".git/, weka/, .travis.yml, *.sh, wizardexperiments/, scripts/, *.tar.gz, lib/*.jar">
         </zip>
     </target>
     
@@ -69,7 +68,6 @@
             </manifest>
             <zipfileset dir="lib" includes="*.properties" />
             <zipgroupfileset dir="lib" includes="*.jar" />
-            <zipgroupfileset dir="lib/swingbuilder" includes="*.jar" />
         </jar>
     </target>
     
@@ -85,7 +83,6 @@
         <tar destfile="autoweka-dist.tar.gz" compression="gzip">
             <tarfileset dir="${jar.dir}" includes="*.jar" />
             <tarfileset dir="${lib.dir}" includes="*.jar" prefix="lib" />
-            <tarfileset dir="${lib.dir}/swingbuilder" includes="**/*" prefix="lib/swingbuilder" />
             <tarfileset dir="params" includes="**/*" prefix="params" />
             <tarfileset dir="scripts" includes="**/*" prefix="scripts" filemode="755" />
             <tarfileset dir="src" includes="**/*" prefix="src" />
