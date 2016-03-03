@@ -68,7 +68,7 @@
         </jar>
     </target>
     
-    <target name="dist" depends="doc,manual,jar,jar-light">
+    <target name="dist" depends="doc,manual,jar">
         <tar destfile="autoweka-dist.tar.gz" compression="gzip">
             <tarfileset dir="${jar.dir}" includes="*.jar" />
             <tarfileset dir="${lib.dir}" includes="*.jar" prefix="lib" />
