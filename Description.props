@@ -31,4 +31,4 @@ PackageURL=http://www.cs.ubc.ca/labs/beta/Projects/autoweka/autoweka.zip
 URL=https://github.com/larskotthoff/autoweka
 
 # Dependencies
-Depends=weka (>=3.7.2)
+Depends=weka (>=3.7.13)
