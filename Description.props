@@ -13,7 +13,7 @@ Title=Automatically find the best model and configuration for a classification t
 Category=Classification
 
 # Author (required)
-Author=Lars Kotthoff, Chris Thornton, Frank Hutter, Holger Hoos, Kevin Leyton-Brown
+Author=Lars Kotthoff, Farooq Ahmed, Chris Thornton, Frank Hutter, Holger Hoos, Kevin Leyton-Brown
 
 # Maintainer (required)
 Maintainer=Lars Kotthoff <larsko@cs.ubc.ca>
@@ -25,7 +25,7 @@ License=GPL 2.0
 Description=Automatically finds the best model with its best parameter settings for a given classification task.<br/><br/>For more information see:<br/><br/>Chris Thornton, Frank Hutter, Holger Hoos, and Kevin Leyton-Brown (2013). Auto-WEKA: Combined Selection and Hyperparameter Optimization of Classifiaction Algorithms. In Proc. of KDD 2013.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.ubc.ca/labs/beta/Projects/autoweka/autoweka.zip
+PackageURL=http://www.cs.ubc.ca/labs/beta/Projects/autoweka/autoweka-1.0.1.zip
 
 # URL for further information
 URL=https://github.com/larskotthoff/autoweka
