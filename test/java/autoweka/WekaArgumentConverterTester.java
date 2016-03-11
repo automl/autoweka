@@ -1,11 +1,8 @@
 package autoweka;
-
 import static org.junit.Assert.*;
-
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
-import org.junit.Ignore;
 
 import autoweka.WekaArgumentConverter.Arguments;
 
@@ -38,12 +35,10 @@ public class WekaArgumentConverterTester
         Arguments Result4 = WekaArgumentConverter.convert(args4);
         System.out.println("Test # 4: processing all arguments");
         assertTrue(Result4.argMap.toString().equals("{attributeeval=[--, -key2, Value2], classifier=[--, -Key2, 69, -Key1, 4.897788, -classifier, classifier], attributesearch=[-key1, assearchValue1, -key2, assearchValue2]}"));
-        assertTrue(Result4.propertyMap.toString().equals("{attributeeval=attributeevalValue, targetclass=targetclassValue, attributetime=attributetimeValue, attributesearch=attributesearchValue}"));
-        
-       
+        assertTrue(Result4.propertyMap.toString().equals("{attributeeval=attributeevalValue, targetclass=targetclassValue, attributetime=attributetimeValue, attributesearch=attributesearchValue}"));       
     }
 
-        public static void main(String[] args){
+    public static void main(String[] args){
         WekaArgumentConverterTester t = new WekaArgumentConverterTester();
         t.convertTester();
     }
