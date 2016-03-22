@@ -113,7 +113,7 @@ public class ClassifierResult
     private double mTrainingTime = 0;
     private double mEvaluationTime = 0;
     private double mAttributeSelectionTime = 0;
-    private double mRegularizationPlenalty = 0;
+    private double mRegularizationPenalty = 1;
     private boolean mCompleted = false;
     private AbstractClassifier mClassifier = null;
     private AttributeSelection mAttributeSelection = null;
@@ -175,11 +175,11 @@ public class ClassifierResult
     }
 
     public double getNormalizationPenalty() {
-        return mRegularizationPlenalty;
+        return mRegularizationPenalty;
     }
 
     public void setRegularizationPenalty(double penalty) {
-        mRegularizationPlenalty = penalty;
+        mRegularizationPenalty = penalty;
     }
 
     public double getTrainingTime(){
@@ -218,7 +218,7 @@ public class ClassifierResult
      */
     public double getScore()
     {
-        double score = mRegularizationPlenalty + mRawScore;
+        double score = mRegularizationPenalty * mRawScore;
         return Double.isNaN(score) ? mMetric.getDefault() : score;
     }
 

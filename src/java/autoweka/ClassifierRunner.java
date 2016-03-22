@@ -9,13 +9,15 @@ import weka.core.Instance;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
-import java.util.Map;
-import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +32,6 @@ public class ClassifierRunner
 {
     final Logger log = LoggerFactory.getLogger(ClassifierRunner.class);
 
-    //private ParameterRegularizer mRegularizer = null;
     private InstanceGenerator mInstanceGenerator = null;
     private boolean mTestOnly = false;
     private boolean mDisableOutput = false;
@@ -46,8 +47,6 @@ public class ClassifierRunner
     {
         //Get the instnace generator
         mInstanceGenerator = InstanceGenerator.create(props.getProperty("instanceGenerator"), props.getProperty("datasetString"));
-        //Get the regularizer - experimental to the point of not working
-        //mRegularizer = ParameterRegularizer.create(props.getProperty("regularizer"), props.getProperty("regularizerParameterFileName"), props.getProperty("regularizerParams"));
 
         mTestOnly = Boolean.valueOf(props.getProperty("onlyTest", "false"));
         mDisableOutput = Boolean.valueOf(props.getProperty("disableOutput", "false"));
@@ -225,13 +224,6 @@ public class ClassifierRunner
             throw new RuntimeException("No target classifier name specified!");
         }
 
-        //Compute the regularization penalty
-        float regPenalty = 0;
-        res.setRegularizationPenalty(regPenalty);
-        /*if(mRegularizer != null) {
-            regPenalty = mRegularizer.getRegularizationPenalty(args);
-        }*/
-
         //Get one of these classifiers
         String[] argsArray = argMap.get("classifier").toArray(new String[0]);
         String[] argsArraySaved = argMap.get("classifier").toArray(new String[0]);
@@ -295,6 +287,22 @@ public class ClassifierRunner
 
         log.debug("Performing evaluation on {} instances.", testing.numInstances());
 
+        // get training performance
+        ClassifierResult resTrain = new ClassifierResult(resultMetric);
+        _evaluateClassifierOnInstances(classifier, resTrain, training, timeout);
+        // test performance with permuted labels
+        Instances testingPermuted = new Instances(testing, testing.size()^2);
+        for(int i = 0; i < testing.size(); i++) {
+            Instance cl = testing.get(i);
+            for(int j = 0; j < testing.size(); j++) {
+                Instance in = (Instance) testing.get(j).copy();
+                in.setClassValue(cl.classValue());
+                testingPermuted.add(in);
+            }
+        }
+        ClassifierResult resPerm = new ClassifierResult(resultMetric);
+        _evaluateClassifierOnInstances(classifier, resPerm, testingPermuted, timeout);
+
         //Get the evaluation
         if(!_evaluateClassifierOnInstances(classifier, res, testing, timeout))
             return res;
@@ -307,6 +315,15 @@ public class ClassifierRunner
              instanceStr, res.getRawScore());
 
         log.debug("Num Training: {}, num testing: {}", training.numInstances(), testing.numInstances());
+
+        double regPenalty = 1e-3;
+        if(resPerm.getScore() - resTrain.getScore() != 0) {
+            // add to avoid zero values
+            regPenalty += Math.abs((res.getScore() - resTrain.getScore())/(resPerm.getScore() - resTrain.getScore()));
+        }
+        res.setRegularizationPenalty((float) regPenalty);
+
+        //log.error("Scores: {}, {}, {}, pen: {}", resTrain.getScore(), res.getScore(), resPerm.getScore(), regPenalty);
 
         return res;
     }
