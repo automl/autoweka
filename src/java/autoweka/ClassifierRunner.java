@@ -118,9 +118,33 @@ public class ClassifierRunner
     {
         ClassifierResult res = new ClassifierResult(resultMetric);
         res.setClassifier(classifier);
-        Instances instances = mInstanceGenerator.getTestingFromParams(instanceStr);
+        Instances training = mInstanceGenerator.getTrainingFromParams(instanceStr);
+        Instances testing  = mInstanceGenerator.getTestingFromParams(instanceStr);
 
-        _evaluateClassifierOnInstances(classifier, res, instances, evaluateClassifierOnInstances);
+        ClassifierResult resTrain = new ClassifierResult(resultMetric);
+        resTrain.setClassifier(classifier);
+        _evaluateClassifierOnInstances(classifier, resTrain, training, evaluateClassifierOnInstances);
+        // test performance with permuted labels
+        Instances testingPermuted = new Instances(testing, testing.size()^2);
+        for(int i = 0; i < testing.size(); i++) {
+            Instance cl = testing.get(i);
+            for(int j = 0; j < testing.size(); j++) {
+                Instance in = (Instance) testing.get(j).copy();
+                in.setClassValue(cl.classValue());
+                testingPermuted.add(in);
+            }
+        }
+        ClassifierResult resPerm = new ClassifierResult(resultMetric);
+        resPerm.setClassifier(classifier);
+        _evaluateClassifierOnInstances(classifier, resPerm, testingPermuted, evaluateClassifierOnInstances);
+
+        double regPenalty = 1e-3;
+        if(resPerm.getScore() - resTrain.getScore() != 0) {
+            // add to avoid zero values
+            regPenalty += Math.abs((res.getScore() - resTrain.getScore())/(resPerm.getScore() - resTrain.getScore()));
+        }
+        _evaluateClassifierOnInstances(classifier, res, testing, evaluateClassifierOnInstances);
+        res.setRegularizationPenalty((float) regPenalty);
 
         return res;
     }
@@ -289,6 +313,7 @@ public class ClassifierRunner
 
         // get training performance
         ClassifierResult resTrain = new ClassifierResult(resultMetric);
+        resTrain.setClassifier(classifier);
         _evaluateClassifierOnInstances(classifier, resTrain, training, timeout);
         // test performance with permuted labels
         Instances testingPermuted = new Instances(testing, testing.size()^2);
@@ -301,6 +326,7 @@ public class ClassifierRunner
             }
         }
         ClassifierResult resPerm = new ClassifierResult(resultMetric);
+        resPerm.setClassifier(classifier);
         _evaluateClassifierOnInstances(classifier, resPerm, testingPermuted, timeout);
 
         //Get the evaluation
