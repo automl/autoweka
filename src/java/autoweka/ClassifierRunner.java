@@ -9,8 +9,11 @@ import weka.core.Instance;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.Properties;
+import java.util.Random;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
@@ -295,7 +298,20 @@ public class ClassifierRunner
 
         log.debug("Performing evaluation on {} instances.", testing.numInstances());
 
-        //Get the evaluation
+        // add some random noise...
+        Map<Double,Double> classValues = new HashMap<Double,Double>();
+        for(int i = 0; i < testing.size(); i++) {
+            classValues.put(testing.get(i).classValue(), testing.get(i).classValue());
+        }
+        Random rand = new Random();
+        for(int i = 0; i < testing.size(); i++) {
+            Instance cl = testing.get(i);
+            if(rand.nextInt(100) > 80) {
+                double newval = (Double) classValues.values().toArray()[rand.nextInt(classValues.size())];
+                cl.setClassValue(newval);
+            }
+        }
+
         if(!_evaluateClassifierOnInstances(classifier, res, testing, timeout))
             return res;
 
