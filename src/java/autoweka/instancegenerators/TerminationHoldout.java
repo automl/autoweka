@@ -66,8 +66,8 @@ public class TerminationHoldout extends RandomSubSampling
         Properties params = Util.parsePropertyString(paramStr);
         filter.setNoReplacement(true);
 
-        if(!"{SEED}".equals(params.getProperty("terminationSeed"))) 
-            filter.setRandomSeed(Integer.parseInt(params.getProperty("terminationSeed", "0")));
+        if(!("{SEED}".equals(params.getProperty("terminationSeed")))) 
+            filter.setRandomSeed(Integer.parseInt(params.getProperty("terminationSeed", params.getProperty("seed", "0"))));
         filter.setSampleSizePercent(Double.parseDouble(params.getProperty("terminationPercent", "30")));
         filter.setBiasToUniformClass(Double.parseDouble(params.getProperty("terminationBias", "0")));
     }

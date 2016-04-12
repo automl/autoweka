@@ -81,8 +81,15 @@ public class SMACExperimentConstructor extends ExperimentConstructor
 
         List<String> args = new ArrayList<String>();
         args.add(smac);
+
+        // seeds
         args.add("--seed");
         args.add("{SEED}");
+        args.add("--validation-seed");
+        args.add("{SEED}");
+        args.add("--random-sample-seed");
+        args.add("{SEED}");
+
         args.add("--scenarioFile");
         args.add("autoweka.scenario");
         args.add("--logModel");

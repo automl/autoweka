@@ -20,15 +20,14 @@ public class SMACWrapper extends Wrapper
     protected void _processWrapperParameterStart(Queue<String> args)
     {
         //First argument is the instance file - smac adds a path here
-        mInstance = (new File(args.poll())).getName();
+        mInstance = args.poll();
         //The instance info... ignore
         args.poll();
         //The timeout
         mTimeout = Float.parseFloat(args.poll());
         //The cutoff length... ignore
         args.poll();
-        // XXX: seed -- no idea how this is set or why exactly things break horribly
-        // if this isn't removed here
+        // some random seed -- ignore
         args.poll();
     }
 

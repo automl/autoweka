@@ -97,4 +97,3 @@ public class CrossValidation extends InstanceGenerator
         return instanceStrings;
     }
 }
-

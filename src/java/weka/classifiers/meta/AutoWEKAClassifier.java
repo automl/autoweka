@@ -219,7 +219,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         props.setProperty("trainArff", URLDecoder.decode(fp.getAbsolutePath()));
         exp.datasetString = Util.propertiesToString(props);
         exp.instanceGenerator = "autoweka.instancegenerators." + String.valueOf(resampling);
-        exp.instanceGeneratorArgs = "seed=" + seed + ":" + resamplingArgs;
+        exp.instanceGeneratorArgs = "seed=" + seed + ":" + resamplingArgs + ":seed=" + seed;
         exp.attributeSelection = true;
 
         exp.attributeSelectionTimeout = timeLimit * 1;
