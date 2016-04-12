@@ -343,13 +343,13 @@ public class ClassifierRunner
         log.debug("Num Training: {}, num testing: {}", training.numInstances(), testing.numInstances());
 
         double regPenalty = 1e-3;
-        if(resPerm.getScore() - resTrain.getScore() != 0) {
+        if(resPerm.getRawScore() - resTrain.getRawScore() != 0) {
             // add to avoid zero values
-            regPenalty += Math.abs((res.getScore() - resTrain.getScore())/(resPerm.getScore() - resTrain.getScore()));
+            regPenalty += Math.max(0, (res.getRawScore() - resTrain.getRawScore())/(resPerm.getRawScore() - resTrain.getRawScore()));
         }
         res.setRegularizationPenalty((float) regPenalty);
 
-        //log.error("Scores: {}, {}, {}, pen: {}", resTrain.getScore(), res.getScore(), resPerm.getScore(), regPenalty);
+        //log.error("Scores: {}, {}, {}, pen: {}", resTrain.getRawScore(), res.getRawScore(), resPerm.getRawScore(), regPenalty);
 
         return res;
     }
