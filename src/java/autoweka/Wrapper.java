@@ -134,6 +134,10 @@ public class Wrapper
 
         ClassifierResult res = _doRun(wrapperArgs);
 
+        if(res == null) {
+            throw new RuntimeException("Failed compute result!");
+        }
+
         //Post event
         _postRun();
 

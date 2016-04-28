@@ -267,7 +267,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                         }
                         // fix nested logging...
                         if(line.matches(".*DEBUG.*") || line.matches(".*Variance is less than.*")) {
-                            //log.debug(line);
+                            log.debug(line);
                         } else if(line.matches(".*INFO.*")) {
                             if(line.matches(".*ClassifierRunner - weka.classifiers.*")) {
                                 tried++;
@@ -278,7 +278,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                                         wLog.logMessage(msg);
                                 }
                             }
-                            //log.info(line);
+                            log.info(line);
                         } else if(line.matches(".*WARN.*")) {
                             log.warn(line);
                         } else if(line.matches(".*ERROR.*")) {

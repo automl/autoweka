@@ -13,7 +13,11 @@ public class SMACWrapper extends Wrapper
     public static void main(String[] args)
     {
         SMACWrapper wrapper = new SMACWrapper();
-        wrapper.run(args);
+        try {
+            wrapper.run(args);
+        } catch(Exception e) {
+            System.exit(1);
+        }
     }
 
     @Override

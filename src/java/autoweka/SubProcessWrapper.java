@@ -29,7 +29,11 @@ public class SubProcessWrapper extends Wrapper
     public static void main(String [] args)
     {
         SubProcessWrapper wrapper = new SubProcessWrapper();
-        wrapper.run(args);
+        try {
+            wrapper.run(args);
+        } catch(Exception e) {
+            System.exit(1);
+        }
         System.exit(0);
     }
 

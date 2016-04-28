@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Random;
 import java.util.Properties;
 
 import weka.attributeSelection.ASEvaluation;
@@ -342,14 +344,27 @@ public class ClassifierRunner
 
         log.debug("Num Training: {}, num testing: {}", training.numInstances(), testing.numInstances());
 
-        double regPenalty = 1e-3;
+        double relOverFit = 0;
         if(resPerm.getRawScore() - resTrain.getRawScore() != 0) {
-            // add to avoid zero values
-            regPenalty += Math.max(0, (res.getRawScore() - resTrain.getRawScore())/(resPerm.getRawScore() - resTrain.getRawScore()));
+            relOverFit = Math.max(0, (res.getRawScore() - resTrain.getRawScore())/(resPerm.getRawScore() - resTrain.getRawScore()));
         }
-        res.setRegularizationPenalty((float) regPenalty);
 
-        //log.error("Scores: {}, {}, {}, pen: {}", resTrain.getRawScore(), res.getRawScore(), resPerm.getRawScore(), regPenalty);
+        // add some random noise...
+        Map<Double,Double> classValues = new HashMap<Double,Double>();
+        for(int i = 0; i < testing.size(); i++) {
+            classValues.put(testing.get(i).classValue(), testing.get(i).classValue());
+        }
+        Random rand = new Random();
+        for(int i = 0; i < testing.size(); i++) {
+            Instance cl = testing.get(i);
+            if(rand.nextInt(100) < 100 * relOverFit) {
+                double newval = (Double) classValues.values().toArray()[rand.nextInt(classValues.size())];
+                cl.setClassValue(newval);
+             }
+         }
+        if(!_evaluateClassifierOnInstances(classifier, res, testing, timeout))
+            return res;
+        log.error("Scores: {}, {}, {}, pen: {}", resTrain.getRawScore(), res.getRawScore(), resPerm.getRawScore(), relOverFit);
 
         return res;
     }

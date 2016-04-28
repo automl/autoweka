@@ -218,7 +218,8 @@ public class ClassifierResult
      */
     public double getScore()
     {
-        double score = mRegularizationPenalty * mRawScore;
+        //double score = mRegularizationPenalty * mRawScore;
+        double score = mRawScore;
         return Double.isNaN(score) ? mMetric.getDefault() : score;
     }
 
