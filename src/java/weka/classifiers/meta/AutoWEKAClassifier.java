@@ -707,6 +707,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             res += "\n";
             res += eval.toClassDetailsString();
         } catch(Exception e) { }
+        res += "\n\nFor better performance, try giving Auto-WEKA more time.";
         return res;
     }
 
