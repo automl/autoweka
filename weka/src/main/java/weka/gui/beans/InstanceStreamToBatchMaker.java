@@ -38,11 +38,11 @@ import weka.gui.Logger;
  * conjunction with the Reservoir sampling filter.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 9132 $
+ * @version $Revision: 10220 $
  */
 @KFStep(category = "Flow", toolTipText = "Converts an incoming instance stream into a data set batch")
 public class InstanceStreamToBatchMaker extends JPanel implements BeanCommon,
-    Visible, InstanceListener, EventConstraints, DataSource {
+  Visible, InstanceListener, EventConstraints, DataSource {
 
   /**
    * For serialization
@@ -50,8 +50,8 @@ public class InstanceStreamToBatchMaker extends JPanel implements BeanCommon,
   private static final long serialVersionUID = -7037141087208627799L;
 
   protected BeanVisual m_visual = new BeanVisual("InstanceStreamToBatchMaker",
-      BeanVisual.ICON_PATH + "InstanceStreamToBatchMaker.gif",
-      BeanVisual.ICON_PATH + "InstanceStreamToBatchMaker_animated.gif");
+    BeanVisual.ICON_PATH + "InstanceStreamToBatchMaker.gif",
+    BeanVisual.ICON_PATH + "InstanceStreamToBatchMaker_animated.gif");
 
   /**
    * The log.
@@ -277,7 +277,7 @@ public class InstanceStreamToBatchMaker extends JPanel implements BeanCommon,
   @Override
   public void useDefaultVisual() {
     m_visual.loadIcons(BeanVisual.ICON_PATH + "InstanceStreamToBatchMaker.gif",
-        BeanVisual.ICON_PATH + "InstanceStreamToBatchMaker_animated.gif");
+      BeanVisual.ICON_PATH + "InstanceStreamToBatchMaker_animated.gif");
   }
 
   /**
@@ -285,6 +285,7 @@ public class InstanceStreamToBatchMaker extends JPanel implements BeanCommon,
    * 
    * @param tse the DataSetEvent to pass on.
    */
+  @SuppressWarnings("unchecked")
   protected void notifyDataListeners(DataSetEvent tse) {
     ArrayList<DataSourceListener> l;
     synchronized (this) {

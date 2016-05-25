@@ -8,7 +8,11 @@
 # - full classname has to be provided
 #
 # author:  FracPete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 9117 $
+# version: $Revision: 11916 $
+
+# whether to show the large tooltip with the global info and capabilities
+# in the class tree
+ShowGlobalInfoToolTip=true
 
 # general
 java.lang.Object[]=weka.gui.GenericArrayEditor
@@ -28,11 +32,17 @@ weka.core.neighboursearch.balltrees.BallTreeConstructor=weka.gui.GenericObjectEd
 weka.core.neighboursearch.balltrees.BallSplitter=weka.gui.GenericObjectEditor
 weka.core.neighboursearch.kdtrees.KDTreeNodeSplitter=weka.gui.GenericObjectEditor
 weka.core.stemmers.Stemmer=weka.gui.GenericObjectEditor
+weka.core.stopwords.StopwordsHandler=weka.gui.GenericObjectEditor
+weka.core.stopwords.StopwordsHandler[]=weka.gui.GenericArrayEditor
 weka.core.tokenizers.Tokenizer=weka.gui.GenericObjectEditor
 
 # estimators
 weka.estimators.Estimator=weka.gui.GenericObjectEditor
 weka.estimators.Estimator[]=weka.gui.GenericArrayEditor
+
+# univariate estimators
+weka.estimators.UnivariateDensityEstimator=weka.gui.GenericObjectEditor
+weka.estimators.UnivariateDensityEstimator[]=weka.gui.GenericArrayEditor
 
 # filters
 weka.filters.Filter=weka.gui.GenericObjectEditor
@@ -40,6 +50,7 @@ weka.filters.Filter[]=weka.gui.GenericArrayEditor
 
 # classifiers
 weka.classifiers.Classifier=weka.gui.GenericObjectEditor
+weka.classifiers.IterativeClassifier=weka.gui.GenericObjectEditor
 weka.classifiers.Classifier[]=weka.gui.GenericArrayEditor
 weka.classifiers.CostMatrix=weka.gui.CostMatrixEditor
 weka.classifiers.bayes.net.search.SearchAlgorithm=weka.gui.GenericObjectEditor

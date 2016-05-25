@@ -20,6 +20,7 @@
 
 package weka.core.tokenizers;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.Vector;
@@ -29,159 +30,163 @@ import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
- <!-- globalinfo-start -->
- * Splits a string into an n-gram with min and max grams.
+ * <!-- globalinfo-start --> Splits a string into an n-gram with min and max
+ * grams.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -delimiters &lt;value&gt;
+ * <pre>
+ * -delimiters &lt;value&gt;
  *  The delimiters to use
- *  (default ' \r\n\t.,;:'"()?!').</pre>
+ *  (default ' \r\n\t.,;:'"()?!').
+ * </pre>
  * 
- * <pre> -max &lt;int&gt;
- *  The max size of the Ngram (default = 3).</pre>
+ * <pre>
+ * -max &lt;int&gt;
+ *  The max size of the Ngram (default = 3).
+ * </pre>
  * 
- * <pre> -min &lt;int&gt;
- *  The min size of the Ngram (default = 1).</pre>
+ * <pre>
+ * -min &lt;int&gt;
+ *  The min size of the Ngram (default = 1).
+ * </pre>
  * 
- <!-- options-end -->
- *
- * @author  Sebastian Germesin (sebastian.germesin@dfki.de)
- * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * <!-- options-end -->
+ * 
+ * @author Sebastian Germesin (sebastian.germesin@dfki.de)
+ * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 10971 $
  */
-public class NGramTokenizer
-  extends CharacterDelimitedTokenizer {
+public class NGramTokenizer extends CharacterDelimitedTokenizer {
 
   /** for serialization */
   private static final long serialVersionUID = -2181896254171647219L;
 
   /** the maximum number of N */
   protected int m_NMax = 3;
-  
+
   /** the minimum number of N */
   protected int m_NMin = 1;
-  
+
   /** the current length of the N-grams */
   protected int m_N;
-  
+
   /** the number of strings available */
   protected int m_MaxPosition;
-  
+
   /** the current position for returning elements */
   protected int m_CurrentPosition;
-  
+
   /** all the available grams */
   protected String[] m_SplitString;
-  
+
   /**
    * Returns a string describing the stemmer
    * 
-   * @return 		a description suitable for displaying in the 
-   * 			explorer/experimenter gui
+   * @return a description suitable for displaying in the explorer/experimenter
+   *         gui
    */
+  @Override
   public String globalInfo() {
     return "Splits a string into an n-gram with min and max grams.";
   }
-  
+
   /**
    * Returns an enumeration of all the available options..
-   *
-   * @return 		an enumeration of all available options.
+   * 
+   * @return an enumeration of all available options.
    */
-  public Enumeration listOptions() {
-    Vector<Option>	result;
-    Enumeration enm;
-    
-    result = new Vector<Option>();
-    
-    enm = super.listOptions();
-    while (enm.hasMoreElements())
-      result.addElement((Option)enm.nextElement());
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> result = new Vector<Option>();
 
-    result.addElement(new Option(
-	"\tThe max size of the Ngram (default = 3).",
-	"max", 1, "-max <int>"));
+    result.addElement(new Option("\tThe max size of the Ngram (default = 3).",
+      "max", 1, "-max <int>"));
 
-    result.addElement(new Option(
-	"\tThe min size of the Ngram (default = 1).",
-	"min", 1, "-min <int>"));
-    
+    result.addElement(new Option("\tThe min size of the Ngram (default = 1).",
+      "min", 1, "-min <int>"));
+
+    result.addAll(Collections.list(super.listOptions()));
+
     return result.elements();
   }
-  
+
   /**
    * Gets the current option settings for the OptionHandler.
-   *
-   * @return 		the list of current option settings as an array of 
-   * 			strings
+   * 
+   * @return the list of current option settings as an array of strings
    */
+  @Override
   public String[] getOptions() {
-    Vector<String>	result;
-    String[]		options;
-    int			i;
-    
-    result = new Vector<String>();
-    
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
-    
+    Vector<String> result = new Vector<String>();
+
     result.add("-max");
     result.add("" + getNGramMaxSize());
 
     result.add("-min");
     result.add("" + getNGramMinSize());
 
+    Collections.addAll(result, super.getOptions());
+
     return result.toArray(new String[result.size()]);
   }
 
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <pre> -delimiters &lt;value&gt;
+   * <!-- options-start --> Valid options are:
+   * <p/>
+   * 
+   * <pre>
+   * -delimiters &lt;value&gt;
    *  The delimiters to use
-   *  (default ' \r\n\t.,;:'"()?!').</pre>
+   *  (default ' \r\n\t.,;:'"()?!').
+   * </pre>
    * 
-   * <pre> -max &lt;int&gt;
-   *  The max size of the Ngram (default = 3).</pre>
+   * <pre>
+   * -max &lt;int&gt;
+   *  The max size of the Ngram (default = 3).
+   * </pre>
    * 
-   * <pre> -min &lt;int&gt;
-   *  The min size of the Ngram (default = 1).</pre>
+   * <pre>
+   * -min &lt;int&gt;
+   *  The min size of the Ngram (default = 1).
+   * </pre>
    * 
-   <!-- options-end -->
-   *
-   * @param options 	the list of options as an array of strings
-   * @throws Exception 	if an option is not supported
+   * <!-- options-end -->
+   * 
+   * @param options the list of options as an array of strings
+   * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    String	value;
-    
-    super.setOptions(options);
+    String value;
 
     value = Utils.getOption("max", options);
-    if (value.length() != 0)
+    if (value.length() != 0) {
       setNGramMaxSize(Integer.parseInt(value));
-    else
+    } else {
       setNGramMaxSize(3);
+    }
 
     value = Utils.getOption("min", options);
-    if (value.length() != 0)
+    if (value.length() != 0) {
       setNGramMinSize(Integer.parseInt(value));
-    else
+    } else {
       setNGramMinSize(1);
+    }
+
+    super.setOptions(options);
   }
-  
+
   /**
    * Gets the max N of the NGram.
    * 
-   * @return 		the size (N) of the NGram.
+   * @return the size (N) of the NGram.
    */
   public int getNGramMaxSize() {
     return m_NMax;
@@ -190,20 +195,21 @@ public class NGramTokenizer
   /**
    * Sets the max size of the Ngram.
    * 
-   * @param value 	the size of the NGram.
+   * @param value the size of the NGram.
    */
   public void setNGramMaxSize(int value) {
-    if (value < 1)
+    if (value < 1) {
       m_NMax = 1;
-    else
+    } else {
       m_NMax = value;
+    }
   }
 
   /**
    * Returns the tip text for this property.
-   *
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String NGramMaxSizeTipText() {
     return "The max N of the NGram.";
@@ -212,19 +218,20 @@ public class NGramTokenizer
   /**
    * Sets the min size of the Ngram.
    * 
-   * @param value 	the size of the NGram.
+   * @param value the size of the NGram.
    */
   public void setNGramMinSize(int value) {
-    if (value < 1)
+    if (value < 1) {
       m_NMin = 1;
-    else
+    } else {
       m_NMin = value;
+    }
   }
 
   /**
    * Gets the min N of the NGram.
    * 
-   * @return 		the size (N) of the NGram.
+   * @return the size (N) of the NGram.
    */
   public int getNGramMinSize() {
     return m_NMin;
@@ -232,9 +239,9 @@ public class NGramTokenizer
 
   /**
    * Returns the tip text for this property.
-   *
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String NGramMinSizeTipText() {
     return "The min N of the NGram.";
@@ -243,27 +250,35 @@ public class NGramTokenizer
   /**
    * returns true if there's more elements available
    * 
-   * @return		true if there are more elements available
+   * @return true if there are more elements available
    */
+  @Override
   public boolean hasMoreElements() {
-    return (m_CurrentPosition < m_MaxPosition && 
-	m_N - 1 + m_CurrentPosition < m_MaxPosition && 
-	m_N >= m_NMin);
+    // return (m_CurrentPosition < m_MaxPosition
+    // && m_N - 1 + m_CurrentPosition < m_MaxPosition && m_N >= m_NMin);
+    //
+    return (m_N >= m_NMin);
   }
-  
+
   /**
    * Returns N-grams and also (N-1)-grams and .... and 1-grams.
    * 
-   * @return		the next element
+   * @return the next element
    */
-  public Object nextElement() {
+  @Override
+  public String nextElement() {
     String retValue = "";
-    
-    for (int i = 0; i < m_N && i + m_CurrentPosition < m_MaxPosition; i++)
+
+    // for (int i = 0; i < m_N && i + m_CurrentPosition < m_MaxPosition; i++) {
+    // retValue += " " + m_SplitString[m_CurrentPosition + i];
+    // }
+
+    for (int i = 0; i < m_N; i++) {
       retValue += " " + m_SplitString[m_CurrentPosition + i];
-    
+    }
+
     m_CurrentPosition++;
-    
+
     if (m_CurrentPosition + m_N - 1 == m_MaxPosition) {
       m_CurrentPosition = 0;
       m_N--;
@@ -272,9 +287,9 @@ public class NGramTokenizer
     return retValue.trim();
   }
 
-  /** 
-   * filters out empty strings in m_SplitString and
-   * replaces m_SplitString with the cleaned version.
+  /**
+   * filters out empty strings in m_SplitString and replaces m_SplitString with
+   * the cleaned version.
    * 
    * @see #m_SplitString
    */
@@ -283,49 +298,56 @@ public class NGramTokenizer
     LinkedList<String> clean = new LinkedList<String>();
 
     for (int i = 0; i < m_SplitString.length; i++) {
-      if (!m_SplitString[i].equals(""))
-	clean.add(m_SplitString[i]);
+      if (!m_SplitString[i].equals("")) {
+        clean.add(m_SplitString[i]);
+      }
     }
 
     newSplit = new String[clean.size()];
-    for (int i = 0; i < clean.size(); i++) 
+    for (int i = 0; i < clean.size(); i++) {
       newSplit[i] = clean.get(i);
+    }
 
     m_SplitString = newSplit;
   }
-  
+
   /**
    * Sets the string to tokenize. Tokenization happens immediately.
    * 
-   * @param s		the string to tokenize
+   * @param s the string to tokenize
    */
+  @Override
   public void tokenize(String s) {
-    m_N           = m_NMax;
+    m_N = m_NMax;
     m_SplitString = s.split("[" + getDelimiters() + "]");
-    
+
     filterOutEmptyStrings();
 
     m_CurrentPosition = 0;
-    m_MaxPosition     = m_SplitString.length;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    m_MaxPosition = m_SplitString.length;
+
+    if (m_SplitString.length < m_NMax) {
+      m_N = m_SplitString.length;
+    }
   }
 
   /**
-   * Runs the tokenizer with the given options and strings to tokenize.
-   * The tokens are printed to stdout.
+   * Returns the revision string.
    * 
-   * @param args	the commandline options and strings to tokenize
+   * @return the revision
+   */
+  @Override
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 10971 $");
+  }
+
+  /**
+   * Runs the tokenizer with the given options and strings to tokenize. The
+   * tokens are printed to stdout.
+   * 
+   * @param args the commandline options and strings to tokenize
    */
   public static void main(String[] args) {
     runTokenizer(new NGramTokenizer(), args);
   }
 }
-

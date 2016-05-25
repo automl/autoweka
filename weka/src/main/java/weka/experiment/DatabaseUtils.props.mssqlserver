@@ -6,7 +6,7 @@
 # url:     http://www.microsoft.com/
 # jdbc:    http://www.microsoft.com/downloads/details.aspx?familyid=07287B11-0502-461A-B138-2AA54BFDC03A
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 5837 $
+# version: $Revision: 11885 $
 
 # JDBC driver (comma-separated list)
 jdbcDriver=com.microsoft.jdbc.sqlserver.SQLServerDriver
@@ -26,6 +26,7 @@ jdbcURL=jdbc:sqlserver://server_name:1433
 # date, getDate() = 8;        --> date
 # text, getString() = 9;      --> string
 # time, getTime() = 10;       --> date
+# timestamp, getTime() = 11;  --> date
 
 varchar=0
 float=2

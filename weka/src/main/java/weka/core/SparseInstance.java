@@ -34,7 +34,7 @@ import java.util.Enumeration;
  * will be stored explicitly.
  * 
  * @author Eibe Frank
- * @version $Revision: 9028 $
+ * @version $Revision: 12472 $
  */
 public class SparseInstance extends AbstractInstance {
 
@@ -139,7 +139,7 @@ public class SparseInstance extends AbstractInstance {
    * @param maxNumValues the maximium number of values that can be stored
    */
   public SparseInstance(double weight, double[] attValues, int[] indices,
-      int maxNumValues) {
+    int maxNumValues) {
 
     int vals = 0;
     m_AttValues = new double[attValues.length];
@@ -196,6 +196,20 @@ public class SparseInstance extends AbstractInstance {
   public Object copy() {
 
     SparseInstance result = new SparseInstance(this);
+    result.m_Dataset = m_Dataset;
+    return result;
+  }
+
+  /**
+   * Copies the instance but fills up its values based on the given array
+   * of doubles. The copy has access to the same dataset.
+   *
+   * @param values the array with new values
+   * @return the new instance
+   */
+  public Instance copy(double[] values) {
+
+    SparseInstance result = new SparseInstance(this.m_Weight, values);
     result.m_Dataset = m_Dataset;
     return result;
   }
@@ -268,7 +282,7 @@ public class SparseInstance extends AbstractInstance {
     }
 
     return new SparseInstance(1.0, values, indices, numAttributes()
-        + inst.numAttributes());
+      + inst.numAttributes());
   }
 
   /**
@@ -356,9 +370,9 @@ public class SparseInstance extends AbstractInstance {
         System.arraycopy(m_AttValues, 0, tempValues, 0, index);
         System.arraycopy(m_Indices, 0, tempIndices, 0, index);
         System.arraycopy(m_AttValues, index + 1, tempValues, index,
-            m_AttValues.length - index - 1);
+          m_AttValues.length - index - 1);
         System.arraycopy(m_Indices, index + 1, tempIndices, index,
-            m_Indices.length - index - 1);
+          m_Indices.length - index - 1);
         m_AttValues = tempValues;
         m_Indices = tempIndices;
       }
@@ -371,9 +385,9 @@ public class SparseInstance extends AbstractInstance {
         tempIndices[index + 1] = attIndex;
         tempValues[index + 1] = value;
         System.arraycopy(m_AttValues, index + 1, tempValues, index + 2,
-            m_AttValues.length - index - 1);
+          m_AttValues.length - index - 1);
         System.arraycopy(m_Indices, index + 1, tempIndices, index + 2,
-            m_Indices.length - index - 1);
+          m_Indices.length - index - 1);
         m_AttValues = tempValues;
         m_Indices = tempIndices;
       }
@@ -404,9 +418,9 @@ public class SparseInstance extends AbstractInstance {
       System.arraycopy(m_AttValues, 0, tempValues, 0, indexOfIndex);
       System.arraycopy(m_Indices, 0, tempIndices, 0, indexOfIndex);
       System.arraycopy(m_AttValues, indexOfIndex + 1, tempValues, indexOfIndex,
-          m_AttValues.length - indexOfIndex - 1);
+        m_AttValues.length - indexOfIndex - 1);
       System.arraycopy(m_Indices, indexOfIndex + 1, tempIndices, indexOfIndex,
-          m_Indices.length - indexOfIndex - 1);
+        m_Indices.length - indexOfIndex - 1);
       m_AttValues = tempValues;
       m_Indices = tempIndices;
     }
@@ -449,54 +463,64 @@ public class SparseInstance extends AbstractInstance {
    * 
    * @return the instance's description as a string
    */
+  @Override
   public String toStringNoWeight(int afterDecimalPoint) {
 
-    StringBuffer text = new StringBuffer();
+    StringBuilder text = new StringBuilder();
 
     text.append('{');
-    for (int i = 0; i < m_Indices.length; i++) {
-      if (i > 0)
-        text.append(",");
-      if (isMissingSparse(i)) {
-        text.append(m_Indices[i] + " ?");
-      } else {
-        if (m_Dataset == null) {
-          text.append(m_Indices[i] + " "
-              + Utils.doubleToString(m_AttValues[i], afterDecimalPoint));
-        } else {
-          if (m_Dataset.attribute(m_Indices[i]).isNominal()
-              || m_Dataset.attribute(m_Indices[i]).isString()
-              || m_Dataset.attribute(m_Indices[i]).isDate()) {
-            try {
-              text.append(m_Indices[i] + " "
-                  + Utils.quote(stringValue(m_Indices[i])));
-            } catch (Exception e) {
-              e.printStackTrace();
-              System.err.println(new Instances(m_Dataset, 0));
-              System.err.println("Att:" + m_Indices[i] + " Val:"
-                  + valueSparse(i));
-              throw new Error("This should never happen!");
-            }
-          } else if (m_Dataset.attribute(m_Indices[i]).isRelationValued()) {
-            try {
-              text.append(m_Indices[i]
-                  + " "
-                  + Utils.quote(m_Dataset.attribute(m_Indices[i])
-                      .relation((int) valueSparse(i)).stringWithoutHeader()));
-            } catch (Exception e) {
-              e.printStackTrace();
-              System.err.println(new Instances(m_Dataset, 0));
-              System.err.println("Att:" + m_Indices[i] + " Val:"
-                  + valueSparse(i));
-              throw new Error("This should never happen!");
-            }
-          } else {
-            text.append(m_Indices[i] + " "
-                + Utils.doubleToString(m_AttValues[i], afterDecimalPoint));
+    String prefix = "";
+    int sparseIndex = 0;
+    for (int i = 0; i < m_NumAttributes; i++) {
+
+      // Have we already output some values?
+      if (text.length() > 1) {
+        prefix = ",";
+      }
+
+      double value = 0;
+
+      try {
+
+        // Get the actual attribute value
+        if (sparseIndex < m_Indices.length && m_Indices[sparseIndex] == i) {
+          value = m_AttValues[sparseIndex++];
+          if (Utils.isMissingValue(value)) {
+            text.append(prefix).append(i).append(" ?");
+            continue;
           }
         }
+
+        // Have to treat all attributes as numeric if we don't have access to a dataset
+        if (m_Dataset == null) {
+          if (value != 0) {
+            text.append(prefix).append(i).append(" ").append(Utils.doubleToString(value, afterDecimalPoint));
+          }
+        } else {
+          Attribute att = m_Dataset.attribute(i);
+          if (att.isString()) { // Output string value regardless
+            text.append(prefix).append(i).append(" ").append(Utils.quote(att.value((int) value)));
+          } else if (att.isRelationValued()) { // Output relational value regardless
+            text.append(prefix).append(i).append(" ").append(Utils.quote(att.relation((int) value).stringWithoutHeader()));
+          } else if (value != 0) { // Only output other attribute types if value != 0
+            if (att.isNominal()) {
+              text.append(prefix).append(i).append(" ").append(Utils.quote(att.value((int) value)));
+            } else if (att.isDate()) {
+              text.append(prefix).append(i).append(" ").append(Utils.quote(att.formatDate(value)));
+            } else {
+              text.append(prefix).append(i).append(" ").append(Utils.doubleToString(value, afterDecimalPoint));
+            }
+          }
+        }
+
+      } catch (Exception e) {
+        e.printStackTrace();
+        System.err.println(new Instances(m_Dataset, 0) + "\n" + "Att: " + i + " Val: " + value);
+        throw new Error("This should never happen!");
       }
     }
+
+
     text.append('}');
 
     return text.toString();
@@ -524,7 +548,7 @@ public class SparseInstance extends AbstractInstance {
   /**
    * Deletes an attribute at the given position (0 to numAttributes() - 1).
    * 
-   * @param pos the attribute's position
+   * @param position the attribute's position
    */
   @Override
   protected void forceDeleteAttributeAt(int position) {
@@ -561,7 +585,7 @@ public class SparseInstance extends AbstractInstance {
    * Inserts an attribute at the given position (0 to numAttributes()) and sets
    * its value to be missing.
    * 
-   * @param pos the attribute's position
+   * @param position the attribute's position
    */
   @Override
   protected void forceInsertAttributeAt(int position) {
@@ -716,7 +740,7 @@ public class SparseInstance extends AbstractInstance {
       copy.insertAttributeAt(0);
       copy.setDataset(inst.dataset());
       System.out.println("Copy with first attribute deleted and inserted: "
-          + copy);
+        + copy);
 
       // Same for second attribute
       copy.setDataset(null);
@@ -724,7 +748,7 @@ public class SparseInstance extends AbstractInstance {
       copy.insertAttributeAt(1);
       copy.setDataset(inst.dataset());
       System.out.println("Copy with second attribute deleted and inserted: "
-          + copy);
+        + copy);
 
       // Same for last attribute
       copy.setDataset(null);
@@ -732,26 +756,26 @@ public class SparseInstance extends AbstractInstance {
       copy.insertAttributeAt(2);
       copy.setDataset(inst.dataset());
       System.out.println("Copy with third attribute deleted and inserted: "
-          + copy);
+        + copy);
 
       // Enumerate attributes (leaving out the class attribute)
       System.out.println("Enumerating attributes (leaving out class):");
-      Enumeration enu = inst.enumerateAttributes();
+      Enumeration<Attribute> enu = inst.enumerateAttributes();
       while (enu.hasMoreElements()) {
-        Attribute att = (Attribute) enu.nextElement();
+        Attribute att = enu.nextElement();
         System.out.println(att);
       }
 
       // Headers are equivalent?
       System.out.println("Header of original and copy equivalent: "
-          + inst.equalHeaders(copy));
+        + inst.equalHeaders(copy));
 
       // Test for missing values
       System.out.println("Length of copy missing: " + copy.isMissing(length));
       System.out.println("Weight of copy missing: "
-          + copy.isMissing(weight.index()));
+        + copy.isMissing(weight.index()));
       System.out.println("Length of copy missing: "
-          + Utils.isMissingValue(copy.value(length)));
+        + Utils.isMissingValue(copy.value(length)));
 
       // Prints number of attributes and classes
       System.out.println("Number of attributes: " + copy.numAttributes());
@@ -771,7 +795,7 @@ public class SparseInstance extends AbstractInstance {
       System.out.println("Copy with class value set to \"third\": " + copy);
       copy.setMissing(1);
       System.out.println("Copy with second attribute set to be missing: "
-          + copy);
+        + copy);
       copy.setMissing(length);
       System.out.println("Copy with length set to be missing: " + copy);
       copy.setValue(0, 0);
@@ -785,14 +809,14 @@ public class SparseInstance extends AbstractInstance {
       System.out.println("Current weight of instance copy: " + copy.weight());
       copy.setWeight(2);
       System.out.println("Current weight of instance copy (set to 2): "
-          + copy.weight());
+        + copy.weight());
       System.out.println("Last value of copy: " + copy.toString(2));
       System.out.println("Value of position for copy: "
-          + copy.toString(position));
+        + copy.toString(position));
       System.out.println("Last value of copy (internal format): "
-          + copy.value(2));
+        + copy.value(2));
       System.out.println("Value of position for copy (internal format): "
-          + copy.value(position));
+        + copy.value(position));
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -805,6 +829,6 @@ public class SparseInstance extends AbstractInstance {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 9028 $");
+    return RevisionUtils.extract("$Revision: 12472 $");
   }
 }

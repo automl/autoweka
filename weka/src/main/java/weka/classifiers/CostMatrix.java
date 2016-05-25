@@ -29,23 +29,44 @@ import java.io.Writer;
 import java.util.Random;
 import java.util.StringTokenizer;
 
-import weka.core.AttributeExpression;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.expressionlanguage.common.IfElseMacro;
+import weka.core.expressionlanguage.common.JavaMacro;
+import weka.core.expressionlanguage.common.MacroDeclarationsCompositor;
+import weka.core.expressionlanguage.common.MathFunctions;
+import weka.core.expressionlanguage.common.Primitives.DoubleExpression;
+import weka.core.expressionlanguage.core.Node;
+import weka.core.expressionlanguage.parser.Parser;
+import weka.core.expressionlanguage.weka.InstancesHelper;
 
 /**
  * Class for storing and manipulating a misclassification cost matrix. The
  * element at position i,j in the matrix is the penalty for classifying an
  * instance of class j as class i. Cost values can be fixed or computed on a
  * per-instance basis (cost sensitive evaluation only) from the value of an
- * attribute or an expression involving attribute(s).
+ * attribute or a mathematical expression involving attribute(s).<br>
+ * <br>
+ *
+ * Values in an instance are accessed in an expression by prefixing their index
+ * (starting at 1) with the character 'a'. E.g.<br>
+ * <br>
+ *
+ * a1 &circ; 2 * a5 / log(a7 * 4.0) <br>
+ * 
+ * Supported opperators: +, -, *, /, ^, log, abs, cos, exp, sqrt, floor, ceil,
+ * rint, tan, sin, (, ).
+ * 
+ *
+ * 
  * 
  * @author Mark Hall
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 9047 $
+ * @version $Revision: 11868 $
+ * @see weka.core.UnsupportedAttributeTypeException
  */
 public class CostMatrix implements Serializable, RevisionHandler {
 
@@ -125,17 +146,15 @@ public class CostMatrix implements Serializable, RevisionHandler {
     return size();
   }
 
-  private boolean replaceStrings() throws Exception {
+  private boolean replaceStrings(Instances dataset) throws Exception {
     boolean nonDouble = false;
 
     for (int i = 0; i < m_size; i++) {
       for (int j = 0; j < m_size; j++) {
         if (getCell(i, j) instanceof String) {
-          AttributeExpression temp = new AttributeExpression();
-          temp.convertInfixToPostfix((String) getCell(i, j));
-          setCell(i, j, temp);
+          setCell(i, j, new InstanceExpression((String) getCell(i, j), dataset));
           nonDouble = true;
-        } else if (getCell(i, j) instanceof AttributeExpression) {
+        } else if (getCell(i, j) instanceof InstanceExpression) {
           nonDouble = true;
         }
       }
@@ -157,11 +176,10 @@ public class CostMatrix implements Serializable, RevisionHandler {
    *              inappropriate.
    */
   public Instances applyCostMatrix(Instances data, Random random)
-      throws Exception {
+    throws Exception {
 
     double sumOfWeightFactors = 0, sumOfMissClassWeights, sumOfWeights;
     double[] weightOfInstancesInClass, weightFactor, weightOfInstances;
-    Instances newData;
 
     if (data.classIndex() < 0) {
       throw new Exception("Class index is not set!");
@@ -172,12 +190,11 @@ public class CostMatrix implements Serializable, RevisionHandler {
     }
 
     // are there any non-fixed, per-instance costs defined in the matrix?
-    if (replaceStrings()) {
+    if (replaceStrings(data)) {
       // could reweight in the two class case
       if (data.classAttribute().numValues() > 2) {
         throw new Exception("Can't resample/reweight instances using "
-            + "non-fixed cost values when there are more "
-            + "than two classes!");
+          + "non-fixed cost values when there are more " + "than two classes!");
       } else {
         // Store new weights
         weightOfInstances = new double[data.numInstances()];
@@ -185,12 +202,13 @@ public class CostMatrix implements Serializable, RevisionHandler {
           Instance inst = data.instance(i);
           int classValIndex = (int) inst.classValue();
           double factor = 1.0;
-          Object element = (classValIndex == 0) ? getCell(classValIndex, 1)
-              : getCell(classValIndex, 0);
+          Object element =
+            (classValIndex == 0) ? getCell(classValIndex, 1) : getCell(
+              classValIndex, 0);
           if (element instanceof Double) {
             factor = ((Double) element).doubleValue();
           } else {
-            factor = ((AttributeExpression) element).evaluateExpression(inst);
+            factor = ((InstanceExpression) element).evaluate(inst);
           }
           weightOfInstances[i] = inst.weight() * factor;
           /*
@@ -216,8 +234,8 @@ public class CostMatrix implements Serializable, RevisionHandler {
     weightFactor = new double[data.numClasses()];
     weightOfInstancesInClass = new double[data.numClasses()];
     for (int j = 0; j < data.numInstances(); j++) {
-      weightOfInstancesInClass[(int) data.instance(j).classValue()] += data
-          .instance(j).weight();
+      weightOfInstancesInClass[(int) data.instance(j).classValue()] +=
+        data.instance(j).weight();
     }
     sumOfWeights = Utils.sum(weightOfInstancesInClass);
 
@@ -239,7 +257,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
       for (int j = 0; j < data.numClasses(); j++) {
         if (Utils.sm(((Double) getCell(i, j)).doubleValue(), 0)) {
           throw new Exception("Neg. weights in misclassification "
-              + "cost matrix!");
+            + "cost matrix!");
         }
         sumOfMissClassWeights += ((Double) getCell(i, j)).doubleValue();
       }
@@ -253,7 +271,8 @@ public class CostMatrix implements Serializable, RevisionHandler {
     // Store new weights
     weightOfInstances = new double[data.numInstances()];
     for (int i = 0; i < data.numInstances(); i++) {
-      weightOfInstances[i] = data.instance(i).weight()
+      weightOfInstances[i] =
+        data.instance(i).weight()
           * weightFactor[(int) data.instance(i).classValue()];
     }
 
@@ -282,7 +301,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
 
     if (classProbs.length != m_size) {
       throw new Exception("Length of probability estimates don't "
-          + "match cost matrix");
+        + "match cost matrix");
     }
 
     double[] costs = new double[m_size];
@@ -292,7 +311,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
         Object element = getCell(y, x);
         if (!(element instanceof Double)) {
           throw new Exception("Can't use non-fixed costs in "
-              + "computing expected costs.");
+            + "computing expected costs.");
         }
         costs[x] += classProbs[y] * ((Double) element).doubleValue();
       }
@@ -312,14 +331,14 @@ public class CostMatrix implements Serializable, RevisionHandler {
    * @exception Exception if something goes wrong
    */
   public double[] expectedCosts(double[] classProbs, Instance inst)
-      throws Exception {
+    throws Exception {
 
     if (classProbs.length != m_size) {
       throw new Exception("Length of probability estimates don't "
-          + "match cost matrix");
+        + "match cost matrix");
     }
 
-    if (!replaceStrings()) {
+    if (!replaceStrings(inst.dataset())) {
       return expectedCosts(classProbs);
     }
 
@@ -330,7 +349,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
         Object element = getCell(y, x);
         double costVal;
         if (!(element instanceof Double)) {
-          costVal = ((AttributeExpression) element).evaluateExpression(inst);
+          costVal = ((InstanceExpression) element).evaluate(inst);
         } else {
           costVal = ((Double) element).doubleValue();
         }
@@ -356,7 +375,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
       Object element = getCell(classVal, i);
       if (!(element instanceof Double)) {
         throw new Exception("Can't use non-fixed costs when "
-            + "getting max cost.");
+          + "getting max cost.");
       }
       double cost = ((Double) element).doubleValue();
       if (cost > maxCost)
@@ -375,7 +394,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
    */
   public double getMaxCost(int classVal, Instance inst) throws Exception {
 
-    if (!replaceStrings()) {
+    if (!replaceStrings(inst.dataset())) {
       return getMaxCost(classVal);
     }
 
@@ -384,7 +403,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
     for (int i = 0; i < m_size; i++) {
       Object element = getCell(classVal, i);
       if (!(element instanceof Double)) {
-        cost = ((AttributeExpression) element).evaluateExpression(inst);
+        cost = ((InstanceExpression) element).evaluate(inst);
       } else {
         cost = ((Double) element).doubleValue();
       }
@@ -438,12 +457,12 @@ public class CostMatrix implements Serializable, RevisionHandler {
       // Get index of first class.
       if (currentToken != StreamTokenizer.TT_NUMBER) {
         throw new Exception("Only numbers and comments allowed "
-            + "in cost file!");
+          + "in cost file!");
       }
       firstIndex = tokenizer.nval;
       if (!Utils.eq((int) firstIndex, firstIndex)) {
         throw new Exception("First number in line has to be "
-            + "index of a class!");
+          + "index of a class!");
       }
       if ((int) firstIndex >= size()) {
         throw new Exception("Class index out of range!");
@@ -458,12 +477,12 @@ public class CostMatrix implements Serializable, RevisionHandler {
       }
       if (currentToken != StreamTokenizer.TT_NUMBER) {
         throw new Exception("Only numbers and comments allowed "
-            + "in cost file!");
+          + "in cost file!");
       }
       secondIndex = tokenizer.nval;
       if (!Utils.eq((int) secondIndex, secondIndex)) {
         throw new Exception("Second number in line has to be "
-            + "index of a class!");
+          + "index of a class!");
       }
       if ((int) secondIndex >= size()) {
         throw new Exception("Class index out of range!");
@@ -481,7 +500,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
       }
       if (currentToken != StreamTokenizer.TT_NUMBER) {
         throw new Exception("Only numbers and comments allowed "
-            + "in cost file!");
+          + "in cost file!");
       }
       weight = tokenizer.nval;
       if (!Utils.gr(weight, 0)) {
@@ -522,7 +541,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
         int rows = Integer.parseInt(st.nextToken());
         if (!st.hasMoreTokens()) {
           throw new Exception("Line " + lnr.getLineNumber()
-              + ": expected number of columns");
+            + ": expected number of columns");
         }
 
         int cols = Integer.parseInt(st.nextToken());
@@ -538,13 +557,13 @@ public class CostMatrix implements Serializable, RevisionHandler {
       } else {
         if (currentRow == m_size) {
           throw new Exception("Line " + lnr.getLineNumber()
-              + ": too many rows provided");
+            + ": too many rows provided");
         }
 
         for (int i = 0; i < m_size; i++) {
           if (!st.hasMoreTokens()) {
             throw new Exception("Line " + lnr.getLineNumber()
-                + ": too few matrix elements provided");
+              + ": too few matrix elements provided");
           }
 
           String nextTok = st.nextToken();
@@ -552,7 +571,6 @@ public class CostMatrix implements Serializable, RevisionHandler {
           Double val = null;
           try {
             val = new Double(nextTok);
-            double value = val.doubleValue();
           } catch (Exception ex) {
             val = null;
           }
@@ -568,10 +586,10 @@ public class CostMatrix implements Serializable, RevisionHandler {
 
     if (currentRow == -1) {
       throw new Exception("Line " + lnr.getLineNumber()
-          + ": expected number of rows");
+        + ": expected number of rows");
     } else if (currentRow != m_size) {
       throw new Exception("Line " + lnr.getLineNumber()
-          + ": too few rows provided");
+        + ": too few rows provided");
     }
   }
 
@@ -645,8 +663,8 @@ public class CostMatrix implements Serializable, RevisionHandler {
     String cells;
 
     // get content
-    cells = matlab.substring(matlab.indexOf("[") + 1, matlab.indexOf("]"))
-        .trim();
+    cells =
+      matlab.substring(matlab.indexOf("[") + 1, matlab.indexOf("]")).trim();
 
     // determine dimenions
     tokRow = new StringTokenizer(cells, ";");
@@ -711,7 +729,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
    * @exception Exception if the value is not a double
    */
   public final double getElement(int rowIndex, int columnIndex)
-      throws Exception {
+    throws Exception {
     if (!(m_matrix[rowIndex][columnIndex] instanceof Double)) {
       throw new Exception("Cost matrix contains non-fixed costs!");
     }
@@ -728,16 +746,16 @@ public class CostMatrix implements Serializable, RevisionHandler {
    * @exception Exception if something goes wrong
    */
   public final double getElement(int rowIndex, int columnIndex, Instance inst)
-      throws Exception {
+    throws Exception {
 
     if (m_matrix[rowIndex][columnIndex] instanceof Double) {
       return ((Double) m_matrix[rowIndex][columnIndex]).doubleValue();
     } else if (m_matrix[rowIndex][columnIndex] instanceof String) {
-      replaceStrings();
+      replaceStrings(inst.dataset());
     }
 
-    return ((AttributeExpression) m_matrix[rowIndex][columnIndex])
-        .evaluateExpression(inst);
+    return ((InstanceExpression) m_matrix[rowIndex][columnIndex])
+      .evaluate(inst);
   }
 
   /**
@@ -788,8 +806,8 @@ public class CostMatrix implements Serializable, RevisionHandler {
       }
     }
     if (maxval > 0) {
-      widthNumber = (int) (Math.log(maxval) / Math.log(10) + (fractional ? 4
-          : 1));
+      widthNumber =
+        (int) (Math.log(maxval) / Math.log(10) + (fractional ? 4 : 1));
     }
 
     int width = (widthNumber > widthExpression) ? widthNumber : widthExpression;
@@ -800,15 +818,16 @@ public class CostMatrix implements Serializable, RevisionHandler {
         element = getCell(i, j);
         if (element instanceof Double) {
           text.append(" ").append(
-              Utils.doubleToString(((Double) element).doubleValue(), width,
-                  (fractional ? 2 : 0)));
+            Utils.doubleToString(((Double) element).doubleValue(), width,
+              (fractional ? 2 : 0)));
         } else {
           int diff = width - element.toString().length();
           if (diff > 0) {
             int left = diff % 2;
             left += diff / 2;
-            String temp = Utils.padLeft(element.toString(), element.toString()
-                .length() + left);
+            String temp =
+              Utils.padLeft(element.toString(), element.toString().length()
+                + left);
             temp = Utils.padRight(temp, width);
             text.append(" ").append(temp);
           } else {
@@ -829,6 +848,43 @@ public class CostMatrix implements Serializable, RevisionHandler {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 9047 $");
+    return RevisionUtils.extract("$Revision: 11868 $");
+  }
+
+  private static class InstanceExpression {
+    private final DoubleExpression m_compiledExpression;
+    private final String m_expression;
+    private final InstancesHelper m_instancesHelper;
+
+    public InstanceExpression(String expression, Instances dataset)
+      throws Exception {
+      this.m_expression = expression;
+      m_instancesHelper = new InstancesHelper(dataset);
+
+      Node node =
+        Parser.parse(
+        // expression
+          expression,
+          // variables
+          m_instancesHelper,
+          // marcos
+          new MacroDeclarationsCompositor(m_instancesHelper,
+            new MathFunctions(), new IfElseMacro(), new JavaMacro()));
+
+      if (!(node instanceof DoubleExpression))
+        throw new Exception("Expression must be of double type!");
+
+      m_compiledExpression = (DoubleExpression) node;
+    }
+
+    public double evaluate(Instance inst) {
+      m_instancesHelper.setInstance(inst);
+      return m_compiledExpression.evaluate();
+    }
+
+    @Override
+    public String toString() {
+      return m_expression;
+    }
   }
 }

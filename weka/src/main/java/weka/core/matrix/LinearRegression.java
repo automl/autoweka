@@ -19,10 +19,11 @@ import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
- * Class for performing (ridged) linear regression.
- *
+ * Class for performing (ridged) linear regression using Tikhonov
+ * regularization.
+ * 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 5953 $
+ * @version $Revision: 9768 $
  */
  
 public class LinearRegression
@@ -85,34 +86,79 @@ public class LinearRegression
 
     int nc = a.getColumnDimension();
     m_Coefficients = new double[nc];
-    Matrix xt = a.transpose();
     Matrix solution;
+
+    Matrix ss = aTa(a);
+    Matrix bb = aTy(a, y);
 
     boolean success = true;
 
     do {
-      Matrix ss = xt.times(a);
-
       // Set ridge regression adjustment
+      Matrix ssWithRidge = ss.copy();
       for (int i = 0; i < nc; i++)
-        ss.set(i, i, ss.get(i, i) + ridge);
+        ssWithRidge.set(i, i, ssWithRidge.get(i, i) + ridge);
 
       // Carry out the regression
-      Matrix bb = xt.times(y);
-      for(int i = 0; i < nc; i++)
-        m_Coefficients[i] = bb.get(i, 0);
-
       try {
-        solution = ss.solve(new Matrix(m_Coefficients, m_Coefficients.length));
+        solution = ssWithRidge.solve(bb);
         for (int i = 0; i < nc; i++)
           m_Coefficients[i] = solution.get(i, 0);
         success = true;
-      } 
-      catch (Exception ex) {
+      } catch (Exception ex) {
         ridge *= 10;
         success = false;
       }
     } while (!success);
+  }
+  
+  /**
+   * Return aTa (a' * a)
+   */
+  private static Matrix aTa(Matrix a) {
+    int cols = a.getColumnDimension();
+    double[][] A = a.getArray();
+    Matrix x = new Matrix(cols, cols);
+    double[][] X = x.getArray();
+    double[] Acol = new double[a.getRowDimension()];
+    for (int col1 = 0; col1 < cols; col1++) {
+      // cache the column for faster access later
+      for (int row = 0; row < Acol.length; row++) {
+        Acol[row] = A[row][col1];
+      }
+      // reference the row for faster lookup
+      double[] Xrow = X[col1];
+      for (int row = 0; row < Acol.length; row++) {
+        double[] Arow = A[row];
+        for (int col2 = col1; col2 < Xrow.length; col2++) {
+          Xrow[col2] += Acol[row] * Arow[col2];
+        }
+      }
+      // result is symmetric
+      for (int col2 = col1 + 1; col2 < Xrow.length; col2++) {
+        X[col2][col1] = Xrow[col2];
+      }
+    }
+    return x;
+  }
+
+  /**
+   * Return aTy (a' * y)
+   */
+  private static Matrix aTy(Matrix a, Matrix y) {
+    double[][] A = a.getArray();
+    double[][] Y = y.getArray();
+    Matrix x = new Matrix(a.getColumnDimension(), 1);
+    double[][] X = x.getArray();
+    for (int row = 0; row < A.length; row++) {
+      // reference the rows for faster lookup
+      double[] Arow = A[row];
+      double[] Yrow = Y[row];
+      for (int col = 0; col < Arow.length; col++) {
+        X[col][0] += Arow[col] * Yrow[0];
+      }
+    }
+    return x;
   }
 
   /**
@@ -137,6 +183,6 @@ public class LinearRegression
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 5953 $");
+    return RevisionUtils.extract("$Revision: 9768 $");
   }
 }

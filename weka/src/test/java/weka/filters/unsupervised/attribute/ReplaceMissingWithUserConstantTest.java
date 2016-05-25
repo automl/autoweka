@@ -19,26 +19,28 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Attribute;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import weka.core.Instances;
 import weka.filters.AbstractFilterTest;
 import weka.filters.Filter;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 /**
- * Tests ReplaceMissingWithUserConstant. Run from the command line with:<p>
+ * Tests ReplaceMissingWithUserConstant. Run from the command line with:
+ * <p>
  * java weka.filters.unsupervised.attribute.ReplaceMissingWithUserConstantTest
- *
+ * 
  * @author Mark Hall
- * @version $Revision: 9169 $
+ * @version $Revision: 10160 $
  */
 public class ReplaceMissingWithUserConstantTest extends AbstractFilterTest {
-  
-  public ReplaceMissingWithUserConstantTest(String name) { super(name);  }
+
+  public ReplaceMissingWithUserConstantTest(String name) {
+    super(name);
+  }
 
   /** Creates a default ReplaceMissingWithUserConstant */
+  @Override
   public Filter getFilter() {
     ReplaceMissingWithUserConstant filter = new ReplaceMissingWithUserConstant();
     filter.setDateReplacementValue("1969-08-28");
@@ -53,8 +55,9 @@ public class ReplaceMissingWithUserConstantTest extends AbstractFilterTest {
     assertEquals(m_Instances.numInstances(), result.numInstances());
     for (int j = 0; j < m_Instances.numAttributes(); j++) {
       for (int i = 0; i < m_Instances.numInstances(); i++) {
-        assertTrue("All missing values should have been replaced " + result.instance(i),
-                   !result.instance(i).isMissing(j));
+        assertTrue(
+          "All missing values should have been replaced " + result.instance(i),
+          !result.instance(i).isMissing(j));
       }
     }
   }
@@ -63,7 +66,7 @@ public class ReplaceMissingWithUserConstantTest extends AbstractFilterTest {
     return new TestSuite(ReplaceMissingWithUserConstantTest.class);
   }
 
-  public static void main(String[] args){
+  public static void main(String[] args) {
     junit.textui.TestRunner.run(suite());
   }
 

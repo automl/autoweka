@@ -26,15 +26,14 @@ import weka.core.RevisionUtils;
 
 /**
  * Encapsulates performance functions for two-class problems.
- *
+ * 
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 8034 $
+ * @version $Revision: 10169 $
  */
-public class TwoClassStats
-  implements RevisionHandler {
+public class TwoClassStats implements RevisionHandler {
 
   /** The names used when converting this object to a confusion matrix */
-  private static final String [] CATEGORY_NAMES = {"negative", "positive"};
+  private static final String[] CATEGORY_NAMES = { "negative", "positive" };
 
   /** Pos predicted as pos */
   private double m_TruePos;
@@ -50,124 +49,148 @@ public class TwoClassStats
 
   /**
    * Creates the TwoClassStats with the given initial performance values.
-   *
+   * 
    * @param tp the number of correctly classified positives
    * @param fp the number of incorrectly classified negatives
    * @param tn the number of correctly classified negatives
    * @param fn the number of incorrectly classified positives
    */
   public TwoClassStats(double tp, double fp, double tn, double fn) {
-      
-    setTruePositive(tp); 
+
+    setTruePositive(tp);
     setFalsePositive(fp);
-    setTrueNegative(tn); 
+    setTrueNegative(tn);
     setFalseNegative(fn);
   }
 
   /** Sets the number of positive instances predicted as positive */
-  public void setTruePositive(double tp) { m_TruePos = tp; }
+  public void setTruePositive(double tp) {
+    m_TruePos = tp;
+  }
 
   /** Sets the number of negative instances predicted as positive */
-  public void setFalsePositive(double fp) { m_FalsePos = fp; }
+  public void setFalsePositive(double fp) {
+    m_FalsePos = fp;
+  }
 
   /** Sets the number of negative instances predicted as negative */
-  public void setTrueNegative(double tn) { m_TrueNeg = tn; }
+  public void setTrueNegative(double tn) {
+    m_TrueNeg = tn;
+  }
 
   /** Sets the number of positive instances predicted as negative */
-  public void setFalseNegative(double fn) { m_FalseNeg = fn; }
+  public void setFalseNegative(double fn) {
+    m_FalseNeg = fn;
+  }
 
   /** Gets the number of positive instances predicted as positive */
-  public double getTruePositive() { return m_TruePos; }
+  public double getTruePositive() {
+    return m_TruePos;
+  }
 
   /** Gets the number of negative instances predicted as positive */
-  public double getFalsePositive() { return m_FalsePos; }
+  public double getFalsePositive() {
+    return m_FalsePos;
+  }
 
   /** Gets the number of negative instances predicted as negative */
-  public double getTrueNegative() { return m_TrueNeg; }
+  public double getTrueNegative() {
+    return m_TrueNeg;
+  }
 
   /** Gets the number of positive instances predicted as negative */
-  public double getFalseNegative() { return m_FalseNeg; }
+  public double getFalseNegative() {
+    return m_FalseNeg;
+  }
 
   /**
-   * Calculate the true positive rate. 
-   * This is defined as<p>
+   * Calculate the true positive rate. This is defined as
+   * <p>
+   * 
    * <pre>
    * correctly classified positives
    * ------------------------------
    *       total positives
    * </pre>
-   *
+   * 
    * @return the true positive rate
    */
-  public double getTruePositiveRate() { 
+  public double getTruePositiveRate() {
     if (0 == (m_TruePos + m_FalseNeg)) {
       return 0;
     } else {
-      return m_TruePos / (m_TruePos + m_FalseNeg); 
+      return m_TruePos / (m_TruePos + m_FalseNeg);
     }
   }
 
   /**
-   * Calculate the false positive rate. 
-   * This is defined as<p>
+   * Calculate the false positive rate. This is defined as
+   * <p>
+   * 
    * <pre>
    * incorrectly classified negatives
    * --------------------------------
    *        total negatives
    * </pre>
-   *
+   * 
    * @return the false positive rate
    */
-  public double getFalsePositiveRate() { 
+  public double getFalsePositiveRate() {
     if (0 == (m_FalsePos + m_TrueNeg)) {
       return 0;
     } else {
-      return m_FalsePos / (m_FalsePos + m_TrueNeg); 
+      return m_FalsePos / (m_FalsePos + m_TrueNeg);
     }
   }
 
   /**
-   * Calculate the precision. 
-   * This is defined as<p>
+   * Calculate the precision. This is defined as
+   * <p>
+   * 
    * <pre>
    * correctly classified positives
    * ------------------------------
    *  total predicted as positive
    * </pre>
-   *
+   * 
    * @return the precision
    */
-  public double getPrecision() { 
+  public double getPrecision() {
     if (0 == (m_TruePos + m_FalsePos)) {
       return 0;
     } else {
-      return m_TruePos / (m_TruePos + m_FalsePos); 
+      return m_TruePos / (m_TruePos + m_FalsePos);
     }
   }
 
   /**
-   * Calculate the recall. 
-   * This is defined as<p>
+   * Calculate the recall. This is defined as
+   * <p>
+   * 
    * <pre>
    * correctly classified positives
    * ------------------------------
    *       total positives
-   * </pre><p>
+   * </pre>
+   * <p>
    * (Which is also the same as the truePositiveRate.)
-   *
+   * 
    * @return the recall
    */
-  public double getRecall() { return getTruePositiveRate(); }
+  public double getRecall() {
+    return getTruePositiveRate();
+  }
 
   /**
-   * Calculate the F-Measure. 
-   * This is defined as<p>
+   * Calculate the F-Measure. This is defined as
+   * <p>
+   * 
    * <pre>
    * 2 * recall * precision
    * ----------------------
    *   recall + precision
    * </pre>
-   *
+   * 
    * @return the F-Measure
    */
   public double getFMeasure() {
@@ -181,44 +204,46 @@ public class TwoClassStats
   }
 
   /**
-   * Calculate the fallout. 
-   * This is defined as<p>
+   * Calculate the fallout. This is defined as
+   * <p>
+   * 
    * <pre>
    * incorrectly classified negatives
    * --------------------------------
    *   total predicted as positive
    * </pre>
-   *
+   * 
    * @return the fallout
    */
-  public double getFallout() { 
+  public double getFallout() {
     if (0 == (m_TruePos + m_FalsePos)) {
       return 0;
     } else {
-      return m_FalsePos / (m_TruePos + m_FalsePos); 
+      return m_FalsePos / (m_TruePos + m_FalsePos);
     }
   }
 
   /**
-   * Generates a <code>ConfusionMatrix</code> representing the current
-   * two-class statistics, using class names "negative" and "positive".
-   *
+   * Generates a <code>ConfusionMatrix</code> representing the current two-class
+   * statistics, using class names "negative" and "positive".
+   * 
    * @return a <code>ConfusionMatrix</code>.
    */
   public ConfusionMatrix getConfusionMatrix() {
 
     ConfusionMatrix cm = new ConfusionMatrix(CATEGORY_NAMES);
-    cm.setElement(0, 0, m_TrueNeg);
-    cm.setElement(0, 1, m_FalsePos);
-    cm.setElement(1, 0, m_FalseNeg);
-    cm.setElement(1, 1, m_TruePos);
+    cm.set(0, 0, m_TrueNeg);
+    cm.set(0, 1, m_FalsePos);
+    cm.set(1, 0, m_FalseNeg);
+    cm.set(1, 1, m_TruePos);
     return cm;
   }
 
   /**
-   * Returns a string containing the various performance measures
-   * for the current object 
+   * Returns a string containing the various performance measures for the
+   * current object
    */
+  @Override
   public String toString() {
 
     StringBuffer res = new StringBuffer();
@@ -234,13 +259,14 @@ public class TwoClassStats
     res.append(getFallout()).append(' ');
     return res.toString();
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10169 $");
   }
 }

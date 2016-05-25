@@ -25,84 +25,113 @@ import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
- <!-- globalinfo-start -->
- * Generates the output as plain text (for fixed width fonts).
+ * <!-- globalinfo-start --> Generates the output as plain text (for fixed width
+ * fonts).
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -mean-prec &lt;int&gt;
+ * <!-- options-start --> Valid options are:
+ * <p/>
+ * 
+ * <pre>
+ * -mean-prec &lt;int&gt;
  *  The number of decimals after the decimal point for the mean.
- *  (default: 2)</pre>
+ *  (default: 2)
+ * </pre>
  * 
- * <pre> -stddev-prec &lt;int&gt;
+ * <pre>
+ * -stddev-prec &lt;int&gt;
  *  The number of decimals after the decimal point for the mean.
- *  (default: 2)</pre>
+ *  (default: 2)
+ * </pre>
  * 
- * <pre> -col-name-width &lt;int&gt;
+ * <pre>
+ * -col-name-width &lt;int&gt;
  *  The maximum width for the column names (0 = optimal).
- *  (default: 0)</pre>
+ *  (default: 0)
+ * </pre>
  * 
- * <pre> -row-name-width &lt;int&gt;
+ * <pre>
+ * -row-name-width &lt;int&gt;
  *  The maximum width for the row names (0 = optimal).
- *  (default: 25)</pre>
+ *  (default: 25)
+ * </pre>
  * 
- * <pre> -mean-width &lt;int&gt;
+ * <pre>
+ * -mean-width &lt;int&gt;
  *  The width of the mean (0 = optimal).
- *  (default: 0)</pre>
+ *  (default: 0)
+ * </pre>
  * 
- * <pre> -stddev-width &lt;int&gt;
+ * <pre>
+ * -stddev-width &lt;int&gt;
  *  The width of the standard deviation (0 = optimal).
- *  (default: 0)</pre>
+ *  (default: 0)
+ * </pre>
  * 
- * <pre> -sig-width &lt;int&gt;
+ * <pre>
+ * -sig-width &lt;int&gt;
  *  The width of the significance indicator (0 = optimal).
- *  (default: 0)</pre>
+ *  (default: 0)
+ * </pre>
  * 
- * <pre> -count-width &lt;int&gt;
+ * <pre>
+ * -count-width &lt;int&gt;
  *  The width of the counts (0 = optimal).
- *  (default: 5)</pre>
+ *  (default: 5)
+ * </pre>
  * 
- * <pre> -show-stddev
+ * <pre>
+ * -show-stddev
  *  Whether to display the standard deviation column.
- *  (default: no)</pre>
+ *  (default: no)
+ * </pre>
  * 
- * <pre> -show-avg
+ * <pre>
+ * -show-avg
  *  Whether to show the row with averages.
- *  (default: no)</pre>
+ *  (default: no)
+ * </pre>
  * 
- * <pre> -remove-filter
+ * <pre>
+ * -remove-filter
  *  Whether to remove the classname package prefixes from the
  *  filter names in datasets.
- *  (default: no)</pre>
+ *  (default: no)
+ * </pre>
  * 
- * <pre> -print-col-names
+ * <pre>
+ * -print-col-names
  *  Whether to output column names or just numbers representing them.
- *  (default: no)</pre>
+ *  (default: no)
+ * </pre>
  * 
- * <pre> -print-row-names
+ * <pre>
+ * -print-row-names
  *  Whether to output row names or just numbers representing them.
- *  (default: no)</pre>
+ *  (default: no)
+ * </pre>
  * 
- * <pre> -enum-col-names
+ * <pre>
+ * -enum-col-names
  *  Whether to enumerate the column names (prefixing them with 
  *  '(x)', with 'x' being the index).
- *  (default: no)</pre>
+ *  (default: no)
+ * </pre>
  * 
- * <pre> -enum-row-names
+ * <pre>
+ * -enum-row-names
  *  Whether to enumerate the row names (prefixing them with 
  *  '(x)', with 'x' being the index).
- *  (default: no)</pre>
+ *  (default: no)
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10204 $
  */
-public class ResultMatrixPlainText
-  extends ResultMatrix {
+public class ResultMatrixPlainText extends ResultMatrix {
 
   /** for serialization. */
   private static final long serialVersionUID = 1502934525382357937L;
@@ -117,8 +146,8 @@ public class ResultMatrixPlainText
   /**
    * initializes the matrix with the given dimensions.
    * 
-   * @param cols	the number of columns
-   * @param rows	the number of rows
+   * @param cols the number of columns
+   * @param rows the number of rows
    */
   public ResultMatrixPlainText(int cols, int rows) {
     super(cols, rows);
@@ -127,18 +156,18 @@ public class ResultMatrixPlainText
   /**
    * initializes the matrix with the values from the given matrix.
    * 
-   * @param matrix      the matrix to get the values from
+   * @param matrix the matrix to get the values from
    */
   public ResultMatrixPlainText(ResultMatrix matrix) {
     super(matrix);
   }
-  
+
   /**
    * Returns a string describing the matrix.
    * 
-   * @return 		a description suitable for
-   * 			displaying in the experimenter gui
+   * @return a description suitable for displaying in the experimenter gui
    */
+  @Override
   public String globalInfo() {
     return "Generates the output as plain text (for fixed width fonts).";
   }
@@ -146,8 +175,9 @@ public class ResultMatrixPlainText
   /**
    * returns the name of the output format.
    * 
-   * @return		the display name
+   * @return the display name
    */
+  @Override
   public String getDisplayName() {
     return "Plain Text";
   }
@@ -155,8 +185,9 @@ public class ResultMatrixPlainText
   /**
    * returns the default width for the row names.
    * 
-   * @return		the width
+   * @return the width
    */
+  @Override
   public int getDefaultRowNameWidth() {
     return 25;
   }
@@ -164,27 +195,29 @@ public class ResultMatrixPlainText
   /**
    * returns the default width for the counts.
    * 
-   * @return		the width
+   * @return the width
    */
+  @Override
   public int getDefaultCountWidth() {
     return 5;
   }
-  
+
   /**
    * returns the header of the matrix as a string.
    * 
-   * @return		the header
-   * @see 		#m_HeaderKeys
-   * @see 		#m_HeaderValues
+   * @return the header
+   * @see #m_HeaderKeys
+   * @see #m_HeaderValues
    */
+  @Override
   public String toStringHeader() {
-    int         i;
-    int         size;
-    String[][]  data;
-    String      result;
+    int i;
+    int size;
+    String[][] data;
+    String result;
 
     result = "";
-    
+
     // fill in data
     data = new String[m_HeaderKeys.size()][2];
     for (i = 0; i < m_HeaderKeys.size(); i++) {
@@ -194,12 +227,14 @@ public class ResultMatrixPlainText
 
     // pad
     size = getColSize(data, 0);
-    for (i = 0; i < data.length; i++)
+    for (i = 0; i < data.length; i++) {
       data[i][0] = padString(data[i][0], size);
+    }
 
     // build result
-    for (i = 0; i < data.length; i++)
+    for (i = 0; i < data.length; i++) {
       result += data[i][0] + " " + data[i][1] + "\n";
+    }
 
     return result;
   }
@@ -207,60 +242,61 @@ public class ResultMatrixPlainText
   /**
    * returns the matrix as plain text.
    * 
-   * @return		the matrix
+   * @return the matrix
    */
+  @Override
   public String toStringMatrix() {
-    StringBuffer    result;
-    String[][]      cells;
-    int             i;
-    int             j;
-    int             n;
-    int             k;
-    int             size;
-    String          line;
-    int             indexBase;
-    int             indexSecond;
-    StringBuffer    head;
-    StringBuffer    body;
-    StringBuffer    foot;
-    int[]           startMeans;
-    int[]           startSigs;
-    int             maxLength;
+    StringBuffer result;
+    String[][] cells;
+    int i;
+    int j;
+    int n;
+    int k;
+    int size;
+    String line;
+    int indexBase;
+    StringBuffer head;
+    StringBuffer body;
+    StringBuffer foot;
+    int[] startMeans;
+    int[] startSigs;
+    int maxLength;
 
-    result     = new StringBuffer();
-    head       = new StringBuffer();
-    body       = new StringBuffer();
-    foot       = new StringBuffer();
-    cells      = toArray();
+    result = new StringBuffer();
+    head = new StringBuffer();
+    body = new StringBuffer();
+    foot = new StringBuffer();
+    cells = toArray();
     startMeans = new int[getColCount()];
-    startSigs  = new int[getColCount() - 1];
-    maxLength  = 0;
+    startSigs = new int[getColCount() - 1];
+    maxLength = 0;
 
     // pad numbers
     for (n = 1; n < cells[0].length; n++) {
       size = getColSize(cells, n, true, true);
-      for (i = 1; i < cells.length - 1; i++)
+      for (i = 1; i < cells.length - 1; i++) {
         cells[i][n] = padString(cells[i][n], size, true);
+      }
     }
 
     // index of base column in array
     indexBase = 1;
-    if (getShowStdDev())
+    if (getShowStdDev()) {
       indexBase++;
+    }
 
-    // index of second column in array
-    indexSecond = indexBase + 1;
-    if (getShowStdDev())
-      indexSecond++;
+    if (getShowStdDev()) {
+    }
 
     // output data (without "(v/ /*)")
     j = 0;
     k = 0;
     for (i = 1; i < cells.length - 1; i++) {
-      if (isAverage(i))
+      if (isAverage(i)) {
         body.append(padString("", maxLength).replaceAll(".", "-") + "\n");
+      }
       line = "";
-      
+
       for (n = 0; n < cells[0].length; n++) {
         // record starts
         if (i == 1) {
@@ -274,66 +310,71 @@ public class ResultMatrixPlainText
             k++;
           }
         }
-        
+
         if (n == 0) {
           line += padString(cells[i][n], getRowNameWidth());
-          if (!isAverage(i))
-            line += padString("(" +
-                Utils.doubleToString(getCount(getDisplayRow(i-1)), 0) + ")",
-                getCountWidth(), true);
-          else
+          if (!isAverage(i)) {
+            line += padString(
+              "(" + Utils.doubleToString(getCount(getDisplayRow(i - 1)), 0)
+                + ")", getCountWidth(), true);
+          } else {
             line += padString("", getCountWidth(), true);
-        }
-        else {
+          }
+        } else {
           // additional space before means
-          if (isMean(n))
+          if (isMean(n)) {
             line += "  ";
+          }
 
           // print cell
           if (getShowStdDev()) {
             if (isMean(n - 1)) {
-              if (!cells[i][n].trim().equals(""))              
+              if (!cells[i][n].trim().equals("")) {
                 line += "(" + cells[i][n] + ")";
-              else
+              } else {
                 line += " " + cells[i][n] + " ";
-            }
-            else
+              }
+            } else {
               line += " " + cells[i][n];
-          }
-          else {
+            }
+          } else {
             line += " " + cells[i][n];
           }
         }
 
         // add separator after base column
-        if (n == indexBase)
+        if (n == indexBase) {
           line += " |";
+        }
       }
 
       // record overall length
-      if (i == 1)
+      if (i == 1) {
         maxLength = line.length();
-      
+      }
+
       body.append(line + "\n");
     }
 
     // column names
     line = padString(cells[0][0], startMeans[0]);
-    i    = -1;
+    i = -1;
     for (n = 1; n < cells[0].length; n++) {
       if (isMean(n)) {
         i++;
 
-        if (i == 0)
+        if (i == 0) {
           line = padString(line, startMeans[i] - getCountWidth());
-        else if (i == 1)
+        } else if (i == 1) {
           line = padString(line, startMeans[i] - " |".length());
-        else if (i > 1)
+        } else if (i > 1) {
           line = padString(line, startMeans[i]);
-        
-        if (i == 1)
+        }
+
+        if (i == 1) {
           line += " |";
-        
+        }
+
         line += " " + cells[0][n];
       }
     }
@@ -344,23 +385,23 @@ public class ResultMatrixPlainText
 
     // output wins/losses/ties
     if (getColCount() > 1) {
-      line = padString(cells[cells.length - 1][0], startMeans[1]-2, true) + " |";
-      i    = 0;
+      line = padString(cells[cells.length - 1][0], startMeans[1] - 2, true)
+        + " |";
+      i = 0;
       for (n = 1; n < cells[cells.length - 1].length; n++) {
         if (isSignificance(n)) {
-          line = padString(
-                  line, startSigs[i] + 1 - cells[cells.length - 1][n].length());
+          line = padString(line,
+            startSigs[i] + 1 - cells[cells.length - 1][n].length());
           line += " " + cells[cells.length - 1][n];
           i++;
         }
       }
       line = padString(line, maxLength);
-    }
-    else {
+    } else {
       line = padString(cells[cells.length - 1][0], line.length() - 2) + " |";
     }
     foot.append(line + "\n");
-    
+
     // assemble output
     result.append(head.toString());
     result.append(body.toString());
@@ -370,22 +411,24 @@ public class ResultMatrixPlainText
   }
 
   /**
-   * returns returns a key for all the col names, for better readability if
-   * the names got cut off.
+   * returns returns a key for all the col names, for better readability if the
+   * names got cut off.
    * 
-   * @return		the key
+   * @return the key
    */
+  @Override
   public String toStringKey() {
-    String          result;
-    int             i;
+    String result;
+    int i;
 
     result = "Key:\n";
     for (i = 0; i < getColCount(); i++) {
-      if (getColHidden(i))
+      if (getColHidden(i)) {
         continue;
+      }
 
-      result +=   LEFT_PARENTHESES + (i+1) + RIGHT_PARENTHESES 
-                + " " + removeFilterName(m_ColNames[i]) + "\n";
+      result += LEFT_PARENTHESES + (i + 1) + RIGHT_PARENTHESES + " "
+        + removeFilterName(m_ColNames[i]) + "\n";
     }
 
     return result;
@@ -394,46 +437,52 @@ public class ResultMatrixPlainText
   /**
    * returns the summary as string.
    * 
-   * @return		the summary
+   * @return the summary
    */
+  @Override
   public String toStringSummary() {
-    String      result;
-    String      titles;
-    int         resultsetLength;
-    int         i;
-    int         j;
+    String result;
+    String titles;
+    int resultsetLength;
+    int i;
+    int j;
 
-    if (m_NonSigWins == null)
+    if (m_NonSigWins == null) {
       return "-summary data not set-";
-    
+    }
+
     result = "";
     titles = "";
-    resultsetLength = 1 + Math.max((int)(Math.log(getColCount())/Math.log(10)),
-                                   (int)(Math.log(getRowCount())/Math.log(10)));
+    resultsetLength = 1 + Math.max(
+      (int) (Math.log(getColCount()) / Math.log(10)),
+      (int) (Math.log(getRowCount()) / Math.log(10)));
 
     for (i = 0; i < getColCount(); i++) {
-      if (getColHidden(i))
+      if (getColHidden(i)) {
         continue;
-      titles += " " + Utils.padLeft("" + getSummaryTitle(i),
-				    resultsetLength * 2 + 3);
+      }
+      titles += " "
+        + Utils.padLeft("" + getSummaryTitle(i), resultsetLength * 2 + 3);
     }
     result += titles + "  (No. of datasets where [col] >> [row])\n";
 
     for (i = 0; i < getColCount(); i++) {
-      if (getColHidden(i))
+      if (getColHidden(i)) {
         continue;
+      }
 
       for (j = 0; j < getColCount(); j++) {
-        if (getColHidden(j))
+        if (getColHidden(j)) {
           continue;
+        }
 
         result += " ";
-	if (j == i)
-	  result += Utils.padLeft("-", resultsetLength * 2 + 3);
-	else
-	  result += Utils.padLeft("" + m_NonSigWins[i][j] 
-                                  + " (" + m_Wins[i][j] + ")",
-				  resultsetLength * 2 + 3);
+        if (j == i) {
+          result += Utils.padLeft("-", resultsetLength * 2 + 3);
+        } else {
+          result += Utils.padLeft("" + m_NonSigWins[i][j] + " (" + m_Wins[i][j]
+            + ")", resultsetLength * 2 + 3);
+        }
       }
 
       result += " | " + getSummaryTitle(i) + " = " + getColName(i) + '\n';
@@ -445,34 +494,36 @@ public class ResultMatrixPlainText
   /**
    * returns the ranking in a string representation.
    * 
-   * @return		the ranking
+   * @return the ranking
    */
+  @Override
   public String toStringRanking() {
-    int           biggest;
-    int           width;
-    String        result;
-    int[]         ranking;
-    int           i;
-    int           curr;
+    int biggest;
+    int width;
+    String result;
+    int[] ranking;
+    int i;
+    int curr;
 
-    if (m_RankingWins == null)
+    if (m_RankingWins == null) {
       return "-ranking data not set-";
+    }
 
     biggest = Math.max(m_RankingWins[Utils.maxIndex(m_RankingWins)],
-                       m_RankingLosses[Utils.maxIndex(m_RankingLosses)]);
-    width = Math.max(2 + (int)(Math.log(biggest) / Math.log(10)),
-			 ">-<".length());
-    result =   Utils.padLeft(">-<", width) + ' '
-             + Utils.padLeft(">", width) + ' '
-             + Utils.padLeft("<", width) + " Resultset\n";
+      m_RankingLosses[Utils.maxIndex(m_RankingLosses)]);
+    width = Math.max(2 + (int) (Math.log(biggest) / Math.log(10)),
+      ">-<".length());
+    result = Utils.padLeft(">-<", width) + ' ' + Utils.padLeft(">", width)
+      + ' ' + Utils.padLeft("<", width) + " Resultset\n";
 
     ranking = Utils.sort(m_RankingDiff);
 
     for (i = getColCount() - 1; i >= 0; i--) {
       curr = ranking[i];
 
-      if (getColHidden(curr))
+      if (getColHidden(curr)) {
         continue;
+      }
 
       result += Utils.padLeft("" + m_RankingDiff[curr], width) + ' '
         + Utils.padLeft("" + m_RankingWins[curr], width) + ' '
@@ -482,71 +533,73 @@ public class ResultMatrixPlainText
 
     return result;
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10204 $");
   }
 
   /**
    * for testing only.
    * 
-   * @param args	ignored
+   * @param args ignored
    */
   public static void main(String[] args) {
-    ResultMatrix        matrix;
-    int                 i;
-    int                 n;
-    
+    ResultMatrix matrix;
+    int i;
+    int n;
+
     matrix = new ResultMatrixPlainText(3, 3);
-    
+
     // set header
     matrix.addHeader("header1", "value1");
     matrix.addHeader("header2", "value2");
     matrix.addHeader("header2", "value3");
-    
+
     // set values
     for (i = 0; i < matrix.getRowCount(); i++) {
       for (n = 0; n < matrix.getColCount(); n++) {
-        matrix.setMean(n, i, (i+1)*n);
-        matrix.setStdDev(n, i, ((double) (i+1)*n) / 100);
+        matrix.setMean(n, i, (i + 1) * n);
+        matrix.setStdDev(n, i, ((double) (i + 1) * n) / 100);
         if (i == n) {
-          if (i % 2 == 1)
+          if (i % 2 == 1) {
             matrix.setSignificance(n, i, SIGNIFICANCE_WIN);
-          else
+          } else {
             matrix.setSignificance(n, i, SIGNIFICANCE_LOSS);
+          }
         }
       }
     }
 
     System.out.println("\n\n--> " + matrix.getDisplayName());
-    
+
     System.out.println("\n1. complete\n");
     System.out.println(matrix.toStringHeader() + "\n");
     System.out.println(matrix.toStringMatrix() + "\n");
     System.out.println(matrix.toStringKey());
-    
+
     System.out.println("\n2. complete with std deviations\n");
     matrix.setShowStdDev(true);
     System.out.println(matrix.toStringMatrix());
-    
+
     System.out.println("\n3. cols numbered\n");
     matrix.setPrintColNames(false);
     System.out.println(matrix.toStringMatrix());
-    
+
     System.out.println("\n4. second col missing\n");
     matrix.setColHidden(1, true);
     System.out.println(matrix.toStringMatrix());
-    
+
     System.out.println("\n5. last row missing, rows numbered too\n");
     matrix.setRowHidden(2, true);
     matrix.setPrintRowNames(false);
     System.out.println(matrix.toStringMatrix());
-    
+
     System.out.println("\n6. mean prec to 3\n");
     matrix.setMeanPrec(3);
     matrix.setPrintRowNames(false);

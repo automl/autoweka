@@ -22,6 +22,7 @@
 
 package weka.classifiers.functions;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -91,7 +92,7 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 8034 $ 
+ * @version $Revision: 10141 $ 
  */
 public class VotedPerceptron 
   extends AbstractClassifier 
@@ -174,9 +175,9 @@ public class VotedPerceptron
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(4);
+    Vector<Option> newVector = new Vector<Option>(4);
 
     newVector.addElement(new Option("\tThe number of iterations to be performed.\n"
 				    + "\t(default 1)",
@@ -191,6 +192,8 @@ public class VotedPerceptron
 				    + "\t(default 10000)",
 				    "M", 1, "-M <int>"));
 
+    newVector.addAll(Collections.list(super.listOptions()));
+    
     return newVector.elements();
   }
 
@@ -247,6 +250,10 @@ public class VotedPerceptron
     } else {
       m_MaxK = 10000;
     }
+    
+    super.setOptions(options);
+    
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -256,17 +263,16 @@ public class VotedPerceptron
    */
   public String[] getOptions() {
 
-    String[] options = new String [8];
-    int current = 0;
+    Vector<String> options = new Vector<String>();
 
-    options[current++] = "-I"; options[current++] = "" + m_NumIterations;
-    options[current++] = "-E"; options[current++] = "" + m_Exponent;
-    options[current++] = "-S"; options[current++] = "" + m_Seed;
-    options[current++] = "-M"; options[current++] = "" + m_MaxK;
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    options.add("-I"); options.add("" + m_NumIterations);
+    options.add("-E"); options.add("" + m_Exponent);
+    options.add("-S"); options.add("" + m_Seed);
+    options.add("-M"); options.add("" + m_MaxK);
+    
+    Collections.addAll(options, super.getOptions());
+    
+    return options.toArray(new String[0]);
   }
 
   /**
@@ -349,8 +355,6 @@ public class VotedPerceptron
 	  }
 	}
       }
-      if(Thread.interrupted())
-        break;
     }
   }
 
@@ -591,7 +595,7 @@ public class VotedPerceptron
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10141 $");
   }
 
   /**

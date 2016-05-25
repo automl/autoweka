@@ -23,7 +23,7 @@ package weka.gui.hierarchyvisualizer;
  * Shows cluster trees represented in Newick format as dendrograms.
  *
  * @author Remco Bouckaert (rrb@xm.co.nz, remco@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 12048 $
  */
 import java.awt.Color;
 import java.awt.Container;
@@ -242,7 +242,7 @@ public class HierarchyVisualizer extends PrintablePanel implements ComponentList
 			if (sStr.charAt(i) == ':') {
 				i++;
 				c = sStr.charAt(i);
-				while (i < sStr.length() && (c=='.' || Character.isDigit(c))) {
+				while (i < sStr.length() && (c=='.' || Character.isDigit(c)) || c=='-') {
 					i++;
 					if (i < sStr.length()) {
 						c = sStr.charAt(i);
@@ -257,7 +257,7 @@ public class HierarchyVisualizer extends PrintablePanel implements ComponentList
 	 * convert string containing Newick tree into tree datastructure but only in
 	 * the limited format as contained in m_sTrees
 	 *
-	 * @param sStr
+	 * @param sNewick
 	 * @return tree consisting of a Node
 	 */
 	void parseNewick(String sNewick) throws Exception {
@@ -398,9 +398,10 @@ public class HierarchyVisualizer extends PrintablePanel implements ComponentList
 	public static void main(String[] args) {
 	      //HierarchyVisualizer a = new HierarchyVisualizer("((((human:2.0,(chimp:1.0,bonobo:1.0):1.0):1.0,gorilla:3.0):1.0,siamang:4.0):1.0,orangutan:5.0)");
 	      //HierarchyVisualizer a = new HierarchyVisualizer("(((human:2.0,(chimp:1.0,bonobo:1.0):1.0):1.0,gorilla:3.0):1.0,siamang:4.0)");
-	      HierarchyVisualizer a = new HierarchyVisualizer(" (((5[theta=0.121335,lxg=0.122437]:0.00742795,3[theta=0.0972485,lxg=0.152762]:0.00742795)[theta=0.490359,lxg=0.0746703]:0.0183076,((2[theta=0.0866056,lxg=0.2295]:0.00993801,4[theta=0.135512,lxg=0.146674]:0.00993801)[theta=0.897783,lxg=0.0200762]:0.00901206,1[theta=0.200265,lxg=0.18925]:0.0189501)[theta=0.0946195,lxg=0.143427]:0.00678551)[theta=0.185562,lxg=0.139681]:0.0129598,(7[theta=0.176022,lxg=0.364039]:0.0320395,((0[theta=0.224286,lxg=0.156485]:0.0175487,8[theta=0.223313,lxg=0.157166]:0.0175487)[theta=0.631287,lxg=0.024042]:0.00758871,6[theta=0.337871,lxg=0.148799]:0.0251374)[theta=0.33847,lxg=0.040784]:0.00690208)[theta=0.209238,lxg=0.0636202]:0.00665587)[theta=0.560453,lxg=-0.138086]:0.01");
+	      //HierarchyVisualizer a = new HierarchyVisualizer(" (((5[theta=0.121335,lxg=0.122437]:0.00742795,3[theta=0.0972485,lxg=0.152762]:0.00742795)[theta=0.490359,lxg=0.0746703]:0.0183076,((2[theta=0.0866056,lxg=0.2295]:0.00993801,4[theta=0.135512,lxg=0.146674]:0.00993801)[theta=0.897783,lxg=0.0200762]:0.00901206,1[theta=0.200265,lxg=0.18925]:0.0189501)[theta=0.0946195,lxg=0.143427]:0.00678551)[theta=0.185562,lxg=0.139681]:0.0129598,(7[theta=0.176022,lxg=0.364039]:0.0320395,((0[theta=0.224286,lxg=0.156485]:0.0175487,8[theta=0.223313,lxg=0.157166]:0.0175487)[theta=0.631287,lxg=0.024042]:0.00758871,6[theta=0.337871,lxg=0.148799]:0.0251374)[theta=0.33847,lxg=0.040784]:0.00690208)[theta=0.209238,lxg=0.0636202]:0.00665587)[theta=0.560453,lxg=-0.138086]:0.01");
 		  //HierarchyVisualizer a = new HierarchyVisualizer(" ((5[theta=0.121335,lxg=0.122437]:0.00742795,3[theta=0.0972485,lxg=0.152762]:0.00742795)[theta=0.490359,lxg=0.0746703]:0.0183076,2[theta=0.0866056,lxg=0.2295]:0.00993801)[theta=0.897783,lxg=0.0200762]:0.00901206");
-	      a.setSize(800 ,600);
+	      HierarchyVisualizer a = new HierarchyVisualizer("((1:0.4,2:0.6):-0.4,3:0.4)");
+		  a.setSize(800 ,600);
 	      JFrame f;
 	      f = new JFrame();
 	      Container contentPane = f.getContentPane();

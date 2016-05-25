@@ -21,6 +21,7 @@
 
 package weka.classifiers;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -33,7 +34,7 @@ import weka.core.Utils;
  * meta classifiers that build an ensemble from a single base learner.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 12505 $
  */
 public abstract class IteratedSingleClassifierEnhancer
   extends SingleClassifierEnhancer {
@@ -45,7 +46,14 @@ public abstract class IteratedSingleClassifierEnhancer
   protected Classifier[] m_Classifiers;
 
   /** The number of iterations. */
-  protected int m_NumIterations = 10;
+  protected int m_NumIterations = defaultNumberOfIterations();
+
+  /**
+   * The default number of iterations to perform.
+   */
+  protected int defaultNumberOfIterations() {
+    return 10;
+  }
 
   /**
    * Stump method for building the classifiers.
@@ -67,19 +75,17 @@ public abstract class IteratedSingleClassifierEnhancer
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(2);
+    Vector<Option> newVector = new Vector<Option>(2);
 
     newVector.addElement(new Option(
           "\tNumber of iterations.\n"
-          + "\t(default 10)",
+          + "\t(current value " + getNumIterations() + ")",
           "I", 1, "-I <num>"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
-    }
+    newVector.addAll(Collections.list(super.listOptions()));
+    
     return newVector.elements();
   }
 
@@ -103,7 +109,7 @@ public abstract class IteratedSingleClassifierEnhancer
     if (iterations.length() != 0) {
       setNumIterations(Integer.parseInt(iterations));
     } else {
-      setNumIterations(10);
+      setNumIterations(defaultNumberOfIterations());
     }
 
     super.setOptions(options);

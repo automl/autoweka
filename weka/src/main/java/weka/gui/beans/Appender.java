@@ -64,12 +64,12 @@ import weka.gui.Logger;
  * connections).
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 9131 $
+ * @version $Revision: 10149 $
  */
 @KFStep(category = "Flow", toolTipText = "Append multiple sets of instances")
 public class Appender extends JPanel implements BeanCommon, Visible,
-    Serializable, DataSource, DataSourceListener, TrainingSetListener,
-    TestSetListener, InstanceListener, EventConstraints {
+  Serializable, DataSource, DataSourceListener, TrainingSetListener,
+  TestSetListener, InstanceListener, EventConstraints {
 
   /**
    * For serialization
@@ -119,8 +119,8 @@ public class Appender extends JPanel implements BeanCommon, Visible,
    * Default visual for data sources
    */
   protected BeanVisual m_visual = new BeanVisual("Appender",
-      BeanVisual.ICON_PATH + "Appender.png", BeanVisual.ICON_PATH
-          + "Appender.png");
+    BeanVisual.ICON_PATH + "Appender.png", BeanVisual.ICON_PATH
+      + "Appender.png");
 
   /** Downstream steps listening to batch data events */
   protected ArrayList<DataSourceListener> m_dataListeners = new ArrayList<DataSourceListener>();
@@ -146,14 +146,35 @@ public class Appender extends JPanel implements BeanCommon, Visible,
   @Override
   public boolean eventGeneratable(String eventName) {
 
-    if (!m_listeneeTypes.contains(eventName)) {
-      return false;
+    if (eventName.equals("instance")) {
+
+      if (!m_listeneeTypes.contains(eventName)) {
+        return false;
+      }
+
+      for (Object listenee : m_listenees.values()) {
+        if (listenee instanceof EventConstraints
+          && !((EventConstraints) listenee).eventGeneratable(eventName)) {
+          return false;
+        }
+      }
     }
 
-    for (Object listenee : m_listenees.values()) {
-      if (listenee instanceof EventConstraints) {
-        if (!((EventConstraints) listenee).eventGeneratable(eventName)) {
-          return false;
+    if (eventName.equals("dataSet") || eventName.equals("trainingSet")
+      || eventName.equals("testSet")) {
+
+      if (!m_listeneeTypes.contains("dataSet")
+        && !m_listeneeTypes.contains("trainingSet")
+        && !m_listeneeTypes.contains("testSet")) {
+        return false;
+      }
+      for (Object listenee : m_listenees.values()) {
+        if (listenee instanceof EventConstraints) {
+          if (!((EventConstraints) listenee).eventGeneratable("dataSet")
+            && !((EventConstraints) listenee).eventGeneratable("trainingSet")
+            && !((EventConstraints) listenee).eventGeneratable("testSet")) {
+            return false;
+          }
         }
       }
     }
@@ -193,8 +214,8 @@ public class Appender extends JPanel implements BeanCommon, Visible,
           String msg = statusMessagePrefix() + "Resetting appender.";
           m_log.statusMessage(msg);
           m_log.logMessage("[Appender] " + msg
-              + " New start of stream detected before "
-              + "all incoming streams have finished!");
+            + " New start of stream detected before "
+            + "all incoming streams have finished!");
         }
 
         m_completed = new HashMap<Object, Instances>();
@@ -234,7 +255,7 @@ public class Appender extends JPanel implements BeanCommon, Visible,
               Instance tempLoaded = loader.getNextInstance(tempStructure);
               while (tempLoaded != null) {
                 Instance converted = makeOutputInstance(m_completeHeader,
-                    tempLoaded);
+                  tempLoaded);
                 m_ie.setStatus(InstanceEvent.INSTANCE_AVAILABLE);
                 m_ie.setInstance(converted);
                 notifyInstanceListeners(m_ie);
@@ -243,7 +264,7 @@ public class Appender extends JPanel implements BeanCommon, Visible,
                 if (m_incrementalCounter % 10000 == 0) {
                   if (m_log != null) {
                     m_log.statusMessage(statusMessagePrefix() + "Processed "
-                        + m_incrementalCounter + " instances");
+                      + m_incrementalCounter + " instances");
                   }
                 }
                 tempLoaded = loader.getNextInstance(tempStructure);
@@ -253,7 +274,7 @@ public class Appender extends JPanel implements BeanCommon, Visible,
           }
         } catch (Exception e1) {
           String msg = statusMessagePrefix()
-              + "ERROR: unable to create output instances structure.";
+            + "ERROR: unable to create output instances structure.";
           if (m_log != null) {
             m_log.statusMessage(msg);
             m_log.logMessage("[Appender] " + e1.getMessage());
@@ -270,7 +291,7 @@ public class Appender extends JPanel implements BeanCommon, Visible,
     }
 
     if (e.getStatus() == InstanceEvent.BATCH_FINISHED
-        || e.getStatus() == InstanceEvent.INSTANCE_AVAILABLE) {
+      || e.getStatus() == InstanceEvent.INSTANCE_AVAILABLE) {
       // get the instance (if available)
       Instance currentI = e.getInstance();
       if (m_completeHeader == null) {
@@ -289,7 +310,7 @@ public class Appender extends JPanel implements BeanCommon, Visible,
               stop();
               e1.printStackTrace();
               String msg = statusMessagePrefix()
-                  + "ERROR: unable to save instance to temp file";
+                + "ERROR: unable to save instance to temp file";
               if (m_log != null) {
                 m_log.statusMessage(msg);
                 m_log.logMessage("[Appender] " + e1.getMessage());
@@ -309,7 +330,7 @@ public class Appender extends JPanel implements BeanCommon, Visible,
             e1.printStackTrace();
 
             String msg = statusMessagePrefix()
-                + "ERROR: unable to save instance to temp file";
+              + "ERROR: unable to save instance to temp file";
             if (m_log != null) {
               m_log.statusMessage(msg);
               m_log.logMessage("[Appender] " + e1.getMessage());
@@ -340,7 +361,7 @@ public class Appender extends JPanel implements BeanCommon, Visible,
           if (m_incrementalCounter % 10000 == 0) {
             if (m_log != null) {
               m_log.statusMessage(statusMessagePrefix() + "Processed "
-                  + m_incrementalCounter + " instances");
+                + m_incrementalCounter + " instances");
             }
           }
 
@@ -407,8 +428,8 @@ public class Appender extends JPanel implements BeanCommon, Visible,
         String msg = statusMessagePrefix() + "Resetting appender.";
         m_log.statusMessage(msg);
         m_log.logMessage("[Appender] " + msg
-            + " New batch for an incoming connection " + "detected before "
-            + "all incoming connections have sent data!");
+          + " New batch for an incoming connection " + "detected before "
+          + "all incoming connections have sent data!");
       }
 
       m_completed = new HashMap<Object, Instances>();
@@ -420,10 +441,10 @@ public class Appender extends JPanel implements BeanCommon, Visible,
     // write these instances (serialized) to a tmp file.
     try {
       File tmpF = File.createTempFile("weka",
-          SerializedInstancesLoader.FILE_EXTENSION);
+        SerializedInstancesLoader.FILE_EXTENSION);
       tmpF.deleteOnExit();
       ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(
-          new FileOutputStream(tmpF)));
+        new FileOutputStream(tmpF)));
       oos.writeObject(e.getDataSet());
       oos.flush();
       oos.close();
@@ -434,7 +455,7 @@ public class Appender extends JPanel implements BeanCommon, Visible,
       e1.printStackTrace();
 
       String msg = statusMessagePrefix()
-          + "ERROR: unable to save batch instances to temp file";
+        + "ERROR: unable to save batch instances to temp file";
       if (m_log != null) {
         m_log.statusMessage(msg);
         m_log.logMessage("[Appender] " + e1.getMessage());
@@ -461,7 +482,7 @@ public class Appender extends JPanel implements BeanCommon, Visible,
 
         for (File f : m_tempBatchFiles.values()) {
           ObjectInputStream ois = new ObjectInputStream(
-              new BufferedInputStream(new FileInputStream(f)));
+            new BufferedInputStream(new FileInputStream(f)));
           Instances temp = (Instances) ois.readObject();
           ois.close();
 
@@ -479,7 +500,7 @@ public class Appender extends JPanel implements BeanCommon, Visible,
         ex.printStackTrace();
 
         String msg = statusMessagePrefix()
-            + "ERROR: unable to output appended data set";
+          + "ERROR: unable to output appended data set";
         if (m_log != null) {
           m_log.statusMessage(msg);
           m_log.logMessage("[Appender] " + ex.getMessage());
@@ -513,15 +534,15 @@ public class Appender extends JPanel implements BeanCommon, Visible,
         } else if (s.isString()) {
           String sVal = source.stringValue(s);
           newVals[outputIndex] = output.attribute(outputIndex).addStringValue(
-              sVal);
+            sVal);
         } else if (s.isRelationValued()) {
           Instances rVal = source.relationalValue(s);
           newVals[outputIndex] = output.attribute(outputIndex)
-              .addRelation(rVal);
+            .addRelation(rVal);
         } else if (s.isNominal()) {
           String nomVal = source.stringValue(s);
           newVals[outputIndex] = output.attribute(outputIndex).indexOfValue(
-              nomVal);
+            nomVal);
         }
       }
     }
@@ -555,7 +576,7 @@ public class Appender extends JPanel implements BeanCommon, Visible,
           if (storedVersion.type() != a.type()) {
             // mismatched types between headers - can't continue
             throw new Exception("Conflicting types for attribute " + "name '"
-                + a.name() + "' between incoming " + "instance sets");
+              + a.name() + "' between incoming " + "instance sets");
           }
 
           if (storedVersion.isNominal()) {
@@ -597,7 +618,7 @@ public class Appender extends JPanel implements BeanCommon, Visible,
     }
 
     Instances outputHeader = new Instances("Appended_" + m_listenees.size()
-        + "_sets", finalAttList, 0);
+      + "_sets", finalAttList, 0);
 
     return outputHeader;
   }
@@ -648,7 +669,7 @@ public class Appender extends JPanel implements BeanCommon, Visible,
   @Override
   public void useDefaultVisual() {
     m_visual.loadIcons(BeanVisual.ICON_PATH + "Appender.png",
-        BeanVisual.ICON_PATH + "Appender.png");
+      BeanVisual.ICON_PATH + "Appender.png");
     m_visual.setText("Appender");
   }
 
@@ -752,7 +773,7 @@ public class Appender extends JPanel implements BeanCommon, Visible,
   @Override
   public boolean connectionAllowed(String eventName) {
     if (!eventName.equals("dataSet") && !eventName.equals("trainingSet")
-        && !eventName.equals("testSet") && !eventName.equals("instance")) {
+      && !eventName.equals("testSet") && !eventName.equals("instance")) {
       return false;
     }
 

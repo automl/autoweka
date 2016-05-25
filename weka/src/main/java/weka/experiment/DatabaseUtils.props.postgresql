@@ -6,7 +6,7 @@
 # url:     http://www.postgresql.org/
 # jdbc:    http://jdbc.postgresql.org/
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 7848 $
+# version: $Revision: 11885 $
 
 # JDBC driver (comma-separated list)
 jdbcDriver=org.postgresql.Driver
@@ -26,7 +26,10 @@ jdbcURL=jdbc:postgresql://server_name:5432/database_name
 # date, getDate() = 8;        --> date
 # text, getString() = 9;      --> string
 # time, getTime() = 10;       --> date
+# timestamp, getTime() = 11;  --> date
 
+# PostgreSQL data types to Java classes information can be found at:
+# http://www.postgresql.org/message-id/AANLkTinsk4rwT7v-751bwQkgTN1rkA=8uE-jk69nape-@mail.gmail.com
 varchar=0
 text=0
 float4=7
@@ -35,6 +38,11 @@ int4=5
 oid=5
 timestamp=8
 date=8
+
+int2=5
+int8=2
+numeric=2
+bpchar=9
 
 # other options
 CREATE_DOUBLE=float8

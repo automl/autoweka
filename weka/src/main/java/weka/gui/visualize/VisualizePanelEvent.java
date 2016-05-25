@@ -19,24 +19,23 @@
  *
  */
 
-
 package weka.gui.visualize;
 
-import weka.core.FastVector;
+import java.util.ArrayList;
+
 import weka.core.Instances;
 
-
-/** 
- * This event Is fired to a listeners 'userDataEvent' function when
- * The user on the VisualizePanel clicks submit. It contains the attributes
- * selected at the time and a FastVector containing the various shapes
- * that had been drawn into the panel.
- *
+/**
+ * This event Is fired to a listeners 'userDataEvent' function when The user on
+ * the VisualizePanel clicks submit. It contains the attributes selected at the
+ * time and a FastVector containing the various shapes that had been drawn into
+ * the panel.
+ * 
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10222 $
  */
 public class VisualizePanelEvent {
-  
+
   /** No longer used */
   public static int NONE = 0;
   public static int RECTANGLE = 1;
@@ -45,53 +44,51 @@ public class VisualizePanelEvent {
   public static int LINE = 4;
   public static int VLINE = 5;
   public static int HLINE = 6;
- 
-  
+
   /** Contains FastVectors, each one containing the points for an object. */
-  private FastVector m_values;
+  private final ArrayList<ArrayList<Double>> m_values;
   /** The instances that fall inside the shapes described in m_values. */
-  private Instances m_inst;
+  private final Instances m_inst;
   /** The instances that fall outside the shapes described in m_values. */
-  private Instances m_inst2;
+  private final Instances m_inst2;
   /** The attribute along the x axis. */
-  private int m_attrib1;
+  private final int m_attrib1;
   /** The attribute along the y axis. */
-  private int m_attrib2;
-  
+  private final int m_attrib2;
 
   /**
    * This constructor creates the event with all the parameters set.
+   * 
    * @param ar The list of shapes.
    * @param i The instances that lie in these shapes.
    * @param i2 The instances that lie outside these shapes.
    * @param at1 The attribute that was along the x axis.
    * @param at2 The attribute that was along the y axis.
    */
-  public VisualizePanelEvent(FastVector ar, Instances i, Instances i2, int at1,
-			     int at2) {
+  public VisualizePanelEvent(ArrayList<ArrayList<Double>> ar, Instances i,
+    Instances i2, int at1, int at2) {
     m_values = ar;
     m_inst = i;
     m_inst2 = i2;
     m_attrib1 = at1;
     m_attrib2 = at2;
-    
-    
+
   }
 
   /**
    * @return The list of shapes.
    */
-  public FastVector getValues() {
+  public ArrayList<ArrayList<Double>> getValues() {
     return m_values;
   }
-  
+
   /**
    * @return The instances that lie in the shapes.
    */
   public Instances getInstances1() {
     return m_inst;
   }
-  
+
   /**
    * @return The instances that lie outside the shapes.
    */
@@ -105,16 +102,12 @@ public class VisualizePanelEvent {
   public int getAttribute1() {
     return m_attrib1;
   }
-  
+
   /**
    * @return The y axis attribute.
    */
   public int getAttribute2() {
     return m_attrib2;
   }
-
-
-
-
 
 }

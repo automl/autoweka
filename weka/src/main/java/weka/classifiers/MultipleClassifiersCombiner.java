@@ -21,21 +21,19 @@
 
 package weka.classifiers;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
 
 /**
  * Abstract utility class for handling settings common to
  * meta classifiers that build an ensemble from multiple classifiers.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 12204 $
  */
 public abstract class MultipleClassifiersCombiner extends AbstractClassifier {
 
@@ -52,9 +50,9 @@ public abstract class MultipleClassifiersCombiner extends AbstractClassifier {
    *
    * @return an enumeration of all the available options
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(1);
+    Vector<Option> newVector = new Vector<Option>(1);
 
     newVector.addElement(new Option(
           "\tFull class name of classifier to include, followed\n"
@@ -62,10 +60,18 @@ public abstract class MultipleClassifiersCombiner extends AbstractClassifier {
           + "\t(default: \"weka.classifiers.rules.ZeroR\")",
           "B", 1, "-B <classifier specification>"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
+    newVector.addAll(Collections.list(super.listOptions()));
+    
+    for (Classifier classifier : getClassifiers()) {
+      if (classifier instanceof OptionHandler) {
+        newVector.addElement(new Option(
+          "",
+          "", 0, "\nOptions specific to classifier "
+            + classifier.getClass().getName() + ":"));
+        newVector.addAll(Collections.list(((OptionHandler)classifier).listOptions()));
+      }
     }
+    
     return newVector.elements();
   }
 
@@ -83,7 +89,7 @@ public abstract class MultipleClassifiersCombiner extends AbstractClassifier {
   public void setOptions(String[] options) throws Exception {
 
     // Iterate through the schemes
-    Vector classifiers = new Vector();
+    Vector<Classifier> classifiers = new Vector<Classifier>();
     while (true) {
       String classifierString = Utils.getOption('B', options);
       if (classifierString.length() == 0) {
@@ -117,16 +123,14 @@ public abstract class MultipleClassifiersCombiner extends AbstractClassifier {
    */
   public String [] getOptions() {
 
-    String [] superOptions = super.getOptions();
-    int current = 0;
-    String[] options = new String [superOptions.length + m_Classifiers.length * 2];
+    Vector<String> options = new Vector<String>();
     for (int i = 0; i < m_Classifiers.length; i++) {
-      options[current++] = "-B";
-      options[current++] = "" + getClassifierSpec(i);
+      options.add("-B");
+      options.add("" + getClassifierSpec(i));
     }
-    System.arraycopy(superOptions, 0, options, current,
-        superOptions.length);
-    return options;
+    Collections.addAll(options, super.getOptions());
+  
+    return options.toArray(new String[0]);
   }
 
   /**
@@ -215,5 +219,23 @@ public abstract class MultipleClassifiersCombiner extends AbstractClassifier {
     result.setOwner(this);
 
     return result;
+  }
+
+  @Override
+  public void preExecution() throws Exception {
+    for (Classifier classifier : getClassifiers()) {
+      if (classifier instanceof CommandlineRunnable) {
+        ((CommandlineRunnable) classifier).preExecution();
+      }
+    }
+  }
+
+  @Override
+  public void postExecution() throws Exception {
+    for (Classifier classifier : getClassifiers()) {
+      if (classifier instanceof CommandlineRunnable) {
+        ((CommandlineRunnable) classifier).postExecution();
+      }
+    }
   }
 }

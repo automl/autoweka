@@ -31,18 +31,18 @@ import weka.core.Utils;
 import weka.filters.Filter;
 
 /**
- * This filter should be extended by other unsupervised attribute
- * filters to allow processing of the class attribute if that's
- * required. It the class is to be ignored it is essential that the
- * extending filter does not change the position (i.e. index) of the
- * attribute that is originally the class attribute !
- *
- * @author Eibe Frank (eibe@cs.waikato.ac.nz), Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 8034 $ 
+ * This filter should be extended by other unsupervised attribute filters to
+ * allow processing of the class attribute if that's required. It the class is
+ * to be ignored it is essential that the extending filter does not change the
+ * position (i.e. index) of the attribute that is originally the class attribute
+ * !
+ * 
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz), Mark Hall
+ *         (mhall@cs.waikato.ac.nz)
+ * @version $Revision: 10215 $
  */
-public abstract class PotentialClassIgnorer
-  extends Filter
-  implements OptionHandler {
+public abstract class PotentialClassIgnorer extends Filter implements
+  OptionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 8625371119276845454L;
@@ -55,81 +55,85 @@ public abstract class PotentialClassIgnorer
 
   /**
    * Returns an enumeration describing the available options.
-   *
-   * @return 		an enumeration of all the available options.
+   * 
+   * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
-    Vector result = new Vector();
-      
+  @Override
+  public Enumeration<Option> listOptions() {
+
+    Vector<Option> result = new Vector<Option>();
+
     result.addElement(new Option(
-	"\tUnsets the class index temporarily before the filter is\n"
-	+ "\tapplied to the data.\n"
-	+ "\t(default: no)",
-	"unset-class-temporarily", 1, "-unset-class-temporarily"));
+      "\tUnsets the class index temporarily before the filter is\n"
+        + "\tapplied to the data.\n" + "\t(default: no)",
+      "unset-class-temporarily", 1, "-unset-class-temporarily"));
 
     return result.elements();
   }
 
   /**
    * Parses a list of options for this object.
-   *
-   * @param options 	the list of options as an array of strings
-   * @throws Exception 	if an option is not supported
+   * 
+   * @param options the list of options as an array of strings
+   * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
     setIgnoreClass(Utils.getFlag("unset-class-temporarily", options));
   }
 
   /**
    * Gets the current settings of the filter.
-   *
-   * @return 		an array of strings suitable for passing to setOptions
+   * 
+   * @return an array of strings suitable for passing to setOptions
    */
+  @Override
   public String[] getOptions() {
-    Vector        result;
 
-    result = new Vector();
+    Vector<String> result = new Vector<String>();
 
-    if (getIgnoreClass())
+    if (getIgnoreClass()) {
       result.add("-unset-class-temporarily");
+    }
 
-    return (String[]) result.toArray(new String[result.size()]);
+    return result.toArray(new String[result.size()]);
   }
 
   /**
-   * Sets the format of the input instances. If the filter is able to
-   * determine the output format before seeing any input instances, it
-   * does so here. This default implementation clears the output format
-   * and output queue, and the new batch flag is set. Overriders should
-   * call <code>super.setInputFormat(Instances)</code>
-   *
+   * Sets the format of the input instances. If the filter is able to determine
+   * the output format before seeing any input instances, it does so here. This
+   * default implementation clears the output format and output queue, and the
+   * new batch flag is set. Overriders should call
+   * <code>super.setInputFormat(Instances)</code>
+   * 
    * @param instanceInfo an Instances object containing the input instance
-   * structure (any instances contained in the object are ignored - only the
-   * structure is required).
+   *          structure (any instances contained in the object are ignored -
+   *          only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the inputFormat can't be set successfully 
+   * @throws Exception if the inputFormat can't be set successfully
    */
+  @Override
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     boolean result = super.setInputFormat(instanceInfo);
     if (m_IgnoreClass) {
       m_ClassIndex = inputFormatPeek().classIndex();
       inputFormatPeek().setClassIndex(-1);
-    }      
+    }
     return result;
   }
 
   /**
-   * Gets the format of the output instances. This should only be called
-   * after input() or batchFinished() has returned true. The relation
-   * name of the output instances should be changed to reflect the
-   * action of the filter (eg: add the filter name and options).
-   *
-   * @return an Instances object containing the output instance
-   * structure only.
-   * @throws NullPointerException if no input structure has been
-   * defined (or the output format hasn't been determined yet) 
+   * Gets the format of the output instances. This should only be called after
+   * input() or batchFinished() has returned true. The relation name of the
+   * output instances should be changed to reflect the action of the filter (eg:
+   * add the filter name and options).
+   * 
+   * @return an Instances object containing the output instance structure only.
+   * @throws NullPointerException if no input structure has been defined (or the
+   *           output format hasn't been determined yet)
    */
+  @Override
   public Instances getOutputFormat() {
 
     if (m_IgnoreClass) {
@@ -140,27 +144,27 @@ public abstract class PotentialClassIgnorer
 
   /**
    * Returns the tip text for this property
-   *
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String ignoreClassTipText() {
     return "The class index will be unset temporarily before the filter is applied.";
   }
 
   /**
-   * Set the IgnoreClass value. Set this to true if the
-   * class index is to be unset before the filter is applied.
+   * Set the IgnoreClass value. Set this to true if the class index is to be
+   * unset before the filter is applied.
    * 
    * @param newIgnoreClass The new IgnoreClass value.
    */
   public void setIgnoreClass(boolean newIgnoreClass) {
     m_IgnoreClass = newIgnoreClass;
   }
-  
+
   /**
-   * Gets the IgnoreClass value. If this to true then the
-   * class index is to unset before the filter is applied.
+   * Gets the IgnoreClass value. If this to true then the class index is to
+   * unset before the filter is applied.
    * 
    * @return the current IgnoreClass value.
    */

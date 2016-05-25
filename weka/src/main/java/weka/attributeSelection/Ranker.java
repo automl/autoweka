@@ -31,39 +31,44 @@ import weka.core.Range;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 
-/** 
- <!-- globalinfo-start -->
- * Ranker : <br/>
+/**
+ * <!-- globalinfo-start --> Ranker : <br/>
  * <br/>
- * Ranks attributes by their individual evaluations. Use in conjunction with attribute evaluators (ReliefF, GainRatio, Entropy etc).<br/>
+ * Ranks attributes by their individual evaluations. Use in conjunction with
+ * attribute evaluators (ReliefF, GainRatio, Entropy etc).<br/>
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -P &lt;start set&gt;
+ * <!-- options-start --> Valid options are:
+ * <p/>
+ * 
+ * <pre>
+ * -P &lt;start set&gt;
  *  Specify a starting set of attributes.
  *  Eg. 1,3,5-7.
  *  Any starting attributes specified are
- *  ignored during the ranking.</pre>
+ *  ignored during the ranking.
+ * </pre>
  * 
- * <pre> -T &lt;threshold&gt;
+ * <pre>
+ * -T &lt;threshold&gt;
  *  Specify a theshold by which attributes
- *  may be discarded from the ranking.</pre>
+ *  may be discarded from the ranking.
+ * </pre>
  * 
- * <pre> -N &lt;num to select&gt;
- *  Specify number of attributes to select</pre>
+ * <pre>
+ * -N &lt;num to select&gt;
+ *  Specify number of attributes to select
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 11213 $
  */
-public class Ranker 
-  extends ASSearch 
-  implements RankedOutputSearch, StartSetHandler, OptionHandler {
-  
+public class Ranker extends ASSearch implements RankedOutputSearch,
+  StartSetHandler, OptionHandler {
+
   /** for serialization */
   static final long serialVersionUID = -9086714848510751934L;
 
@@ -88,14 +93,16 @@ public class Ranker
   /** The number of attribtes */
   private int m_numAttribs;
 
-  /** 
-   * A threshold by which to discard attributes---used by the
-   * AttributeSelection module
+  /**
+   * A threshold by which to discard attributes---used by the AttributeSelection
+   * module
    */
   private double m_threshold;
 
-  /** The number of attributes to select. -1 indicates that all attributes
-      are to be retained. Has precedence over m_threshold */
+  /**
+   * The number of attributes to select. -1 indicates that all attributes are to
+   * be retained. Has precedence over m_threshold
+   */
   private int m_numToSelect = -1;
 
   /** Used to compute the number to select */
@@ -103,207 +110,231 @@ public class Ranker
 
   /**
    * Returns a string describing this search method
-   * @return a description of the search suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the search suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
     return "Ranker : \n\nRanks attributes by their individual evaluations. "
-      +"Use in conjunction with attribute evaluators (ReliefF, GainRatio, "
-      +"Entropy etc).\n";
+      + "Use in conjunction with attribute evaluators (ReliefF, GainRatio, "
+      + "Entropy etc).\n";
   }
 
   /**
    * Constructor
    */
-  public Ranker () {
+  public Ranker() {
     resetOptions();
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String numToSelectTipText() {
     return "Specify the number of attributes to retain. The default value "
-      +"(-1) indicates that all attributes are to be retained. Use either "
-      +"this option or a threshold to reduce the attribute set.";
+      + "(-1) indicates that all attributes are to be retained. Use either "
+      + "this option or a threshold to reduce the attribute set.";
   }
 
   /**
    * Specify the number of attributes to select from the ranked list. -1
    * indicates that all attributes are to be retained.
+   * 
    * @param n the number of attributes to retain
    */
+  @Override
   public void setNumToSelect(int n) {
     m_numToSelect = n;
   }
 
   /**
    * Gets the number of attributes to be retained.
+   * 
    * @return the number of attributes to retain
    */
+  @Override
   public int getNumToSelect() {
     return m_numToSelect;
   }
 
   /**
-   * Gets the calculated number to select. This might be computed
-   * from a threshold, or if < 0 is set as the number to select then
-   * it is set to the number of attributes in the (transformed) data.
+   * Gets the calculated number to select. This might be computed from a
+   * threshold, or if < 0 is set as the number to select then it is set to the
+   * number of attributes in the (transformed) data.
+   * 
    * @return the calculated number of attributes to select
    */
+  @Override
   public int getCalculatedNumToSelect() {
     if (m_numToSelect >= 0) {
-      m_calculatedNumToSelect = m_numToSelect;
+      m_calculatedNumToSelect =
+        m_numToSelect > m_attributeMerit.length ? m_attributeMerit.length
+          : m_numToSelect;
     }
     return m_calculatedNumToSelect;
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String thresholdTipText() {
     return "Set threshold by which attributes can be discarded. Default value "
       + "results in no attributes being discarded. Use either this option or "
-      +"numToSelect to reduce the attribute set.";
+      + "numToSelect to reduce the attribute set.";
   }
 
   /**
    * Set the threshold by which the AttributeSelection module can discard
    * attributes.
+   * 
    * @param threshold the threshold.
    */
+  @Override
   public void setThreshold(double threshold) {
     m_threshold = threshold;
   }
 
   /**
-   * Returns the threshold so that the AttributeSelection module can
-   * discard attributes from the ranking.
+   * Returns the threshold so that the AttributeSelection module can discard
+   * attributes from the ranking.
    */
+  @Override
   public double getThreshold() {
     return m_threshold;
   }
-  
+
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String generateRankingTipText() {
     return "A constant option. Ranker is only capable of generating "
-      +" attribute rankings.";
+      + " attribute rankings.";
   }
 
   /**
-   * This is a dummy set method---Ranker is ONLY capable of producing
-   * a ranked list of attributes for attribute evaluators.
+   * This is a dummy set method---Ranker is ONLY capable of producing a ranked
+   * list of attributes for attribute evaluators.
+   * 
    * @param doRank this parameter is N/A and is ignored
    */
+  @Override
   public void setGenerateRanking(boolean doRank) {
-    
+
   }
 
   /**
-   * This is a dummy method. Ranker can ONLY be used with attribute
-   * evaluators and as such can only produce a ranked list of attributes
+   * This is a dummy method. Ranker can ONLY be used with attribute evaluators
+   * and as such can only produce a ranked list of attributes
+   * 
    * @return true all the time.
    */
+  @Override
   public boolean getGenerateRanking() {
     return true;
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String startSetTipText() {
     return "Specify a set of attributes to ignore. "
-      +" When generating the ranking, Ranker will not evaluate the attributes "
-      +" in this list. "
-      +"This is specified as a comma " 
-      +"seperated list off attribute indexes starting at 1. It can include "
-      +"ranges. Eg. 1,2,5-9,17.";
+      + " When generating the ranking, Ranker will not evaluate the attributes "
+      + " in this list. " + "This is specified as a comma "
+      + "seperated list off attribute indexes starting at 1. It can include "
+      + "ranges. Eg. 1,2,5-9,17.";
   }
 
   /**
-   * Sets a starting set of attributes for the search. It is the
-   * search method's responsibility to report this start set (if any)
-   * in its toString() method.
+   * Sets a starting set of attributes for the search. It is the search method's
+   * responsibility to report this start set (if any) in its toString() method.
+   * 
    * @param startSet a string containing a list of attributes (and or ranges),
-   * eg. 1,2,6,10-15.
+   *          eg. 1,2,6,10-15.
    * @throws Exception if start set can't be set.
    */
-  public void setStartSet (String startSet) throws Exception {
+  @Override
+  public void setStartSet(String startSet) throws Exception {
     m_startRange.setRanges(startSet);
   }
 
   /**
    * Returns a list of attributes (and or attribute ranges) as a String
+   * 
    * @return a list of attributes (and or attribute ranges)
    */
-  public String getStartSet () {
+  @Override
+  public String getStartSet() {
     return m_startRange.getRanges();
   }
 
   /**
    * Returns an enumeration describing the available options.
+   * 
    * @return an enumeration of all the available options.
    **/
-  public Enumeration listOptions () {
-    Vector newVector = new Vector(3);
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector = new Vector<Option>(3);
 
-    newVector
-      .addElement(new Option("\tSpecify a starting set of attributes.\n" 
-                             + "\tEg. 1,3,5-7.\n"
-                             +"\tAny starting attributes specified are\n"
-                             +"\tignored during the ranking."
-                             ,"P",1
-                             , "-P <start set>"));
-    newVector
-      .addElement(new Option("\tSpecify a theshold by which attributes\n" 
-                             + "\tmay be discarded from the ranking.","T",1
-                             , "-T <threshold>"));
+    newVector.addElement(new Option("\tSpecify a starting set of attributes.\n"
+      + "\tEg. 1,3,5-7.\n" + "\tAny starting attributes specified are\n"
+      + "\tignored during the ranking.", "P", 1, "-P <start set>"));
+    newVector.addElement(new Option(
+      "\tSpecify a theshold by which attributes\n"
+        + "\tmay be discarded from the ranking.", "T", 1, "-T <threshold>"));
 
-    newVector
-      .addElement(new Option("\tSpecify number of attributes to select" 
-                             ,"N",1
-                             , "-N <num to select>"));
+    newVector.addElement(new Option("\tSpecify number of attributes to select",
+      "N", 1, "-N <num to select>"));
 
     return newVector.elements();
 
   }
-  
+
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <pre> -P &lt;start set&gt;
+   * <!-- options-start --> Valid options are:
+   * <p/>
+   * 
+   * <pre>
+   * -P &lt;start set&gt;
    *  Specify a starting set of attributes.
    *  Eg. 1,3,5-7.
    *  Any starting attributes specified are
-   *  ignored during the ranking.</pre>
+   *  ignored during the ranking.
+   * </pre>
    * 
-   * <pre> -T &lt;threshold&gt;
+   * <pre>
+   * -T &lt;threshold&gt;
    *  Specify a theshold by which attributes
-   *  may be discarded from the ranking.</pre>
+   *  may be discarded from the ranking.
+   * </pre>
    * 
-   * <pre> -N &lt;num to select&gt;
-   *  Specify number of attributes to select</pre>
+   * <pre>
+   * -N &lt;num to select&gt;
+   *  Specify number of attributes to select
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
-  public void setOptions (String[] options)
-    throws Exception {
+  @Override
+  public void setOptions(String[] options) throws Exception {
     String optionString;
     resetOptions();
 
@@ -327,97 +358,91 @@ public class Ranker
 
   /**
    * Gets the current settings of ReliefFAttributeEval.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions()
    */
-  public String[] getOptions () {
-    String[] options = new String[6];
-    int current = 0;
+  @Override
+  public String[] getOptions() {
+
+    Vector<String> options = new Vector<String>();
 
     if (!(getStartSet().equals(""))) {
-      options[current++] = "-P";
-      options[current++] = ""+startSetToString();
+      options.add("-P");
+      options.add("" + startSetToString());
     }
 
-    options[current++] = "-T";
-    options[current++] = "" + getThreshold();
+    options.add("-T");
+    options.add("" + getThreshold());
 
-    options[current++] = "-N";
-    options[current++] = ""+getNumToSelect();
+    options.add("-N");
+    options.add("" + getNumToSelect());
 
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return  options;
+    return options.toArray(new String[0]);
   }
 
   /**
-   * converts the array of starting attributes to a string. This is
-   * used by getOptions to return the actual attributes specified
-   * as the starting set. This is better than using m_startRanges.getRanges()
-   * as the same start set can be specified in different ways from the
-   * command line---eg 1,2,3 == 1-3. This is to ensure that stuff that
-   * is stored in a database is comparable.
+   * converts the array of starting attributes to a string. This is used by
+   * getOptions to return the actual attributes specified as the starting set.
+   * This is better than using m_startRanges.getRanges() as the same start set
+   * can be specified in different ways from the command line---eg 1,2,3 == 1-3.
+   * This is to ensure that stuff that is stored in a database is comparable.
+   * 
    * @return a comma seperated list of individual attribute numbers as a String
    */
   private String startSetToString() {
     StringBuffer FString = new StringBuffer();
     boolean didPrint;
-    
+
     if (m_starting == null) {
       return getStartSet();
     }
 
     for (int i = 0; i < m_starting.length; i++) {
       didPrint = false;
-      
-      if ((m_hasClass == false) || 
-          (m_hasClass == true && i != m_classIndex)) {
+
+      if ((m_hasClass == false) || (m_hasClass == true && i != m_classIndex)) {
         FString.append((m_starting[i] + 1));
         didPrint = true;
       }
-      
+
       if (i == (m_starting.length - 1)) {
         FString.append("");
-      }
-      else {
+      } else {
         if (didPrint) {
           FString.append(",");
         }
       }
     }
-    
+
     return FString.toString();
   }
 
   /**
-   * Kind of a dummy search algorithm. Calls a Attribute evaluator to
-   * evaluate each attribute not included in the startSet and then sorts
-   * them to produce a ranked list of attributes.
-   *
+   * Kind of a dummy search algorithm. Calls a Attribute evaluator to evaluate
+   * each attribute not included in the startSet and then sorts them to produce
+   * a ranked list of attributes.
+   * 
    * @param ASEval the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
    * @throws Exception if the search can't be completed
    */
-  public int[] search (ASEvaluation ASEval, Instances data)
-    throws Exception {
+  @Override
+  public int[] search(ASEvaluation ASEval, Instances data) throws Exception {
     int i, j;
 
     if (!(ASEval instanceof AttributeEvaluator)) {
-      throw  new Exception(ASEval.getClass().getName() 
-                           + " is not a" 
-                           + "Attribute evaluator!");
+      throw new Exception(ASEval.getClass().getName() + " is not a"
+        + "Attribute evaluator!");
     }
 
     m_numAttribs = data.numAttributes();
 
     if (ASEval instanceof UnsupervisedAttributeEvaluator) {
       m_hasClass = false;
-    }
-    else {
+    } else {
       m_classIndex = data.classIndex();
-      if (m_classIndex >= 0) {  
+      if (m_classIndex >= 0) {
         m_hasClass = true;
       } else {
         m_hasClass = false;
@@ -427,20 +452,19 @@ public class Ranker
     // get the transformed data and check to see if the transformer
     // preserves a class index
     if (ASEval instanceof AttributeTransformer) {
-      data = ((AttributeTransformer)ASEval).transformedHeader();
+      data = ((AttributeTransformer) ASEval).transformedHeader();
       if (m_classIndex >= 0 && data.classIndex() >= 0) {
         m_classIndex = data.classIndex();
         m_hasClass = true;
       }
     }
 
-
     m_startRange.setUpper(m_numAttribs - 1);
     if (!(getStartSet().equals(""))) {
       m_starting = m_startRange.getSelection();
     }
-    
-    int sl=0;
+
+    int sl = 0;
     if (m_starting != null) {
       sl = m_starting.length;
     }
@@ -453,17 +477,15 @@ public class Ranker
           break;
         }
       }
-      
+
       if (ok == false) {
         sl++;
       }
-    }
-    else {
+    } else {
       if (m_hasClass == true) {
         sl++;
       }
     }
-
 
     m_attributeList = new int[m_numAttribs - sl];
     m_attributeMerit = new double[m_numAttribs - sl];
@@ -475,7 +497,7 @@ public class Ranker
       }
     }
 
-    AttributeEvaluator ASEvaluator = (AttributeEvaluator)ASEval;
+    AttributeEvaluator ASEvaluator = (AttributeEvaluator) ASEval;
 
     for (i = 0; i < m_attributeList.length; i++) {
       m_attributeMerit[i] = ASEvaluator.evaluateAttribute(m_attributeList[i]);
@@ -485,26 +507,25 @@ public class Ranker
     int[] rankedAttributes = new int[m_attributeList.length];
 
     for (i = 0; i < m_attributeList.length; i++) {
-      rankedAttributes[i] = (int)tempRanked[i][0];
+      rankedAttributes[i] = (int) tempRanked[i][0];
     }
 
-    return  rankedAttributes;
+    return rankedAttributes;
   }
-
 
   /**
    * Sorts the evaluated attribute list
-   *
+   * 
    * @return an array of sorted (highest eval to lowest) attribute indexes
    * @throws Exception of sorting can't be done.
    */
-  public double[][] rankedAttributes ()
-    throws Exception {
+  @Override
+  public double[][] rankedAttributes() throws Exception {
     int i, j;
 
     if (m_attributeList == null || m_attributeMerit == null) {
-      throw  new Exception("Search must be performed before a ranked " 
-                           + "attribute list can be obtained");
+      throw new Exception("Search must be performed before a ranked "
+        + "attribute list can be obtained");
     }
 
     int[] ranked = Utils.sort(m_attributeMerit);
@@ -517,14 +538,14 @@ public class Ranker
 
     // convert the indexes to attribute indexes
     for (i = 0; i < bestToWorst.length; i++) {
-      int temp = ((int)bestToWorst[i][0]);
+      int temp = ((int) bestToWorst[i][0]);
       bestToWorst[i][0] = m_attributeList[temp];
       bestToWorst[i][1] = m_attributeMerit[temp];
     }
-    
-    if (m_numToSelect > bestToWorst.length) {
-      throw new Exception("More attributes requested than exist in the data");
-    }
+
+    // if (m_numToSelect > bestToWorst.length) {
+    // throw new Exception("More attributes requested than exist in the data");
+    // }
 
     if (m_numToSelect <= 0) {
       if (m_threshold == -Double.MAX_VALUE) {
@@ -533,42 +554,30 @@ public class Ranker
         determineNumToSelectFromThreshold(bestToWorst);
       }
     }
-    /*    if (m_numToSelect > 0) {
-      determineThreshFromNumToSelect(bestToWorst);
-      } */
+    /*
+     * if (m_numToSelect > 0) { determineThreshFromNumToSelect(bestToWorst); }
+     */
 
-    return  bestToWorst;
+    return bestToWorst;
   }
 
-  private void determineNumToSelectFromThreshold(double [][] ranking) {
+  private void determineNumToSelectFromThreshold(double[][] ranking) {
     int count = 0;
-    for (int i = 0; i < ranking.length; i++) {
-      if (ranking[i][1] > m_threshold) {
+    for (double[] element : ranking) {
+      if (element[1] > m_threshold) {
         count++;
       }
     }
     m_calculatedNumToSelect = count;
   }
 
-  private void determineThreshFromNumToSelect(double [][] ranking) 
-    throws Exception {
-    if (m_numToSelect > ranking.length) {
-      throw new Exception("More attributes requested than exist in the data");
-    }
-
-    if (m_numToSelect == ranking.length) {
-      return;
-    }
-
-    m_threshold = (ranking[m_numToSelect-1][1] + 
-                   ranking[m_numToSelect][1]) / 2.0;
-  }
-
   /**
    * returns a description of the search as a String
+   * 
    * @return a description of the search
    */
-  public String toString () {
+  @Override
+  public String toString() {
     StringBuffer BfString = new StringBuffer();
     BfString.append("\tAttribute ranking.\n");
 
@@ -581,17 +590,16 @@ public class Ranker
 
     if (m_threshold != -Double.MAX_VALUE) {
       BfString.append("\tThreshold for discarding attributes: "
-                      + Utils.doubleToString(m_threshold,8,4)+"\n");
+        + Utils.doubleToString(m_threshold, 8, 4) + "\n");
     }
 
     return BfString.toString();
   }
 
-
   /**
    * Resets stuff to default values
    */
-  protected void resetOptions () {
+  protected void resetOptions() {
     m_starting = null;
     m_startRange = new Range();
     m_attributeList = null;
@@ -599,32 +607,32 @@ public class Ranker
     m_threshold = -Double.MAX_VALUE;
   }
 
-
-  private boolean inStarting (int feat) {
+  private boolean inStarting(int feat) {
     // omit the class from the evaluation
     if ((m_hasClass == true) && (feat == m_classIndex)) {
-      return  true;
+      return true;
     }
 
     if (m_starting == null) {
-      return  false;
+      return false;
     }
 
-    for (int i = 0; i < m_starting.length; i++) {
-      if (m_starting[i] == feat) {
-        return  true;
+    for (int element : m_starting) {
+      if (element == feat) {
+        return true;
       }
     }
 
-    return  false;
+    return false;
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 11213 $");
   }
 }

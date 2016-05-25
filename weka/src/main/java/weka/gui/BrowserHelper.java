@@ -15,41 +15,44 @@
 
 /*
  * BrowserHelper.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006-2012,2015 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
+import java.awt.Desktop.Action;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.lang.reflect.Method;
+import java.net.URI;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
-
 /**
- * A little helper class for browser related stuff. <p/>
+ * A little helper class for browser related stuff.
+ * <p/>
  * 
- * The <code>openURL</code> method is based on 
- * <a href="http://www.centerkey.com/java/browser/" target="_blank">Bare Bones Browser Launch</a>,
- * which is placed in the public domain.
+ * The <code>openURL</code> method is based on <a
+ * href="http://www.centerkey.com/java/browser/" target="_blank">Bare Bones
+ * Browser Launch</a>, which is placed in the public domain.
  * 
- * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @author fracpete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 12296 $
  */
 public class BrowserHelper {
 
   /** Linux/Unix binaries to look for */
-  public final static String[] LINUX_BROWSERS = 
-    {"firefox", "google-chrome", "opera", "konqueror", "epiphany", "mozilla", "netscape"};
-  
+  public final static String[] LINUX_BROWSERS = { "firefox", "google-chrome",
+    "opera", "konqueror", "epiphany", "mozilla", "netscape" };
+
   /**
    * opens the URL in a browser.
    * 
-   * @param url		the URL to open
+   * @param url the URL to open
    */
   public static void openURL(String url) {
     openURL(null, url);
@@ -58,8 +61,8 @@ public class BrowserHelper {
   /**
    * opens the URL in a browser.
    * 
-   * @param parent	the parent component
-   * @param url		the URL to open
+   * @param parent the parent component
+   * @param url the URL to open
    */
   public static void openURL(Component parent, String url) {
     openURL(parent, url, true);
@@ -68,58 +71,69 @@ public class BrowserHelper {
   /**
    * opens the URL in a browser.
    * 
-   * @param parent	the parent component
-   * @param url		the URL to open
-   * @param showDialog	whether to display a dialog in case of an error or
-   * 			just print the error to the console
+   * @param parent the parent component
+   * @param url the URL to open
+   * @param showDialog whether to display a dialog in case of an error or just
+   *          print the error to the console
    */
   public static void openURL(Component parent, String url, boolean showDialog) {
-    String osName = System.getProperty("os.name"); 
-    try { 
-      // Mac OS
-      if (osName.startsWith("Mac OS")) { 
-	Class fileMgr = Class.forName("com.apple.eio.FileManager"); 
-	Method openURL = fileMgr.getDeclaredMethod("openURL", new Class[] {String.class}); 
-	openURL.invoke(null, new Object[] {url}); 
-      } 
-      // Windows
-      else if (osName.startsWith("Windows")) {
-	Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + url); 
+    String osName = System.getProperty("os.name");
+    try {
+      if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Action.BROWSE)) {
+        Desktop.getDesktop().browse(new URI(url));
       }
-      // assume Unix or Linux
-      else {  
-	String browser = null; 
-	for (int count = 0; count < LINUX_BROWSERS.length && browser == null; count++) {
-	  // look for binaries and take first that's available
-	  if (Runtime.getRuntime().exec(new String[] {"which", LINUX_BROWSERS[count]}).waitFor() == 0) {
-	    browser = LINUX_BROWSERS[count];
-	    break;
-	  }
-	}
-	if (browser == null) 
-	  throw new Exception("Could not find web browser");
-	else
-	  Runtime.getRuntime().exec(new String[] {browser, url});
+      else {
+        System.err.println("Desktop or browse action not supported, using fallback to determine browser.");
+
+        // Mac OS
+        if (osName.startsWith("Mac OS")) {
+          Class<?> fileMgr = Class.forName("com.apple.eio.FileManager");
+          Method openURL = fileMgr.getDeclaredMethod("openURL",
+              new Class[] { String.class });
+          openURL.invoke(null, new Object[] { url });
+        }
+        // Windows
+        else if (osName.startsWith("Windows")) {
+          Runtime.getRuntime()
+            .exec("rundll32 url.dll,FileProtocolHandler " + url);
+        }
+        // assume Unix or Linux
+        else {
+          String browser = null;
+          for (int count = 0; count < LINUX_BROWSERS.length && browser == null; count++) {
+            // look for binaries and take first that's available
+            if (Runtime.getRuntime()
+                .exec(new String[] { "which", LINUX_BROWSERS[count] }).waitFor() == 0) {
+              browser = LINUX_BROWSERS[count];
+              break;
+            }
+          }
+          if (browser == null) {
+            throw new Exception("Could not find web browser");
+          } else {
+            Runtime.getRuntime().exec(new String[] { browser, url });
+          }
+        }
+      }
+    } catch (Exception e) {
+      String errMsg = "Error attempting to launch web browser:\n"
+        + e.getMessage();
+
+      if (showDialog) {
+        JOptionPane.showMessageDialog(parent, errMsg);
+      } else {
+        System.err.println(errMsg);
       }
     }
-    catch (Exception e) {
-      String errMsg = "Error attempting to launch web browser:\n" + e.getMessage();
-      
-      if (showDialog)
-	JOptionPane.showMessageDialog(
-	    parent, errMsg);
-      else
-	System.err.println(errMsg);
-    }
-  } 
-  
+  }
+
   /**
    * Generates a label with a clickable link.
    * 
-   * @param url		the url of the link
-   * @param text	the text to display instead of URL. if null or of 
-   * 			length 0 then the URL is used
-   * @return		the generated label
+   * @param url the url of the link
+   * @param text the text to display instead of URL. if null or of length 0 then
+   *          the URL is used
+   * @return the generated label
    */
   public static JLabel createLink(String url, String text) {
     final String urlF = url;
@@ -128,22 +142,26 @@ public class BrowserHelper {
     result.setToolTipText("Click to open link in browser");
     result.setForeground(Color.BLUE);
     result.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent e) {
-	if (e.getButton() == MouseEvent.BUTTON1) {
-	  BrowserHelper.openURL(urlF);
-	}
-	else {
-	  super.mouseClicked(e);
-	}
+        if (e.getButton() == MouseEvent.BUTTON1) {
+          BrowserHelper.openURL(urlF);
+        } else {
+          super.mouseClicked(e);
+        }
       }
+
+      @Override
       public void mouseEntered(MouseEvent e) {
-	result.setForeground(Color.RED);
+        result.setForeground(Color.RED);
       }
+
+      @Override
       public void mouseExited(MouseEvent e) {
-	result.setForeground(Color.BLUE);
+        result.setForeground(Color.BLUE);
       }
     });
-    
+
     return result;
   }
 }

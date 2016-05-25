@@ -59,7 +59,7 @@ import weka.core.Utils;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8937 $
+ * @version $Revision: 11458 $
  */
 public class PlainText
   extends AbstractOutput {
@@ -92,11 +92,11 @@ public class PlainText
   protected void doPrintHeader() {
     if (m_Header.classAttribute().isNominal())
       if (m_OutputDistribution)
-	append(" inst#     actual  predicted error distribution");
+	append("    inst#     actual  predicted error distribution");
       else
-	append(" inst#     actual  predicted error prediction");
+	append("    inst#     actual  predicted error prediction");
     else
-      append(" inst#     actual  predicted      error");
+      append("    inst#     actual  predicted      error");
     
     if (m_Attributes != null) {
       append(" (");
@@ -169,7 +169,7 @@ public class PlainText
     }
     
     // index
-    append(Utils.padLeft("" + (index+1), 6));
+    append(Utils.padLeftAndAllowOverflow("" + (index+1), 9));
 
     if (inst.dataset().classAttribute().isNumeric()) {
       // actual
@@ -189,12 +189,12 @@ public class PlainText
         append(" " + Utils.doubleToString(predValue - inst.classValue(), width, prec));
     } else {
       // actual
-      append(" " + Utils.padLeft(((int) inst.classValue()+1) + ":" + inst.toString(inst.classIndex()), width));
+      append(" " + Utils.padLeftAndAllowOverflow(((int) inst.classValue()+1) + ":" + inst.toString(inst.classIndex()), width));
       // predicted
       if (Utils.isMissingValue(predValue))
         append(" " + Utils.padLeft("?", width));
       else
-        append(" " + Utils.padLeft(((int) predValue+1) + ":" + inst.dataset().classAttribute().value((int)predValue), width));
+        append(" " + Utils.padLeftAndAllowOverflow(((int) predValue+1) + ":" + inst.dataset().classAttribute().value((int)predValue), width));
       // error?
       if (!Utils.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
         append(" " + "  +  ");

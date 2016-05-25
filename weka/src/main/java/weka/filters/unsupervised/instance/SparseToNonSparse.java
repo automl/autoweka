@@ -40,7 +40,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- globalinfo-end -->
  * 
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 8034 $ 
+ * @version $Revision: 12037 $ 
  */
 public class SparseToNonSparse 
   extends Filter 
@@ -123,9 +123,9 @@ public class SparseToNonSparse
       inst = new DenseInstance(instance.weight(), instance.toDoubleArray());
       inst.setDataset(instance.dataset());
     } else {
-      inst = instance;
+      inst = (Instance)instance.copy();
     }
-    push(inst);
+    push(inst, false); // No need to copy instance
     return true;
   }
   
@@ -135,7 +135,7 @@ public class SparseToNonSparse
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

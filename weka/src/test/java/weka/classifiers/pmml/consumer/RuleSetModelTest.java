@@ -19,16 +19,16 @@
 
 package weka.classifiers.pmml.consumer;
 
-import weka.core.FastVector;
+import java.util.ArrayList;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
  * Tests the pmml RuleSetModel classifier.
- *
+ * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 8034 $
+ * @version $Revision: 10160 $
  */
 public class RuleSetModelTest extends AbstractPMMLClassifierTest {
 
@@ -36,11 +36,12 @@ public class RuleSetModelTest extends AbstractPMMLClassifierTest {
     super(name);
   }
 
+  @Override
   protected void setUp() throws Exception {
-    m_modelNames = new FastVector();
-    m_dataSetNames = new FastVector();
-    m_modelNames.addElement("HEART_RULESET.xml");
-    m_dataSetNames.addElement("heart-c.arff");
+    m_modelNames = new ArrayList<String>();
+    m_dataSetNames = new ArrayList<String>();
+    m_modelNames.add("HEART_RULESET.xml");
+    m_dataSetNames.add("heart-c.arff");
   }
 
   public static Test suite() {

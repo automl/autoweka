@@ -43,11 +43,20 @@ import weka.core.OptionHandler;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
 
 /**
+ * <!-- globalinfo-start --> A filter that adds new attributes with user
+ * specified type and constant value. Numeric, nominal, string and date
+ * attributes can be created. Attribute name, and value can be set with
+ * environment variables. Date attributes can also specify a formatting string
+ * by which to parse the supplied date value. Alternatively, a current time
+ * stamp can be specified by supplying the special string "now" as the value for
+ * a date attribute.
+ * <p/>
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start --> 
- Valid options are:
+ * <!-- options-start --> Valid options are:
  * <p/>
  * 
  * <pre>
@@ -58,17 +67,16 @@ import weka.filters.Filter;
  *  The value for date be a specific date string or the special string
  *  "now" to indicate the current date-time. A specific date format
  *  string for parsing specific date values can be specified by suffixing
- *  the type specification - e.g. "myTime&#64;date:MM-dd-yyyy&#64;08-23-2009".
- *  This option may be specified multiple times
+ *  the type specification - e.g. "myTime&#64;date:MM-dd-yyyy&#64;08-23-2009".This option may be specified multiple times
  * </pre>
  * 
  * <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 9002 $
+ * @version $Revision: 12731 $
  */
 public class AddUserFields extends Filter implements OptionHandler,
-    EnvironmentHandler {
+  EnvironmentHandler, UnsupervisedFilter {
 
   /** For serialization */
   private static final long serialVersionUID = -2761427344847891585L;
@@ -273,7 +281,7 @@ public class AddUserFields extends Filter implements OptionHandler,
      */
     public String getNominalOrStringValue() {
       if (getResolvedType().toLowerCase().startsWith("nominal")
-          || getResolvedType().toLowerCase().startsWith("string")) {
+        || getResolvedType().toLowerCase().startsWith("string")) {
         return getResolvedValue();
       }
 
@@ -314,15 +322,14 @@ public class AddUserFields extends Filter implements OptionHandler,
 
       if (m_typeS.toLowerCase().startsWith("date") && m_typeS.indexOf(":") > 0) {
         String format = m_typeS.substring(m_typeS.indexOf(":") + 1,
-            m_typeS.length());
+          m_typeS.length());
         m_dateFormat = new SimpleDateFormat(format);
         if (!m_valueS.toLowerCase().equals("now")) {
           try {
             m_parsedDate = m_dateFormat.parse(m_valueS);
           } catch (ParseException e) {
             throw new IllegalArgumentException("Date value \"" + m_valueS
-                + " \" can't be parsed with formatting string \"" + format
-                + "\"");
+              + " \" can't be parsed with formatting string \"" + format + "\"");
           }
         }
       }
@@ -342,9 +349,9 @@ public class AddUserFields extends Filter implements OptionHandler,
       if (type.toLowerCase().startsWith("date") && type.indexOf(":") > 0) {
         type = type.substring(0, type.indexOf(":"));
         String format = m_type.substring(m_type.indexOf(":" + 1,
-            m_type.length()));
+          m_type.length()));
         buff.append("Type: ").append(type).append(" [").append(format)
-            .append("] ");
+          .append("] ");
       } else {
         buff.append("Type: ").append(type).append(" ");
       }
@@ -357,7 +364,7 @@ public class AddUserFields extends Filter implements OptionHandler,
       StringBuffer buff = new StringBuffer();
 
       buff.append(m_name).append("@").append(m_type).append("@")
-          .append(m_value);
+        .append(m_value);
 
       return buff.toString();
     }
@@ -378,12 +385,12 @@ public class AddUserFields extends Filter implements OptionHandler,
    */
   public String globalInfo() {
     return "A filter that adds new attributes with user specified type and constant value. "
-        + "Numeric, nominal, string and date attributes can be created. "
-        + "Attribute name, and value can be set with environment variables. Date "
-        + "attributes can also specify a formatting string by which to parse "
-        + "the supplied date value. Alternatively, a current time stamp can "
-        + "be specified by supplying the special string \"now\" as the value "
-        + "for a date attribute.";
+      + "Numeric, nominal, string and date attributes can be created. "
+      + "Attribute name, and value can be set with environment variables. Date "
+      + "attributes can also specify a formatting string by which to parse "
+      + "the supplied date value. Alternatively, a current time stamp can "
+      + "be specified by supplying the special string \"now\" as the value "
+      + "for a date attribute.";
   }
 
   /**
@@ -424,20 +431,21 @@ public class AddUserFields extends Filter implements OptionHandler,
    * @return an enumeration of all the available options.
    */
   @Override
-  public Enumeration listOptions() {
-    Vector<Option> newVector = new Vector<Option>();
+  public Enumeration<Option> listOptions() {
+
+    Vector<Option> newVector = new Vector<Option>(1);
 
     newVector
-        .addElement(new Option(
-            "\tNew field specification (name@type@value).\n"
-                + "\t Environment variables may be used for any/all parts of the\n"
-                + "\tspecification. Type can be one of (numeric, nominal, string or date).\n"
-                + "\tThe value for date be a specific date string or the special string\n"
-                + "\t\"now\" to indicate the current date-time. A specific date format\n"
-                + "\tstring for parsing specific date values can be specified by suffixing\n"
-                + "\tthe type specification - e.g. \"myTime@date:MM-dd-yyyy@08-23-2009\"."
-                + "This option may be specified multiple times", "A", 1,
-            "-A <name:type:value>"));
+      .addElement(new Option(
+        "\tNew field specification (name@type@value).\n"
+          + "\t Environment variables may be used for any/all parts of the\n"
+          + "\tspecification. Type can be one of (numeric, nominal, string or date).\n"
+          + "\tThe value for date be a specific date string or the special string\n"
+          + "\t\"now\" to indicate the current date-time. A specific date format\n"
+          + "\tstring for parsing specific date values can be specified by suffixing\n"
+          + "\tthe type specification - e.g. \"myTime@date:MM-dd-yyyy@08-23-2009\"."
+          + "This option may be specified multiple times", "A", 1,
+        "-A <name@type@value>"));
 
     return newVector.elements();
   }
@@ -446,23 +454,22 @@ public class AddUserFields extends Filter implements OptionHandler,
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> 
-   Valid options are:
+   * <!-- options-start --> * Valid options are:
    * <p/>
+   * * *
    * 
    * <pre>
    * -A &lt;name:type:value&gt;
-   *  New field specification (name&#64;type&#64;value).
-   *   Environment variables may be used for any/all parts of the
-   *  specification. Type can be one of (numeric, nominal, string or date).
-   *  The value for date be a specific date string or the special string
-   *  "now" to indicate the current date-time. A specific date format
-   *  string for parsing specific date values can be specified by suffixing
-   *  the type specification - e.g. "myTime&#64;date:MM-dd-yyyy&#64;08-23-2009".
-   *  This option may be specified multiple times
+   * *  New field specification (name&#64;type&#64;value).
+   * *   Environment variables may be used for any/all parts of the
+   * *  specification. Type can be one of (numeric, nominal, string or date).
+   * *  The value for date be a specific date string or the special string
+   * *  "now" to indicate the current date-time. A specific date format
+   * *  string for parsing specific date values can be specified by suffixing
+   * *  the type specification - e.g. "myTime&#64;date:MM-dd-yyyy&#64;08-23-2009".This option may be specified multiple times
    * </pre>
    * 
-   * <!-- options-end -->
+   * * <!-- options-end -->
    * 
    * @param otions the list of options as an array of string
    * @throws Exception if an option is not supported
@@ -486,6 +493,7 @@ public class AddUserFields extends Filter implements OptionHandler,
    */
   @Override
   public String[] getOptions() {
+
     ArrayList<String> options = new ArrayList<String>();
 
     for (int i = 0; i < m_attributeSpecs.size(); i++) {
@@ -593,7 +601,7 @@ public class AddUserFields extends Filter implements OptionHandler,
     Instance inst = (Instance) instance.copy();
 
     // First copy string values from input to output
-    copyValues(inst, true, inst.dataset(), getOutputFormat());
+    copyValues(inst, true, inst.dataset(), outputFormatPeek());
 
     convertInstance(inst);
     return true;
@@ -615,7 +623,7 @@ public class AddUserFields extends Filter implements OptionHandler,
     // new user values
     Instances outputFormat = getOutputFormat();
     for (int i = instance.numAttributes(); i < outputFormatPeek()
-        .numAttributes(); i++) {
+      .numAttributes(); i++) {
       AttributeSpec spec = m_attributeSpecs.get(i - instance.numAttributes());
       Attribute outAtt = outputFormat.attribute(i);
       if (outAtt.isDate()) {
@@ -639,7 +647,7 @@ public class AddUserFields extends Filter implements OptionHandler,
       inst = new DenseInstance(instance.weight(), vals);
     }
     inst.setDataset(outputFormat);
-    push(inst);
+    push(inst, false); // No need to copy instance
   }
 
   /**

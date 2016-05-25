@@ -54,15 +54,13 @@ import javax.swing.text.StyledDocument;
 import weka.core.Tee;
 import weka.core.Utils;
 
-/** 
+/**
  * Frame that shows the output from stdout and stderr.
- *
- * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * 
+ * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 10216 $
  */
-public class LogWindow 
-  extends JFrame
-  implements CaretListener, ChangeListener {
+public class LogWindow extends JFrame implements CaretListener, ChangeListener {
 
   /** for serialization */
   private static final long serialVersionUID = 5650947361381061112L;
@@ -84,7 +82,7 @@ public class LogWindow
 
   /** whether the JTextPane has wordwrap or not */
   public boolean m_UseWordwrap = true;
-  
+
   /** the output */
   protected JTextPane m_Output = new JTextPane();
 
@@ -109,33 +107,36 @@ public class LogWindow
   /** for redirecting stderr */
   protected static Tee m_TeeErr = null;
 
-  /** inner class for printing to the window, is used instead of standard
-   * System.out and System.err */
+  /**
+   * inner class for printing to the window, is used instead of standard
+   * System.out and System.err
+   */
   protected class LogWindowPrintStream extends PrintStream {
     /** the parent */
     protected LogWindow m_Parent = null;
 
     /** the style of the printstream */
     protected String m_Style = null;
-    
+
     /**
      * the constructor
-     * @param parent      the parent frame
-     * @param stream      the stream (used for constructor of superclass)
-     * @param style       the style name associated with this output
+     * 
+     * @param parent the parent frame
+     * @param stream the stream (used for constructor of superclass)
+     * @param style the style name associated with this output
      */
-    public LogWindowPrintStream( LogWindow parent, 
-                                 PrintStream stream, 
-                                 String style ) {
+    public LogWindowPrintStream(LogWindow parent, PrintStream stream,
+      String style) {
       super(stream);
 
       m_Parent = parent;
-      m_Style  = style;
+      m_Style = style;
     }
-    
+
     /**
      * flushes the printstream
      */
+    @Override
     public synchronized void flush() {
       // ignored
     }
@@ -143,39 +144,37 @@ public class LogWindow
     /**
      * prints the given int
      */
+    @Override
     public synchronized void print(int x) {
       print(new Integer(x).toString());
     }
 
     /**
-     * prints the given boolean 
+     * prints the given boolean
      */
+    @Override
     public synchronized void print(boolean x) {
       print(new Boolean(x).toString());
     }
 
     /**
-     * prints the given string 
+     * prints the given string
      */
+    @Override
     public synchronized void print(String x) {
-      StyledDocument      doc;
-      int                 size;
-      int                 maxSize;
-      int                 pos;
-      
+      StyledDocument doc;
       doc = m_Parent.m_Output.getStyledDocument();
 
       try {
         // insert text
         doc.insertString(doc.getLength(), x, doc.getStyle(m_Style));
-        
+
         // move cursor to end
         m_Parent.m_Output.setCaretPosition(doc.getLength());
 
         // trim size if necessary
         m_Parent.trim();
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
         e.printStackTrace();
       }
     }
@@ -183,30 +182,34 @@ public class LogWindow
     /**
      * prints the given object
      */
+    @Override
     public synchronized void print(Object x) {
-      String                  line;
-      Throwable               t;
-      StackTraceElement[]     trace;
-      int                     i;
+      String line;
+      Throwable t;
+      StackTraceElement[] trace;
+      int i;
 
       if (x instanceof Throwable) {
-        t     = (Throwable) x;
+        t = (Throwable) x;
         trace = t.getStackTrace();
-        line  = t.getMessage() + "\n";
-        for (i = 0; i < trace.length; i++)
+        line = t.getMessage() + "\n";
+        for (i = 0; i < trace.length; i++) {
           line += "\t" + trace[i].toString() + "\n";
+        }
         x = line;
       }
 
-      if (x == null)
-	print("null");
-      else
-	print(x.toString());
+      if (x == null) {
+        print("null");
+      } else {
+        print(x.toString());
+      }
     }
 
     /**
      * prints a new line
      */
+    @Override
     public synchronized void println() {
       print("\n");
     }
@@ -214,6 +217,7 @@ public class LogWindow
     /**
      * prints the given int
      */
+    @Override
     public synchronized void println(int x) {
       print(x);
       println();
@@ -222,6 +226,7 @@ public class LogWindow
     /**
      * prints the given boolean
      */
+    @Override
     public synchronized void println(boolean x) {
       print(x);
       println();
@@ -230,6 +235,7 @@ public class LogWindow
     /**
      * prints the given string
      */
+    @Override
     public synchronized void println(String x) {
       print(x);
       println();
@@ -238,12 +244,13 @@ public class LogWindow
     /**
      * prints the given object (for Throwables we print the stack trace)
      */
+    @Override
     public synchronized void println(Object x) {
       print(x);
       println();
     }
   }
-  
+
   /**
    * creates the frame
    */
@@ -253,19 +260,19 @@ public class LogWindow
     createFrame();
 
     // styles
-    StyledDocument      doc;
-    Style               style;
-    boolean             teeDone;
+    StyledDocument doc;
+    Style style;
+    boolean teeDone;
 
-    doc   = m_Output.getStyledDocument();
-    style = StyleContext.getDefaultStyleContext()
-                        .getStyle(StyleContext.DEFAULT_STYLE);
+    doc = m_Output.getStyledDocument();
+    style = StyleContext.getDefaultStyleContext().getStyle(
+      StyleContext.DEFAULT_STYLE);
     style = doc.addStyle(STYLE_STDOUT, style);
     StyleConstants.setFontFamily(style, "monospaced");
     StyleConstants.setForeground(style, COLOR_STDOUT);
-    
-    style = StyleContext.getDefaultStyleContext()
-                        .getStyle(StyleContext.DEFAULT_STYLE);
+
+    style = StyleContext.getDefaultStyleContext().getStyle(
+      StyleContext.DEFAULT_STYLE);
     style = doc.addStyle(STYLE_STDERR, style);
     StyleConstants.setFontFamily(style, "monospaced");
     StyleConstants.setForeground(style, COLOR_STDERR);
@@ -277,41 +284,41 @@ public class LogWindow
         m_TeeOut = new Tee(System.out);
         System.setOut(m_TeeOut);
       }
-      m_TeeOut.add(
-          new LogWindowPrintStream(this, m_TeeOut.getDefault(), STYLE_STDOUT));
+      m_TeeOut.add(new LogWindowPrintStream(this, m_TeeOut.getDefault(),
+        STYLE_STDOUT));
     }
 
     if (!teeDone) {
       m_TeeErr = new Tee(System.err);
       System.setErr(m_TeeErr);
     }
-    m_TeeErr.add(
-        new LogWindowPrintStream(this, m_TeeErr.getDefault(), STYLE_STDERR));
+    m_TeeErr.add(new LogWindowPrintStream(this, m_TeeErr.getDefault(),
+      STYLE_STDERR));
   }
 
   /**
    * creates the frame and all its components
    */
   protected void createFrame() {
-    JPanel                panel;
-    JPanel                panel2;
-    JPanel                panel3;
-    JPanel                panel4;
-    SpinnerNumberModel    model;
-    int                   width;
-    JLabel                label;
+    JPanel panel;
+    JPanel panel2;
+    JPanel panel3;
+    JPanel panel4;
+    SpinnerNumberModel model;
+    int width;
+    JLabel label;
 
     // set layout
     setSize(600, 400);
     width = getBounds().width;
-    setLocation(
-        getGraphicsConfiguration().getBounds().width - width, getLocation().y);
+    setLocation(getGraphicsConfiguration().getBounds().width - width,
+      getLocation().y);
     getContentPane().setLayout(new BorderLayout());
-    
-    // output 
+
+    // output
     getContentPane().add(new JScrollPane(m_Output), BorderLayout.CENTER);
     setWordwrap(m_UseWordwrap);
-    
+
     // button(s)
     panel = new JPanel(new BorderLayout());
     getContentPane().add(panel, BorderLayout.SOUTH);
@@ -322,24 +329,26 @@ public class LogWindow
 
     m_ButtonClear.setMnemonic('C');
     m_ButtonClear.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  clear();
-	}
-      });
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        clear();
+      }
+    });
     panel2.add(m_ButtonClear);
 
     m_ButtonClose.setMnemonic('l');
     m_ButtonClose.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  close();
-	}
-      });
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        close();
+      }
+    });
     panel2.add(m_ButtonClose);
 
     // size + current size + wordwrap
     panel2 = new JPanel(new GridLayout(1, 3));
     panel3.add(panel2, BorderLayout.WEST);
-    
+
     // size
     panel4 = new JPanel(new FlowLayout());
     panel2.add(panel4);
@@ -366,10 +375,11 @@ public class LogWindow
     panel2.add(panel4);
     m_CheckBoxWordwrap.setSelected(m_UseWordwrap);
     m_CheckBoxWordwrap.addItemListener(new ItemListener() {
-	public void itemStateChanged(ItemEvent e) {
-	  setWordwrap(m_CheckBoxWordwrap.isSelected());
-	}
-      });
+      @Override
+      public void itemStateChanged(ItemEvent e) {
+        setWordwrap(m_CheckBoxWordwrap.isSelected());
+      }
+    });
     panel4.add(m_CheckBoxWordwrap);
   }
 
@@ -391,34 +401,36 @@ public class LogWindow
    * trims the JTextPane, if too big
    */
   public void trim() {
-    StyledDocument      doc;
-    int                 size;
-    int                 maxSize;
-    int                 pos;
-    
+    StyledDocument doc;
+    int size;
+    int maxSize;
+    int pos;
+
     doc = m_Output.getStyledDocument();
 
     // too large?
-    size    = doc.getLength();
+    size = doc.getLength();
     maxSize = ((Integer) m_SpinnerMaxSize.getValue()).intValue();
     if (size > maxSize) {
       try {
         // determine EOL after which to cut
         pos = size - maxSize;
-        while (!doc.getText(pos, 1).equals("\n"))
+        while (!doc.getText(pos, 1).equals("\n")) {
           pos++;
-        while (doc.getText(pos, 1).equals("\n")) 
+        }
+        while (doc.getText(pos, 1).equals("\n")) {
           pos++;
+        }
         // delete text
         doc.remove(0, pos);
-      }
-      catch (Exception ex) {
+      } catch (Exception ex) {
         // don't print it, otherwise we get an endless loop!
-        if (DEBUG)
+        if (DEBUG) {
           System.out.println(ex);
+        }
       }
     }
-    
+
     // move cursor to end
     m_Output.setCaretPosition(doc.getLength());
   }
@@ -427,55 +439,61 @@ public class LogWindow
    * returns a string representation (#RGB) of the given color
    */
   protected String colorToString(Color c) {
-    String      result;
-    
-    result = "#" + Utils.padLeft(Integer.toHexString(c.getRed()),   2)
-                 + Utils.padLeft(Integer.toHexString(c.getGreen()), 2)
-                 + Utils.padLeft(Integer.toHexString(c.getBlue()),  2);
+    String result;
+
+    result = "#" + Utils.padLeft(Integer.toHexString(c.getRed()), 2)
+      + Utils.padLeft(Integer.toHexString(c.getGreen()), 2)
+      + Utils.padLeft(Integer.toHexString(c.getBlue()), 2);
 
     result = result.replaceAll("\\ ", "0").toUpperCase();
-    
+
     return result;
   }
 
   /**
    * toggles the wordwrap<br/>
-   * override wordwrap from: 
+   * override wordwrap from:
    * http://forum.java.sun.com/thread.jspa?threadID=498535&messageID=2356174
    */
   public void setWordwrap(boolean wrap) {
-    Container   parent;
-    JTextPane   outputOld;
-    
+    Container parent;
+    JTextPane outputOld;
+
     m_UseWordwrap = wrap;
-    if (m_CheckBoxWordwrap.isSelected() != m_UseWordwrap)
+    if (m_CheckBoxWordwrap.isSelected() != m_UseWordwrap) {
       m_CheckBoxWordwrap.setSelected(m_UseWordwrap);
+    }
 
     // create new JTextPane
-    parent    = m_Output.getParent();
+    parent = m_Output.getParent();
     outputOld = m_Output;
-    if (m_UseWordwrap)
+    if (m_UseWordwrap) {
       m_Output = new JTextPane();
-    else
-      m_Output = new JTextPane(){
+    } else {
+      m_Output = new JTextPane() {
         private static final long serialVersionUID = -8275856175921425981L;
-        public void setSize(Dimension d) {    
-          if (d.width < getGraphicsConfiguration().getBounds().width) 
-            d.width = getGraphicsConfiguration().getBounds().width; 
+
+        @Override
+        public void setSize(Dimension d) {
+          if (d.width < getGraphicsConfiguration().getBounds().width) {
+            d.width = getGraphicsConfiguration().getBounds().width;
+          }
           super.setSize(d);
         }
 
-        public boolean getScrollableTracksViewportWidth() { 
-          return false; 
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+          return false;
         }
       };
+    }
     m_Output.setEditable(false);
     m_Output.addCaretListener(this);
     m_Output.setDocument(outputOld.getDocument());
     m_Output.setCaretPosition(m_Output.getDocument().getLength());
-    //m_Output.setToolTipText(
-    //      "stdout = " + colorToString(COLOR_STDOUT) + ", "
-    //    + "stderr = " + colorToString(COLOR_STDERR));
+    // m_Output.setToolTipText(
+    // "stdout = " + colorToString(COLOR_STDOUT) + ", "
+    // + "stderr = " + colorToString(COLOR_STDERR));
     parent.add(m_Output);
     parent.remove(outputOld);
   }
@@ -483,17 +501,20 @@ public class LogWindow
   /**
    * Called when the caret position is updated.
    */
+  @Override
   public void caretUpdate(CaretEvent e) {
-    m_LabelCurrentSize.setText(
-        "currently: " + m_Output.getStyledDocument().getLength());
+    m_LabelCurrentSize.setText("currently: "
+      + m_Output.getStyledDocument().getLength());
 
-    if (DEBUG)
+    if (DEBUG) {
       System.out.println(e);
+    }
   }
 
   /**
    * Invoked when the target of the listener has changed its state.
    */
+  @Override
   public void stateChanged(ChangeEvent e) {
     // check max size if Spinner is changed
     if (e.getSource() == m_SpinnerMaxSize.getModel()) {
@@ -507,10 +528,10 @@ public class LogWindow
    * for testing only
    */
   public static void main(String[] args) {
-    LogWindow       log;
+    LogWindow log;
 
     LookAndFeel.setLookAndFeel();
-    
+
     log = new LogWindow();
     log.setVisible(true);
     log.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

@@ -33,7 +33,7 @@ import weka.core.RevisionUtils;
  * through. Basically just for testing purposes.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 12037 $
  */
 public class AllFilter
   extends Filter
@@ -112,7 +112,11 @@ public class AllFilter
       resetQueue();
       m_NewBatch = false;
     }
-    push((Instance)instance.copy());
+    if (instance.dataset() == null) {
+      push((Instance) instance.copy());
+    } else {
+      push(instance); // push() will make a copy anyway.
+    }
     return true;
   }
   
@@ -173,7 +177,7 @@ public class AllFilter
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

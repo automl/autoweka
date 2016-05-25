@@ -29,37 +29,44 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Vector;
 
 /**
- * Class that can test whether a given string is a stop word.
- * Lowercases all words before the test. <p/>
- * The format for reading and writing is one word per line, lines starting
- * with '#' are interpreted as comments and therefore skipped. <p/>
- * The default stopwords are based on <a href="http://www.cs.cmu.edu/~mccallum/bow/rainbow/" target="_blank">Rainbow</a>. <p/>
- *
- * Accepts the following parameter: <p/>
- *
+ * Class that can test whether a given string is a stop word. Lowercases all
+ * words before the test.
+ * <p/>
+ * The format for reading and writing is one word per line, lines starting with
+ * '#' are interpreted as comments and therefore skipped.
+ * <p/>
+ * The default stopwords are based on <a
+ * href="http://www.cs.cmu.edu/~mccallum/bow/rainbow/"
+ * target="_blank">Rainbow</a>.
+ * <p/>
+ * 
+ * Accepts the following parameter:
+ * <p/>
+ * 
  * -i file <br/>
- * loads the stopwords from the given file <p/>
- *
+ * loads the stopwords from the given file
+ * <p/>
+ * 
  * -o file <br/>
- * saves the stopwords to the given file <p/>
- *
+ * saves the stopwords to the given file
+ * <p/>
+ * 
  * -p <br/>
- * outputs the current stopwords on stdout <p/>
- *
+ * outputs the current stopwords on stdout
+ * <p/>
+ * 
  * Any additional parameters are interpreted as words to test as stopwords.
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10203 $
  */
-public class Stopwords
-  implements RevisionHandler {
-  
+public class Stopwords implements RevisionHandler {
+
   /** The hash set containing the list of stopwords */
   protected HashSet<String> m_Words = null;
 
@@ -73,12 +80,14 @@ public class Stopwords
   }
 
   /**
-   * initializes the stopwords (based on <a href="http://www.cs.cmu.edu/~mccallum/bow/rainbow/" target="_blank">Rainbow</a>).
+   * initializes the stopwords (based on <a
+   * href="http://www.cs.cmu.edu/~mccallum/bow/rainbow/"
+   * target="_blank">Rainbow</a>).
    */
   public Stopwords() {
     m_Words = new HashSet<String>();
 
-    //Stopwords list from Rainbow
+    // Stopwords list from Rainbow
     add("a");
     add("able");
     add("about");
@@ -319,7 +328,7 @@ public class Stopwords
     add("liked");
     add("likely");
     add("little");
-    add("ll"); //added to avoid words like you'll,I'll etc.
+    add("ll"); // added to avoid words like you'll,I'll etc.
     add("look");
     add("looking");
     add("looks");
@@ -548,7 +557,7 @@ public class Stopwords
     add("v");
     add("value");
     add("various");
-    add("ve"); //added to avoid words like I've,you've etc.
+    add("ve"); // added to avoid words like I've,you've etc.
     add("very");
     add("via");
     add("viz");
@@ -617,25 +626,26 @@ public class Stopwords
   /**
    * adds the given word to the stopword list (is automatically converted to
    * lower case and trimmed)
-   *
+   * 
    * @param word the word to add
    */
   public void add(String word) {
-    if (word.trim().length() > 0)
+    if (word.trim().length() > 0) {
       m_Words.add(word.trim().toLowerCase());
+    }
   }
 
   /**
    * removes the word from the stopword list
-   *
+   * 
    * @param word the word to remove
    * @return true if the word was found in the list and then removed
    */
   public boolean remove(String word) {
     return m_Words.remove(word);
   }
-  
-  /** 
+
+  /**
    * Returns true if the given string is a stop word.
    * 
    * @param word the word to test
@@ -647,18 +657,14 @@ public class Stopwords
 
   /**
    * Returns a sorted enumeration over all stored stopwords
-   *
+   * 
    * @return the enumeration over all stopwords
    */
-  public Enumeration elements() {
-    Iterator<String>    iter;
-    Vector<String>      list;
+  public Enumeration<String> elements() {
 
-    iter = m_Words.iterator();
-    list = new Vector<String>();
+    Vector<String> list = new Vector<String>();
 
-    while (iter.hasNext())
-      list.add(iter.next());
+    list.addAll(m_Words);
 
     // sort list
     Collections.sort(list);
@@ -668,7 +674,7 @@ public class Stopwords
 
   /**
    * Generates a new Stopwords object from the given file
-   *
+   * 
    * @param filename the file to read the stopwords from
    * @throws Exception if reading fails
    */
@@ -678,7 +684,7 @@ public class Stopwords
 
   /**
    * Generates a new Stopwords object from the given file
-   *
+   * 
    * @param file the file to read the stopwords from
    * @throws Exception if reading fails
    */
@@ -687,22 +693,23 @@ public class Stopwords
   }
 
   /**
-   * Generates a new Stopwords object from the reader. The reader is
-   * closed automatically.
-   *
+   * Generates a new Stopwords object from the reader. The reader is closed
+   * automatically.
+   * 
    * @param reader the reader to get the stopwords from
    * @throws Exception if reading fails
    */
   public void read(BufferedReader reader) throws Exception {
-    String      line;
+    String line;
 
     clear();
-    
+
     while ((line = reader.readLine()) != null) {
       line = line.trim();
       // comment?
-      if (line.startsWith("#"))
+      if (line.startsWith("#")) {
         continue;
+      }
       add(line);
     }
 
@@ -711,7 +718,7 @@ public class Stopwords
 
   /**
    * Writes the current stopwords to the given file
-   *
+   * 
    * @param filename the file to write the stopwords to
    * @throws Exception if writing fails
    */
@@ -721,7 +728,7 @@ public class Stopwords
 
   /**
    * Writes the current stopwords to the given file
-   *
+   * 
    * @param file the file to write the stopwords to
    * @throws Exception if writing fails
    */
@@ -732,12 +739,12 @@ public class Stopwords
   /**
    * Writes the current stopwords to the given writer. The writer is closed
    * automatically.
-   *
+   * 
    * @param writer the writer to get the stopwords from
    * @throws Exception if writing fails
    */
   public void write(BufferedWriter writer) throws Exception {
-    Enumeration   enm;
+    Enumeration<String> enm;
 
     // header
     writer.write("# generated " + new Date());
@@ -756,25 +763,27 @@ public class Stopwords
 
   /**
    * returns the current stopwords in a string
-   *
+   * 
    * @return the current stopwords
    */
+  @Override
   public String toString() {
-    Enumeration   enm;
-    StringBuffer  result;
+    Enumeration<String> enm;
+    StringBuffer result;
 
     result = new StringBuffer();
-    enm    = elements();
+    enm = elements();
     while (enm.hasMoreElements()) {
       result.append(enm.nextElement().toString());
-      if (enm.hasMoreElements())
+      if (enm.hasMoreElements()) {
         result.append(",");
+      }
     }
 
     return result.toString();
   }
-  
-  /** 
+
+  /**
    * Returns true if the given string is a stop word.
    * 
    * @param str the word to test
@@ -783,28 +792,33 @@ public class Stopwords
   public static boolean isStopword(String str) {
     return m_Stopwords.is(str.toLowerCase());
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10203 $");
   }
-  
+
   /**
-   * Accepts the following parameter: <p/>
-   *
+   * Accepts the following parameter:
+   * <p/>
+   * 
    * -i file <br/>
-   * loads the stopwords from the given file <p/>
-   *
+   * loads the stopwords from the given file
+   * <p/>
+   * 
    * -o file <br/>
-   * saves the stopwords to the given file <p/>
-   *
+   * saves the stopwords to the given file
+   * <p/>
+   * 
    * -p <br/>
-   * outputs the current stopwords on stdout <p/>
-   *
+   * outputs the current stopwords on stdout
+   * <p/>
+   * 
    * Any additional parameters are interpreted as words to test as stopwords.
    * 
    * @param args commandline parameters
@@ -817,28 +831,31 @@ public class Stopwords
 
     // words to process?
     Vector<String> words = new Vector<String>();
-    for (int i = 0; i < args.length; i++) {
-      if (args[i].trim().length() > 0)
-        words.add(args[i].trim());
+    for (String arg : args) {
+      if (arg.trim().length() > 0) {
+        words.add(arg.trim());
+      }
     }
-    
+
     Stopwords stopwords = new Stopwords();
 
     // load from file?
-    if (input.length() != 0)
+    if (input.length() != 0) {
       stopwords.read(input);
+    }
 
     // write to file?
-    if (output.length() != 0)
+    if (output.length() != 0) {
       stopwords.write(output);
-    
+    }
+
     // output to stdout?
     if (print) {
       System.out.println("\nStopwords:");
-      Enumeration enm = stopwords.elements();
+      Enumeration<String> enm = stopwords.elements();
       int i = 0;
       while (enm.hasMoreElements()) {
-        System.out.println((i+1) + ". " + enm.nextElement());
+        System.out.println((i + 1) + ". " + enm.nextElement());
         i++;
       }
     }
@@ -847,9 +864,8 @@ public class Stopwords
     if (words.size() > 0) {
       System.out.println("\nChecking for stopwords:");
       for (int i = 0; i < words.size(); i++) {
-        System.out.println(
-            (i+1) + ". " + words.get(i) + ": " 
-            + stopwords.is(words.get(i).toString()));
+        System.out.println((i + 1) + ". " + words.get(i) + ": "
+          + stopwords.is(words.get(i).toString()));
       }
     }
   }

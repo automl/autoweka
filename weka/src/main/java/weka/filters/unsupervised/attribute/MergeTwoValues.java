@@ -19,16 +19,15 @@
  *
  */
 
-
 package weka.filters.unsupervised.attribute;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -41,62 +40,68 @@ import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
-/** 
- <!-- globalinfo-start -->
- * Merges two values of a nominal attribute into one value.
+/**
+ * <!-- globalinfo-start --> Merges two values of a nominal attribute into one
+ * value.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -C &lt;col&gt;
- *  Sets the attribute index (default last).</pre>
+ * <pre>
+ * -C &lt;col&gt;
+ *  Sets the attribute index (default last).
+ * </pre>
  * 
- * <pre> -F &lt;value index&gt;
- *  Sets the first value's index (default first).</pre>
+ * <pre>
+ * -F &lt;value index&gt;
+ *  Sets the first value's index (default first).
+ * </pre>
  * 
- * <pre> -S &lt;value index&gt;
- *  Sets the second value's index (default last).</pre>
+ * <pre>
+ * -S &lt;value index&gt;
+ *  Sets the second value's index (default last).
+ * </pre>
  * 
- <!-- options-end -->
- *
- * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 8288 $
+ * <!-- options-end -->
+ * 
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @version $Revision: 12037 $
  */
-public class MergeTwoValues 
-  extends Filter
-  implements UnsupervisedFilter, StreamableFilter, OptionHandler {
+public class MergeTwoValues extends Filter implements UnsupervisedFilter,
+  StreamableFilter, OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = 2925048980504034018L;
-  
+
   /** The attribute's index setting. */
-  private SingleIndex m_AttIndex = new SingleIndex("last"); 
+  private final SingleIndex m_AttIndex = new SingleIndex("last");
 
   /** The first value's index setting. */
-  private SingleIndex m_FirstIndex = new SingleIndex("first");
+  private final SingleIndex m_FirstIndex = new SingleIndex("first");
 
   /** The second value's index setting. */
-  private SingleIndex m_SecondIndex = new SingleIndex("last");
+  private final SingleIndex m_SecondIndex = new SingleIndex("last");
 
   /**
    * Returns a string describing this filter
-   *
-   * @return a description of the filter suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the filter suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
 
-    return  "Merges two values of a nominal attribute into one value.";
+    return "Merges two values of a nominal attribute into one value.";
   }
 
-  /** 
+  /**
    * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
+   * 
+   * @return the capabilities of this object
+   * @see Capabilities
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
     result.disableAll();
@@ -104,62 +109,63 @@ public class MergeTwoValues
     // attributes
     result.enableAllAttributes();
     result.enable(Capability.MISSING_VALUES);
-    
+
     // class
     result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
     result.enable(Capability.NO_CLASS);
-    
+
     return result;
   }
 
   /**
    * Sets the format of the input instances.
-   *
-   * @param instanceInfo an Instances object containing the input 
-   * instance structure (any instances contained in the object are 
-   * ignored - only the structure is required).
+   * 
+   * @param instanceInfo an Instances object containing the input instance
+   *          structure (any instances contained in the object are ignored -
+   *          only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the input format can't be set 
-   * successfully
+   * @throws Exception if the input format can't be set successfully
    */
-  public boolean setInputFormat(Instances instanceInfo) 
-       throws Exception {
+  @Override
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     super.setInputFormat(instanceInfo);
     m_AttIndex.setUpper(instanceInfo.numAttributes() - 1);
-    m_FirstIndex.setUpper(instanceInfo.
-			  attribute(m_AttIndex.getIndex()).numValues() - 1);
-    m_SecondIndex.setUpper(instanceInfo.
-			   attribute(m_AttIndex.getIndex()).numValues() - 1);
-    if ((instanceInfo.classIndex() > -1) && (instanceInfo.classIndex() == m_AttIndex.getIndex())) {
+    m_FirstIndex.setUpper(instanceInfo.attribute(m_AttIndex.getIndex())
+      .numValues() - 1);
+    m_SecondIndex.setUpper(instanceInfo.attribute(m_AttIndex.getIndex())
+      .numValues() - 1);
+    if ((instanceInfo.classIndex() > -1)
+      && (instanceInfo.classIndex() == m_AttIndex.getIndex())) {
       throw new Exception("Cannot process class attribute.");
     }
     if (!instanceInfo.attribute(m_AttIndex.getIndex()).isNominal()) {
-      throw new UnsupportedAttributeTypeException("Chosen attribute not nominal.");
+      throw new UnsupportedAttributeTypeException(
+        "Chosen attribute not nominal.");
     }
     if (instanceInfo.attribute(m_AttIndex.getIndex()).numValues() < 2) {
-      throw new UnsupportedAttributeTypeException("Chosen attribute has less than " +
-						  "two values.");
+      throw new UnsupportedAttributeTypeException(
+        "Chosen attribute has less than " + "two values.");
     }
     if (m_SecondIndex.getIndex() <= m_FirstIndex.getIndex()) {
       // XXX Maybe we should just swap the values??
-      throw new Exception("The second index has to be greater "+
-			  "than the first.");
+      throw new Exception("The second index has to be greater "
+        + "than the first.");
     }
     setOutputFormat();
     return true;
   }
 
   /**
-   * Input an instance for filtering. The instance is processed
-   * and made available for output immediately.
-   *
+   * Input an instance for filtering. The instance is processed and made
+   * available for output immediately.
+   * 
    * @param instance the input instance
-   * @return true if the filtered instance may now be
-   * collected with output().
+   * @return true if the filtered instance may now be collected with output().
    * @throws IllegalStateException if no input format has been set.
    */
+  @Override
   public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
@@ -169,65 +175,73 @@ public class MergeTwoValues
       resetQueue();
       m_NewBatch = false;
     }
-    Instance newInstance = (Instance)instance.copy();
-    if ((int)newInstance.value(m_AttIndex.getIndex()) == m_SecondIndex.getIndex()) {
-      newInstance.setValue(m_AttIndex.getIndex(), (double)m_FirstIndex.getIndex());
-    }
-    else if ((int)newInstance.value(m_AttIndex.getIndex()) > m_SecondIndex.getIndex()) {
+    Instance newInstance = (Instance) instance.copy();
+    if ((int) newInstance.value(m_AttIndex.getIndex()) == m_SecondIndex
+      .getIndex()) {
+      newInstance.setValue(m_AttIndex.getIndex(), m_FirstIndex.getIndex());
+    } else if ((int) newInstance.value(m_AttIndex.getIndex()) > m_SecondIndex
+      .getIndex()) {
       newInstance.setValue(m_AttIndex.getIndex(),
-			   newInstance.value(m_AttIndex.getIndex()) - 1);
+        newInstance.value(m_AttIndex.getIndex()) - 1);
     }
-    push(newInstance);
+    push(newInstance, false); // No need to copy instance
     return true;
   }
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  @Override
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(3);
-
-    newVector.addElement(new Option(
-              "\tSets the attribute index (default last).",
-              "C", 1, "-C <col>"));
+    Vector<Option> newVector = new Vector<Option>(3);
 
     newVector.addElement(new Option(
-              "\tSets the first value's index (default first).",
-              "F", 1, "-F <value index>"));
+      "\tSets the attribute index (default last).", "C", 1, "-C <col>"));
 
     newVector.addElement(new Option(
-              "\tSets the second value's index (default last).",
-              "S", 1, "-S <value index>"));
+      "\tSets the first value's index (default first).", "F", 1,
+      "-F <value index>"));
+
+    newVector.addElement(new Option(
+      "\tSets the second value's index (default last).", "S", 1,
+      "-S <value index>"));
 
     return newVector.elements();
   }
 
-
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -C &lt;col&gt;
-   *  Sets the attribute index (default last).</pre>
+   * <pre>
+   * -C &lt;col&gt;
+   *  Sets the attribute index (default last).
+   * </pre>
    * 
-   * <pre> -F &lt;value index&gt;
-   *  Sets the first value's index (default first).</pre>
+   * <pre>
+   * -F &lt;value index&gt;
+   *  Sets the first value's index (default first).
+   * </pre>
    * 
-   * <pre> -S &lt;value index&gt;
-   *  Sets the second value's index (default last).</pre>
+   * <pre>
+   * -S &lt;value index&gt;
+   *  Sets the second value's index (default last).
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    
+
     String attIndex = Utils.getOption('C', options);
     if (attIndex.length() != 0) {
       setAttributeIndex(attIndex);
@@ -248,37 +262,37 @@ public class MergeTwoValues
     } else {
       setSecondValueIndex("last");
     }
-   
+
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
     }
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of the filter.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
+  @Override
+  public String[] getOptions() {
 
-    String [] options = new String [6];
-    int current = 0;
+    Vector<String> options = new Vector<String>();
 
-    options[current++] = "-C";
-    options[current++] = "" + getAttributeIndex();
-    options[current++] = "-F"; 
-    options[current++] = "" + getFirstValueIndex();
-    options[current++] = "-S"; 
-    options[current++] = "" + getSecondValueIndex();
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    options.add("-C");
+    options.add("" + getAttributeIndex());
+    options.add("-F");
+    options.add("" + getFirstValueIndex());
+    options.add("-S");
+    options.add("" + getSecondValueIndex());
+
+    return options.toArray(new String[0]);
   }
 
   /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String attributeIndexTipText() {
 
@@ -288,7 +302,7 @@ public class MergeTwoValues
 
   /**
    * Get the index of the attribute used.
-   *
+   * 
    * @return the index of the attribute
    */
   public String getAttributeIndex() {
@@ -298,17 +312,17 @@ public class MergeTwoValues
 
   /**
    * Sets index of the attribute used.
-   *
+   * 
    * @param attIndex the index of the attribute
    */
   public void setAttributeIndex(String attIndex) {
-    
+
     m_AttIndex.setSingleIndex(attIndex);
   }
 
   /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String firstValueIndexTipText() {
 
@@ -318,7 +332,7 @@ public class MergeTwoValues
 
   /**
    * Get the index of the first value used.
-   *
+   * 
    * @return the index of the first value
    */
   public String getFirstValueIndex() {
@@ -328,17 +342,17 @@ public class MergeTwoValues
 
   /**
    * Sets index of the first value used.
-   *
+   * 
    * @param firstIndex the index of the first value
    */
   public void setFirstValueIndex(String firstIndex) {
-    
+
     m_FirstIndex.setSingleIndex(firstIndex);
   }
 
   /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String secondValueIndexTipText() {
 
@@ -348,7 +362,7 @@ public class MergeTwoValues
 
   /**
    * Get the index of the second value used.
-   *
+   * 
    * @return the index of the second value
    */
   public String getSecondValueIndex() {
@@ -358,108 +372,104 @@ public class MergeTwoValues
 
   /**
    * Sets index of the second value used.
-   *
+   * 
    * @param secondIndex the index of the second value
    */
   public void setSecondValueIndex(String secondIndex) {
-    
+
     m_SecondIndex.setSingleIndex(secondIndex);
   }
 
   /**
-   * Set the output format. Takes the current average class values
-   * and m_InputFormat and calls setOutputFormat(Instances) 
-   * appropriately.
+   * Set the output format. Takes the current average class values and
+   * m_InputFormat and calls setOutputFormat(Instances) appropriately.
    */
   private void setOutputFormat() {
-    
+
     Instances newData;
-    FastVector newAtts, newVals;
-    boolean firstEndsWithPrime = false, 
-      secondEndsWithPrime = false;
+    ArrayList<Attribute> newAtts;
+    ArrayList<String> newVals;
+    boolean firstEndsWithPrime = false, secondEndsWithPrime = false;
     StringBuffer text = new StringBuffer();
-      
+
     // Compute new attributes
-      
-    newAtts = new FastVector(getInputFormat().numAttributes());
+
+    newAtts = new ArrayList<Attribute>(getInputFormat().numAttributes());
     for (int j = 0; j < getInputFormat().numAttributes(); j++) {
       Attribute att = getInputFormat().attribute(j);
       if (j != m_AttIndex.getIndex()) {
-	newAtts.addElement(att.copy());
+        newAtts.add((Attribute) att.copy());
       } else {
-	  
-	// Compute new value
-	  
-	if (att.value(m_FirstIndex.getIndex()).endsWith("'")) {
-	  firstEndsWithPrime = true;
-	}
-	if (att.value(m_SecondIndex.getIndex()).endsWith("'")) {
-	  secondEndsWithPrime = true;
-	}
-	if (firstEndsWithPrime || secondEndsWithPrime) {
-	  text.append("'");
-	}
-	if (firstEndsWithPrime) {
-	  text.append(((String)att.value(m_FirstIndex.getIndex())).
-		      substring(1, ((String)att.value(m_FirstIndex.getIndex())).
-				length() - 1));
-	} else {
-	  text.append((String)att.value(m_FirstIndex.getIndex()));
-	}
-	text.append('_');
-	if (secondEndsWithPrime) {
-	  text.append(((String)att.value(m_SecondIndex.getIndex())).
-		      substring(1, ((String)att.value(m_SecondIndex.getIndex())).
-				length() - 1));
-	} else {
-	  text.append((String)att.value(m_SecondIndex.getIndex()));
-	}
-	if (firstEndsWithPrime || secondEndsWithPrime) {
-	  text.append("'");
-	}
-	  
-	// Compute list of attribute values
-	  
-	newVals = new FastVector(att.numValues() - 1);
-	for (int i = 0; i < att.numValues(); i++) {
-	  if (i == m_FirstIndex.getIndex()) {
-	    newVals.addElement(text.toString());
-	  } else if (i != m_SecondIndex.getIndex()) {
-	    newVals.addElement(att.value(i));
-	  }
-	}
-	
-	Attribute newAtt = new Attribute(att.name(), newVals);
-	newAtt.setWeight(getInputFormat().attribute(j).weight());
-	
-	newAtts.addElement(newAtt);
+
+        // Compute new value
+
+        if (att.value(m_FirstIndex.getIndex()).endsWith("'")) {
+          firstEndsWithPrime = true;
+        }
+        if (att.value(m_SecondIndex.getIndex()).endsWith("'")) {
+          secondEndsWithPrime = true;
+        }
+        if (firstEndsWithPrime || secondEndsWithPrime) {
+          text.append("'");
+        }
+        if (firstEndsWithPrime) {
+          text.append(att.value(m_FirstIndex.getIndex()).substring(1,
+            att.value(m_FirstIndex.getIndex()).length() - 1));
+        } else {
+          text.append(att.value(m_FirstIndex.getIndex()));
+        }
+        text.append('_');
+        if (secondEndsWithPrime) {
+          text.append(att.value(m_SecondIndex.getIndex()).substring(1,
+            att.value(m_SecondIndex.getIndex()).length() - 1));
+        } else {
+          text.append(att.value(m_SecondIndex.getIndex()));
+        }
+        if (firstEndsWithPrime || secondEndsWithPrime) {
+          text.append("'");
+        }
+
+        // Compute list of attribute values
+
+        newVals = new ArrayList<String>(att.numValues() - 1);
+        for (int i = 0; i < att.numValues(); i++) {
+          if (i == m_FirstIndex.getIndex()) {
+            newVals.add(text.toString());
+          } else if (i != m_SecondIndex.getIndex()) {
+            newVals.add(att.value(i));
+          }
+        }
+
+        Attribute newAtt = new Attribute(att.name(), newVals);
+        newAtt.setWeight(getInputFormat().attribute(j).weight());
+
+        newAtts.add(newAtt);
       }
     }
-      
+
     // Construct new header
-      
-    newData = new Instances(getInputFormat().relationName(), newAtts,
-			    0);
+
+    newData = new Instances(getInputFormat().relationName(), newAtts, 0);
     newData.setClassIndex(getInputFormat().classIndex());
     setOutputFormat(newData);
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8288 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
-  
+
   /**
    * Main method for testing this class.
-   *
-   * @param argv should contain arguments to the filter: 
-   * use -h for help
+   * 
+   * @param argv should contain arguments to the filter: use -h for help
    */
-  public static void main(String [] argv) {
+  public static void main(String[] argv) {
     runFilter(new MergeTwoValues(), argv);
   }
 }

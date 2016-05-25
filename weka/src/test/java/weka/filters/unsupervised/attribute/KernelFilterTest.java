@@ -34,7 +34,7 @@ import junit.framework.TestSuite;
  * java weka.filters.unsupervised.attribute.KernelFilterTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 9568 $
  */
 public class KernelFilterTest 
   extends AbstractFilterTest {
@@ -60,7 +60,7 @@ public class KernelFilterTest
     result = new FilteredClassifier();
     
     result.setFilter(getFilter());
-    result.setClassifier(new weka.classifiers.trees.M5P());
+    result.setClassifier(new weka.classifiers.trees.J48());
     
     return result;
   }

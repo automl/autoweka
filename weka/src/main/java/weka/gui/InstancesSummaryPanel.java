@@ -33,15 +33,14 @@ import javax.swing.SwingConstants;
 import weka.core.Instances;
 import weka.core.Utils;
 
-/** 
+/**
  * This panel just displays relation name, number of instances, and number of
  * attributes.
- *
+ * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 9348 $
  */
-public class InstancesSummaryPanel
-  extends JPanel {
+public class InstancesSummaryPanel extends JPanel {
 
   /** for serialization */
   private static final long serialVersionUID = -5243579535296681063L;
@@ -51,27 +50,25 @@ public class InstancesSummaryPanel
 
   /** Displays the name of the relation */
   protected JLabel m_RelationNameLab = new JLabel(NO_SOURCE);
-  
+
   /** Displays the number of instances */
   protected JLabel m_NumInstancesLab = new JLabel(NO_SOURCE);
-  
+
   /** Displays the number of attributes */
   protected JLabel m_NumAttributesLab = new JLabel(NO_SOURCE);
-  
+
   /** Displays the sum of instance weights */
   protected JLabel m_sumOfWeightsLab = new JLabel(NO_SOURCE);
-    
+
   /** The instances we're playing with */
   protected Instances m_Instances;
-  
-  /** 
-   * Whether to display 0 or ? for the number of instances
-   * in cases where a dataset has only structure. Depending
-   * on where this panel is used from, the user may have
-   * loaded a dataset with no instances or a Loader that
-   * can read incrementally may be being used (in which case
-   * we don't know how many instances are in the dataset... 
-   * yet).
+
+  /**
+   * Whether to display 0 or ? for the number of instances in cases where a
+   * dataset has only structure. Depending on where this panel is used from, the
+   * user may have loaded a dataset with no instances or a Loader that can read
+   * incrementally may be being used (in which case we don't know how many
+   * instances are in the dataset... yet).
    */
   protected boolean m_showZeroInstancesAsUnknown = false;
 
@@ -87,30 +84,35 @@ public class InstancesSummaryPanel
     GridBagConstraints gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 0;     gbConstraints.gridx = 0;
+    gbConstraints.gridy = 0;
+    gbConstraints.gridx = 0;
     gbLayout.setConstraints(lab, gbConstraints);
     add(lab);
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.WEST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 0;     gbConstraints.gridx = 1;
-    gbConstraints.weightx = 100; //gbConstraints.gridwidth = GridBagConstraints.RELATIVE;
+    gbConstraints.gridy = 0;
+    gbConstraints.gridx = 1;
+    gbConstraints.weightx = 100; // gbConstraints.gridwidth =
+                                 // GridBagConstraints.RELATIVE;
     gbLayout.setConstraints(m_RelationNameLab, gbConstraints);
     add(m_RelationNameLab);
     m_RelationNameLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 10));
-    
+
     lab = new JLabel("Instances:", SwingConstants.RIGHT);
     lab.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 1;     gbConstraints.gridx = 0;
+    gbConstraints.gridy = 1;
+    gbConstraints.gridx = 0;
     gbLayout.setConstraints(lab, gbConstraints);
     add(lab);
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.WEST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 1;     gbConstraints.gridx = 1;
+    gbConstraints.gridy = 1;
+    gbConstraints.gridx = 1;
     gbConstraints.weightx = 100;
     gbLayout.setConstraints(m_NumInstancesLab, gbConstraints);
     add(m_NumInstancesLab);
@@ -121,73 +123,90 @@ public class InstancesSummaryPanel
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 0;     gbConstraints.gridx = 2;
+    gbConstraints.gridy = 0;
+    gbConstraints.gridx = 2;
     gbLayout.setConstraints(lab, gbConstraints);
     add(lab);
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.WEST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 0;     gbConstraints.gridx = 3;
-    //gbConstraints.weightx = 100;
+    gbConstraints.gridy = 0;
+    gbConstraints.gridx = 3;
+    // gbConstraints.weightx = 100;
     gbLayout.setConstraints(m_NumAttributesLab, gbConstraints);
     add(m_NumAttributesLab);
-    m_NumAttributesLab.setBorder(BorderFactory.createEmptyBorder(0, 5,
-								 0, 10));
-    
+    m_NumAttributesLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 10));
+
     lab = new JLabel("Sum of weights:", SwingConstants.RIGHT);
     lab.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 1;     gbConstraints.gridx = 2;
+    gbConstraints.gridy = 1;
+    gbConstraints.gridx = 2;
     gbLayout.setConstraints(lab, gbConstraints);
     add(lab);
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.WEST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 1;     gbConstraints.gridx = 3;
-    //gbConstraints.weightx = 100;
+    gbConstraints.gridy = 1;
+    gbConstraints.gridx = 3;
+    // gbConstraints.weightx = 100;
     gbLayout.setConstraints(m_sumOfWeightsLab, gbConstraints);
     add(m_sumOfWeightsLab);
-    m_sumOfWeightsLab.setBorder(BorderFactory.createEmptyBorder(0, 5,
-                                                                 0, 10));
-    
+    m_sumOfWeightsLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 10));
+
   }
-  
+
+  /**
+   * Set whether to show zero instances as unknown (i.e. "?" rather than zero).
+   * This is useful if header information has been read and the instances
+   * themselves will be loaded incrementally.
+   * 
+   * @param zeroAsUnknown true if zero instances will be displayed as "unknown",
+   *          i.e. "?"
+   */
   public void setShowZeroInstancesAsUnknown(boolean zeroAsUnknown) {
     m_showZeroInstancesAsUnknown = zeroAsUnknown;
   }
-  
+
+  /**
+   * Get whether to show zero instances as unknown (i.e. "?" rather than zero).
+   * This is useful if header information has been read and the instances
+   * themselves will be loaded incrementally.
+   * 
+   * @return true if zero instances will be displayed as "unknown", i.e. "?"
+   */
   public boolean getShowZeroInstancesAsUnknown() {
     return m_showZeroInstancesAsUnknown;
   }
 
   /**
    * Tells the panel to use a new set of instances.
-   *
+   * 
    * @param inst a set of Instances
    */
   public void setInstances(Instances inst) {
     m_Instances = inst;
     m_RelationNameLab.setText(m_Instances.relationName());
     m_RelationNameLab.setToolTipText(m_Instances.relationName());
-    m_NumInstancesLab.setText("" + 
-        ((m_showZeroInstancesAsUnknown && m_Instances.numInstances() == 0) 
-            ? "?" 
-            : "" + m_Instances.numInstances()));
+    m_NumInstancesLab
+        .setText(""
+            + ((m_showZeroInstancesAsUnknown && m_Instances.numInstances() == 0) ? "?"
+                : "" + m_Instances.numInstances()));
     m_NumAttributesLab.setText("" + m_Instances.numAttributes());
-    m_sumOfWeightsLab.setText("" + 
-        ((m_showZeroInstancesAsUnknown && m_Instances.numInstances() == 0) 
-            ? "?" 
-            : "" + Utils.doubleToString(m_Instances.sumOfWeights(), 3)));
+    m_sumOfWeightsLab
+        .setText(""
+            + ((m_showZeroInstancesAsUnknown && m_Instances.numInstances() == 0) ? "?"
+                : "" + Utils.doubleToString(m_Instances.sumOfWeights(), 3)));
   }
 
   /**
    * Tests out the instance summary panel from the command line.
-   *
+   * 
    * @param args optional name of dataset to load
    */
-  public static void main(String [] args) {
+  public static void main(String[] args) {
 
     try {
       final javax.swing.JFrame jf = new javax.swing.JFrame("Instances Panel");
@@ -196,23 +215,24 @@ public class InstancesSummaryPanel
       p.setBorder(BorderFactory.createTitledBorder("Relation"));
       jf.getContentPane().add(p, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
-	public void windowClosing(java.awt.event.WindowEvent e) {
-	  jf.dispose();
-	  System.exit(0);
-	}
+        @Override
+        public void windowClosing(java.awt.event.WindowEvent e) {
+          jf.dispose();
+          System.exit(0);
+        }
       });
       jf.pack();
       jf.setVisible(true);
       if (args.length == 1) {
-	java.io.Reader r = new java.io.BufferedReader(
-			   new java.io.FileReader(args[0]));
-	Instances i = new Instances(r);
-	p.setInstances(i);
+        java.io.Reader r = new java.io.BufferedReader(new java.io.FileReader(
+            args[0]));
+        Instances i = new Instances(r);
+        p.setInstances(i);
       }
     } catch (Exception ex) {
       ex.printStackTrace();
       System.err.println(ex.getMessage());
     }
   }
-  
+
 }

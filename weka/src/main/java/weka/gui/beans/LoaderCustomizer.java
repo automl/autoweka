@@ -32,10 +32,10 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
+import java.util.Arrays;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -57,10 +57,10 @@ import weka.gui.PropertySheetPanel;
  * GUI Customizer for the loader bean
  * 
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 9205 $
+ * @version $Revision: 10221 $
  */
 public class LoaderCustomizer extends JPanel implements BeanCustomizer,
-    CustomizerCloseRequester, EnvironmentHandler {
+  CustomizerCloseRequester, EnvironmentHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 6990446313118930298L;
@@ -70,14 +70,14 @@ public class LoaderCustomizer extends JPanel implements BeanCustomizer,
   }
 
   private final PropertyChangeSupport m_pcSupport = new PropertyChangeSupport(
-      this);
+    this);
 
   private weka.gui.beans.Loader m_dsLoader;
 
   private final PropertySheetPanel m_LoaderEditor = new PropertySheetPanel();
 
   private final JFileChooser m_fileChooser = new JFileChooser(new File(
-      System.getProperty("user.dir")));
+    System.getProperty("user.dir")));
   /*
    * private JDialog m_chooserDialog = new
    * JDialog((JFrame)getTopLevelAncestor(), true);
@@ -96,7 +96,7 @@ public class LoaderCustomizer extends JPanel implements BeanCustomizer,
 
   private JPasswordField m_passwordText;
 
-  private JCheckBox m_relativeFilePath;
+  // private JCheckBox m_relativeFilePath; NOT USED
 
   private EnvironmentField m_fileText;
 
@@ -245,7 +245,7 @@ public class LoaderCustomizer extends JPanel implements BeanCustomizer,
      * m_dbaseURLText.setPreferredSize(new Dimension(width * 2, height));
      */
     m_dbaseURLText.setText(((DatabaseConverter) m_dsLoader.getLoader())
-        .getUrl());
+      .getUrl());
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
@@ -272,7 +272,7 @@ public class LoaderCustomizer extends JPanel implements BeanCustomizer,
      * m_userNameText.setPreferredSize(new Dimension(width * 2, height));
      */
     m_userNameText.setText(((DatabaseConverter) m_dsLoader.getLoader())
-        .getUser());
+      .getUser());
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
@@ -293,7 +293,7 @@ public class LoaderCustomizer extends JPanel implements BeanCustomizer,
 
     m_passwordText = new JPasswordField();
     m_passwordText.setText(((DatabaseLoader) m_dsLoader.getLoader())
-        .getPassword());
+      .getPassword());
     JPanel passwordHolder = new JPanel();
     passwordHolder.setLayout(new BorderLayout());
     passwordHolder.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -363,7 +363,7 @@ public class LoaderCustomizer extends JPanel implements BeanCustomizer,
 
     JLabel propsLab = new JLabel("DB config props", SwingConstants.RIGHT);
     propsLab
-        .setToolTipText("The custom properties that the user can use to override the default ones.");
+      .setToolTipText("The custom properties that the user can use to override the default ones.");
     propsLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
@@ -377,7 +377,7 @@ public class LoaderCustomizer extends JPanel implements BeanCustomizer,
     m_dbProps.setEnvironment(m_env);
     m_dbProps.resetFileFilters();
     m_dbProps.addFileFilter(new ExtensionFileFilter(".props",
-        "DatabaseUtils property file (*.props)"));
+      "DatabaseUtils property file (*.props)"));
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
@@ -411,10 +411,10 @@ public class LoaderCustomizer extends JPanel implements BeanCustomizer,
           File propsFile = new File(propsS);
           if (propsFile.exists()) {
             ((DatabaseLoader) m_dsLoader.getLoader())
-                .setCustomPropsFile(propsFile);
+              .setCustomPropsFile(propsFile);
             ((DatabaseLoader) m_dsLoader.getLoader()).resetOptions();
             m_dbaseURLText.setText(((DatabaseLoader) m_dsLoader.getLoader())
-                .getUrl());
+              .getUrl());
           }
         }
       }
@@ -491,10 +491,10 @@ public class LoaderCustomizer extends JPanel implements BeanCustomizer,
     File propsFile = dbl.getCustomPropsFile();
 
     boolean update = (!url.equals(m_dbaseURLText.getText())
-        || !user.equals(m_userNameText.getText())
-        || !password.equals(m_passwordText.getText())
-        || !query.equalsIgnoreCase(m_queryText.getText()) || !keys
-        .equals(m_keyText.getText()));
+      || !user.equals(m_userNameText.getText())
+      || !Arrays.equals(password.toCharArray(), m_passwordText.getPassword())
+      || !query.equalsIgnoreCase(m_queryText.getText()) || !keys
+      .equals(m_keyText.getText()));
 
     if (propsFile != null && m_dbProps.getText().length() > 0) {
       update = (update || !propsFile.toString().equals(m_dbProps.getText()));
@@ -544,13 +544,15 @@ public class LoaderCustomizer extends JPanel implements BeanCustomizer,
     ExtensionFileFilter firstFilter = null;
     for (int i = 0; i < ext.length; i++) {
       ExtensionFileFilter ff = new ExtensionFileFilter(ext[i],
-          loader.getFileDescription() + " (*" + ext[i] + ")");
-      if (i == 0)
+        loader.getFileDescription() + " (*" + ext[i] + ")");
+      if (i == 0) {
         firstFilter = ff;
+      }
       m_fileChooser.addChoosableFileFilter(ff);
     }
-    if (firstFilter != null)
+    if (firstFilter != null) {
       m_fileChooser.setFileFilter(firstFilter);
+    }
     JPanel about = m_LoaderEditor.getAboutPanel();
     JPanel northPanel = new JPanel();
     northPanel.setLayout(new BorderLayout());
@@ -585,8 +587,7 @@ public class LoaderCustomizer extends JPanel implements BeanCustomizer,
         try {
           // final JFrame jf = new JFrame("Choose file");
           final JDialog jf = new JDialog((JDialog) LoaderCustomizer.this
-              .getTopLevelAncestor(), "Choose file",
-              ModalityType.DOCUMENT_MODAL);
+            .getTopLevelAncestor(), "Choose file", ModalityType.DOCUMENT_MODAL);
           jf.setLayout(new BorderLayout());
           // jf.getContentPane().setLayout(new BorderLayout());
           jf.getContentPane().add(m_fileChooser, BorderLayout.CENTER);
@@ -623,7 +624,7 @@ public class LoaderCustomizer extends JPanel implements BeanCustomizer,
       public void actionPerformed(ActionEvent e) {
         try {
           ((FileSourcedConverter) m_dsLoader.getLoader()).setFile(new File(ef
-              .getText()));
+            .getText()));
           // tell the loader that a new file has been selected so
           // that it can attempt to load the header
           // m_dsLoader.setLoader(m_dsLoader.getLoader());
@@ -680,7 +681,7 @@ public class LoaderCustomizer extends JPanel implements BeanCustomizer,
 
     try {
       m_backup = (weka.core.converters.Loader) GenericObjectEditor
-          .makeCopy(m_dsLoader.getLoader());
+        .makeCopy(m_dsLoader.getLoader());
     } catch (Exception ex) {
       // ignore
     }
@@ -693,8 +694,9 @@ public class LoaderCustomizer extends JPanel implements BeanCustomizer,
     } else {
       if (m_dsLoader.getLoader() instanceof DatabaseConverter) {
         setUpDatabase();
-      } else
+      } else {
         setUpOther();
+      }
     }
   }
 

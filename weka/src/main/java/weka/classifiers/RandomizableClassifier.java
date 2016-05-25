@@ -21,6 +21,7 @@
 
 package weka.classifiers;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -33,7 +34,7 @@ import weka.core.Utils;
  * classifiers.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10141 $
  */
 public abstract class RandomizableClassifier
   extends AbstractClassifier implements Randomizable {
@@ -49,19 +50,17 @@ public abstract class RandomizableClassifier
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(2);
+    Vector<Option> newVector = new Vector<Option>(2);
 
     newVector.addElement(new Option(
           "\tRandom number seed.\n"
           + "\t(default 1)",
           "S", 1, "-S <num>"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
-    }
+    newVector.addAll(Collections.list(super.listOptions()));
+    
     return newVector.elements();
   }
 
@@ -101,17 +100,14 @@ public abstract class RandomizableClassifier
    */
   public String [] getOptions() {
 
-    String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 2];
+    Vector<String> options = new Vector<String>();
 
-    int current = 0;
-    options[current++] = "-S";
-    options[current++] = "" + getSeed();
+    options.add("-S");
+    options.add("" + getSeed());
 
-    System.arraycopy(superOptions, 0, options, current,
-        superOptions.length);
+    Collections.addAll(options, super.getOptions());
 
-    return options;
+    return options.toArray(new String[0]);
   }
 
   /**

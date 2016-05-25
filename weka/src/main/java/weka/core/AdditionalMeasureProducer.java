@@ -28,7 +28,7 @@ import java.util.Enumeration;
  * calculated by evaluation modules. 
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10141 $
  */
 public interface AdditionalMeasureProducer {
 
@@ -38,7 +38,7 @@ public interface AdditionalMeasureProducer {
    * double measureBlah()
    * @return an enumeration of the measure names
    */
-  Enumeration enumerateMeasures();
+  Enumeration<String> enumerateMeasures();
 
   /**
    * Returns the value of the named measure

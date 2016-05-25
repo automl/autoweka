@@ -28,16 +28,19 @@ import java.util.EventObject;
  * Event that encapsulates an Image
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 8034 $
+ * @version $Revision: 10882 $
  */
 public class ImageEvent extends EventObject {
-  
+
   /** For serialization */
   private static final long serialVersionUID = -8126533743311557969L;
-  
+
   /** The image */
   protected BufferedImage m_image;
-  
+
+  /** The name of the image */
+  protected String m_imageName = "";
+
   /**
    * Construct a new ImageEvent
    * 
@@ -45,11 +48,23 @@ public class ImageEvent extends EventObject {
    * @param image the image to encapsulate
    */
   public ImageEvent(Object source, BufferedImage image) {
-    super(source);
-    
-    m_image = image;
+    this(source, image, "");
   }
-  
+
+  /**
+   * Construct an ImageEvent
+   * 
+   * @param source the source of this event
+   * @param image the image to encapsulate
+   * @param imageName the name of the image
+   */
+  public ImageEvent(Object source, BufferedImage image, String imageName) {
+    super(source);
+
+    m_image = image;
+    m_imageName = imageName;
+  }
+
   /**
    * Get the encapsulated image
    * 
@@ -57,5 +72,14 @@ public class ImageEvent extends EventObject {
    */
   public BufferedImage getImage() {
     return m_image;
+  }
+
+  /**
+   * Get the name of the image
+   * 
+   * @return
+   */
+  public String getImageName() {
+    return m_imageName;
   }
 }

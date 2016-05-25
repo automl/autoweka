@@ -27,7 +27,7 @@ import weka.core.Instance;
  * at a time.
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10829 $
  */
 public interface UpdateableClusterer {
 
@@ -40,7 +40,7 @@ public interface UpdateableClusterer {
   public void updateClusterer(Instance newInstance) throws Exception;
 
   /**
-   * Singals the end of the updating.
+   * Signals the end of the updating.
    */
   public void updateFinished();
 }

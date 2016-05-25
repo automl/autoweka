@@ -20,6 +20,7 @@
 
 package weka.core.neighboursearch;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -45,7 +46,7 @@ import weka.core.Utils;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10141 $
  */
 public class LinearNNSearch
   extends NearestNeighbourSearch {
@@ -97,12 +98,14 @@ public class LinearNNSearch
    *
    * @return 		an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
     Vector<Option> result = new Vector<Option>();
     
     result.add(new Option(
 	"\tSkip identical instances (distances equal to zero).\n",
 	"S", 1,"-S"));
+    
+    result.addAll(Collections.list(super.listOptions()));
     
     return result.elements();
   }
@@ -126,6 +129,8 @@ public class LinearNNSearch
     super.setOptions(options);
 
     setSkipIdentical(Utils.getFlag('S', options));
+    
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -134,15 +139,9 @@ public class LinearNNSearch
    * @return 		an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions() {
-    Vector<String>	result;
-    String[]		options;
-    int			i;
+    Vector<String>	result = new Vector<String>();
     
-    result = new Vector<String>();
-    
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
+    Collections.addAll(result, super.getOptions());
     
     if (getSkipIdentical())
       result.add("-S");
@@ -349,6 +348,6 @@ public class LinearNNSearch
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10141 $");
   }
 }

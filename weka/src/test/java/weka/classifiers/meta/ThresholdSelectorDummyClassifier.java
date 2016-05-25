@@ -28,32 +28,36 @@ import weka.core.RevisionUtils;
 
 /**
  * Dummy classifier - used in ThresholdSelectorTest.
- *
+ * 
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpet at waikato dor ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 11263 $
  * @see ThresholdSelectorTest
  */
-public class ThresholdSelectorDummyClassifier 
+public class ThresholdSelectorDummyClassifier
   extends AbstractClassifier {
 
   /** for serialization */
   private static final long serialVersionUID = -2040984810834943903L;
-  
-  private double[] m_Preds;
+
+  private final double[] m_Preds;
   private int m_Pos;
 
   public ThresholdSelectorDummyClassifier(double[] preds) {
+
     m_Preds = new double[preds.length];
-    for (int i = 0; i < preds.length; i++)
+
+    for (int i = 0; i < preds.length; i++) {
       m_Preds[i] = preds[i];
+    }
   }
 
   /**
    * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
+   * 
+   * @return the capabilities of this classifier
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
 
@@ -64,13 +68,16 @@ public class ThresholdSelectorDummyClassifier
 
     // class
     result.enable(Capability.NOMINAL_CLASS);
-    
+
     return result;
   }
 
-  public void buildClassifier(Instances train) { 
+  @Override
+  public void buildClassifier(Instances train) {
+    m_Pos = 0;
   }
 
+  @Override
   public double[] distributionForInstance(Instance test) throws Exception {
     double[] result = new double[test.numClasses()];
     int pred = 0;
@@ -84,14 +91,24 @@ public class ThresholdSelectorDummyClassifier
     m_Pos = (m_Pos + 1) % m_Preds.length;
     return result;
   }
-  
+
+  @Override
+  public String toString() {
+    StringBuffer buff = new StringBuffer();
+    for (double m_Pred : m_Preds) {
+      buff.append(m_Pred + " ");
+    }
+
+    return buff.toString();
+  }
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 11263 $");
   }
 }
-

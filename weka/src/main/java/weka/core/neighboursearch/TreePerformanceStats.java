@@ -20,6 +20,7 @@
 
 package weka.core.neighboursearch;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -30,7 +31,7 @@ import weka.core.RevisionUtils;
  * nearest neighbour search algorithm.
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10141 $
  */
 public class TreePerformanceStats
   extends PerformanceStats {
@@ -235,13 +236,11 @@ public class TreePerformanceStats
    * 
    * @return An enumeration of the measure names.
    */
-  public Enumeration enumerateMeasures() {
+  public Enumeration<String> enumerateMeasures() {
     Vector<String> newVector = new Vector<String>();
     
-    Enumeration en = super.enumerateMeasures();
-    while(en.hasMoreElements())
-      newVector.addElement((String)en.nextElement());
-    
+    newVector.addAll(Collections.list(super.enumerateMeasures()));
+   
     newVector.addElement("measureTotal_nodes_visited");
     newVector.addElement("measureMean_nodes_visited");
     newVector.addElement("measureStdDev_nodes_visited");
@@ -316,6 +315,6 @@ public class TreePerformanceStats
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10141 $");
   }
 }

@@ -21,22 +21,20 @@
 
 package weka.classifiers;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
 import weka.classifiers.rules.ZeroR;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
 
 /**
  * Abstract utility class for handling settings common to meta
  * classifiers that use a single base learner.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 12204 $
  */
 public abstract class SingleClassifierEnhancer extends AbstractClassifier {
 
@@ -55,32 +53,36 @@ public abstract class SingleClassifierEnhancer extends AbstractClassifier {
   }
 
   /**
+   * String describing options for default classifier.
+   */
+  protected String[] defaultClassifierOptions() {
+
+    return new String[0];
+  }
+
+  /**
    * Returns an enumeration describing the available options.
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(3);
-
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
-    }
+    Vector<Option> newVector = new Vector<Option>(3);
 
     newVector.addElement(new Option(
           "\tFull name of base classifier.\n"
-          + "\t(default: " + defaultClassifierString() +")",
+          + "\t(default: " + defaultClassifierString() + 
+          ((defaultClassifierOptions().length > 0) ? 
+           " with options " + Utils.joinOptions(defaultClassifierOptions()) + ")" : ")"),
           "W", 1, "-W"));
+    
+    newVector.addAll(Collections.list(super.listOptions()));
 
     newVector.addElement(new Option(
           "",
           "", 0, "\nOptions specific to classifier "
           + m_Classifier.getClass().getName() + ":"));
-    enu = ((OptionHandler)m_Classifier).listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
-    }
+    newVector.addAll(Collections.list(((OptionHandler)m_Classifier).listOptions()));
 
     return newVector.elements();
   }
@@ -103,19 +105,19 @@ public abstract class SingleClassifierEnhancer extends AbstractClassifier {
     String classifierName = Utils.getOption('W', options);
 
     if (classifierName.length() > 0) {
-
-      // This is just to set the classifier in case the option
-      // parsing fails.
       setClassifier(AbstractClassifier.forName(classifierName, null));
       setClassifier(AbstractClassifier.forName(classifierName,
             Utils.partitionOptions(options)));
     } else {
-
-      // This is just to set the classifier in case the option
-      // parsing fails.
       setClassifier(AbstractClassifier.forName(defaultClassifierString(), null));
-      setClassifier(AbstractClassifier.forName(defaultClassifierString(),
-            Utils.partitionOptions(options)));
+      String[] classifierOptions = Utils.partitionOptions(options);
+      if (classifierOptions.length > 0) {
+        setClassifier(AbstractClassifier.forName(defaultClassifierString(),
+                                                 classifierOptions));
+      } else {
+        setClassifier(AbstractClassifier.forName(defaultClassifierString(),
+                                                 defaultClassifierOptions()));
+      }
     }
   }
 
@@ -126,31 +128,20 @@ public abstract class SingleClassifierEnhancer extends AbstractClassifier {
    */
   public String [] getOptions() {
 
-    String [] classifierOptions = ((OptionHandler)m_Classifier).getOptions();
-    int extraOptionsLength = classifierOptions.length;
-    if (extraOptionsLength > 0) {
-      extraOptionsLength++; // for the double hyphen
-    }
-
-    String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length +
-      extraOptionsLength + 2];
-
-    int current = 0;
-    options[current++] = "-W";
-    options[current++] = getClassifier().getClass().getName();
-
-    System.arraycopy(superOptions, 0, options, current,
-        superOptions.length);
-    current += superOptions.length;
-
+    Vector<String> options = new Vector<String>();
+       
+    options.add("-W");
+    options.add(getClassifier().getClass().getName());
+    
+    Collections.addAll(options, super.getOptions());
+    
+    String[] classifierOptions = ((OptionHandler)m_Classifier).getOptions();
     if (classifierOptions.length > 0) {
-      options[current++] = "--";
-      System.arraycopy(classifierOptions, 0, options, current,
-          classifierOptions.length);
+      options.add("--");
+      Collections.addAll(options, classifierOptions);
     }
 
-    return options;
+    return options.toArray(new String[0]);
   }
 
   /**
@@ -217,5 +208,19 @@ public abstract class SingleClassifierEnhancer extends AbstractClassifier {
     Classifier c = getClassifier();
     return c.getClass().getName() + " "
       + Utils.joinOptions(((OptionHandler)c).getOptions());
+  }
+
+  @Override
+  public void preExecution() throws Exception {
+    if (getClassifier() instanceof CommandlineRunnable) {
+      ((CommandlineRunnable) getClassifier()).preExecution();
+    }
+  }
+
+  @Override
+  public void postExecution() throws Exception {
+    if (getClassifier() instanceof CommandlineRunnable) {
+      ((CommandlineRunnable) getClassifier()).postExecution();
+    }
   }
 }

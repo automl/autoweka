@@ -50,7 +50,7 @@ import weka.filters.UnsupervisedFilter;
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 8034 $
+ * @version $Revision: 12037 $
  */
 public class Center 
   extends PotentialClassIgnorer 
@@ -232,7 +232,7 @@ public class Center
     
     inst.setDataset(instance.dataset());
     
-    push(inst);
+    push(inst, false); // No need to copy instance
   }
   
   /**
@@ -323,7 +323,7 @@ public class Center
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

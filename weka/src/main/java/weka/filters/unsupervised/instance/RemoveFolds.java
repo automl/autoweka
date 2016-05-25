@@ -19,7 +19,6 @@
  *
  */
 
-
 package weka.filters.unsupervised.instance;
 
 import java.util.Enumeration;
@@ -38,43 +37,47 @@ import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
 /**
- <!-- globalinfo-start -->
- * This filter takes a dataset and outputs a specified fold for cross validation. If you want the folds to be stratified use the supervised version.
+ * <!-- globalinfo-start --> This filter takes a dataset and outputs a specified
+ * fold for cross validation. If you want the folds to be stratified use the
+ * supervised version.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -V
+ * <pre>
+ * -V
  *  Specifies if inverse of selection is to be output.
  * </pre>
  * 
- * <pre> -N &lt;number of folds&gt;
+ * <pre>
+ * -N &lt;number of folds&gt;
  *  Specifies number of folds dataset is split into. 
  *  (default 10)
  * </pre>
  * 
- * <pre> -F &lt;fold&gt;
+ * <pre>
+ * -F &lt;fold&gt;
  *  Specifies which fold is selected. (default 1)
  * </pre>
  * 
- * <pre> -S &lt;seed&gt;
+ * <pre>
+ * -S &lt;seed&gt;
  *  Specifies random number seed. (default 0, no randomizing)
  * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 8034 $ 
-*/
-public class RemoveFolds 
-  extends Filter
-  implements UnsupervisedFilter, OptionHandler {
+ * @version $Revision: 12037 $
+ */
+public class RemoveFolds extends Filter implements UnsupervisedFilter,
+  OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = 8220373305559055700L;
-  
+
   /** Indicates if inverse of selection is to be output. */
   private boolean m_Inverse = false;
 
@@ -89,61 +92,67 @@ public class RemoveFolds
 
   /**
    * Gets an enumeration describing the available options..
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  @Override
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(6);
-
-    newVector.addElement(new Option(
-	      "\tSpecifies if inverse of selection is to be output.\n",
-	      "V", 0, "-V"));
+    Vector<Option> newVector = new Vector<Option>(4);
 
     newVector.addElement(new Option(
-              "\tSpecifies number of folds dataset is split into. \n"
-	      + "\t(default 10)\n",
-              "N", 1, "-N <number of folds>"));
+      "\tSpecifies if inverse of selection is to be output.\n", "V", 0, "-V"));
 
     newVector.addElement(new Option(
-	      "\tSpecifies which fold is selected. (default 1)\n",
-	      "F", 1, "-F <fold>"));
+      "\tSpecifies number of folds dataset is split into. \n"
+        + "\t(default 10)\n", "N", 1, "-N <number of folds>"));
+
+    newVector
+      .addElement(new Option(
+        "\tSpecifies which fold is selected. (default 1)\n", "F", 1,
+        "-F <fold>"));
 
     newVector.addElement(new Option(
-	      "\tSpecifies random number seed. (default 0, no randomizing)\n",
-	      "S", 1, "-S <seed>"));
+      "\tSpecifies random number seed. (default 0, no randomizing)\n", "S", 1,
+      "-S <seed>"));
 
     return newVector.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -V
+   * <pre>
+   * -V
    *  Specifies if inverse of selection is to be output.
    * </pre>
    * 
-   * <pre> -N &lt;number of folds&gt;
+   * <pre>
+   * -N &lt;number of folds&gt;
    *  Specifies number of folds dataset is split into. 
    *  (default 10)
    * </pre>
    * 
-   * <pre> -F &lt;fold&gt;
+   * <pre>
+   * -F &lt;fold&gt;
    *  Specifies which fold is selected. (default 1)
    * </pre>
    * 
-   * <pre> -S &lt;seed&gt;
+   * <pre>
+   * -S &lt;seed&gt;
    *  Specifies random number seed. (default 0, no randomizing)
    * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
 
     setInvertSelection(Utils.getFlag('V', options));
@@ -168,48 +177,50 @@ public class RemoveFolds
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
     }
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of the filter.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
+  @Override
+  public String[] getOptions() {
 
-    String [] options = new String [8];
-    int current = 0;
+    Vector<String> options = new Vector<String>();
 
-    options[current++] = "-S"; options[current++] = "" + getSeed();
+    options.add("-S");
+    options.add("" + getSeed());
     if (getInvertSelection()) {
-      options[current++] = "-V";
+      options.add("-V");
     }
-    options[current++] = "-N"; options[current++] = "" + getNumFolds();
-    options[current++] = "-F"; options[current++] = "" + getFold();
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    options.add("-N");
+    options.add("" + getNumFolds());
+    options.add("-F");
+    options.add("" + getFold());
+
+    return options.toArray(new String[0]);
   }
 
   /**
    * Returns a string describing this filter
-   *
-   * @return a description of the filter suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the filter suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "This filter takes a dataset and outputs a specified fold for "
+    return "This filter takes a dataset and outputs a specified fold for "
       + "cross validation. If you want the folds to be stratified use the "
       + "supervised version.";
   }
 
   /**
    * Returns the tip text for this property
-   *
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String invertSelectionTipText() {
 
@@ -218,7 +229,7 @@ public class RemoveFolds
 
   /**
    * Gets if selection is to be inverted.
-   *
+   * 
    * @return true if the selection is to be inverted
    */
   public boolean getInvertSelection() {
@@ -228,19 +239,19 @@ public class RemoveFolds
 
   /**
    * Sets if selection is to be inverted.
-   *
+   * 
    * @param inverse true if inversion is to be performed
    */
   public void setInvertSelection(boolean inverse) {
-    
+
     m_Inverse = inverse;
   }
 
   /**
    * Returns the tip text for this property
-   *
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String numFoldsTipText() {
 
@@ -258,25 +269,26 @@ public class RemoveFolds
   }
 
   /**
-   * Sets the number of folds the dataset is split into. If the number
-   * of folds is zero, it won't split it into folds. 
-   *
+   * Sets the number of folds the dataset is split into. If the number of folds
+   * is zero, it won't split it into folds.
+   * 
    * @param numFolds number of folds dataset is to be split into
    * @throws IllegalArgumentException if number of folds is negative
    */
   public void setNumFolds(int numFolds) {
 
     if (numFolds < 0) {
-      throw new IllegalArgumentException("Number of folds has to be positive or zero.");
+      throw new IllegalArgumentException(
+        "Number of folds has to be positive or zero.");
     }
     m_NumFolds = numFolds;
   }
 
   /**
    * Returns the tip text for this property
-   *
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String foldTipText() {
 
@@ -285,7 +297,7 @@ public class RemoveFolds
 
   /**
    * Gets the fold which is selected.
-   *
+   * 
    * @return the fold which is selected
    */
   public int getFold() {
@@ -295,23 +307,24 @@ public class RemoveFolds
 
   /**
    * Selects a fold.
-   *
+   * 
    * @param fold the fold to be selected.
    * @throws IllegalArgumentException if fold's index is smaller than 1
    */
   public void setFold(int fold) {
 
     if (fold < 1) {
-      throw new IllegalArgumentException("Fold's index has to be greater than 0.");
+      throw new IllegalArgumentException(
+        "Fold's index has to be greater than 0.");
     }
     m_Fold = fold;
   }
 
   /**
    * Returns the tip text for this property
-   *
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String seedTipText() {
 
@@ -320,7 +333,7 @@ public class RemoveFolds
 
   /**
    * Gets the random number seed used for shuffling the dataset.
-   *
+   * 
    * @return the random number seed
    */
   public long getSeed() {
@@ -329,22 +342,23 @@ public class RemoveFolds
   }
 
   /**
-   * Sets the random number seed for shuffling the dataset. If seed
-   * is negative, shuffling won't be performed.
-   *
+   * Sets the random number seed for shuffling the dataset. If seed is negative,
+   * shuffling won't be performed.
+   * 
    * @param seed the random number seed
    */
   public void setSeed(long seed) {
-    
+
     m_Seed = seed;
   }
 
-  /** 
+  /**
    * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
+   * 
+   * @return the capabilities of this object
+   * @see Capabilities
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
     result.disableAll();
@@ -352,29 +366,30 @@ public class RemoveFolds
     // attributes
     result.enableAllAttributes();
     result.enable(Capability.MISSING_VALUES);
-    
+
     // class
     result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
     result.enable(Capability.NO_CLASS);
-    
+
     return result;
   }
 
   /**
    * Sets the format of the input instances.
-   *
+   * 
    * @param instanceInfo an Instances object containing the input instance
-   * structure (any instances contained in the object are ignored - only the
-   * structure is required).
+   *          structure (any instances contained in the object are ignored -
+   *          only the structure is required).
    * @return true because outputFormat can be collected immediately
    * @throws Exception if the input format can't be set successfully
-   */  
+   */
+  @Override
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     if ((m_NumFolds > 0) && (m_NumFolds < m_Fold)) {
-      throw new IllegalArgumentException("Fold has to be smaller or equal to "+
-                                         "number of folds.");
+      throw new IllegalArgumentException("Fold has to be smaller or equal to "
+        + "number of folds.");
     }
     super.setInputFormat(instanceInfo);
     setOutputFormat(instanceInfo);
@@ -382,14 +397,14 @@ public class RemoveFolds
   }
 
   /**
-   * Input an instance for filtering. Filter requires all
-   * training instances be read before producing output.
-   *
+   * Input an instance for filtering. Filter requires all training instances be
+   * read before producing output.
+   * 
    * @param instance the input instance
-   * @return true if the filtered instance may now be
-   * collected with output().
+   * @return true if the filtered instance may now be collected with output().
    * @throws IllegalStateException if no input structure has been defined
    */
+  @Override
   public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
@@ -409,65 +424,65 @@ public class RemoveFolds
   }
 
   /**
-   * Signify that this batch of input to the filter is
-   * finished. Output() may now be called to retrieve the filtered
-   * instances.
-   *
+   * Signify that this batch of input to the filter is finished. Output() may
+   * now be called to retrieve the filtered instances.
+   * 
    * @return true if there are instances pending output
-   * @throws IllegalStateException if no input structure has been defined 
+   * @throws IllegalStateException if no input structure has been defined
    */
+  @Override
   public boolean batchFinished() {
 
     if (getInputFormat() == null) {
       throw new IllegalStateException("No input instance format defined");
     }
-    
+
     Instances instances;
 
     if (!isFirstBatchDone()) {
       if (m_Seed > 0) {
-	// User has provided a random number seed.
-	getInputFormat().randomize(new Random(m_Seed));
+        // User has provided a random number seed.
+        getInputFormat().randomize(new Random(m_Seed));
       }
       // Push instances for output into output queue
 
       // Select out a fold
       if (!m_Inverse) {
-	instances = getInputFormat().testCV(m_NumFolds, m_Fold - 1);
+        instances = getInputFormat().testCV(m_NumFolds, m_Fold - 1);
       } else {
-	instances = getInputFormat().trainCV(m_NumFolds, m_Fold - 1);
+        instances = getInputFormat().trainCV(m_NumFolds, m_Fold - 1);
       }
-    }
-    else {
+    } else {
       instances = getInputFormat();
     }
-    
+
     flushInput();
 
     for (int i = 0; i < instances.numInstances(); i++) {
-      push(instances.instance(i));
+      push(instances.instance(i), false); // No need to copy instance because of bufferInput()
     }
 
     m_NewBatch = true;
     m_FirstBatchDone = true;
     return (numPendingOutput() != 0);
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**
    * Main method for testing this class.
-   *
+   * 
    * @param argv should contain arguments to the filter: use -h for help
    */
-  public static void main(String [] argv) {
+  public static void main(String[] argv) {
     runFilter(new RemoveFolds(), argv);
   }
 }

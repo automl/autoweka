@@ -19,46 +19,44 @@
 
 package weka.core.converters;
 
-import weka.test.WekaTestSuite;
-
 import java.util.Vector;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import weka.test.WekaTestSuite;
 
 /**
- * Test class for converter classes. Run from the command line with: <p/>
+ * Test class for converter classes. Run from the command line with:
+ * <p/>
  * java weka.core.converter.AllTests
- *
+ * 
  * @author FracPete (frapcete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10222 $
  */
-public class AllTests 
-  extends WekaTestSuite {
+public class AllTests extends WekaTestSuite {
 
   /**
    * generates all the tests
    * 
-   * @return		all the tests
+   * @return all the tests
    */
   public static Test suite() {
     TestSuite suite = new TestSuite();
-    
+
     // all tests in converter package
-    Vector packages = new Vector();
+    Vector<String> packages = new Vector<String>();
     packages.add("weka.core.converters");
     suite.addTest(suite(AbstractConverterTest.class.getName(), packages));
-    
+
     return suite;
   }
 
   /**
    * for running the tests from commandline
    * 
-   * @param args	the commandline arguments - ignored
+   * @param args the commandline arguments - ignored
    */
-  public static void main(String []args) {
+  public static void main(String[] args) {
     junit.textui.TestRunner.run(suite());
   }
 }
-
