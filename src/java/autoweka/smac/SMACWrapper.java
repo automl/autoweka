@@ -1,10 +1,15 @@
 package autoweka.smac;
 
+import java.io.File;
 import java.util.Properties;
 import java.util.Queue;
-import java.io.File;
+import java.util.ArrayList;
 import autoweka.Wrapper;
 import autoweka.ClassifierResult;
+import autoweka.Util;
+
+import autoweka.Configuration;
+import autoweka.ConfigurationRanker;
 
 public class SMACWrapper extends Wrapper
 {
@@ -90,4 +95,67 @@ public class SMACWrapper extends Wrapper
         System.out.println("Result for ParamILS: " + resultStr + ", " + res.getTime() + ", 0, " + score + ", " + mExperimentSeed + ", EXTRA " + extraResultsSB.toString());
         System.exit(0);
     }
+
+    @Override
+    protected void _processResults(ClassifierResult res, ArrayList<String> wrapperArgs,String instanceString)
+    {
+        //Get the score
+        double score = res.getScore();
+        if(mRawEval)
+        {
+            score = res.getRawScore();
+        }
+
+        //Did we complete?
+        String resultStr = "SAT";
+        if(!res.getCompleted())
+        {
+            resultStr = "TIMEOUT";
+        }
+
+        StringBuilder extraResultsSB = new StringBuilder();
+        int i = 0;
+        while(mProperties.containsKey("extraRun" + i))
+        {
+            //Run this instance
+            ClassifierResult evalRes = mRunner.evaluateClassifierOnTesting(res.getClassifier(), mProperties.getProperty("extraRun" + i), mResultMetric, mTimeout);
+            extraResultsSB.append("(");
+            extraResultsSB.append(evalRes.getEvaluationTime());
+            extraResultsSB.append(" ");
+            extraResultsSB.append(evalRes.getRawScore());
+            extraResultsSB.append(") ");
+            i++;
+        }
+        //We need to add the norm penalty
+        if(mRawEval)
+        {
+            extraResultsSB.append("[");
+            extraResultsSB.append(res.getNormalizationPenalty());
+            extraResultsSB.append("] ");
+        }
+        if(res.getMemOut()){
+            extraResultsSB.append("MEMOUT ");
+        }
+
+        extraResultsSB.append(res.getPercentEvaluated());
+        
+
+        //Grab the fold id from mInstance @TODO is that where this information actually lies?
+        Properties pInstanceString = Util.parsePropertyString(instanceString);
+        int currentFold = Integer.parseInt(pInstanceString.getProperty("fold", "-1")); 
+        //Save to temporary configuration log
+        Configuration spitMe = new Configuration(wrapperArgs);
+        spitMe.setEvaluationValues(score,currentFold);
+        spitMe.toXML("TemporaryConfigurationLog.xml"); //ba dum tss
+       
+        //Print the result string
+        //@TODO Later, check if this became pointless. If yes, just remove it
+        System.out.println("Result for ParamILS: " + resultStr + ", " + res.getTime() + ", 0, " + score + ", " + mExperimentSeed + ", EXTRA " + extraResultsSB.toString());
+        System.exit(0);
+    }
+
+
+
+
 }
+

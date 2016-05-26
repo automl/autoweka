@@ -171,7 +171,7 @@ public class ClassifierRunner
             }catch(Exception e){
                 throw new RuntimeException("Failed to create ASSearch " + attribSearchClassName + ": " + e.getMessage(), e);
             }
-
+            
             //Build ourselves a selector
             AttributeSelection attribSelect = new AttributeSelection();
             attribSelect.setEvaluator(asEval);

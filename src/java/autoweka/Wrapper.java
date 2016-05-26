@@ -11,6 +11,8 @@ import java.io.FileInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import autoweka.smac.SMACWrapper;
+
 /**
  *  Generic class that gets called from an SMBO method, completes the evaluation, and returns the result back up to the SMBO method.
  *
@@ -25,7 +27,7 @@ import org.slf4j.LoggerFactory;
 public class Wrapper
 {
     protected String mExperimentSeed = null;
-    protected String mInstance = null;
+    protected String mInstance = null; //instance string
     protected float mTimeout = 0;
     protected ClassifierRunner mRunner;
     protected Properties mProperties;
@@ -65,10 +67,12 @@ public class Wrapper
             else if(inWrapper)
             {
                 //Strip out the single quotes if they are there
-                if(arg.startsWith("'") && arg.endsWith("'"))
+                if(arg.startsWith("'") && arg.endsWith("'")){
                     wrapperArgs.add(arg.substring(1, arg.length()-1));
-                else
+                }
+                else{
                     wrapperArgs.add(arg);
+                }
             }
             else
             {
@@ -142,7 +146,17 @@ public class Wrapper
         _postRun();
 
         //Process the result
-        _processResults(res);
+        //System.out.println("Wrapper: About to check if I'm a SMACWrapper");
+        if(this instanceof SMACWrapper){
+            //@TODO: Rather than checking if its smac, have a proper flag the user can set.
+            //If we wanna spit out the N best configs, we need to know what those configs look like.
+            //System.out.println("Wrapper: Yes I am a SMACWrapper");
+            _processResults(res,wrapperArgs,mInstance); 
+        }else{
+            //System.out.println("Wrapper: No I'm not a SMACWrapper");
+            _processResults(res);
+        }
+
     }
 
     /**
@@ -157,8 +171,9 @@ public class Wrapper
         res.setCompleted(false);
         com.sun.management.OperatingSystemMXBean OSBean = (com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory.getOperatingSystemMXBean();
         long startTime = OSBean.getProcessCpuTime();
-        for(String s: runnerArgs)
+        for(String s: runnerArgs){
             log.trace("Adding arg {}", s);
+        }
 
         try {
             res = mRunner.run(mInstance, mResultMetric, mTimeout, mExperimentSeed, runnerArgs);
@@ -209,6 +224,13 @@ public class Wrapper
      * Called once the run has completed (or been terminated), the results should be sent back to the SMBO method here
      */
     protected void _processResults(ClassifierResult res)
+    {
+    }
+
+    /**
+     * Overrloading in case we wanna save N best results
+     */
+    protected void _processResults(ClassifierResult res,  ArrayList<String> wrapperArgs, String instanceString)
     {
     }
 }

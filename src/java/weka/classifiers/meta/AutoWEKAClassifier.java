@@ -75,15 +75,19 @@ import autoweka.Trajectory;
 import autoweka.TrajectoryGroup;
 import autoweka.TrajectoryMerger;
 
+import autoweka.ConfigurationRanker;
+
 import autoweka.tools.GetBestFromTrajectoryGroup;
 
 /**
  * Auto-WEKA interface for WEKA.
- *
- * @author Lars Kotthoff
+ 
+* * @author Lars Kotthoff
  */
 
 public class AutoWEKAClassifier extends AbstractClassifier implements AdditionalMeasureProducer {
+
+    
 
     /** For serialization. */
     static final long serialVersionUID = 2907034203562786373L;
@@ -120,6 +124,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
     /** Default additional arguments for Auto-WEKA. */
     static final String DEFAULT_EXTRA_ARGS = "initialIncumbent=RANDOM:acq-func=EI";
+
+    
 
     /** The chosen classifier. */
     protected Classifier classifier;
@@ -195,6 +201,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     * @throws Exception if the classifier could not be built successfully.
     */
     public void buildClassifier(Instances is) throws Exception {
+
         msExperimentPath = Files.createTempDirectory("autoweka").toString() + File.separator;
         getCapabilities().testWithFail(is);
 
@@ -234,6 +241,11 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         args.add("-experimentpath");
         args.add(msExperimentPath);
 
+        //Make the Ranker
+        System.out.println("main class: About to instantiate ranker");
+        ConfigurationRanker configRanker = ConfigurationRanker.getInstance(10,"TemporaryConfigurationLog.xml","SortedConfigurationLog.xml");
+        System.out.println("main class: Just instantiated ranker");
+        
         //Make the thing
         ExperimentConstructor.buildSingle("autoweka.smac.SMACExperimentConstructor", exp, args);
 
@@ -331,6 +343,12 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         log.info("classifier: {}, arguments: {}, attribute search: {}, attribute search arguments: {}, attribute evaluation: {}, attribute evaluation arguments: {}",
             classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
+
+        //Print log of N best configurations
+
+        System.out.println("main class: about to rank");
+        configRanker.rank();
+        System.out.println("main class: just ranked");
 
         // train model on entire dataset and save
         as = new AttributeSelection();
