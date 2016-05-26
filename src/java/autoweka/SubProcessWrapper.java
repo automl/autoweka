@@ -90,7 +90,7 @@ public class SubProcessWrapper extends Wrapper
 
     /**
      * Small class that just encapsulates the error and time of a sub process run
-     * TODO: Should really be changed to use a ClassifierResult instead
+     * @TODO: Should really be changed to use a ClassifierResult instead
      */
     static public class ErrorAndTime
     {

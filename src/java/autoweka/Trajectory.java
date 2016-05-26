@@ -11,7 +11,9 @@ import javax.xml.bind.annotation.*;
 @XmlAccessorType(XmlAccessType.NONE)
 public class Trajectory
 {
-    /** Representation of a single point along the optimisation run
+    
+    /**
+     * Representation of a single point along the optimisation run
      */
     @XmlRootElement(name="point")
     @XmlAccessorType(XmlAccessType.NONE)
@@ -38,6 +40,9 @@ public class Trajectory
         @XmlElement(name="specificInstanceInfo")
         public ArrayList<SpecificInstanceInfo> specificInstanceInfo = new ArrayList<SpecificInstanceInfo>();
 
+        /**
+         * Class used to store this extra data   
+         */
         @XmlRootElement(name="specific")
         @XmlAccessorType(XmlAccessType.NONE)
         public static class SpecificInstanceInfo
@@ -60,6 +65,7 @@ public class Trajectory
             public double time;
         }
 
+
         //Needed for the XML stuff
         private Point(){}
 
@@ -79,11 +85,14 @@ public class Trajectory
         }
     }
 
+
+
     /**
      * The points in this trajectory
      */
     @XmlElement(name="point")
     private List<Point> mPoints = new ArrayList<Point>();
+    
     /**
      * The seed of this trajectory
      */
