@@ -20,6 +20,8 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.commons.math3.distribution.LaplaceDistribution;
+
 /**
  * Class that is responsible for actually running a WEKA classifier from start to finish using the Auto-WEKA argument format.
  *
@@ -117,11 +119,30 @@ public class ClassifierRunner
      */
     public ClassifierResult evaluateClassifierOnTesting(AbstractClassifier classifier, String instanceStr, String resultMetric, float evaluateClassifierOnInstances)
     {
+        Instances training = mInstanceGenerator.getTrainingFromParams(instanceStr);
+        Instances testing  = mInstanceGenerator.getTestingFromParams(instanceStr);
+
+        ClassifierResult resTrain = new ClassifierResult(resultMetric);
+        resTrain.setClassifier(classifier);
+        _evaluateClassifierOnInstances(classifier, resTrain, training, evaluateClassifierOnInstances);
+
         ClassifierResult res = new ClassifierResult(resultMetric);
         res.setClassifier(classifier);
-        Instances instances = mInstanceGenerator.getTestingFromParams(instanceStr);
+        _evaluateClassifierOnInstances(classifier, res, testing, evaluateClassifierOnInstances);
 
-        _evaluateClassifierOnInstances(classifier, res, instances, evaluateClassifierOnInstances);
+        // differential privacy noise
+        double tolerance = 100.0/Math.sqrt(training.size());
+        double threshold = 400.0/Math.sqrt(training.size());
+
+        LaplaceDistribution ld = new LaplaceDistribution(0, tolerance);
+
+        double trainScore = resTrain.getScore();
+        double testScore = res.getScore();
+        if(Math.abs(trainScore - testScore) > threshold + ld.sample()) {
+            res._setRawScore(res.getScore() + ld.sample());
+        } else {
+            res._setRawScore(resTrain.getScore());
+        }
 
         return res;
     }
@@ -298,6 +319,25 @@ public class ClassifierRunner
         //Get the evaluation
         if(!_evaluateClassifierOnInstances(classifier, res, testing, timeout))
             return res;
+
+        ClassifierResult resTrain = new ClassifierResult(resultMetric);
+        resTrain.setClassifier(classifier);
+        if(!_evaluateClassifierOnInstances(classifier, resTrain, training, timeout))
+            return res;
+
+        // differential privacy noise
+        double tolerance = 100.0/Math.sqrt(training.size());
+        double threshold = 400.0/Math.sqrt(training.size());
+
+        LaplaceDistribution ld = new LaplaceDistribution(0, tolerance);
+
+        double trainScore = resTrain.getScore();
+        double testScore = res.getScore();
+        if(Math.abs(trainScore - testScore) >= threshold + ld.sample()) {
+            res._setRawScore(testScore + ld.sample());
+        } else {
+            res._setRawScore(trainScore);
+        }
 
         // write out configuration info
         log.info("{};{};{};{};{};{};{};{}",
