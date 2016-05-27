@@ -1,6 +1,5 @@
 package autoweka.smac;
 
-import java.io.File;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.ArrayList;
@@ -13,7 +12,6 @@ import autoweka.Util;
 import autoweka.Configuration;
 import autoweka.ConfigurationCollection;
 import autoweka.ConfigurationRanker;
-import autoweka.XmlSerializable;
 
 public class SMACWrapper extends Wrapper
 {

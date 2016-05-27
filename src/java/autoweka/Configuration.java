@@ -1,17 +1,12 @@
 package autoweka;
 
-import java.util.Arrays;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.xml.bind.annotation.*;
-
-import autoweka.WekaArgumentConverter;
-import autoweka.WekaArgumentConverter.Arguments;
-import autoweka.XmlSerializable;
 
 /*
 	Wraps a configuration and the evaluation(s) SMAC performed on it.

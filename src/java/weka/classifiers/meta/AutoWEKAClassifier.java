@@ -75,7 +75,6 @@ import autoweka.Trajectory;
 import autoweka.TrajectoryGroup;
 import autoweka.TrajectoryMerger;
 
-import autoweka.ConfigurationCollection;
 import autoweka.ConfigurationRanker;
 
 import autoweka.tools.GetBestFromTrajectoryGroup;

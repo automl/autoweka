@@ -1,26 +1,11 @@
 
 package autoweka;
 
-import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.HashMap;
 
 import javax.xml.bind.annotation.*;
-
-/*import autoweka.WekaArgumentConverter;
-import autoweka.WekaArgumentConverter.Arguments;
-import autoweka.XmlSerializable;*/
-
-import java.io.File;
-
-import org.w3c.dom.Document;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 /*
 Simply a wrapper for a list of configurations. Might seem silly and redundant, but the purpose of this is to work nicely with the XML Parser that already exists in AutoWeka.
@@ -50,5 +35,5 @@ public class ConfigurationCollection extends XmlSerializable{
 	public static <T extends XmlSerializable> T fromXML(String filename, Class<T> c){ //Original is protected so we're overriding to make it public.
 		return XmlSerializable.fromXML(filename,c);
 	}
-			
+
 }

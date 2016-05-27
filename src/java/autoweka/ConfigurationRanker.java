@@ -1,22 +1,13 @@
 package autoweka;
 
-import java.util.Arrays;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-/*import autoweka.WekaArgumentConverter;
-import autoweka.WekaArgumentConverter.Arguments;
-import autoweka.XmlSerializable;*/
 
 import java.io.File;
 
-import org.w3c.dom.Document;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 
 public class ConfigurationRanker{
@@ -64,7 +55,7 @@ public class ConfigurationRanker{
 			if(configurationsMap.containsKey(ciKey)){
 				configurationsMap.get(ciKey).updateEvaluationCollection( ciScore,ciFoldId );
 			}else{
-				configurationsMap.put(new Integer(ciKey,ciConfig);
+				configurationsMap.put(new Integer(ciKey),ciConfig);
 				configurationsMap.get(ciKey).updateEvaluationCollection( ciScore,ciFoldId );
 			}
 		}
