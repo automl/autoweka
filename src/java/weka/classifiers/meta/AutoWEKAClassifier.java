@@ -75,8 +75,8 @@ import autoweka.Trajectory;
 import autoweka.TrajectoryGroup;
 import autoweka.TrajectoryMerger;
 
-import autoweka.ConfigurationRanker;
 import autoweka.ConfigurationCollection;
+import autoweka.ConfigurationRanker;
 
 import autoweka.tools.GetBestFromTrajectoryGroup;
 
@@ -100,6 +100,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     static final int DEFAULT_TIME_LIMIT = 15;
     /** Default memory limit for classifiers. */
     static final int DEFAULT_MEM_LIMIT = 1024;
+    /** Default */
+    static final int DEFAULT_N_BEST = 1;
 
     /** Internal evaluation method. */
     static enum Resampling {
@@ -146,13 +148,13 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     /** The arguments of the chosen attribute evaluation method. */
     protected String[] attributeEvalArgs;
 
-    /** The path to the internal Auto-WEKA files. */
+    /** The path to the internal Auto-WEKA files.*/
     protected static String msExperimentPath;
     /** The internal name of the experiment. */
     protected static String expName = "Auto-WEKA";
-    /** The path for the sorted best configurations*/
+    /** The path for the sorted best configurations */
     protected static String sortedConfigurationLog="SortedConfigurationLog.xml";
-    /** The path for the log where the unsorted configurations are held, relative to the temporary directory in msExperimentPath*/
+    /** The path for the log where the unsorted configurations are held, relative to the temporary directory in msExperimentPath */
     protected static String temporaryConfigurationLog="TemporaryConfigurationLog.xml";
 
     /** The random seed. */
@@ -161,6 +163,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     protected int timeLimit = DEFAULT_TIME_LIMIT;
     /** The memory limit for running classifiers. */
     protected int memLimit = DEFAULT_MEM_LIMIT;
+    /** The amout of best configurations to return as output*/
+    protected int nBestConfigs = DEFAULT_N_BEST;
     /** The internal evaluation method. */
     protected Resampling resampling = DEFAULT_RESAMPLING;
     /** The arguments to the evaluation method. */
@@ -345,7 +349,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
 
         //Print log of best configurations
-        ConfigurationCollection.rank(msExperimentPath+"/"+expName+"/"+temporaryConfigurationLog,sortedConfigurationLog);
+        ConfigurationRanker.rank(nBestConfigs,msExperimentPath+"/"+expName+"/"+temporaryConfigurationLog,msExperimentPath+"/"+expName+"/"+sortedConfigurationLog);
 
         // train model on entire dataset and save
         as = new AttributeSelection();
@@ -416,6 +420,9 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.addElement(
             new Option("\tThe memory limit for runs in MiB.\n" + "\t(default: " + DEFAULT_MEM_LIMIT + ")",
                 "memLimit", 1, "-memLimit <limit>"));
+        result.addElement(
+            new Option("\tThe amount of best configurations to return.\n" + "\t(default: " + DEFAULT_MEM_LIMIT + ")",
+                "nBestConfigs", 1, "-nBestConfigs <limit>"));
         //result.addElement(
         //    new Option("\tThe type of resampling used.\n" + "\t(default: " + String.valueOf(DEFAULT_RESAMPLING) + ")",
         //        "resampling", 1, "-resampling <resampling>"));
@@ -449,6 +456,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.add("" + timeLimit);
         result.add("-memLimit");
         result.add("" + memLimit);
+        result.add("-nBestConfigs");
+        result.add("" + nBestConfigs);
         //result.add("-resampling");
         //result.add("" + resampling);
         //result.add("-resamplingArgs");
@@ -487,6 +496,13 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             memLimit = Integer.parseInt(tmpStr);
         } else {
             memLimit = DEFAULT_MEM_LIMIT;
+        }
+
+        tmpStr = Utils.getOption("nBestConfigs", options);
+        if (tmpStr.length() != 0) {
+            nBestConfigs = Integer.parseInt(tmpStr);
+        } else {
+            nBestConfigs = DEFAULT_MEM_LIMIT;
         }
 
         //tmpStr = Utils.getOption("resampling", options);
@@ -584,6 +600,31 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     public String memLimitTipText() {
         return "the memory limit for runs (in MiB)";
     }
+
+    /**
+     * Set the memory limit.
+     * @param nbc the amount of best configurations
+     */
+    public void setNBestConfigs(int nbc) {
+        nBestConfigs = nbc;
+    }
+
+    /**
+     * Get the memory limit.
+     * @return The amount of best configurations that will be given as output
+     */
+    public int getNBestConfigs() {
+        return nBestConfigs;
+    }
+
+    /**
+     * Returns the tip text for this property.
+     * @return tip text for this property
+     */
+    public String nBestConfigsTipText() {
+        return "How many of the best configurations should be returned as output";
+    }
+
 
     //public void setResampling(Resampling r) {
     //    resampling = r;

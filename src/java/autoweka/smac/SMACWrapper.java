@@ -12,6 +12,7 @@ import autoweka.Util;
 
 import autoweka.Configuration;
 import autoweka.ConfigurationCollection;
+import autoweka.ConfigurationRanker;
 import autoweka.XmlSerializable;
 
 public class SMACWrapper extends Wrapper
@@ -145,6 +146,7 @@ public class SMACWrapper extends Wrapper
         
         //Maybe put this in a separate support method
         String tempConfigLog = "TemporaryConfigurationLog.xml"; //TODO unhardcode this. Maybe have this as an input thing.
+        String sortedConfigLog = "SortedConfigurationLog.xml";
         ConfigurationCollection configurations;
 
         //Grab the fold id from mInstance (the Instance String)
@@ -160,7 +162,8 @@ public class SMACWrapper extends Wrapper
             configurations = ConfigurationCollection.fromXML(tempConfigLog,ConfigurationCollection.class);
         }catch(Exception e){
             //This will be the first configuration to be logged.
-            ConfigurationCollection.initializeLog(tempConfigLog);
+            ConfigurationRanker.initializeLog(sortedConfigLog);
+            ConfigurationRanker.initializeLog(tempConfigLog);
             configurations = new ConfigurationCollection();
         }
         //Adding the new guy and spiting the updated log out
@@ -173,9 +176,6 @@ public class SMACWrapper extends Wrapper
         System.out.println("Result for ParamILS: " + resultStr + ", " + res.getTime() + ", 0, " + score + ", " + mExperimentSeed + ", EXTRA " + extraResultsSB.toString());
         System.exit(0);
     }
-
-
-
 
 }
 
