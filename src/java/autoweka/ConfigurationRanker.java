@@ -25,7 +25,7 @@ public class ConfigurationRanker{
 		Static part for ranking configurations in the end of the run
 	*/
 	
-	//Loads configurations from temporary log, merges identical while merging the folds in which they were analyzed, sorts them and spits to a xml
+	//Loads configurations from temporary log, merges identical while merging the folds in which they were analyzed, sorts them and spits n of them to a xml
 	public static void rank(int n, String aTemporaryLogPath,String aSortedLogPath){
 		
 		initializeLog(aSortedLogPath);
@@ -46,7 +46,7 @@ public class ConfigurationRanker{
 		spit.toXML(aSortedLogPath);// ba dum tss
 	}
 	
-	//Merging identical configurations while keeping track of the folds in which they were analyzed
+	//Merging equivalent configurations while keeping track of the folds in which each instance was analyzed
 	private static HashMap<Integer,Configuration> mergeConfigurations(String aTemporaryLogPath){
 		
 		HashMap<Integer,Configuration> configurationsMap = new HashMap<Integer,Configuration>();
@@ -64,7 +64,8 @@ public class ConfigurationRanker{
 			if(configurationsMap.containsKey(ciKey)){
 				configurationsMap.get(ciKey).updateEvaluationCollection( ciScore,ciFoldId );
 			}else{
-				configurationsMap.put(new Integer(ciConfig.hashCode()),ciConfig);
+				configurationsMap.put(new Integer(ciKey,ciConfig);
+				configurationsMap.get(ciKey).updateEvaluationCollection( ciScore,ciFoldId );
 			}
 		}
 

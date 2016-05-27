@@ -13,39 +13,44 @@ import autoweka.WekaArgumentConverter;
 import autoweka.WekaArgumentConverter.Arguments;
 import autoweka.XmlSerializable;
 
-
+/*
+	Wraps a configuration and the evaluation(s) SMAC performed on it.
+*/
+/*
+	The idea here is that, when a configuration is evaluated by smac, we record the corresponding score and the fold id for the evaluation. Therefore,
+	an instance of the Configuration class represents one evaluation, and contains a mScore and a mEvalautedFold.  When we are going over all of the 
+	smac evaluations to sort the best configurations, we merge equivalent instances of Configuration into a single one, keeping track of the best score
+	and filling the mFolds list with each fold upon which it was evaluated.
+*/
 @XmlRootElement(name="configuration")
 public class Configuration extends XmlSerializable implements Comparable{ 
 
-	//@TODO make a larger log? I mean, rather than saving a score keeping an array of previous scores.
+	//@TODO make a larger log? I mean, rather than saving the best score, keeping an array of previous scores just for the record. That might be useful info.
 
 	@XmlElement(name="argStrings")
 	private ArrayList<String>  mArgStrings;
 
 	@XmlElement(name="score")
-	private double 	      mScore;
+	private double mScore;
 	
 	@XmlElement(name="evaluatedFold")
-	private int 		  mEvaluatedFold;
+	private int mEvaluatedFold; 
 
 	@XmlElement(name="folds")
 	private ArrayList<String> mFolds;
 
-	public Configuration(){}
+	public Configuration(){} //Apparently the XML Parser requires this. Don't remove it if you don't want the compiler screaming at your face.
 
 	public Configuration(List<String> args){
 		this.mScore=0;
 		this.mArgStrings = new ArrayList<String>(args);
-		//this.mArguments = WekaArgumentConverter.convert(args);
 		this.mFolds=null;
 	}
 	
 	public void updateEvaluationCollection(double aNewScore, int aNewFold){
 		
 		if (mFolds == null) mFolds = new ArrayList<String>();
-		mScore = (aNewScore > mScore) ? (aNewScore):(mScore); //TODO check if java has a standard max function
-		
-		//Integer wNewFold = new Integer(aNewFold); //w for wrapped
+		mScore = (aNewScore > mScore) ? (aNewScore):(mScore); //TODO Is it worth it to import Math and use .max()?
 		String wNewFold = Integer.toString(aNewFold);
 		if(!mFolds.contains(wNewFold)){
 			mFolds.add(wNewFold);
@@ -55,11 +60,7 @@ public class Configuration extends XmlSerializable implements Comparable{
 	/*
 	Utilities
 	*/
-	public Configuration clone(){
-		return new Configuration(mArgStrings);
-	}
-
-	public int compareTo(Object aTarget){
+	public int compareTo(Object aTarget){ //Compares the score.
 		
 		if (!(aTarget instanceof Configuration)) throw new RuntimeException("Comparing Configuration to another type!");
 		Configuration target = (Configuration) aTarget;
@@ -70,17 +71,15 @@ public class Configuration extends XmlSerializable implements Comparable{
 	}
 
 	public String toString(){
-		
 		String strFolds = "[";
 		for(String fold : mFolds){
 			strFolds+=(fold.toString()+"/");
 		}
 		strFolds+="]";
-		
-		return (","+Integer.toString(this.hashCode())+Double.toString(mScore)+strFolds);
+		return (Integer.toString(this.hashCode())+","+Double.toString(mScore)+","+strFolds);
 	}
 	
-	public int hashCode(){
+	public int hashCode(){ //Useful for merging configuration objects that refer to the same set of parameters.
 		return mArgStrings.hashCode();
 	}
 
