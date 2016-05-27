@@ -76,6 +76,7 @@ import autoweka.TrajectoryGroup;
 import autoweka.TrajectoryMerger;
 
 import autoweka.ConfigurationRanker;
+import autoweka.ConfigurationCollection;
 
 import autoweka.tools.GetBestFromTrajectoryGroup;
 
@@ -149,6 +150,10 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     protected static String msExperimentPath;
     /** The internal name of the experiment. */
     protected static String expName = "Auto-WEKA";
+    /** The path for the sorted best configurations*/
+    protected static String sortedConfigurationLog="SortedConfigurationLog.xml";
+    /** The path for the log where the unsorted configurations are held, relative to the temporary directory in msExperimentPath*/
+    protected static String temporaryConfigurationLog="TemporaryConfigurationLog.xml";
 
     /** The random seed. */
     protected int seed = 123;
@@ -240,11 +245,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         List<String> args = new LinkedList<String>();
         args.add("-experimentpath");
         args.add(msExperimentPath);
-
-        //Make the Ranker
-        System.out.println("main class: About to instantiate ranker");
-        ConfigurationRanker configRanker = ConfigurationRanker.getInstance(10,"TemporaryConfigurationLog.xml","SortedConfigurationLog.xml");
-        System.out.println("main class: Just instantiated ranker");
         
         //Make the thing
         ExperimentConstructor.buildSingle("autoweka.smac.SMACExperimentConstructor", exp, args);
@@ -344,11 +344,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         log.info("classifier: {}, arguments: {}, attribute search: {}, attribute search arguments: {}, attribute evaluation: {}, attribute evaluation arguments: {}",
             classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
 
-        //Print log of N best configurations
-
-        System.out.println("main class: about to rank");
-        configRanker.rank();
-        System.out.println("main class: just ranked");
+        //Print log of best configurations
+        ConfigurationCollection.rank(msExperimentPath+"/"+expName+"/"+temporaryConfigurationLog,sortedConfigurationLog);
 
         // train model on entire dataset and save
         as = new AttributeSelection();

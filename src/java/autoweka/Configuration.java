@@ -13,17 +13,14 @@ import autoweka.WekaArgumentConverter;
 import autoweka.WekaArgumentConverter.Arguments;
 import autoweka.XmlSerializable;
 
+
 @XmlRootElement(name="configuration")
-@XmlAccessorType(XmlAccessType.NONE)
 public class Configuration extends XmlSerializable implements Comparable{ 
 
 	//@TODO make a larger log? I mean, rather than saving a score keeping an array of previous scores.
 
 	@XmlElement(name="argStrings")
-	private List<String>  mArgStrings;
-
-	@XmlElement(name="arguments")
-	private Arguments     mArguments;
+	private ArrayList<String>  mArgStrings;
 
 	@XmlElement(name="score")
 	private double 	      mScore;
@@ -32,21 +29,24 @@ public class Configuration extends XmlSerializable implements Comparable{
 	private int 		  mEvaluatedFold;
 
 	@XmlElement(name="folds")
-	private List<Integer> mFolds;
+	private ArrayList<String> mFolds;
+
+	public Configuration(){}
 
 	public Configuration(List<String> args){
 		this.mScore=0;
-		this.mArgStrings = args;
-		this.mArguments = WekaArgumentConverter.convert(args);
+		this.mArgStrings = new ArrayList<String>(args);
+		//this.mArguments = WekaArgumentConverter.convert(args);
 		this.mFolds=null;
 	}
 	
 	public void updateEvaluationCollection(double aNewScore, int aNewFold){
 		
-		if (mFolds == null) mFolds = new ArrayList<Integer>();
+		if (mFolds == null) mFolds = new ArrayList<String>();
 		mScore = (aNewScore > mScore) ? (aNewScore):(mScore); //TODO check if java has a standard max function
 		
-		Integer wNewFold = new Integer(aNewFold); //w for wrapped
+		//Integer wNewFold = new Integer(aNewFold); //w for wrapped
+		String wNewFold = Integer.toString(aNewFold);
 		if(!mFolds.contains(wNewFold)){
 			mFolds.add(wNewFold);
 		}
@@ -72,12 +72,12 @@ public class Configuration extends XmlSerializable implements Comparable{
 	public String toString(){
 		
 		String strFolds = "[";
-		for(Integer fold : mFolds){
+		for(String fold : mFolds){
 			strFolds+=(fold.toString()+"/");
 		}
 		strFolds+="]";
 		
-		return (","+Integer.toString(this.hashCode())+Double.toString(mScore)+strFolds+mArguments.toString());	
+		return (","+Integer.toString(this.hashCode())+Double.toString(mScore)+strFolds);
 	}
 	
 	public int hashCode(){

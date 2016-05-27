@@ -4,12 +4,15 @@ import java.io.File;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Collections;
 import autoweka.Wrapper;
 import autoweka.ClassifierResult;
 import autoweka.Util;
 
 import autoweka.Configuration;
-import autoweka.ConfigurationRanker;
+import autoweka.ConfigurationCollection;
+import autoweka.XmlSerializable;
 
 public class SMACWrapper extends Wrapper
 {
@@ -96,7 +99,9 @@ public class SMACWrapper extends Wrapper
         System.exit(0);
     }
 
-    @Override
+    @Override //I've made this specific version of the method for SMACWrapper in order to not break anything. 
+    //@TODO check if integrating the new part in a conditional on the original method would break stuff.
+    //The main issue is that the original method's signature would have to be changed to the one below.
     protected void _processResults(ClassifierResult res, ArrayList<String> wrapperArgs,String instanceString)
     {
         //Get the score
@@ -136,18 +141,33 @@ public class SMACWrapper extends Wrapper
         if(res.getMemOut()){
             extraResultsSB.append("MEMOUT ");
         }
-
         extraResultsSB.append(res.getPercentEvaluated());
         
+        //Maybe put this in a separate support method
+        String tempConfigLog = "TemporaryConfigurationLog.xml"; //TODO unhardcode this. Maybe have this as an input thing.
+        ConfigurationCollection configurations;
 
-        //Grab the fold id from mInstance @TODO is that where this information actually lies?
+        //Grab the fold id from mInstance (the Instance String)
         Properties pInstanceString = Util.parsePropertyString(instanceString);
         int currentFold = Integer.parseInt(pInstanceString.getProperty("fold", "-1")); 
-        //Save to temporary configuration log
-        Configuration spitMe = new Configuration(wrapperArgs);
-        spitMe.setEvaluationValues(score,currentFold);
-        spitMe.toXML("TemporaryConfigurationLog.xml"); //ba dum tss
-       
+        
+        //Instantiate a new Configuration
+        Configuration currentConfig = new Configuration(wrapperArgs);
+        currentConfig.setEvaluationValues(score,currentFold);
+        
+        //Get the temporary log
+        try{
+            configurations = ConfigurationCollection.fromXML(tempConfigLog,ConfigurationCollection.class);
+            configurations.loadFromXML(tempConfigLog);    
+        }catch(Exception e){
+            //This will be the first configuration to be logged.
+            configurations = new ConfigurationCollection();
+        }
+        //Adding the new guy and spiting the updated log out
+        configurations.add(currentConfig);
+        configurations.toXML(tempConfigLog);
+        //End of possible separate support method
+
         //Print the result string
         //@TODO Later, check if this became pointless. If yes, just remove it
         System.out.println("Result for ParamILS: " + resultStr + ", " + res.getTime() + ", 0, " + score + ", " + mExperimentSeed + ", EXTRA " + extraResultsSB.toString());
