@@ -44,15 +44,18 @@ public class ConfigurationCollection extends XmlSerializable{
 	public void add(Configuration c){ 
 		mConfigurations.add(c);
 	}
-
+	public static <T extends XmlSerializable> T fromXML(String filename, Class<T> c){ //Original is protected so we're overriding to make it public.
+		return XmlSerializable.fromXML(filename,c);
+	}
 	
 	/*
 		Static part for ranking configurations in the end of the run
 	*/
+	
 	//Loads configurations from temporary log, merges identical while merging the folds in which they were analyzed, sorts them and spits to a xml
 	public static void rank(String aTemporaryLogPath,String aSortedLogPath){
 		
-		initializeSortedLog(aSortedLogPath);
+		initializeLog(aSortedLogPath);
 
 		HashMap<Integer,Configuration> configurationsMap = mergeConfigurations(aTemporaryLogPath);
 		
@@ -88,24 +91,16 @@ public class ConfigurationCollection extends XmlSerializable{
 		return configurationsMap;
 	}
 
-	private static void initializeSortedLog(String aOutputPath){
+	//@TODO check if theres something equivalent in util and if there isnt just throw this there
+	public static void initializeLog(String aLogPath){
 
 		try{
-			File outputFile = new File(aOutputPath);
-			outputFile.createNewFile();
+			File logFile = new File(aLogPath);
+			logFile.createNewFile();
 		}catch(Exception e){
-			System.out.println("ConfigurationCollection: Couldn't make output files out of xml paths");
+			System.out.println("ConfigurationCollection: Couldn't make log file out of xml path!");
 		}
 
-		try{ 
-			DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-			System.out.println("ConfigurationRanker: HUE 2");
-			Document outputDoc = db.newDocument();	
-			System.out.println("ConfigurationRanker: HUE 4");
-		}catch (Exception e){
-			System.out.println("Could not initialize output logs");
-		}
-	
 	}
 
 }

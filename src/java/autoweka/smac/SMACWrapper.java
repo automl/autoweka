@@ -158,9 +158,9 @@ public class SMACWrapper extends Wrapper
         //Get the temporary log
         try{
             configurations = ConfigurationCollection.fromXML(tempConfigLog,ConfigurationCollection.class);
-            configurations.loadFromXML(tempConfigLog);    
         }catch(Exception e){
             //This will be the first configuration to be logged.
+            ConfigurationCollection.initializeLog(tempConfigLog);
             configurations = new ConfigurationCollection();
         }
         //Adding the new guy and spiting the updated log out
