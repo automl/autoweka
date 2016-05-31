@@ -18,7 +18,7 @@ import autoweka.smac.SMACWrapper;
  *
  *  The command line arguments for these wrappers consist of two portions, a number of options that specify seeds/properties that relate to the wrapper itself,
  *  followed by the -wrapper argument. Depending on the SMBO method, this is where you specify the datasetString that you want to pass off to the InstanceGenerator,
- *  along with any other options that are required. The remainder of the arguments after the sub classes have processed the -wrapper are going to be passed off to the classifier 
+ *  along with any other options that are required. The remainder of the arguments after the sub classes have processed the -wrapper are going to be passed off to the classifier
  *  runner for evaluation.
  *
  *  There are a number of 'events' that occur during the run of a wrapper - if you need to do something special here you should just be able to override these and inject the correct
@@ -146,14 +146,14 @@ public class Wrapper
         _postRun();
 
         //Process the result
-        //System.out.println("Wrapper: About to check if I'm a SMACWrapper");
+      //  System.out.println("Wrapper: About to check if I'm a SMACWrapper");
         if(this instanceof SMACWrapper){
             //@TODO: Rather than checking if its smac, have a proper flag the user can set.
             //If we wanna spit out the N best configs, we need to know what those configs look like.
-            //System.out.println("Wrapper: Yes I am a SMACWrapper");
-            _processResults(res,wrapperArgs,mInstance); 
+          //  System.out.println("Wrapper: Yes I am a SMACWrapper");
+            _processResults(res,wrapperArgs,mInstance);
         }else{
-            //System.out.println("Wrapper: No I'm not a SMACWrapper");
+          //  System.out.println("Wrapper: No I'm not a SMACWrapper");
             _processResults(res);
         }
 
