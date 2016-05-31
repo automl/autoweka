@@ -146,78 +146,37 @@ public class SMACWrapper extends Wrapper
         }
         extraResultsSB.append(res.getPercentEvaluated());
 
-        //System.out.println("SMACWrapper 1");
-        //Maybe put this in a separate support method
-        String tempConfigLog = "TemporaryConfigurationLog.xml"; //TODO unhardcode this. Maybe have this as an input thing.
-        // File tclFile = new File(tempConfigLog);
-        // if(!tclFile.exists()){
-        //     tclFile.createNewFile();
-        // }
-        String sortedConfigLog = "SortedConfigurationLog.xml";
-        // File sclFile = new File(sortedConfigLog);
-        // if(!sclFile.exists()){
-        //   sclFile.createNewFile();
-        // }
 
+
+        String tempConfigLog = "TemporaryConfigurationLog.xml"; //TODO unhardcode this. Maybe have this as an input thing.
+        String sortedConfigLog = "SortedConfigurationLog.xml";
         ConfigurationCollection configurations;
 
-        //System.out.println("SMACWrapper 2");
-        //Grab the fold id from mInstance (the Instance String)
         Properties pInstanceString = Util.parsePropertyString(instanceString);
         int currentFold = Integer.parseInt(pInstanceString.getProperty("fold", "-1"));
-
-        //System.out.println("SMACWrapper 3");
-        //Instantiate a new Configuration
+        //
+        // //Instantiate a new Configuration
         Configuration currentConfig = new Configuration(wrapperArgs);
         currentConfig.setEvaluationValues(score,currentFold);
 
-        //System.out.println("SMACWrapper 4");
-        //Get the temporary log
+        // //Get the temporary log
         try{
           //  System.out.println("SMACWrapper 4 in try");
-            configurations = ConfigurationCollection.fromXML(tempConfigLog,ConfigurationCollection.class);
+           configurations = ConfigurationCollection.fromXML(tempConfigLog,ConfigurationCollection.class);
         }catch(Exception e){
-          //  System.out.println("SMACWrapper 4 in catch");
+            System.out.println("\n\n\n\nSMACWrapper 4 in catch");
             //This will be the first configuration to be logged.
             ConfigurationRanker.initializeLog(sortedConfigLog);
             ConfigurationRanker.initializeLog(tempConfigLog);
             configurations = new ConfigurationCollection();
         }
-        //System.out.println("SMACWrapper 5");
         //Adding the new guy and spiting the updated log out
         configurations.add(currentConfig);
         configurations.toXML(tempConfigLog);
+        System.out.println("SMACWrapper 5");
 
 
-        // File f = new File("setErr.txt");
-        // PrintStream testlog=null;
-        //
-        // if(!f.exists()){
-        //   try{
-        //     f.createNewFile();
-        //   }catch (Exception e){
-        //     System.out.println("couldnt create new file");
-        //   }
-        // }
-        //
-        // try{
-        //   testlog =  new PrintStream( new FileOutputStream(f,true) );
-        // }catch(Exception e){
-        //   System.out.println("couldnt instantiate printstream");
-        // }
-        //
-        //
-        //
-        //
-        // if (testlog!=null){
-        //   testlog.println(".\n.\n.\n.\n.\n.\n.\n.");
-        //   testlog.println("--------------This smac run:--------------");
-        //   testlog.println("Args:\n"+wrapperArgs.toString());
-        //   testlog.println("Fold id:\n"+currentFold);
-        //   testlog.println("Score:\n"+score);
-        //   testlog.println("--------------End of run--------------");
-        // }
-        //@TODO Later, check if this became pointless. If yes, just remove it
+//        @TODO Later, check if this became pointless. If yes, just remove it
         System.out.println("Result for ParamILS: " + resultStr + ", " + res.getTime() + ", 0, " + score + ", " + mExperimentSeed + ", EXTRA " + extraResultsSB.toString());
         System.exit(0);
     }

@@ -71,12 +71,7 @@ public class ConfigurationRanker{
 			File logFile = new File(aLogPath);
 			if(!logFile.exists()){
 				logFile.createNewFile();
-				ConfigurationCollection empty = new ConfigurationCollection();
-				empty.toXML(aLogPath);
-				System.out.println("HUE "+aLogPath);
 			}
-
-			System.out.println("HUE HUE"+aLogPath);
 		}catch(Exception e){
 			System.out.println("ConfigurationCollection: Couldn't make log file out of xml path!");
 		}

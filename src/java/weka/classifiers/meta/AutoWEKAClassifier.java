@@ -81,13 +81,13 @@ import autoweka.tools.GetBestFromTrajectoryGroup;
 
 /**
  * Auto-WEKA interface for WEKA.
- 
+
 * * @author Lars Kotthoff
  */
 
 public class AutoWEKAClassifier extends AbstractClassifier implements AdditionalMeasureProducer {
 
-    
+
 
     /** For serialization. */
     static final long serialVersionUID = 2907034203562786373L;
@@ -127,7 +127,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     /** Default additional arguments for Auto-WEKA. */
     static final String DEFAULT_EXTRA_ARGS = "initialIncumbent=RANDOM:acq-func=EI";
 
-    
+
 
     /** The chosen classifier. */
     protected Classifier classifier;
@@ -248,9 +248,22 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         List<String> args = new LinkedList<String>();
         args.add("-experimentpath");
         args.add(msExperimentPath);
-        
+
         //Make the thing
         ExperimentConstructor.buildSingle("autoweka.smac.SMACExperimentConstructor", exp, args);
+
+        // try{
+        //   ConfigurationRanker.initializeLog(msExperimentPath+expName+"/"+temporaryConfigurationLog);
+        // }catch(Exception e){
+        //   System.out.println(msExperimentPath+expName+"/"+temporaryConfigurationLog);
+        //   throw e;
+        // }
+        // try{
+        //   ConfigurationRanker.initializeLog(msExperimentPath+expName+"/"+sortedConfigurationLog);
+        // }catch(Exception e){
+        //   System.out.println(msExperimentPath+expName+"/"+sortedConfigurationLog);
+        //   throw e;
+        // }
 
         // run experiment
         Thread worker = new Thread(new Runnable() {
@@ -293,7 +306,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                                         wLog.logMessage(msg);
                                 }
                             }
-                            //log.info(line);
+                            log.info(line);
                         } else if(line.matches(".*WARN.*")) {
                             log.warn(line);
                         } else if(line.matches(".*ERROR.*")) {
@@ -348,7 +361,9 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
 
         //Print log of best configurations
-        ConfigurationRanker.rank(nBestConfigs,msExperimentPath+"/"+expName+"/"+temporaryConfigurationLog,msExperimentPath+"/"+expName+"/"+sortedConfigurationLog);
+        System.out.println("Starts ranking");
+        ConfigurationRanker.rank(nBestConfigs,msExperimentPath+expName+"/"+temporaryConfigurationLog,msExperimentPath+expName+"/"+sortedConfigurationLog);
+        System.out.println("Finishes ranking");
 
         // train model on entire dataset and save
         as = new AttributeSelection();
@@ -501,7 +516,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         if (tmpStr.length() != 0) {
             nBestConfigs = Integer.parseInt(tmpStr);
         } else {
-            nBestConfigs = DEFAULT_MEM_LIMIT;
+            nBestConfigs = DEFAULT_N_BEST;
         }
 
         //tmpStr = Utils.getOption("resampling", options);

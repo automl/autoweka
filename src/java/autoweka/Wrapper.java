@@ -147,13 +147,13 @@ public class Wrapper
 
         //Process the result
       //  System.out.println("Wrapper: About to check if I'm a SMACWrapper");
-        if(this instanceof SMACWrapper){
-            //@TODO: Rather than checking if its smac, have a proper flag the user can set.
-            //If we wanna spit out the N best configs, we need to know what those configs look like.
-          //  System.out.println("Wrapper: Yes I am a SMACWrapper");
-            _processResults(res,wrapperArgs,mInstance);
-        }else{
-          //  System.out.println("Wrapper: No I'm not a SMACWrapper");
+         if(this instanceof SMACWrapper){
+             //@TODO: Rather than checking if its smac, have a proper flag the user can set.
+             //If we wanna spit out the N best configs, we need to know what those configs look like.
+           //  System.out.println("Wrapper: Yes I am a SMACWrapper");
+             _processResults(res,wrapperArgs,mInstance);
+         }else{
+        //  System.out.println("Wrapper: No I'm not a SMACWrapper");
             _processResults(res);
         }
 
@@ -167,6 +167,7 @@ public class Wrapper
     protected ClassifierResult _doRun(List<String> runnerArgs)
     {
         //Run it
+
         ClassifierResult res = new ClassifierResult(mResultMetric);
         res.setCompleted(false);
         com.sun.management.OperatingSystemMXBean OSBean = (com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory.getOperatingSystemMXBean();

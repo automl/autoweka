@@ -32,10 +32,10 @@ public class Configuration extends XmlSerializable implements Comparable{
 	private int mEvaluatedFold;
 
 	@XmlElement(name="folds")
-	private ArrayList<Integer> mFolds; //@TODO change to int
+	private ArrayList<String> mFolds;
 
 	@XmlElement(name="scores")
-	private ArrayList<Double> mScores;
+	private ArrayList<String> mScores;
 
 	@XmlElement(name="avgScore")
 	private double mAverageScore;
@@ -52,8 +52,8 @@ public class Configuration extends XmlSerializable implements Comparable{
 
 	public Configuration(List<String> args){
 		this.mArgStrings = new ArrayList<String>(args);
-		this.mFolds  = new ArrayList<Integer>(); //@TODO Create a confmerger class? Or make those lazy.
-		this.mScores = new ArrayList<Double>();
+		this.mFolds  = new ArrayList<String>(); //@TODO Create a confmerger class? Or make those lazy.
+		this.mScores = new ArrayList<String>();
 		this.mEvaluatedScore=0;
 		this.mEvaluatedFold=0;
 		this.mEvaluatedScore=0;
@@ -73,8 +73,11 @@ public class Configuration extends XmlSerializable implements Comparable{
 			throw new RuntimeException("Evaluated same fold twice!");
 		}
 
-		Integer wNewFold  = new Integer(c.getEvaluatedFold());
-		Double wNewScore = new Double(c.getEvaluatedScore());
+		String wNewFold = Integer.toString(c.getEvaluatedFold()); // new Integer(c.getEvaluatedFold());
+		String wNewScore = Double.toString(c.getEvaluatedScore()); //new Double(c.getEvaluatedScore());
+
+		String wMyFold = Integer.toString(mEvaluatedFold);
+		String wMyScore = Double.toString(mEvaluatedScore);
 
 		mFolds.add(wNewFold);
 		mAmtFolds++;
@@ -94,27 +97,21 @@ public class Configuration extends XmlSerializable implements Comparable{
 			averagedFlag=true;
 		}
 	}
-	private double average(List<Double> l){ //Apparently theres no standard java method for that. @TODO Check if thats true
+	private double average(List<String> l){ //Apparently theres no standard java method for that. @TODO Check if thats true
 		double sum = 0;
-		for (double d: l){
-			sum+=d;
+		for (String d: l){
+			sum+=Double.parseDouble(d);
 		}
 		return (sum/l.size());
 	}
 
 	public int compareTo(Object aTarget){ //Compares only the average score. If necessary, updates this metric before comparing
-		//System.out.println()
+
 		if (!(aTarget instanceof Configuration)) throw new RuntimeException("Comparing Configuration to another type!");
 		Configuration cTarget = (Configuration) aTarget; //c for casted
 
 		this.lazyUpdateAverage();
 		cTarget.lazyUpdateAverage();
-
-		/*if(this.mFolds==null){ //if both are null -1 works too
-			return -1;
-		}else if (cTarget.mFolds==null){
-			return 1;
-		}else{*/
 
 			if (this.mFolds.size() > cTarget.mFolds.size()){
 				return 1;
@@ -131,7 +128,7 @@ public class Configuration extends XmlSerializable implements Comparable{
 
 	public String toString(){
 		String strFolds = "[";
-		for(Integer fold : mFolds){
+		for(String fold : mFolds){
 			strFolds+=(fold.toString()+"/");
 		}
 		strFolds+="]";
@@ -148,8 +145,14 @@ public class Configuration extends XmlSerializable implements Comparable{
 	public void setEvaluationValues(double aScore, int aFoldId){ //These always go together anyway.
 		mEvaluatedScore = aScore;
 		mEvaluatedFold  = aFoldId;
-		mFolds.add(aFoldId);
-		mScores.add(aScore);
+		if (mFolds==null){
+			mFolds = new ArrayList<String>();
+		}
+		if (mScores == null){
+			mScores = new ArrayList<String>();
+		}
+		mFolds.add(Integer.toString(aFoldId));
+		mScores.add(Double.toString(aScore));
 		mAmtFolds++;
 		mAmtScores++;
 	}
@@ -160,7 +163,7 @@ public class Configuration extends XmlSerializable implements Comparable{
 	}
 
 	public double getEvaluatedScore()   {return mEvaluatedScore;}
-	public int getEvaluatedFold() 		{return mEvaluatedFold;}
+	public int getEvaluatedFold()   		{return mEvaluatedFold;}
 	public List<String> getArgStrings() {return mArgStrings;} //In case someone wants to make a "clone", just call clone()
 
 }
