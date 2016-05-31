@@ -18,7 +18,7 @@ import java.net.URLDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** 
+/**
  * Abstract class responsible for generating all the necessary stuff to run an Auto-WEKA Experiment.
  *
  * Although this class is static, you should use it's main method to actually do the experiment construction.
@@ -30,7 +30,7 @@ public abstract class ExperimentConstructor
     final static Logger log = LoggerFactory.getLogger(ExperimentConstructor.class);
 
     /**
-     * The directory with all the param files in it. 
+     * The directory with all the param files in it.
      */
     protected String mParamBaseDir = autoweka.Util.getAutoWekaDistributionPath() + File.separator + "params";
 
@@ -70,7 +70,7 @@ public abstract class ExperimentConstructor
     protected Properties mProperties = null;
 
     /**
-     * The instance generator we're using, all loaded up and ready to go with the appropriate dataset 
+     * The instance generator we're using, all loaded up and ready to go with the appropriate dataset
      */
     protected InstanceGenerator mInstanceGenerator = null;
 
@@ -82,7 +82,7 @@ public abstract class ExperimentConstructor
      */
     public static void main(String[] args)
     {
-        if(args.length < 0) 
+        if(args.length < 0)
         {
             log.error("Arguments missing. Please refer to manual for help.");
         }
@@ -198,10 +198,10 @@ public abstract class ExperimentConstructor
         //Create an instance of the instance generator
         mInstanceGenerator = InstanceGenerator.create(mExperiment.instanceGenerator, mExperiment.datasetString);
 
-        //Load up all the attribute selectors that we can 
+        //Load up all the attribute selectors that we can
         if(mExperiment.attributeSelection)
             loadAttributeSelectors();
-        
+
         mAllowedClassifiers = exp.allowedClassifiers;
 
         //Load up all the classifiers for the dataset we can
@@ -268,7 +268,7 @@ public abstract class ExperimentConstructor
     }
 
     /**
-     * Subclasses must provide this method which is responsible for 
+     * Subclasses must provide this method which is responsible for
      */
     public abstract void prepareExperiment(String path);
 
@@ -299,7 +299,7 @@ public abstract class ExperimentConstructor
     {
         return Collections.emptyList();
     }
-    
+
     private void loadAttributeSelectors()
     {
         Instances instances = mInstanceGenerator.getTraining();
@@ -359,10 +359,10 @@ public abstract class ExperimentConstructor
     {
         return classifierName.replaceAll("\\.", "").toLowerCase();
     }
-    
-    
+
+
     /**
-     * Populates a ParameterConditionalGroup with all the params/conditionals that are needed for 
+     * Populates a ParameterConditionalGroup with all the params/conditionals that are needed for
      * optimization methods that support a DAG structure
      */
     public ParameterConditionalGroup generateAlgorithmParameterConditionalGroupForDAG()
@@ -378,7 +378,7 @@ public abstract class ExperimentConstructor
                 throw new RuntimeException("Couldn't find any attribute search methods");
             }
 
-            List<String> searchParamNames = new ArrayList<String>(); 
+            List<String> searchParamNames = new ArrayList<String>();
             //Insert NONE for now, we need to take it out in a second.... after we build the param
             searchParamNames.add("NONE");
             for(ClassParams clsParams: mAttribSearchClassParams){
@@ -391,9 +391,9 @@ public abstract class ExperimentConstructor
             for(ClassParams clsParams: mAttribSearchClassParams){
                 addClassifierToParameterConditionalGroupForDAG(paramGroup, clsParams, "assearch_", attributesearch);
             }
-            
+
             //Now we have to build the attribute eval param
-            List<String> evalParamNames = new ArrayList<String>(); 
+            List<String> evalParamNames = new ArrayList<String>();
             for(ClassParams clsParams: mAttribEvalClassParams){
                 evalParamNames.add(clsParams.getTargetClass());
             }
@@ -413,25 +413,25 @@ public abstract class ExperimentConstructor
         List<String> metaClassifiers = new ArrayList<String>();
         List<String> ensembleClassifiers = new ArrayList<String>();
         //Go build up the names of base methods
-        for(ClassParams clsParams: mBaseClassParams) { 
+        for(ClassParams clsParams: mBaseClassParams) {
             String className = clsParams.getTargetClass();
-            classifiers.add(className); 
+            classifiers.add(className);
             baseClassifiers.add(className);
         }
         //Go build up the names of meta methods
         if(mIncludeMeta){
-            for(ClassParams clsParams: mMetaClassParams) { 
+            for(ClassParams clsParams: mMetaClassParams) {
                 String className = clsParams.getTargetClass();
-                classifiers.add(className); 
+                classifiers.add(className);
                 metaClassifiers.add(className);
             }
         }
         //Go build up the names of ensemble methods
         if(mIncludeEnsemble)
         {
-            for(ClassParams clsParams: mEnsembleClassParams) { 
+            for(ClassParams clsParams: mEnsembleClassParams) {
                 String className = clsParams.getTargetClass();
-                classifiers.add(className); 
+                classifiers.add(className);
                 ensembleClassifiers.add(className);
             }
         }
@@ -448,18 +448,18 @@ public abstract class ExperimentConstructor
 
         //Next, insert all the default parameters for each method (Just the flat level
         if(mIncludeBase){
-            for(ClassParams clsParams: mBaseClassParams) { 
-                addClassifierToParameterConditionalGroupForDAG(paramGroup, clsParams, "_0_", targetclass); 
+            for(ClassParams clsParams: mBaseClassParams) {
+                addClassifierToParameterConditionalGroupForDAG(paramGroup, clsParams, "_0_", targetclass);
             }
         }
         if(mIncludeMeta){
-            for(ClassParams clsParams: mMetaClassParams) { 
-                addClassifierToParameterConditionalGroupForDAG(paramGroup, clsParams, "_0_", targetclass); 
+            for(ClassParams clsParams: mMetaClassParams) {
+                addClassifierToParameterConditionalGroupForDAG(paramGroup, clsParams, "_0_", targetclass);
             }
         }
         if(mIncludeEnsemble){
             for(ClassParams clsParams: mEnsembleClassParams) {
-                addClassifierToParameterConditionalGroupForDAG(paramGroup, clsParams, "_0_", targetclass); 
+                addClassifierToParameterConditionalGroupForDAG(paramGroup, clsParams, "_0_", targetclass);
             }
         }
 
@@ -473,7 +473,7 @@ public abstract class ExperimentConstructor
             paramGroup.add(_1_W_0_DASHDASH);
             paramGroup.add(new Conditional(_1_W_0_DASHDASH, targetclass, metaClassifiers));
             for(ClassParams clsParams: mBaseClassParams) {
-                addClassifierToParameterConditionalGroupForDAG(paramGroup, clsParams, "_1_W_1_", _1_W); 
+                addClassifierToParameterConditionalGroupForDAG(paramGroup, clsParams, "_1_W_1_", _1_W);
             }
         }
 
@@ -496,9 +496,9 @@ public abstract class ExperimentConstructor
                 Parameter gateParam = new Parameter(prefix + "_0_QUOTE_START_B", baseClassifiers);
                 paramGroup.add(gateParam);
                 for(ClassParams clsParams: mBaseClassParams) {
-                    addClassifierToParameterConditionalGroupForDAG(paramGroup, clsParams, prefix + "_1_", gateParam); 
+                    addClassifierToParameterConditionalGroupForDAG(paramGroup, clsParams, prefix + "_1_", gateParam);
                 }
-                
+
                 //Add this level for everything beneath us
                 levels.clear();
                 for(int l = i; l < mEnsembleMaxNum; l++) {
