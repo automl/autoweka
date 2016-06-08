@@ -131,15 +131,17 @@ public class ClassifierRunner
         _evaluateClassifierOnInstances(classifier, res, testing, evaluateClassifierOnInstances);
 
         // differential privacy noise
-        double tolerance = 100.0/Math.sqrt(training.size());
-        double threshold = 400.0/Math.sqrt(training.size());
+        double tolerance = 100.0/Math.sqrt((training.size() + testing.size())/2);
+        double threshold = 400.0/Math.sqrt((training.size() + testing.size())/2);
 
-        LaplaceDistribution ld = new LaplaceDistribution(0, tolerance);
+        LaplaceDistribution ld1 = new LaplaceDistribution(0, 1 * tolerance);
+        LaplaceDistribution ld2 = new LaplaceDistribution(0, 2 * tolerance);
+        LaplaceDistribution ld4 = new LaplaceDistribution(0, 4 * tolerance);
 
         double trainScore = resTrain.getScore();
         double testScore = res.getScore();
-        if(Math.abs(trainScore - testScore) > threshold + ld.sample()) {
-            res._setRawScore(res.getScore() + ld.sample());
+        if(Math.abs(trainScore - testScore) > threshold + ld2.sample() + ld4.sample()) {
+            res._setRawScore(res.getScore() + ld1.sample());
         } else {
             res._setRawScore(resTrain.getScore());
         }
@@ -326,17 +328,19 @@ public class ClassifierRunner
             return res;
 
         // differential privacy noise
-        double tolerance = 100.0/Math.sqrt(training.size());
-        double threshold = 400.0/Math.sqrt(training.size());
+        double tolerance = 100.0/Math.sqrt((training.size() + testing.size())/2);
+        double threshold = 400.0/Math.sqrt((training.size() + testing.size())/2);
 
-        LaplaceDistribution ld = new LaplaceDistribution(0, tolerance);
+        LaplaceDistribution ld1 = new LaplaceDistribution(0, 1 * tolerance);
+        LaplaceDistribution ld2 = new LaplaceDistribution(0, 2 * tolerance);
+        LaplaceDistribution ld4 = new LaplaceDistribution(0, 4 * tolerance);
 
         double trainScore = resTrain.getScore();
         double testScore = res.getScore();
-        if(Math.abs(trainScore - testScore) >= threshold + ld.sample()) {
-            res._setRawScore(testScore + ld.sample());
+        if(Math.abs(trainScore - testScore) > threshold + ld2.sample() + ld4.sample()) {
+            res._setRawScore(res.getScore() + ld1.sample());
         } else {
-            res._setRawScore(trainScore);
+            res._setRawScore(resTrain.getScore());
         }
 
         // write out configuration info
