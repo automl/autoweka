@@ -110,7 +110,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         TerminationHoldout
     }
     /** Default evaluation method. */
-    static final Resampling DEFAULT_RESAMPLING = Resampling.TerminationHoldout;
+    static final Resampling DEFAULT_RESAMPLING = Resampling.CrossValidation;
 
     /** Default arguments for the different evaluation methods. */
     static final Map<Resampling, String> resamplingArgsMap;
@@ -201,6 +201,14 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         wLog = null;
     }
 
+    public static String getResamplingType(){
+        if(DEFAULT_RESAMPLING==Resampling.CrossValidation || DEFAULT_RESAMPLING==Resampling.MultiLevel || DEFAULT_RESAMPLING==Resampling.RandomSubSampling ){
+          return "examineFolds";
+        }else{
+          return "parseTrajectory";
+        }
+    }
+
     /**
     * Find the best classifier, arguments, and attribute selection for the data.
     *
@@ -252,18 +260,26 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         //Make the thing
         ExperimentConstructor.buildSingle("autoweka.smac.SMACExperimentConstructor", exp, args);
 
-        // try{
-        //   ConfigurationRanker.initializeLog(msExperimentPath+expName+"/"+temporaryConfigurationLog);
-        // }catch(Exception e){
-        //   System.out.println(msExperimentPath+expName+"/"+temporaryConfigurationLog);
-        //   throw e;
-        // }
-        // try{
-        //   ConfigurationRanker.initializeLog(msExperimentPath+expName+"/"+sortedConfigurationLog);
-        // }catch(Exception e){
-        //   System.out.println(msExperimentPath+expName+"/"+sortedConfigurationLog);
-        //   throw e;
-        // }
+
+        if(getResamplingType().equals("examineFolds")){
+
+          System.out.println("@into the if statement\n\n\n\n");
+
+          try{
+            ConfigurationRanker.initializeLog(msExperimentPath+expName+"/"+temporaryConfigurationLog);
+          }catch(Exception e){
+            System.out.println("catch1\n\n\n\n");
+            System.out.println(msExperimentPath+expName+"/"+temporaryConfigurationLog);
+            throw e;
+          }
+          try{
+            ConfigurationRanker.initializeLog(msExperimentPath+expName+"/"+sortedConfigurationLog);
+          }catch(Exception e){
+            System.out.println("catch2\n\n\n");
+            System.out.println(msExperimentPath+expName+"/"+sortedConfigurationLog);
+            throw e;
+          }
+        }
 
         // run experiment
         Thread worker = new Thread(new Runnable() {
@@ -306,7 +322,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                                         wLog.logMessage(msg);
                                 }
                             }
-                            log.info(line);
+                            //log.info(line);
                         } else if(line.matches(".*WARN.*")) {
                             log.warn(line);
                         } else if(line.matches(".*ERROR.*")) {
@@ -337,11 +353,16 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         // print trajectory information
         log.debug("Optimization trajectory:");
+
         for(Trajectory t: group.getTrajectories()) {
+        //    System.out.println("Traj: "+t.toString());
             log.debug("{}", t);
         }
-
+        //TODO check that
         GetBestFromTrajectoryGroup mBest = new GetBestFromTrajectoryGroup(group);
+
+        System.out.println("mBest Error Estimate: "+mBest.errorEstimate+"\n\n\n\n\n");
+
         if(mBest.errorEstimate == autoweka.ClassifierResult.INFINITY) {
             throw new Exception("All runs timed out, unable to find good configuration. Please allow more time and rerun.");
         }
@@ -361,9 +382,12 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
 
         //Print log of best configurations
-        System.out.println("Starts ranking");
-        ConfigurationRanker.rank(nBestConfigs,msExperimentPath+expName+"/"+temporaryConfigurationLog,msExperimentPath+expName+"/"+sortedConfigurationLog);
-        System.out.println("Finishes ranking");
+
+        if(getResamplingType().equals("examineFolds")){
+          System.out.println("Starts ranking");
+          ConfigurationRanker.rank(nBestConfigs,msExperimentPath+expName+"/"+temporaryConfigurationLog,msExperimentPath+expName+"/"+sortedConfigurationLog);
+          System.out.println("Finishes ranking");
+        }
 
         // train model on entire dataset and save
         as = new AttributeSelection();

@@ -133,6 +133,7 @@ public class SMACWrapper extends Wrapper
             extraResultsSB.append(evalRes.getRawScore());
             extraResultsSB.append(") ");
             i++;
+            System.out.println("Extra runs \n\n\n"+extraResultsSB.toString()+"\n\n\n");
         }
         //We need to add the norm penalty
         if(mRawEval)
@@ -147,38 +148,75 @@ public class SMACWrapper extends Wrapper
         extraResultsSB.append(res.getPercentEvaluated());
 
 
+      //
+      //   String tempConfigLog = "TemporaryConfigurationLog.xml"; //TODO unhardcode this. Maybe have this as an input thing.
+      //   String sortedConfigLog = "SortedConfigurationLog.xml";
+      //   ConfigurationCollection configurations;
+      //
+      //   Properties pInstanceString = Util.parsePropertyString(instanceString);
+      //   int currentFold = Integer.parseInt(pInstanceString.getProperty("fold", "-1"));
+      //   //
+      //   // //Instantiate a new Configuration
+      // //  double evalResScore = evalRes.getScore();
+      //   Configuration currentConfig = new Configuration(wrapperArgs);
+      //   currentConfig.setEvaluationValues(score,currentFold);
+      //
+      //   // //Get the temporary log
+      //   try{
+      //     //  System.out.println("SMACWrapper 4 in try");
+      //      configurations = ConfigurationCollection.fromXML(tempConfigLog,ConfigurationCollection.class);
+      //   }catch(Exception e){
+      //       System.out.println("\n\n\n\nSMACWrapper 4 in catch");
+      //       //This will be the first configuration to be logged.
+      //       ConfigurationRanker.initializeLog(sortedConfigLog);
+      //       ConfigurationRanker.initializeLog(tempConfigLog);
+      //       configurations = new ConfigurationCollection();
+      //   }
+      //   //Adding the new guy and spiting the updated log out
+      //   configurations.add(currentConfig);
+      //   configurations.toXML(tempConfigLog);
+      //  System.out.println("SMACWrapper 5");
 
-        String tempConfigLog = "TemporaryConfigurationLog.xml"; //TODO unhardcode this. Maybe have this as an input thing.
-        String sortedConfigLog = "SortedConfigurationLog.xml";
-        ConfigurationCollection configurations;
+        saveConfiguration( res, wrapperArgs, instanceString);
 
-        Properties pInstanceString = Util.parsePropertyString(instanceString);
-        int currentFold = Integer.parseInt(pInstanceString.getProperty("fold", "-1"));
-        //
-        // //Instantiate a new Configuration
-        Configuration currentConfig = new Configuration(wrapperArgs);
-        currentConfig.setEvaluationValues(score,currentFold);
-
-        // //Get the temporary log
-        try{
-          //  System.out.println("SMACWrapper 4 in try");
-           configurations = ConfigurationCollection.fromXML(tempConfigLog,ConfigurationCollection.class);
-        }catch(Exception e){
-            System.out.println("\n\n\n\nSMACWrapper 4 in catch");
-            //This will be the first configuration to be logged.
-            ConfigurationRanker.initializeLog(sortedConfigLog);
-            ConfigurationRanker.initializeLog(tempConfigLog);
-            configurations = new ConfigurationCollection();
-        }
-        //Adding the new guy and spiting the updated log out
-        configurations.add(currentConfig);
-        configurations.toXML(tempConfigLog);
-        System.out.println("SMACWrapper 5");
-
-
-//        @TODO Later, check if this became pointless. If yes, just remove it
+        //TODO Later, check if this became pointless. If yes, just remove it
         System.out.println("Result for ParamILS: " + resultStr + ", " + res.getTime() + ", 0, " + score + ", " + mExperimentSeed + ", EXTRA " + extraResultsSB.toString());
         System.exit(0);
+    }
+
+    protected void saveConfiguration(ClassifierResult res,List<String> args, String instanceStr){
+
+              System.out.println("saveConfiguration started");
+              double score = res.getScore();
+              String tempConfigLog = "TemporaryConfigurationLog.xml"; //TODO unhardcode this. Maybe have this as an input thing.
+              String sortedConfigLog = "SortedConfigurationLog.xml";
+              ConfigurationCollection configurations;
+
+
+              Configuration currentConfig = new Configuration(args);
+
+              Properties pInstanceString = Util.parsePropertyString(instanceStr);
+              int currentFold = Integer.parseInt(pInstanceString.getProperty("fold", "-1"));
+
+              System.out.println("@ACTUAL_SCORE: "+score);
+
+              currentConfig.setEvaluationValues(score,currentFold);
+
+              //currentConfig.setScore(score);
+
+              // //Get the temporary log
+              try{
+                 configurations = ConfigurationCollection.fromXML(tempConfigLog,ConfigurationCollection.class);
+              }catch(Exception e){
+                  System.out.println("saveConfiguration 4 in catch");
+                  //This will be the first configuration to be logged.
+                  ConfigurationRanker.initializeLog(sortedConfigLog);
+                  ConfigurationRanker.initializeLog(tempConfigLog);
+                  configurations = new ConfigurationCollection();
+              }
+              //Adding the new guy and spiting the updated log out
+              configurations.add(currentConfig);
+              configurations.toXML(tempConfigLog);
     }
 
     // protected void _preRun(){

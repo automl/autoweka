@@ -125,6 +125,7 @@ public class Wrapper
 
         //What kind of evaluation type are we using?
         mResultMetric = mProperties.getProperty("resultMetric", null);
+        System.out.println("\n\n@RM IS: "+mResultMetric);
         if(mResultMetric == null){
             log.warn("No evaluation method specified, defaulting to error rate");
             mResultMetric = "errorRate";
@@ -179,6 +180,7 @@ public class Wrapper
         try {
             res = mRunner.run(mInstance, mResultMetric, mTimeout, mExperimentSeed, runnerArgs);
         } catch (Throwable e) {
+            System.out.println("@GOTCHA!!!");
             log.error(e.getMessage(), e);
             long stopTime = OSBean.getProcessCpuTime();
             res.setTrainingTime(1.0f + ((stopTime - startTime) * 1e-9f));
