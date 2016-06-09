@@ -110,7 +110,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         TerminationHoldout
     }
     /** Default evaluation method. */
-    static final Resampling DEFAULT_RESAMPLING = Resampling.CrossValidation;
+    static final Resampling DEFAULT_RESAMPLING = Resampling.MultiLevel;
 
     /** Default arguments for the different evaluation methods. */
     static final Map<Resampling, String> resamplingArgsMap;
@@ -260,24 +260,18 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         //Make the thing
         ExperimentConstructor.buildSingle("autoweka.smac.SMACExperimentConstructor", exp, args);
 
-
-        if(getResamplingType().equals("examineFolds")){
-
-          System.out.println("@into the if statement\n\n\n\n");
-
+        //Initializing logs
+        if(nBestConfigs>1){
           try{
-            ConfigurationRanker.initializeLog(msExperimentPath+expName+"/"+temporaryConfigurationLog);
+            Util.initializeFile(msExperimentPath+expName+"/"+temporaryConfigurationLog);
           }catch(Exception e){
-            System.out.println("catch1\n\n\n\n");
-            System.out.println(msExperimentPath+expName+"/"+temporaryConfigurationLog);
-            throw e;
+            log.debug("Couldn't initialize log at: "+msExperimentPath+expName+"/"+temporaryConfigurationLog);
+
           }
           try{
-            ConfigurationRanker.initializeLog(msExperimentPath+expName+"/"+sortedConfigurationLog);
+            Util.initializeFile(msExperimentPath+expName+"/"+sortedConfigurationLog);
           }catch(Exception e){
-            System.out.println("catch2\n\n\n");
-            System.out.println(msExperimentPath+expName+"/"+sortedConfigurationLog);
-            throw e;
+            log.debug("Couldn't initialize log at: "+msExperimentPath+expName+"/"+sortedConfigurationLog);
           }
         }
 
@@ -355,13 +349,14 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         log.debug("Optimization trajectory:");
 
         for(Trajectory t: group.getTrajectories()) {
-        //    System.out.println("Traj: "+t.toString());
             log.debug("{}", t);
         }
-        //TODO check that
+
         GetBestFromTrajectoryGroup mBest = new GetBestFromTrajectoryGroup(group);
 
-        System.out.println("mBest Error Estimate: "+mBest.errorEstimate+"\n\n\n\n\n");
+        //@TODO
+        //Get best from rank. Check if its argstr matches mBest's. If it doesnt, check if you can find mBest tying with the best from rank. If not, its a problem. If yes, switch
+        //the best in the rank to mbest for consistency. Maybe term holdout etc will need a diff behavior regarding that.
 
         if(mBest.errorEstimate == autoweka.ClassifierResult.INFINITY) {
             throw new Exception("All runs timed out, unable to find good configuration. Please allow more time and rerun.");
@@ -382,12 +377,10 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
 
         //Print log of best configurations
-
-        if(getResamplingType().equals("examineFolds")){
-          System.out.println("Starts ranking");
+        if (nBestConfigs>1){
           ConfigurationRanker.rank(nBestConfigs,msExperimentPath+expName+"/"+temporaryConfigurationLog,msExperimentPath+expName+"/"+sortedConfigurationLog);
-          System.out.println("Finishes ranking");
         }
+
 
         // train model on entire dataset and save
         as = new AttributeSelection();
@@ -640,8 +633,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     }
 
     /**
-     * Set the memory limit.
-     * @param nbc the amount of best configurations
+     * Set the amount of configurations that will be given as output
+     * @param The amount of best configurations desired by the user
      */
     public void setNBestConfigs(int nbc) {
         nBestConfigs = nbc;
@@ -787,7 +780,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             "attribute search arguments: " + (attributeSearchArgs != null ? Arrays.toString(attributeSearchArgs) : "[]") + "\n" +
             "attribute evaluation: " + attributeEvalClass + "\n" +
             "attribute evaluation arguments: " + (attributeEvalArgs != null ? Arrays.toString(attributeEvalArgs) : "[]") + "\n" +
-            "estimated error: " + estimatedError + "\n\n";
+            "estimated error: " + estimatedError + "\n\n"; //@TODO looks like this error is printing the wrong value
         try {
             res += eval.toSummaryString();
             res += "\n";
@@ -795,6 +788,13 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             res += "\n";
             res += eval.toClassDetailsString();
         } catch(Exception e) { }
+
+        if(nBestConfigs>1){
+          res+="===== Other good results =====";
+
+        }
+
+
         return res;
     }
 

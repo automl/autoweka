@@ -125,7 +125,6 @@ public class Wrapper
 
         //What kind of evaluation type are we using?
         mResultMetric = mProperties.getProperty("resultMetric", null);
-        System.out.println("\n\n@RM IS: "+mResultMetric);
         if(mResultMetric == null){
             log.warn("No evaluation method specified, defaulting to error rate");
             mResultMetric = "errorRate";
@@ -147,17 +146,7 @@ public class Wrapper
         _postRun();
 
         //Process the result
-      //  System.out.println("Wrapper: About to check if I'm a SMACWrapper");
-         if(this instanceof SMACWrapper){
-             //@TODO: Rather than checking if its smac, have a proper flag the user can set.
-             //If we wanna spit out the N best configs, we need to know what those configs look like.
-           //  System.out.println("Wrapper: Yes I am a SMACWrapper");
-             _processResults(res,wrapperArgs,mInstance);
-         }else{
-        //  System.out.println("Wrapper: No I'm not a SMACWrapper");
-            _processResults(res);
-        }
-
+        _processResults(res);
     }
 
     /**
@@ -180,7 +169,6 @@ public class Wrapper
         try {
             res = mRunner.run(mInstance, mResultMetric, mTimeout, mExperimentSeed, runnerArgs);
         } catch (Throwable e) {
-            System.out.println("@GOTCHA!!!");
             log.error(e.getMessage(), e);
             long stopTime = OSBean.getProcessCpuTime();
             res.setTrainingTime(1.0f + ((stopTime - startTime) * 1e-9f));
@@ -227,13 +215,6 @@ public class Wrapper
      * Called once the run has completed (or been terminated), the results should be sent back to the SMBO method here
      */
     protected void _processResults(ClassifierResult res)
-    {
-    }
-
-    /**
-     * Overrloading in case we wanna save N best results
-     */
-    protected void _processResults(ClassifierResult res,  ArrayList<String> wrapperArgs, String instanceString)
     {
     }
 }

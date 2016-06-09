@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.*;
 @XmlAccessorType(XmlAccessType.NONE)
 public class Trajectory
 {
-    
+
     /**
      * Representation of a single point along the optimisation run
      */
@@ -41,7 +41,7 @@ public class Trajectory
         public ArrayList<SpecificInstanceInfo> specificInstanceInfo = new ArrayList<SpecificInstanceInfo>();
 
         /**
-         * Class used to store this extra data   
+         * Class used to store this extra data
          */
         @XmlRootElement(name="specific")
         @XmlAccessorType(XmlAccessType.NONE)
@@ -92,7 +92,7 @@ public class Trajectory
      */
     @XmlElement(name="point")
     private List<Point> mPoints = new ArrayList<Point>();
-    
+
     /**
      * The seed of this trajectory
      */
@@ -104,7 +104,7 @@ public class Trajectory
      */
     @XmlElement(name="numEvaluatedEvaluations")
     private int mNumEvaluations = -1;
-    
+
     /**
      * The number of evaluations that hit their memory limit in this run
      */

@@ -5,7 +5,11 @@ import weka.classifiers.AbstractClassifier;
 import weka.classifiers.evaluation.output.prediction.CSV;
 import weka.core.Instances;
 import weka.core.Instance;
+import weka.classifiers.meta.AutoWEKAClassifier;
+import autoweka.instancegenerators.CrossValidation;
+import autoweka.instancegenerators.TerminationHoldout;
 
+import java.io.File;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -16,6 +20,7 @@ import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
 import java.util.Map;
 import java.util.Arrays;
+
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,8 +125,7 @@ public class ClassifierRunner
         ClassifierResult res = new ClassifierResult(resultMetric);
         res.setClassifier(classifier);
         Instances instances = mInstanceGenerator.getTestingFromParams(instanceStr);
-
-        _evaluateClassifierOnInstances(classifier, res, instances, evaluateClassifierOnInstances);
+        _evaluateClassifierOnInstances(classifier, res, instances, evaluateClassifierOnInstances,null,null);
 
         return res;
     }
@@ -131,9 +135,11 @@ public class ClassifierRunner
      */
     private ClassifierResult _run(String instanceStr, String resultMetric, float timeout, String mSeed, List<String> args)
     {
+
         //The first arg contains stuff we need to pass to the instance generator
         Instances training = mInstanceGenerator.getTrainingFromParams(instanceStr);
         Instances testing  = mInstanceGenerator.getTestingFromParams(instanceStr);
+
 
         //Next, start into the arguments that are for the actual classifier
         WekaArgumentConverter.Arguments wekaArgs = WekaArgumentConverter.convert(args);
@@ -171,7 +177,7 @@ public class ClassifierRunner
             }catch(Exception e){
                 throw new RuntimeException("Failed to create ASSearch " + attribSearchClassName + ": " + e.getMessage(), e);
             }
-            
+
             //Build ourselves a selector
             AttributeSelection attribSelect = new AttributeSelection();
             attribSelect.setEvaluator(asEval);
@@ -296,18 +302,18 @@ public class ClassifierRunner
         log.debug("Performing evaluation on {} instances.", testing.numInstances());
 
         //Get the evaluation
-        if(!_evaluateClassifierOnInstances(classifier, res, testing, timeout))
-            return res;
+        if(!_evaluateClassifierOnInstances(classifier, res, testing, timeout,args,instanceStr)){
+          return res;
+        }
 
         // write out configuration info
         log.info("{};{};{};{};{};{};{};{}",
-            targetClassifierName, argsArraySaved,
-             attribEvalClassName, argMap.get("attributeeval"),
-             attribSearchClassName, argMap.get("attributesearch"),
-             instanceStr, res.getRawScore());
+        targetClassifierName, argsArraySaved,
+        attribEvalClassName, argMap.get("attributeeval"),
+        attribSearchClassName, argMap.get("attributesearch"),
+        instanceStr, res.getRawScore());
 
         log.debug("Num Training: {}, num testing: {}", training.numInstances(), testing.numInstances());
-
         return res;
     }
 
@@ -316,8 +322,9 @@ public class ClassifierRunner
      *
      * If true, then the training was good, otherwise it failed
      */
-    private boolean _evaluateClassifierOnInstances(AbstractClassifier classifier, ClassifierResult res, Instances instances, float timeout)
+    private boolean _evaluateClassifierOnInstances(AbstractClassifier classifier, ClassifierResult res, Instances instances, float timeout,List<String> args,String instanceStr)
     {
+
         Evaluation eval = null;
         try
         {
@@ -350,6 +357,7 @@ public class ClassifierRunner
             {
                 //We're good, we can safely report this value
                 res.setScoreFromEval(eval, instances);
+                saveConfiguration(res,args,instanceStr);
             }
         } catch(Exception e) {
             log.debug("Evaluating classifier failed: {}", e.getMessage(), e);
@@ -366,7 +374,41 @@ public class ClassifierRunner
             //throw new RuntimeException("Failed to get confusion matrix", e);
         }
         log.debug(res.getDescription());
+
         return true;
+    }
+
+
+    protected void saveConfiguration(ClassifierResult res,List<String> args, String instanceStr){
+      String tempConfigLog = "TemporaryConfigurationLog.xml"; //TODO unhardcode this somehow?
+      File log = new File(tempConfigLog);
+      if (!log.exists()){ //We're not returning more than 1 config so this is pointless
+        return;
+      }
+
+      String sortedConfigLog = "SortedConfigurationLog.xml";
+      double score = res.getScore();
+      ConfigurationCollection configurations;
+
+      Configuration currentConfig = new Configuration(args);
+
+      Properties pInstanceString = Util.parsePropertyString(instanceStr);
+      int currentFold = Integer.parseInt(pInstanceString.getProperty("fold", "-1"));
+
+      currentConfig.setEvaluationValues(score,currentFold);
+
+      //Get the temporary log
+      try{
+         configurations = ConfigurationCollection.fromXML(tempConfigLog,ConfigurationCollection.class);
+      }catch(Exception e){
+          //This will be the first configuration to be logged.
+          Util.initializeFile(sortedConfigLog);
+          Util.initializeFile(tempConfigLog);
+          configurations = new ConfigurationCollection();
+      }
+      //Adding the new guy and spiting the updated log out
+      configurations.add(currentConfig);
+      configurations.toXML(tempConfigLog);
     }
 
 

@@ -8,18 +8,18 @@ import java.util.Properties;
 import java.util.Random;
 import weka.core.Instances;
 
-/** 
+/**
  * Splits the training data up into CV folds with a given seed.
  *
  * instanceGeneratorArguments: A property string with:
  *   seed - The seed to use for splitting up the training data
  *   numFolds - The number of folds to make
- *  
+ *
  * instance string format:
  *   seed - The seed to use for splitting up the training data
  *   numFolds - The number of folds to make
- *   fold - the index of the current fold   
- */ 
+ *   fold - the index of the current fold
+ */
 public class CrossValidation extends InstanceGenerator
 {
     public CrossValidation(InstanceGenerator generator)
@@ -37,17 +37,22 @@ public class CrossValidation extends InstanceGenerator
         super(training, testing);
     }
 
+    //Changed the method signature to the protected getInstances thing because it seemed to have some useless legacy params. If things break,
+    //just switch back to commented lines.
     public Instances _getTrainingFromParams(String paramString)
     {
-        return getInstances(true, getTraining(), Util.parsePropertyString(paramString));
+        //return getInstances(true, getTraining(), Util.parsePropertyString(paramString));
+        return getInstances(true, Util.parsePropertyString(paramString));
     }
 
     public Instances _getTestingFromParams(String paramString)
     {
-        return getInstances(false, getTraining(), Util.parsePropertyString(paramString));
+        //return getInstances(false, getTraining(), Util.parsePropertyString(paramString));
+        return getInstances(false,  Util.parsePropertyString(paramString));
     }
 
-    protected Instances getInstances(boolean trainingFold, Instances instances, Properties params)
+    //protected Instances getInstances(boolean trainingFold, Instances instances, Properties params)
+    protected Instances getInstances(boolean trainingFold, Properties params)
     {
         int seed = Integer.parseInt(params.getProperty("seed", "0"));
         int numFolds = Integer.parseInt(params.getProperty("numFolds", "-1"));
@@ -60,7 +65,7 @@ public class CrossValidation extends InstanceGenerator
             throw new RuntimeException("fold must be set to something in [0," + (numFolds - 1) + "]");
 
         Random rand = new Random(seed);
-        Instances randData = getTraining();
+        Instances randData = getTraining(); //@TODO Looks fishy. Take a peek later.
         randData.randomize(rand);
 
         if(trainingFold)

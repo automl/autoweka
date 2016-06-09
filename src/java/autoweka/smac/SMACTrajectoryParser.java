@@ -66,12 +66,9 @@ public class SMACTrajectoryParser extends TrajectoryParser
                     score = Float.parseFloat(matcher.group(2));
 
                     log.debug("Time: {}, score: {}", time, score);
-                    if(score < currentBest)
-                    {
-                        currentBest = score;
-                        argString = filterArgString(params, matcher.group(3));
-                        traj.addPoint(new Trajectory.Point(time, score, argString));
-                    }
+                    argString = filterArgString(params, matcher.group(3));
+                    traj.addPoint(new Trajectory.Point(time, score, argString));
+                    
                 }
                 else
                 {
@@ -132,7 +129,7 @@ public class SMACTrajectoryParser extends TrajectoryParser
                         log.error(e.getMessage(), e);
                     }
                 }
-                traj.setEvaluationCounts(numEvals, numMemOut, numTimeOut); 
+                traj.setEvaluationCounts(numEvals, numMemOut, numTimeOut);
             }
             else
             {
@@ -170,4 +167,3 @@ public class SMACTrajectoryParser extends TrajectoryParser
         return autoweka.Util.argMapToString(params.filterParams(argMap));
     }
 }
-

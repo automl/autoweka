@@ -123,7 +123,7 @@ public class ClassifierResult
 
     public ClassifierResult(String typeName)
     {
-        this(getMetricFromString(typeName));
+        this(getMetricFromString(typeName)); 
     }
 
     public ClassifierResult(Metric type)
@@ -146,6 +146,7 @@ public class ClassifierResult
 
     public void setScoreFromEval(Evaluation eval, Instances testingData) {
         mRawScore = mMetric.getScore(eval, testingData);
+
         if(Double.isInfinite(mRawScore)) {
             mRawScore = INFINITY;
         }
@@ -257,4 +258,3 @@ public class ClassifierResult
         return mMemOut;
     }
 }
-

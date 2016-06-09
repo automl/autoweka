@@ -13,7 +13,7 @@ Also contains the static methods for organizing,sorting and spitting them out to
 */
 @XmlRootElement(name="configurationCollection")
 public class ConfigurationCollection extends XmlSerializable{
-	
+
 	@XmlElement(name="configurations")
 	private ArrayList<Configuration> mConfigurations;
 
@@ -26,7 +26,7 @@ public class ConfigurationCollection extends XmlSerializable{
 	public ConfigurationCollection(ArrayList<Configuration> aConfigurations){
 		mConfigurations = aConfigurations;
 	}
-	public void add(Configuration c){ 
+	public void add(Configuration c){
 		mConfigurations.add(c);
 	}
 	public ArrayList<Configuration> asArrayList(){

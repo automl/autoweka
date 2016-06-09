@@ -19,14 +19,15 @@ import javax.xml.bind.annotation.*;
 	smac evaluations to sort the best configurations, we merge equivalent instances of Configuration into a single one, keeping track of the best score
 	and filling the mFolds list with each fold upon which it was evaluated.
 */
+
 @XmlRootElement(name="configuration")
 public class Configuration extends XmlSerializable implements Comparable{
 
-	//@TODO make a larger log? I mean, rather than saving the best score, keeping an array of previous scores just for the record. That might be useful info.
+	//@TODO Use Doubles and Integers for scores and folds
 
 	@XmlElement(name="argStrings")
 	private String mArgStrings;
-////
+
 	@XmlElement(name="evaluatedScore")
 	private double mEvaluatedScore;
 
@@ -58,7 +59,7 @@ public class Configuration extends XmlSerializable implements Comparable{
 		for (String s : args){
 			this.mArgStrings+=(s+" ");
 		}
-		this.mFolds  = new ArrayList<String>(); //@TODO Create a confmerger class? Or make those lazy.
+		this.mFolds  = new ArrayList<String>();
 		this.mScores = new ArrayList<String>();
 		this.mEvaluatedScore=0;
 		this.mEvaluatedFold=0;
@@ -70,17 +71,14 @@ public class Configuration extends XmlSerializable implements Comparable{
 		this.averagedFlag=false;
 	}
 
-
+	//Merges two instances of the same configuration (i.e. same argument string), while keeping track of scores and folds id's
 	public void mergeWith(Configuration c){
-//		System.out.println("mergeWith");
+
 		if(c.hashCode()!=this.hashCode()){
 			throw new RuntimeException("Not equivalent configurations!");
 		}
 
-		if (this.mEvaluatedFold==c.mEvaluatedFold){
-			throw new RuntimeException("Evaluated same fold twice!");
-		}
-
+		//@TODO optimize those to Integer and Double later
 		String wNewFold = Integer.toString(c.getEvaluatedFold()); // new Integer(c.getEvaluatedFold());
 		String wMyFold = Integer.toString(mEvaluatedFold);
 		mFolds.add(wNewFold);
@@ -119,7 +117,7 @@ public class Configuration extends XmlSerializable implements Comparable{
 	}
 
 	public int compareTo(Object aTarget){ //Compares only the average score. If necessary, updates this metric before comparing
-	//	System.out.println("compareTo");
+
 		if (!(aTarget instanceof Configuration)) throw new RuntimeException("Comparing Configuration to another type!");
 
 		Configuration cTarget = (Configuration) aTarget; //c for casted
@@ -132,12 +130,11 @@ public class Configuration extends XmlSerializable implements Comparable{
 			}else if (this.mFolds.size() < cTarget.mFolds.size()){
 				return -1;
 			}else{
-				if      (this.mAverageScore < cTarget.mAverageScore ) return 1;//Smaller score is better. @TODO if score metric changes, change that.
+				if      (this.mAverageScore < cTarget.mAverageScore ) return 1; //Assumes smaller score is better. If that isn't the case, change that. @TODO make this receive Metric as input and do this change automatically
 				else if (this.mAverageScore > cTarget.mAverageScore)  return -1;
 				else return 0;
 			}
 
-		//}
 	}
 
 	public String toString(){
@@ -195,8 +192,9 @@ public class Configuration extends XmlSerializable implements Comparable{
 		return mAverageScore;
 	}
 
+	//@TODO I think im not longer using those, check this later.
 	public double getEvaluatedScore()   { return mEvaluatedScore;}
 	public int getEvaluatedFold()   		{ return mEvaluatedFold;}
-	public String getArgStrings() 			{ return mArgStrings;} //In case someone wants to make a "clone", just call clone()
+	public String getArgStrings() 			{ return mArgStrings;}
 
 }
