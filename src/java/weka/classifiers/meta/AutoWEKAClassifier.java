@@ -110,7 +110,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         TerminationHoldout
     }
     /** Default evaluation method. */
-    static final Resampling DEFAULT_RESAMPLING = Resampling.MultiLevel;
+    static final Resampling DEFAULT_RESAMPLING = Resampling.TerminationHoldout;
 
     /** Default arguments for the different evaluation methods. */
     static final Map<Resampling, String> resamplingArgsMap;

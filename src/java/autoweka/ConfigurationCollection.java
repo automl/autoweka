@@ -29,6 +29,15 @@ public class ConfigurationCollection extends XmlSerializable{
 	public void add(Configuration c){
 		mConfigurations.add(c);
 	}
+
+	public Configuration get(int i){
+		return mConfigurations.get(i);
+	}
+
+	public int size (){
+		return mConfigurations.size();
+	}
+
 	public ArrayList<Configuration> asArrayList(){
 		return mConfigurations;
 	}
