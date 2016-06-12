@@ -353,7 +353,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         }
 
         GetBestFromTrajectoryGroup mBest = new GetBestFromTrajectoryGroup(group);
-
+        
         //@TODO
         //Get best from rank. Check if its argstr matches mBest's. If it doesnt, check if you can find mBest tying with the best from rank. If not, its a problem. If yes, switch
         //the best in the rank to mbest for consistency. Maybe term holdout etc will need a diff behavior regarding that.
@@ -378,7 +378,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         //Print log of best configurations
         if (nBestConfigs>1){
-          ConfigurationRanker.rank(nBestConfigs,msExperimentPath+expName+"/"+temporaryConfigurationLog,msExperimentPath+expName+"/"+sortedConfigurationLog);
+          ConfigurationRanker.rank(nBestConfigs,msExperimentPath+expName+"/"+temporaryConfigurationLog,msExperimentPath+expName+"/"+sortedConfigurationLog,mBest.rawArgs);
         }
 
 

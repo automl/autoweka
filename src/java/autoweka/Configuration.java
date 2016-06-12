@@ -24,6 +24,8 @@ import javax.xml.bind.annotation.*;
 public class Configuration extends XmlSerializable implements Comparable{
 
 	//@TODO Use Doubles and Integers for scores and folds
+	//@TODO make this have a Metric attribute and use it to be more generic
+	//@TODO perhaps define > and < in terms of the score
 
 	@XmlElement(name="argStrings")
 	private String mArgStrings;
@@ -51,24 +53,30 @@ public class Configuration extends XmlSerializable implements Comparable{
 
 	private boolean averagedFlag;
 
-	public Configuration(){} //Apparently the XML Parser requires this. Don't remove it if you don't want the compiler screaming at your face.
-
-	public Configuration(List<String> args){
-
-		this.mArgStrings = "";
-		for (String s : args){
-			this.mArgStrings+=(s+" ");
-		}
+	public Configuration(){
 		this.mFolds  = new ArrayList<String>();
 		this.mScores = new ArrayList<String>();
 		this.mEvaluatedScore=0;
 		this.mEvaluatedFold=0;
-		this.mEvaluatedScore=0;
+		this.mAverageScore=0;
 		this.mAmtFolds=0;
 		this.mAmtScores=0;
 		this.mFolds=null;
 		this.mScores=null;
 		this.averagedFlag=false;
+	}
+
+	public Configuration(List<String> argsList){
+		this();
+		this.mArgStrings = "";
+		for (String s : argsList){
+			this.mArgStrings+=(s+" ");
+		}
+	}
+
+	public Configuration(String args){
+		this();
+		this.mArgStrings=args;
 	}
 
 	//Merges two instances of the same configuration (i.e. same argument string), while keeping track of scores and folds id's
@@ -196,6 +204,6 @@ public class Configuration extends XmlSerializable implements Comparable{
 	public double getEvaluatedScore() { return mEvaluatedScore;}
 	public int getEvaluatedFold()   	{ return mEvaluatedFold;}
 	public String getArgStrings() 		{ return mArgStrings;}
-	public int[] getFolds() 				  { return mFolds;}
+	public List<String> getFolds() 	  { return mFolds;}
 
 }

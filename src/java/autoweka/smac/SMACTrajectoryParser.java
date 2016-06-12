@@ -25,6 +25,8 @@ public class SMACTrajectoryParser extends TrajectoryParser
     //private Pattern mTrajPattern = Pattern.compile("([\\-\\.\\d]+),\\s*([\\-\\.\\d]+),\\s*[\\-\\.\\d]+,\\s*[\\-\\.\\d]+,\\s*[\\-\\.\\d]+,\\s*(.*)");
     private Pattern mRunsAndResultFileNamePattern = Pattern.compile("runs_and_results-it(\\d+).csv");
 
+    public SMACTrajectoryParser(){ super(); };//To help with the unit tests, don't remove.
+
     public Trajectory parseTrajectory(Experiment experiment, File folder, String seed)
     {
         //Load up the conditional params
@@ -68,7 +70,6 @@ public class SMACTrajectoryParser extends TrajectoryParser
                     log.debug("Time: {}, score: {}", time, score);
                     argString = filterArgString(params, matcher.group(3));
                     traj.addPoint(new Trajectory.Point(time, score, argString));
-                    
                 }
                 else
                 {
