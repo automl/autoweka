@@ -75,7 +75,9 @@ import autoweka.Trajectory;
 import autoweka.TrajectoryGroup;
 import autoweka.TrajectoryMerger;
 
+import autoweka.Configuration;
 import autoweka.ConfigurationRanker;
+import autoweka.ConfigurationCollection;
 
 import autoweka.tools.GetBestFromTrajectoryGroup;
 
@@ -353,7 +355,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         }
 
         GetBestFromTrajectoryGroup mBest = new GetBestFromTrajectoryGroup(group);
-        
+
         //@TODO
         //Get best from rank. Check if its argstr matches mBest's. If it doesnt, check if you can find mBest tying with the best from rank. If not, its a problem. If yes, switch
         //the best in the rank to mbest for consistency. Maybe term holdout etc will need a diff behavior regarding that.
@@ -788,12 +790,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             res += "\n";
             res += eval.toClassDetailsString();
         } catch(Exception e) { }
-
-        if(nBestConfigs>1){
-          res+="===== Other good results =====";
-
-        }
-
 
         return res;
     }

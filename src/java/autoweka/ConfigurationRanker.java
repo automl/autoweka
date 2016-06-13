@@ -45,10 +45,8 @@ public class ConfigurationRanker{
 					throw new RuntimeException("SMAC's final incumbent was found in the configuration log but it wasn't the best (or tied with the best)");
 				}
 				Configuration temp = choppedList.get(0);
-				choppedList.remove(0);
-				choppedList.add(0,c);
-				choppedList.remove(i);
-				choppedList.add(i,temp);
+				choppedList.set(0,c);
+				choppedList.set(i,temp);
 				return;
 			}
 		}
