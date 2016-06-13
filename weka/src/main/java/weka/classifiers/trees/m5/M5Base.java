@@ -21,6 +21,8 @@
 
 package weka.classifiers.trees.m5;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -29,7 +31,6 @@ import weka.classifiers.AbstractClassifier;
 import weka.classifiers.functions.LinearRegression;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -44,37 +45,39 @@ import weka.filters.unsupervised.attribute.RemoveUseless;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 /**
- * M5Base. Implements base routines
- * for generating M5 Model trees and rules. <p>
+ * M5Base. Implements base routines for generating M5 Model trees and rules.
+ * <p>
  * 
  * The original algorithm M5 was invented by Quinlan: <br/>
  * 
- * Quinlan J. R. (1992). Learning with continuous classes. Proceedings of
- * the Australian Joint Conference on Artificial Intelligence. 343--348.
- * World Scientific, Singapore. <p/>
+ * Quinlan J. R. (1992). Learning with continuous classes. Proceedings of the
+ * Australian Joint Conference on Artificial Intelligence. 343--348. World
+ * Scientific, Singapore.
+ * <p/>
  * 
  * Yong Wang made improvements and created M5': <br/>
  * 
- * Wang, Y and Witten, I. H. (1997). Induction of model trees for
- * predicting continuous classes. Proceedings of the poster papers of the
- * European Conference on Machine Learning. University of Economics,
- * Faculty of Informatics and Statistics, Prague. <p/>
- *
- * Valid options are:<p>
+ * Wang, Y and Witten, I. H. (1997). Induction of model trees for predicting
+ * continuous classes. Proceedings of the poster papers of the European
+ * Conference on Machine Learning. University of Economics, Faculty of
+ * Informatics and Statistics, Prague.
+ * <p/>
+ * 
+ * Valid options are:
+ * <p>
  * 
  * -U <br>
- * Use unsmoothed predictions. <p>
- *
+ * Use unsmoothed predictions.
+ * <p>
+ * 
  * -R <br>
  * Build regression tree/rule rather than model tree/rule
- *
+ * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 12641 $
  */
-public abstract class M5Base 
-  extends AbstractClassifier 
-  implements AdditionalMeasureProducer,
-	     TechnicalInformationHandler {
+public abstract class M5Base extends AbstractClassifier implements
+  AdditionalMeasureProducer, TechnicalInformationHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -4022221950191647679L;
@@ -87,7 +90,7 @@ public abstract class M5Base
   /**
    * the rule set
    */
-  protected FastVector m_ruleSet;
+  protected ArrayList<Rule> m_ruleSet;
 
   /**
    * generate a decision list instead of a single tree.
@@ -108,9 +111,9 @@ public abstract class M5Base
    * filter to convert nominal attributes to binary
    */
   private NominalToBinary m_nominalToBinary;
-  
+
   /**
-   * for removing useless attributes 
+   * for removing useless attributes
    */
   private RemoveUseless m_removeUseless;
 
@@ -146,12 +149,12 @@ public abstract class M5Base
 
   /**
    * returns information about the classifier
-   * @return a description suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description suitable for displaying in the explorer/experimenter
+   *         gui
    */
   public String globalInfo() {
-    return 
-        "M5Base. Implements base routines for generating M5 Model trees and " 
+    return "M5Base. Implements base routines for generating M5 Model trees and "
       + "rules\n"
       + "The original algorithm M5 was invented by R. Quinlan and Yong Wang "
       + "made improvements.\n\n"
@@ -160,32 +163,36 @@ public abstract class M5Base
   }
 
   /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
+   * Returns an instance of a TechnicalInformation object, containing detailed
+   * information about the technical background of this class, e.g., paper
+   * reference or book this class is based on.
    * 
    * @return the technical information about this class
    */
+  @Override
   public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    TechnicalInformation 	additional;
-    
+    TechnicalInformation result;
+    TechnicalInformation additional;
+
     result = new TechnicalInformation(Type.INPROCEEDINGS);
     result.setValue(Field.AUTHOR, "Ross J. Quinlan");
     result.setValue(Field.TITLE, "Learning with Continuous Classes");
-    result.setValue(Field.BOOKTITLE, "5th Australian Joint Conference on Artificial Intelligence");
+    result.setValue(Field.BOOKTITLE,
+      "5th Australian Joint Conference on Artificial Intelligence");
     result.setValue(Field.YEAR, "1992");
     result.setValue(Field.PAGES, "343-348");
     result.setValue(Field.PUBLISHER, "World Scientific");
     result.setValue(Field.ADDRESS, "Singapore");
-    
+
     additional = result.add(Type.INPROCEEDINGS);
     additional.setValue(Field.AUTHOR, "Y. Wang and I. H. Witten");
-    additional.setValue(Field.TITLE, "Induction of model trees for predicting continuous classes");
-    additional.setValue(Field.BOOKTITLE, "Poster papers of the 9th European Conference on Machine Learning");
+    additional.setValue(Field.TITLE,
+      "Induction of model trees for predicting continuous classes");
+    additional.setValue(Field.BOOKTITLE,
+      "Poster papers of the 9th European Conference on Machine Learning");
     additional.setValue(Field.YEAR, "1997");
     additional.setValue(Field.PUBLISHER, "Springer");
-    
+
     return result;
   }
 
@@ -194,39 +201,44 @@ public abstract class M5Base
    * 
    * @return an enumeration of all the available options
    */
-  public Enumeration listOptions() {
-    Vector newVector = new Vector(4);
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector = new Vector<Option>(4);
 
-    newVector.addElement(new Option("\tUse unpruned tree/rules", 
-				    "N", 0, "-N"));
+    newVector.add(new Option("\tUse unpruned tree/rules", "N", 0, "-N"));
 
-    newVector.addElement(new Option("\tUse unsmoothed predictions", 
-				    "U", 0, "-U"));
+    newVector.add(new Option("\tUse unsmoothed predictions", "U", 0, "-U"));
 
-    newVector.addElement(new Option("\tBuild regression tree/rule rather "
-				    +"than a model tree/rule", 
-				    "R", 0, "-R"));
+    newVector.add(new Option("\tBuild regression tree/rule rather "
+      + "than a model tree/rule", "R", 0, "-R"));
 
-    newVector.addElement(new Option("\tSet minimum number of instances "
-				    +"per leaf\n\t(default 4)",
-				    "M",1,"-M <minimum number of instances>"));
+    newVector.add(new Option("\tSet minimum number of instances "
+      + "per leaf\n\t(default 4)", "M", 1, "-M <minimum number of instances>"));
+
+    newVector.addAll(Collections.list(super.listOptions()));
+
     return newVector.elements();
-  } 
+  }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * Valid options are:<p>
+   * Valid options are:
+   * <p>
    * 
    * -U <br>
-   * Use unsmoothed predictions. <p>
-   *
+   * Use unsmoothed predictions.
+   * <p>
+   * 
    * -R <br>
-   * Build a regression tree rather than a model tree. <p>
+   * Build a regression tree rather than a model tree.
+   * <p>
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
     setUnpruned(Utils.getFlag('N', options));
     setUseUnsmoothed(Utils.getFlag('U', options));
@@ -235,44 +247,45 @@ public abstract class M5Base
     if (optionString.length() != 0) {
       setMinNumInstances((new Double(optionString)).doubleValue());
     }
+    super.setOptions(options);
     Utils.checkForRemainingOptions(options);
-  } 
+  }
 
   /**
    * Gets the current settings of the classifier.
    * 
    * @return an array of strings suitable for passing to setOptions
    */
+  @Override
   public String[] getOptions() {
-    String[] options = new String[5];
-    int current = 0;
+
+    Vector<String> result = new Vector<String>();
 
     if (getUnpruned()) {
-      options[current++] = "-N";
+      result.add("-N");
     }
 
     if (getUseUnsmoothed()) {
-      options[current++] = "-U";
-    } 
-
-    if (getBuildRegressionTree()) {
-      options[current++] = "-R";
+      result.add("-U");
     }
 
-    options[current++] = "-M"; 
-    options[current++] = ""+getMinNumInstances();
+    if (getBuildRegressionTree()) {
+      result.add("-R");
+    }
 
-    while (current < options.length) {
-      options[current++] = "";
-    } 
-    return options;
-  } 
+    result.add("-M");
+    result.add("" + getMinNumInstances());
+
+    Collections.addAll(result, super.getOptions());
+
+    return result.toArray(new String[result.size()]);
+  }
 
   /**
    * Returns the tip text for this property
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String unprunedTipText() {
     return "Whether unpruned tree/rules are to be generated.";
@@ -280,7 +293,7 @@ public abstract class M5Base
 
   /**
    * Use unpruned tree/rules
-   *
+   * 
    * @param unpruned true if unpruned tree/rules are to be generated
    */
   public void setUnpruned(boolean unpruned) {
@@ -289,7 +302,7 @@ public abstract class M5Base
 
   /**
    * Get whether unpruned tree/rules are being generated
-   *
+   * 
    * @return true if unpruned tree/rules are to be generated
    */
   public boolean getUnpruned() {
@@ -299,8 +312,8 @@ public abstract class M5Base
   /**
    * Returns the tip text for this property
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String generateRulesTipText() {
     return "Whether to generate rules (decision list) rather than a tree.";
@@ -313,7 +326,7 @@ public abstract class M5Base
    */
   protected void setGenerateRules(boolean u) {
     m_generateRules = u;
-  } 
+  }
 
   /**
    * get whether rules are being generated rather than a tree
@@ -322,13 +335,13 @@ public abstract class M5Base
    */
   protected boolean getGenerateRules() {
     return m_generateRules;
-  } 
+  }
 
   /**
    * Returns the tip text for this property
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String useUnsmoothedTipText() {
     return "Whether to use unsmoothed predictions.";
@@ -341,7 +354,7 @@ public abstract class M5Base
    */
   public void setUseUnsmoothed(boolean s) {
     m_unsmoothedPredictions = s;
-  } 
+  }
 
   /**
    * Get whether or not smoothing is being used
@@ -350,13 +363,13 @@ public abstract class M5Base
    */
   public boolean getUseUnsmoothed() {
     return m_unsmoothedPredictions;
-  } 
+  }
 
   /**
    * Returns the tip text for this property
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String buildRegressionTreeTipText() {
     return "Whether to generate a regression tree/rule instead of a model tree/rule.";
@@ -364,29 +377,29 @@ public abstract class M5Base
 
   /**
    * Get the value of regressionTree.
-   *
+   * 
    * @return Value of regressionTree.
    */
   public boolean getBuildRegressionTree() {
-    
+
     return m_regressionTree;
   }
-  
+
   /**
    * Set the value of regressionTree.
-   *
+   * 
    * @param newregressionTree Value to assign to regressionTree.
    */
   public void setBuildRegressionTree(boolean newregressionTree) {
-    
+
     m_regressionTree = newregressionTree;
   }
 
   /**
    * Returns the tip text for this property
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String minNumInstancesTipText() {
     return "The minimum number of instances to allow at a leaf node.";
@@ -394,7 +407,7 @@ public abstract class M5Base
 
   /**
    * Set the minimum number of instances to allow at a leaf node
-   *
+   * 
    * @param minNum the minimum number of instances
    */
   public void setMinNumInstances(double minNum) {
@@ -403,7 +416,7 @@ public abstract class M5Base
 
   /**
    * Get the minimum number of instances to allow at a leaf node
-   *
+   * 
    * @return a <code>double</code> value
    */
   public double getMinNumInstances() {
@@ -412,9 +425,10 @@ public abstract class M5Base
 
   /**
    * Returns default capabilities of the classifier, i.e., of LinearRegression.
-   *
-   * @return      the capabilities of this classifier
+   * 
+   * @return the capabilities of this classifier
    */
+  @Override
   public Capabilities getCapabilities() {
     return new LinearRegression().getCapabilities();
   }
@@ -423,9 +437,9 @@ public abstract class M5Base
    * Generates the classifier.
    * 
    * @param data set of instances serving as training data
-   * @throws Exception if the classifier has not been generated
-   * successfully
+   * @throws Exception if the classifier has not been generated successfully
    */
+  @Override
   public void buildClassifier(Instances data) throws Exception {
     // can classifier handle the data?
     getCapabilities().testWithFail(data);
@@ -433,7 +447,7 @@ public abstract class M5Base
     // remove instances with missing class
     data = new Instances(data);
     data.deleteWithMissingClass();
-    
+
     m_instances = new Instances(data);
 
     m_replaceMissing = new ReplaceMissingValues();
@@ -447,35 +461,35 @@ public abstract class M5Base
     m_removeUseless = new RemoveUseless();
     m_removeUseless.setInputFormat(m_instances);
     m_instances = Filter.useFilter(m_instances, m_removeUseless);
-    
+
     m_instances.randomize(new Random(1));
 
-    m_ruleSet = new FastVector();
+    m_ruleSet = new ArrayList<Rule>();
 
     Rule tempRule;
 
     if (m_generateRules) {
       Instances tempInst = m_instances;
-     
+
       do {
-	tempRule = new Rule();
-	tempRule.setSmoothing(!m_unsmoothedPredictions);
-	tempRule.setRegressionTree(m_regressionTree);
-	tempRule.setUnpruned(m_useUnpruned);
-	tempRule.setSaveInstances(false);
-	tempRule.setMinNumInstances(m_minNumInstances);
-	tempRule.buildClassifier(tempInst);
-	m_ruleSet.addElement(tempRule);
-	//	System.err.println("Built rule : "+tempRule.toString());
-	tempInst = tempRule.notCoveredInstances();
-	tempRule.freeNotCoveredInstances();
+        tempRule = new Rule();
+        tempRule.setSmoothing(!m_unsmoothedPredictions);
+        tempRule.setRegressionTree(m_regressionTree);
+        tempRule.setUnpruned(m_useUnpruned);
+        tempRule.setSaveInstances(false);
+        tempRule.setMinNumInstances(m_minNumInstances);
+        tempRule.buildClassifier(tempInst);
+        m_ruleSet.add(tempRule);
+        // System.err.println("Built rule : "+tempRule.toString());
+        tempInst = tempRule.notCoveredInstances();
+        tempRule.freeNotCoveredInstances();
       } while (tempInst.numInstances() > 0);
     } else {
       // just build a single tree
       tempRule = new Rule();
 
       tempRule.setUseTree(true);
-      //      tempRule.setGrowFullTree(true);
+      // tempRule.setGrowFullTree(true);
       tempRule.setSmoothing(!m_unsmoothedPredictions);
       tempRule.setSaveInstances(m_saveInstances);
       tempRule.setRegressionTree(m_regressionTree);
@@ -488,25 +502,26 @@ public abstract class M5Base
 
       tempRule.buildClassifier(temp_train);
 
-      m_ruleSet.addElement(tempRule);      
+      m_ruleSet.add(tempRule);
 
-      //      System.err.print(tempRule.m_topOfTree.treeToString(0));
+      // System.err.print(tempRule.m_topOfTree.treeToString(0));
     }
-    
+
     // save space
     m_instances = new Instances(m_instances, 0);
-  } 
+  }
 
   /**
-   * Calculates a prediction for an instance using a set of rules
-   * or an M5 model tree
+   * Calculates a prediction for an instance using a set of rules or an M5 model
+   * tree
    * 
    * @param inst the instance whos class value is to be predicted
    * @return the prediction
    * @throws Exception if a prediction can't be made.
    */
+  @Override
   public double classifyInstance(Instance inst) throws Exception {
-    Rule   temp;
+    Rule temp;
     double prediction = 0;
     boolean success = false;
 
@@ -519,63 +534,58 @@ public abstract class M5Base
 
     if (m_ruleSet == null) {
       throw new Exception("Classifier has not been built yet!");
-    } 
+    }
 
     if (!m_generateRules) {
-      temp = (Rule) m_ruleSet.elementAt(0);
+      temp = m_ruleSet.get(0);
       return temp.classifyInstance(inst);
-    } 
+    }
 
     boolean cont;
-    int     i;
+    int i;
 
     for (i = 0; i < m_ruleSet.size(); i++) {
       cont = false;
-      temp = (Rule) m_ruleSet.elementAt(i);
+      temp = m_ruleSet.get(i);
 
       try {
-	prediction = temp.classifyInstance(inst);
-	success = true;
+        prediction = temp.classifyInstance(inst);
+        success = true;
       } catch (Exception e) {
-	cont = true;
-      } 
+        cont = true;
+      }
 
       if (!cont) {
-	break;
-      } 
-    } 
+        break;
+      }
+    }
 
     if (!success) {
       System.out.println("Error in predicting (DecList)");
-    } 
+    }
     return prediction;
-  } 
+  }
 
   /**
    * Returns a description of the classifier
    * 
    * @return a description of the classifier as a String
    */
+  @Override
   public String toString() {
     StringBuffer text = new StringBuffer();
-    Rule	 temp;
+    Rule temp;
 
     if (m_ruleSet == null) {
       return "Classifier hasn't been built yet!";
-    } 
+    }
 
     if (m_generateRules) {
-      text.append("M5 "
-		  + ((m_useUnpruned == true)
-		     ? "unpruned "
-		     : "pruned ")
-		  + ((m_regressionTree == true) 
-		     ?  "regression "
-		     : "model ")
-		  + "rules ");
+      text.append("M5 " + ((m_useUnpruned == true) ? "unpruned " : "pruned ")
+        + ((m_regressionTree == true) ? "regression " : "model ") + "rules ");
 
       if (!m_unsmoothedPredictions) {
-	text.append("\n(using smoothed linear models) ");
+        text.append("\n(using smoothed linear models) ");
       }
 
       text.append(":\n");
@@ -583,58 +593,62 @@ public abstract class M5Base
       text.append("Number of Rules : " + m_ruleSet.size() + "\n\n");
 
       for (int j = 0; j < m_ruleSet.size(); j++) {
-	temp = (Rule) m_ruleSet.elementAt(j);
+        temp = m_ruleSet.get(j);
 
-	text.append("Rule: " + (j + 1) + "\n");
-	text.append(temp.toString());
-      } 
+        text.append("Rule: " + (j + 1) + "\n");
+        text.append(temp.toString());
+      }
     } else {
-      temp = (Rule) m_ruleSet.elementAt(0);
+      temp = m_ruleSet.get(0);
       text.append(temp.toString());
-    } 
+    }
     return text.toString();
-  } 
+  }
 
   /**
    * Returns an enumeration of the additional measure names
+   * 
    * @return an enumeration of the measure names
    */
-  public Enumeration enumerateMeasures() {
-    Vector newVector = new Vector(1);
-    newVector.addElement("measureNumRules");
+  @Override
+  public Enumeration<String> enumerateMeasures() {
+    Vector<String> newVector = new Vector<String>(1);
+    newVector.add("measureNumRules");
     return newVector.elements();
   }
 
   /**
    * Returns the value of the named measure
+   * 
    * @param additionalMeasureName the name of the measure to query for its value
    * @return the value of the named measure
    * @throws Exception if the named measure is not supported
    */
-  public double getMeasure(String additionalMeasureName) 
-    {
+  @Override
+  public double getMeasure(String additionalMeasureName) {
     if (additionalMeasureName.compareToIgnoreCase("measureNumRules") == 0) {
       return measureNumRules();
     } else {
-      throw new IllegalArgumentException(additionalMeasureName 
-					 + " not supported (M5)");
+      throw new IllegalArgumentException(additionalMeasureName
+        + " not supported (M5)");
     }
   }
 
   /**
    * return the number of rules
-   * @return the number of rules (same as # linear models &
-   * # leaves in the tree)
+   * 
+   * @return the number of rules (same as # linear models & # leaves in the
+   *         tree)
    */
   public double measureNumRules() {
     if (m_generateRules) {
       return m_ruleSet.size();
     }
-    return ((Rule)m_ruleSet.elementAt(0)).m_topOfTree.numberOfLinearModels();
+    return m_ruleSet.get(0).m_topOfTree.numberOfLinearModels();
   }
 
   public RuleNode getM5RootNode() {
-    Rule temp = (Rule) m_ruleSet.elementAt(0);
+    Rule temp = m_ruleSet.get(0);
     return temp.getM5RootNode();
   }
 }

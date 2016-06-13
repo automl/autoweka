@@ -15,7 +15,7 @@
 
 /*
  * GlobalInfoJavadoc.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006-2012,2015 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
@@ -26,10 +26,10 @@ import java.lang.reflect.Method;
  * Generates Javadoc comments from the class's globalInfo method. Can 
  * automatically update the comments if they're surrounded by
  * the GLOBALINFO_STARTTAG and GLOBALINFO_ENDTAG (the indention is determined via
- * the GLOBALINFO_STARTTAG). <p/>
+ * the GLOBALINFO_STARTTAG). <br><br>
  * 
  <!-- options-start -->
- * Valid options are: <p/>
+ * Valid options are: <br>
  * 
  * <pre> -W &lt;classname&gt;
  *  The class to load.</pre>
@@ -46,7 +46,7 @@ import java.lang.reflect.Method;
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 11736 $
  * @see #GLOBALINFO_METHOD
  * @see #GLOBALINFO_STARTTAG
  * @see #GLOBALINFO_ENDTAG
@@ -102,7 +102,7 @@ public class GlobalInfoJavadoc
       
       // retrieve global info
       result = toHTML((String) method.invoke(getInstance(), (Object[]) null));
-      result = result.trim() + "\n<p/>\n";
+      result = result.trim() + "\n<br><br>\n";
       
       // stars?
       if (getUseStars()) 
@@ -118,7 +118,7 @@ public class GlobalInfoJavadoc
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 11736 $");
   }
   
   /**

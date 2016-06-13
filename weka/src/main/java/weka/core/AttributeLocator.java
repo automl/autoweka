@@ -15,20 +15,21 @@
 
 /*
  * StringLocator.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005-2014 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
 
 import java.io.Serializable;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.BitSet;
 
 /**
  * This class locates and records the indices of a certain type of attributes, 
  * recursively in case of Relational attributes.
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10649 $
  * @see Attribute#RELATIONAL
  */
 public class AttributeLocator 
@@ -41,10 +42,10 @@ public class AttributeLocator
   protected int[] m_AllowedIndices = null;
   
   /** contains the attribute locations, either true or false Boolean objects */
-  protected Vector<Boolean> m_Attributes = null;
+  protected BitSet m_Attributes = null;
   
   /** contains the locator locations, either null or a AttributeLocator reference */
-  protected Vector<AttributeLocator> m_Locators = null;
+  protected ArrayList<AttributeLocator> m_Locators = null;
 
   /** the type of the attribute */
   protected int m_Type = -1;
@@ -146,8 +147,8 @@ public class AttributeLocator
   protected void locate() {
     int         i;
     
-    m_Attributes = new Vector<Boolean>();
-    m_Locators   = new Vector<AttributeLocator>();
+    m_Attributes = new BitSet(m_AllowedIndices.length);
+    m_Locators   = new ArrayList<AttributeLocator>();
     
     for (i = 0; i < m_AllowedIndices.length; i++) {
       if (m_Data.attribute(m_AllowedIndices[i]).type() == Attribute.RELATIONAL)
@@ -155,10 +156,7 @@ public class AttributeLocator
       else
 	m_Locators.add(null);
       
-      if (m_Data.attribute(m_AllowedIndices[i]).type() == getType())
-        m_Attributes.add(new Boolean(true));
-      else
-        m_Attributes.add(new Boolean(false));
+      m_Attributes.set(i, m_Data.attribute(m_AllowedIndices[i]).type() == getType());
     }
   }
   
@@ -182,13 +180,13 @@ public class AttributeLocator
   protected int[] find(boolean findAtts) {
     int		i;
     int[]	result;
-    Vector<Integer>	indices;
+    ArrayList<Integer>	indices;
 
     // determine locations
-    indices = new Vector<Integer>();
+    indices = new ArrayList<Integer>();
     if (findAtts) {
       for (i = 0; i < m_Attributes.size(); i++) {
-	if (((Boolean) m_Attributes.get(i)).booleanValue())
+	if (m_Attributes.get(i)) 
 	  indices.add(new Integer(i));
       }
     }
@@ -330,6 +328,6 @@ public class AttributeLocator
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10649 $");
   }
 }

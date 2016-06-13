@@ -35,54 +35,57 @@ import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 
 /**
- <!-- globalinfo-start -->
- * Class for building and using a 0-R classifier. Predicts the mean (for a numeric class) or the mode (for a nominal class).
+ * <!-- globalinfo-start --> Class for building and using a 0-R classifier.
+ * Predicts the mean (for a numeric class) or the mode (for a nominal class).
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -D
+ * <!-- options-start --> Valid options are:
+ * <p/>
+ * 
+ * <pre>
+ * -D
  *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
+ *  may output additional info to the console
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 12024 $
  */
-public class ZeroR 
-  extends AbstractClassifier 
-  implements WeightedInstancesHandler, Sourcable {
+public class ZeroR extends AbstractClassifier implements
+  WeightedInstancesHandler, Sourcable {
 
   /** for serialization */
   static final long serialVersionUID = 48055541465867954L;
-  
+
   /** The class value 0R predicts. */
   private double m_ClassValue;
 
   /** The number of instances in each class (null if class numeric). */
-  private double [] m_Counts;
-  
+  private double[] m_Counts;
+
   /** The class attribute. */
   private Attribute m_Class;
-    
+
   /**
    * Returns a string describing classifier
-   * @return a description suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description suitable for displaying in the explorer/experimenter
+   *         gui
    */
   public String globalInfo() {
-    return "Class for building and using a 0-R classifier. Predicts the mean " 
-      + "(for a numeric class) or the mode (for a nominal class).";	    
+    return "Class for building and using a 0-R classifier. Predicts the mean "
+      + "(for a numeric class) or the mode (for a nominal class).";
   }
 
   /**
    * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
+   * 
+   * @return the capabilities of this classifier
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
     result.disableAll();
@@ -103,55 +106,51 @@ public class ZeroR
 
     // instances
     result.setMinimumNumberInstances(0);
-    
+
     return result;
   }
 
   /**
    * Generates the classifier.
-   *
-   * @param instances set of instances serving as training data 
+   * 
+   * @param instances set of instances serving as training data
    * @throws Exception if the classifier has not been generated successfully
    */
+  @Override
   public void buildClassifier(Instances instances) throws Exception {
     // can classifier handle the data?
     getCapabilities().testWithFail(instances);
 
-    // remove instances with missing class
-    instances = new Instances(instances);
-    instances.deleteWithMissingClass();
-    
     double sumOfWeights = 0;
 
     m_Class = instances.classAttribute();
     m_ClassValue = 0;
     switch (instances.classAttribute().type()) {
-      case Attribute.NUMERIC:
-        m_Counts = null;
-        break;
-      case Attribute.NOMINAL:
-        m_Counts = new double [instances.numClasses()];
-        for (int i = 0; i < m_Counts.length; i++) {
-          m_Counts[i] = 1;
-        }
-        sumOfWeights = instances.numClasses();
-        break;
+    case Attribute.NUMERIC:
+      m_Counts = null;
+      break;
+    case Attribute.NOMINAL:
+      m_Counts = new double[instances.numClasses()];
+      for (int i = 0; i < m_Counts.length; i++) {
+        m_Counts[i] = 1;
+      }
+      sumOfWeights = instances.numClasses();
+      break;
     }
-    Enumeration enu = instances.enumerateInstances();
-    while (enu.hasMoreElements()) {
-      Instance instance = (Instance) enu.nextElement();
-      if (!instance.classIsMissing()) {
-	if (instances.classAttribute().isNominal()) {
-	  m_Counts[(int)instance.classValue()] += instance.weight();
-	} else {
-	  m_ClassValue += instance.weight() * instance.classValue();
-	}
-	sumOfWeights += instance.weight();
+    for (Instance instance : instances) {
+      double classValue = instance.classValue();
+      if (!Utils.isMissingValue(classValue)) {
+        if (instances.classAttribute().isNominal()) {
+          m_Counts[(int) classValue] += instance.weight();
+        } else {
+          m_ClassValue += instance.weight() * classValue;
+        }
+        sumOfWeights += instance.weight();
       }
     }
     if (instances.classAttribute().isNumeric()) {
       if (Utils.gr(sumOfWeights, 0)) {
-	m_ClassValue /= sumOfWeights;
+        m_ClassValue /= sumOfWeights;
       }
     } else {
       m_ClassValue = Utils.maxIndex(m_Counts);
@@ -161,10 +160,11 @@ public class ZeroR
 
   /**
    * Classifies a given instance.
-   *
+   * 
    * @param instance the instance to be classified
    * @return index of the predicted class
    */
+  @Override
   public double classifyInstance(Instance instance) {
 
     return m_ClassValue;
@@ -172,63 +172,70 @@ public class ZeroR
 
   /**
    * Calculates the class membership probabilities for the given test instance.
-   *
+   * 
    * @param instance the instance to be classified
    * @return predicted class probability distribution
    * @throws Exception if class is numeric
    */
-  public double [] distributionForInstance(Instance instance) 
-       throws Exception {
-	 
+  @Override
+  public double[] distributionForInstance(Instance instance) throws Exception {
+
     if (m_Counts == null) {
       double[] result = new double[1];
       result[0] = m_ClassValue;
       return result;
     } else {
-      return (double []) m_Counts.clone();
+      return m_Counts.clone();
     }
   }
 
   /**
-   * Returns a string that describes the classifier as source. The
-   * classifier will be contained in a class with the given name (there may
-   * be auxiliary classes),
-   * and will contain a method with the signature:
-   * <pre><code>
+   * Returns a string that describes the classifier as source. The classifier
+   * will be contained in a class with the given name (there may be auxiliary
+   * classes), and will contain a method with the signature:
+   * 
+   * <pre>
+   * <code>
    * public static double classify(Object[] i);
-   * </code></pre>
-   * where the array <code>i</code> contains elements that are either
-   * Double, String, with missing values represented as null. The generated
-   * code is public domain and comes with no warranty.
-   *
+   * </code>
+   * </pre>
+   * 
+   * where the array <code>i</code> contains elements that are either Double,
+   * String, with missing values represented as null. The generated code is
+   * public domain and comes with no warranty.
+   * 
    * @param className the name that should be given to the source class.
    * @return the object source described by a string
    * @throws Exception if the souce can't be computed
    */
+  @Override
   public String toSource(String className) throws Exception {
-    StringBuffer        result;
-    
+    StringBuffer result;
+
     result = new StringBuffer();
-    
+
     result.append("class " + className + " {\n");
     result.append("  public static double classify(Object[] i) {\n");
-    if (m_Counts != null)
-      result.append("    // always predicts label '" + m_Class.value((int) m_ClassValue) + "'\n");
+    if (m_Counts != null) {
+      result.append("    // always predicts label '"
+        + m_Class.value((int) m_ClassValue) + "'\n");
+    }
     result.append("    return " + m_ClassValue + ";\n");
     result.append("  }\n");
     result.append("}\n");
-    
+
     return result.toString();
   }
- 
+
   /**
    * Returns a description of the classifier.
-   *
+   * 
    * @return a description of the classifier as a string.
    */
+  @Override
   public String toString() {
 
-    if (m_Class ==  null) {
+    if (m_Class == null) {
       return "ZeroR: No model built yet.";
     }
     if (m_Counts == null) {
@@ -237,22 +244,23 @@ public class ZeroR
       return "ZeroR predicts class value: " + m_Class.value((int) m_ClassValue);
     }
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 12024 $");
   }
 
   /**
    * Main method for testing this class.
-   *
+   * 
    * @param argv the options
    */
-  public static void main(String [] argv) {
+  public static void main(String[] argv) {
     runClassifier(new ZeroR(), argv);
   }
 }

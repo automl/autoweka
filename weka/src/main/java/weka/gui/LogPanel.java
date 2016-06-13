@@ -21,18 +21,6 @@
 
 package weka.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -45,25 +33,35 @@ import javax.swing.JTextArea;
 import javax.swing.JViewport;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import java.awt.BorderLayout;
+import java.awt.Font;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-/** 
- * This panel allows log and status messages to be posted. Log messages
- * appear in a scrollable text area, and status messages appear as one-line
- * transient messages.
+/**
+ * This panel allows log and status messages to be posted. Log messages appear
+ * in a scrollable text area, and status messages appear as one-line transient
+ * messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 12358 $
  */
-public class LogPanel
-  extends JPanel
-  implements Logger, TaskLogger {
+public class LogPanel extends JPanel implements Logger, TaskLogger {
 
   /** for serialization */
   private static final long serialVersionUID = -4072464549112439484L;
 
   /** Displays the current status */
   protected JLabel m_StatusLab = new JLabel("OK");
-  
+
   /** Displays the log messages */
   protected JTextArea m_LogText = new JTextArea(4, 20);
 
@@ -73,12 +71,11 @@ public class LogPanel
   /** An indicator for whether text has been output yet */
   protected boolean m_First = true;
 
-  /** The panel for monitoring the number of running tasks (if supplied)*/
-  protected WekaTaskMonitor m_TaskMonitor=null;
-  
+  /** The panel for monitoring the number of running tasks (if supplied) */
+  protected WekaTaskMonitor m_TaskMonitor = null;
+
   /**
-   * Creates the log panel with no task monitor and
-   * the log always visible.
+   * Creates the log panel with no task monitor and the log always visible.
    */
   public LogPanel() {
 
@@ -86,8 +83,7 @@ public class LogPanel
   }
 
   /**
-   * Creates the log panel with a task monitor,
-   * where the log is hidden.
+   * Creates the log panel with a task monitor, where the log is hidden.
    *
    * @param tm the task monitor, or null for none
    */
@@ -97,54 +93,52 @@ public class LogPanel
   }
 
   /**
-   * Creates the log panel, possibly with task monitor,
-   * where the log is optionally hidden.
+   * Creates the log panel, possibly with task monitor, where the log is
+   * optionally hidden.
    *
    * @param tm the task monitor, or null for none
-   * @param logHidden true if the log should be hidden and
-   *                  acessible via a button, or false if the
-   *                  log should always be visible.
+   * @param logHidden true if the log should be hidden and acessible via a
+   *          button, or false if the log should always be visible.
    */
   public LogPanel(WekaTaskMonitor tm, boolean logHidden) {
     this(tm, logHidden, false, true);
   }
 
   /**
-   * Creates the log panel, possibly with task monitor,
-   * where the either the log is optionally hidden or the status
-   * (having both hidden is not allowed).
+   * Creates the log panel, possibly with task monitor, where the either the log
+   * is optionally hidden or the status (having both hidden is not allowed).
    * 
    *
    * @param tm the task monitor, or null for none
-   * @param logHidden true if the log should be hidden and
-   *                  acessible via a button, or false if the
-   *                  log should always be visible.
+   * @param logHidden true if the log should be hidden and acessible via a
+   *          button, or false if the log should always be visible.
    * @param statusHidden true if the status bar should be hidden (i.e.
-   * @param titledBorder true if the log should have a title
-   * you only want the log part).
+   * @param titledBorder true if the log should have a title you only want the
+   *          log part).
    */
-  public LogPanel(WekaTaskMonitor tm, boolean logHidden, 
-      boolean statusHidden, boolean titledBorder) {
+  public LogPanel(WekaTaskMonitor tm, boolean logHidden, boolean statusHidden,
+    boolean titledBorder) {
 
     m_TaskMonitor = tm;
     m_LogText.setEditable(false);
     m_LogText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     m_StatusLab.setBorder(BorderFactory.createCompoundBorder(
-			  BorderFactory.createTitledBorder("Status"),
-			  BorderFactory.createEmptyBorder(0, 5, 5, 5)));
+      BorderFactory.createTitledBorder("Status"),
+      BorderFactory.createEmptyBorder(0, 5, 5, 5)));
 
     // create scrolling log
     final JScrollPane js = new JScrollPane(m_LogText);
     js.getViewport().addChangeListener(new ChangeListener() {
       private int lastHeight;
+
       public void stateChanged(ChangeEvent e) {
-	JViewport vp = (JViewport)e.getSource();
-	int h = vp.getViewSize().height; 
-	if (h != lastHeight) { // i.e. an addition not just a user scrolling
-	  lastHeight = h;
-	  int x = h - vp.getExtentSize().height;
-	  vp.setViewPosition(new Point(0, x));
-	}
+        JViewport vp = (JViewport) e.getSource();
+        int h = vp.getViewSize().height;
+        if (h != lastHeight) { // i.e. an addition not just a user scrolling
+          lastHeight = h;
+          int x = h - vp.getExtentSize().height;
+          vp.setViewPosition(new Point(0, x));
+        }
       }
     });
 
@@ -153,22 +147,22 @@ public class LogPanel
       // create log window
       final JFrame jf = new JFrame("Log");
       jf.addWindowListener(new WindowAdapter() {
-	  public void windowClosing(WindowEvent e) {
-	    jf.setVisible(false);
-	  }
-	});
+        public void windowClosing(WindowEvent e) {
+          jf.setVisible(false);
+        }
+      });
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(js, BorderLayout.CENTER);
       jf.pack();
       jf.setSize(450, 350);
-      
+
       // display log window on request
       m_logButton.addActionListener(new ActionListener() {
-	  public void actionPerformed(ActionEvent e) {
-	    jf.setVisible(true);
-	  }
-	});
-      
+        public void actionPerformed(ActionEvent e) {
+          jf.setVisible(true);
+        }
+      });
+
       // do layout
       setLayout(new BorderLayout());
       JPanel logButPanel = new JPanel();
@@ -179,19 +173,19 @@ public class LogPanel
       p1.setLayout(new BorderLayout());
       p1.add(m_StatusLab, BorderLayout.CENTER);
       p1.add(logButPanel, BorderLayout.EAST);
-      
+
       if (tm == null) {
-	add(p1, BorderLayout.SOUTH);
+        add(p1, BorderLayout.SOUTH);
       } else {
-	JPanel p2 = new JPanel();
-	p2.setLayout(new BorderLayout());
-	p2.add(p1, BorderLayout.CENTER);
-	p2.add((java.awt.Component)m_TaskMonitor, BorderLayout.EAST);
-	add(p2, BorderLayout.SOUTH);
+        JPanel p2 = new JPanel();
+        p2.setLayout(new BorderLayout());
+        p2.add(p1, BorderLayout.CENTER);
+        p2.add((java.awt.Component) m_TaskMonitor, BorderLayout.EAST);
+        add(p2, BorderLayout.SOUTH);
       }
     } else {
       // log always visible
-      
+
       JPanel p1 = new JPanel();
       if (titledBorder) {
         p1.setBorder(BorderFactory.createTitledBorder("Log"));
@@ -209,8 +203,8 @@ public class LogPanel
         if (!statusHidden) {
           JPanel p2 = new JPanel();
           p2.setLayout(new BorderLayout());
-          p2.add(m_StatusLab,BorderLayout.CENTER);
-          p2.add((java.awt.Component)m_TaskMonitor, BorderLayout.EAST);
+          p2.add(m_StatusLab, BorderLayout.CENTER);
+          p2.add((java.awt.Component) m_TaskMonitor, BorderLayout.EAST);
           add(p2, BorderLayout.SOUTH);
         }
       }
@@ -219,68 +213,88 @@ public class LogPanel
   }
 
   /**
+   * Set the size of the font used in the log message area. <= 0 will use the
+   * default for JTextArea.
+   *
+   * @param size the size of the font to use in the log message area
+   */
+  public void setLoggingFontSize(int size) {
+    if (size > 0) {
+      m_LogText.setFont(new Font(null, Font.PLAIN, size));
+    } else {
+      Font temp = new JTextArea().getFont();
+      m_LogText.setFont(temp);
+    }
+  }
+
+  /**
    * adds thousand's-separators to the number
-   * @param l       the number to print
-   * @return        the number as string with separators
+   * 
+   * @param l the number to print
+   * @return the number as string with separators
    */
   private String printLong(long l) {
-    String        result;
-    String        str;
-    int           i;
-    int           count;
+    String result;
+    String str;
+    int i;
+    int count;
 
-    str    = Long.toString(l);
+    str = Long.toString(l);
     result = "";
-    count  = 0;
+    count = 0;
 
     for (i = str.length() - 1; i >= 0; i--) {
       count++;
       result = str.charAt(i) + result;
-      if ( (count == 3) && (i > 0) ) {
+      if ((count == 3) && (i > 0)) {
         result = "," + result;
         count = 0;
       }
     }
-    
+
     return result;
   }
 
   /**
-   * Add a popup menu for displaying the amount of free memory
-   * and running the garbage collector
+   * Add a popup menu for displaying the amount of free memory and running the
+   * garbage collector
    */
   private void addPopup() {
     addMouseListener(new MouseAdapter() {
-	public void mouseClicked(MouseEvent e) {
-	  if (((e.getModifiers() & InputEvent.BUTTON1_MASK)
-	       != InputEvent.BUTTON1_MASK) || e.isAltDown()) {
-	    JPopupMenu gcMenu = new JPopupMenu();
-	    JMenuItem availMem = new JMenuItem("Memory information");
-	    availMem.addActionListener(new ActionListener() {
-		public void actionPerformed(ActionEvent ee) {
-		  System.gc();
-		  Runtime currR = Runtime.getRuntime();
-		  long freeM = currR.freeMemory();
-		  long totalM = currR.totalMemory();
-		  long maxM = currR.maxMemory();
-		  logMessage("Memory (free/total/max.) in bytes: " + printLong(freeM) + " / " + printLong(totalM) + " / " + printLong(maxM));
-		  statusMessage("Memory (free/total/max.) in bytes: " + printLong(freeM) + " / " + printLong(totalM) + " / " + printLong(maxM));
-		}
-	      });
-	    gcMenu.add(availMem);
-	    JMenuItem runGC = new JMenuItem("Run garbage collector");
-	    runGC.addActionListener(new ActionListener() {
-		public void actionPerformed(ActionEvent ee) {
-		  statusMessage("Running garbage collector");
-		  System.gc();
-		  statusMessage("OK");
-		}
-	      });
-	    gcMenu.add(runGC);
-	    gcMenu.show(LogPanel.this, e.getX(), e.getY());
-	  }
-	}
-      });
+      public void mouseClicked(MouseEvent e) {
+        if (((e.getModifiers() & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK)
+          || e.isAltDown()) {
+          JPopupMenu gcMenu = new JPopupMenu();
+          JMenuItem availMem = new JMenuItem("Memory information");
+          availMem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ee) {
+              System.gc();
+              Runtime currR = Runtime.getRuntime();
+              long freeM = currR.freeMemory();
+              long totalM = currR.totalMemory();
+              long maxM = currR.maxMemory();
+              logMessage("Memory (free/total/max.) in bytes: "
+                + printLong(freeM) + " / " + printLong(totalM) + " / "
+                + printLong(maxM));
+              statusMessage("Memory (free/total/max.) in bytes: "
+                + printLong(freeM) + " / " + printLong(totalM) + " / "
+                + printLong(maxM));
+            }
+          });
+          gcMenu.add(availMem);
+          JMenuItem runGC = new JMenuItem("Run garbage collector");
+          runGC.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ee) {
+              statusMessage("Running garbage collector");
+              System.gc();
+              statusMessage("OK");
+            }
+          });
+          gcMenu.add(runGC);
+          gcMenu.show(LogPanel.this, e.getX(), e.getY());
+        }
+      }
+    });
   }
 
   /**
@@ -300,7 +314,7 @@ public class LogPanel
       m_TaskMonitor.taskFinished();
     }
   }
-    
+
   /**
    * Gets a string containing current date and time.
    *
@@ -312,8 +326,8 @@ public class LogPanel
   }
 
   /**
-   * Sends the supplied message to the log area. The current timestamp will
-   * be prepended.
+   * Sends the supplied message to the log area. The current timestamp will be
+   * prepended.
    *
    * @param message a value of type 'String'
    */
@@ -338,13 +352,12 @@ public class LogPanel
     m_StatusLab.setText(message);
   }
 
-  
   /**
    * Tests out the log panel from the command line.
    *
    * @param args ignored
    */
-  public static void main(String [] args) {
+  public static void main(String[] args) {
 
     try {
       final javax.swing.JFrame jf = new javax.swing.JFrame("Log Panel");
@@ -352,17 +365,17 @@ public class LogPanel
       final LogPanel lp = new LogPanel();
       jf.getContentPane().add(lp, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
-	public void windowClosing(java.awt.event.WindowEvent e) {
-	  jf.dispose();
-	  System.exit(0);
-	}
+        public void windowClosing(java.awt.event.WindowEvent e) {
+          jf.dispose();
+          System.exit(0);
+        }
       });
       jf.pack();
       jf.setVisible(true);
       lp.logMessage("Welcome to the generic log panel!");
       lp.statusMessage("Hi there");
       lp.logMessage("Funky chickens");
-      
+
     } catch (Exception ex) {
       ex.printStackTrace();
       System.err.println(ex.getMessage());

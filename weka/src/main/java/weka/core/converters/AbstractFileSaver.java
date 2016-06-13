@@ -53,10 +53,13 @@ import weka.core.Utils;
  * 
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 9022 $
+ * @version $Revision: 12074 $
  */
 public abstract class AbstractFileSaver extends AbstractSaver implements
-    OptionHandler, FileSourcedConverter, EnvironmentHandler {
+  OptionHandler, FileSourcedConverter, EnvironmentHandler {
+
+  /** ID to avoid warning */
+  private static final long serialVersionUID = 2399441762235754491L;
 
   /** The destination file. */
   private File m_outputFile;
@@ -137,7 +140,7 @@ public abstract class AbstractFileSaver extends AbstractSaver implements
    */
   @Override
   public String[] getFileExtensions() {
-    return new String[] { getFileExtension(), FILE_EXTENSION_COMPRESSED };
+    return new String[] { getFileExtension() };
   }
 
   /**
@@ -243,15 +246,18 @@ public abstract class AbstractFileSaver extends AbstractSaver implements
    * @return an enumeration of all the available options.
    */
   @Override
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>();
+    Vector<Option> newVector =
+      Option.listOptionsForClassHierarchy(this.getClass(),
+        AbstractFileSaver.class);
+    // Vector<Option> newVector = new Vector<Option>();
 
     newVector.addElement(new Option("\tThe input file", "i", 1,
-        "-i <the input file>"));
+      "-i <the input file>"));
 
     newVector.addElement(new Option("\tThe output file", "o", 1,
-        "-o <the output file>"));
+      "-o <the output file>"));
 
     return newVector.elements();
   }
@@ -276,6 +282,7 @@ public abstract class AbstractFileSaver extends AbstractSaver implements
   @Override
   public void setOptions(String[] options) throws Exception {
 
+    Option.setOptionsForHierarchy(options, this, AbstractFileSaver.class);
     String outputString = Utils.getOption('o', options);
     String inputString = Utils.getOption('i', options);
 
@@ -291,7 +298,7 @@ public abstract class AbstractFileSaver extends AbstractSaver implements
       } catch (Exception ex) {
         ex.printStackTrace();
         throw new IOException(
-            "No data set loaded. Data set has to be in ARFF format.");
+          "No data set loaded. Data set has to be in ARFF format.");
       }
     }
     if (outputString.length() != 0) {
@@ -304,19 +311,20 @@ public abstract class AbstractFileSaver extends AbstractSaver implements
       }
       // add appropriate file extension
       if (!validExt) {
-        if (outputString.lastIndexOf('.') != -1)
-          outputString = (outputString.substring(0,
-              outputString.lastIndexOf('.')))
+        if (outputString.lastIndexOf('.') != -1) {
+          outputString =
+            (outputString.substring(0, outputString.lastIndexOf('.')))
               + FILE_EXTENSION;
-        else
+        } else {
           outputString = outputString + FILE_EXTENSION;
+        }
       }
       try {
         File output = new File(outputString);
         setFile(output);
       } catch (Exception ex) {
         throw new IOException("Cannot create output file (Reason: "
-            + ex.toString() + "). Standard out is used.");
+          + ex.toString() + "). Standard out is used.");
       }
     }
   }
@@ -331,6 +339,10 @@ public abstract class AbstractFileSaver extends AbstractSaver implements
     Vector<String> result;
 
     result = new Vector<String>();
+    for (String s : Option
+      .getOptionsForHierarchy(this, AbstractFileSaver.class)) {
+      result.add(s);
+    }
 
     if (m_outputFile != null) {
       result.add("-o");
@@ -351,8 +363,9 @@ public abstract class AbstractFileSaver extends AbstractSaver implements
 
     if (getWriteMode() == CANCEL) {
       if (m_outputFile != null && m_outputFile.exists()) {
-        if (m_outputFile.delete())
+        if (m_outputFile.delete()) {
           System.out.println("File deleted.");
+        }
       }
       resetOptions();
     }
@@ -383,18 +396,19 @@ public abstract class AbstractFileSaver extends AbstractSaver implements
     if (m_outputFile != null) {
       try {
         if (file.exists()) {
-          if (!file.delete())
+          if (!file.delete()) {
             throw new IOException("File already exists.");
+          }
         }
         if (out.lastIndexOf(File.separatorChar) == -1) {
           success = file.createNewFile();
         } else {
-          String outPath = out
-              .substring(0, out.lastIndexOf(File.separatorChar));
+          String outPath =
+            out.substring(0, out.lastIndexOf(File.separatorChar));
           File dir = new File(outPath);
-          if (dir.exists())
+          if (dir.exists()) {
             success = file.createNewFile();
-          else {
+          } else {
             dir.mkdirs();
             success = file.createNewFile();
           }
@@ -413,11 +427,11 @@ public abstract class AbstractFileSaver extends AbstractSaver implements
         }
       } catch (Exception ex) {
         throw new IOException("Cannot create a new output file (Reason: "
-            + ex.toString() + "). Standard out is used.");
+          + ex.toString() + "). Standard out is used.");
       } finally {
         if (!success) {
           System.err
-              .println("Cannot create a new output file. Standard out is used.");
+            .println("Cannot create a new output file. Standard out is used.");
           m_outputFile = null; // use standard out
         }
       }
@@ -454,10 +468,11 @@ public abstract class AbstractFileSaver extends AbstractSaver implements
         if (relationName.length() == 0) {
           throw new IOException("[Saver] Empty filename!!");
         }
-        String concat = (m_dir + File.separator + relationName + add + FILE_EXTENSION);
+        String concat =
+          (m_dir + File.separator + relationName + add + FILE_EXTENSION);
         if (!concat.toLowerCase().endsWith(FILE_EXTENSION)
-            && !concat.toLowerCase().endsWith(
-                FILE_EXTENSION + FILE_EXTENSION_COMPRESSED)) {
+          && !concat.toLowerCase().endsWith(
+            FILE_EXTENSION + FILE_EXTENSION_COMPRESSED)) {
           concat += FILE_EXTENSION;
         }
         setFile(new File(concat));
@@ -465,17 +480,18 @@ public abstract class AbstractFileSaver extends AbstractSaver implements
         if (relationName.length() > 0) {
           relationName = "_" + relationName;
         }
-        String concat = (m_dir + File.separator + m_prefix + relationName + add);
+        String concat =
+          (m_dir + File.separator + m_prefix + relationName + add);
         if (!concat.toLowerCase().endsWith(FILE_EXTENSION)
-            && !concat.toLowerCase().endsWith(
-                FILE_EXTENSION + FILE_EXTENSION_COMPRESSED)) {
+          && !concat.toLowerCase().endsWith(
+            FILE_EXTENSION + FILE_EXTENSION_COMPRESSED)) {
           concat += FILE_EXTENSION;
         }
         setFile(new File(concat));
       }
     } catch (Exception ex) {
       System.err
-          .println("File prefix and/or directory could not have been set.");
+        .println("File prefix and/or directory could not have been set.");
       ex.printStackTrace();
     }
   }
@@ -534,9 +550,9 @@ public abstract class AbstractFileSaver extends AbstractSaver implements
     result.append("\n");
     result.append(saver.getClass().getName().replaceAll(".*\\.", ""));
     result.append(" options:\n\n");
-    Enumeration enm = saver.listOptions();
+    Enumeration<Option> enm = saver.listOptions();
     while (enm.hasMoreElements()) {
-      option = (Option) enm.nextElement();
+      option = enm.nextElement();
       result.append(option.synopsis() + "\n");
       result.append(option.description() + "\n");
     }

@@ -15,12 +15,43 @@
 
 /*
  *    SimpleSetupPanel.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002-2015 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
 
+import weka.classifiers.Classifier;
+import weka.core.xml.KOML;
+import weka.experiment.CSVResultListener;
+import weka.experiment.ClassifierSplitEvaluator;
+import weka.experiment.CrossValidationResultProducer;
+import weka.experiment.DatabaseResultListener;
+import weka.experiment.Experiment;
+import weka.experiment.InstancesResultListener;
+import weka.experiment.PropertyNode;
+import weka.experiment.RandomSplitResultProducer;
+import weka.experiment.RegressionSplitEvaluator;
+import weka.experiment.SplitEvaluator;
+import weka.gui.DatabaseConnectionDialog;
+import weka.gui.ExtensionFileFilter;
+
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -40,38 +71,6 @@ import java.beans.PropertyChangeSupport;
 import java.beans.PropertyDescriptor;
 import java.io.File;
 
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.filechooser.FileFilter;
-
-import weka.classifiers.Classifier;
-import weka.core.xml.KOML;
-import weka.experiment.CSVResultListener;
-import weka.experiment.ClassifierSplitEvaluator;
-import weka.experiment.CrossValidationResultProducer;
-import weka.experiment.DatabaseResultListener;
-import weka.experiment.Experiment;
-import weka.experiment.InstancesResultListener;
-import weka.experiment.PropertyNode;
-import weka.experiment.RandomSplitResultProducer;
-import weka.experiment.RegressionSplitEvaluator;
-import weka.experiment.SplitEvaluator;
-import weka.gui.DatabaseConnectionDialog;
-import weka.gui.ExtensionFileFilter;
-
 /** 
  * This panel controls the configuration of an experiment.
   * <p>
@@ -81,10 +80,10 @@ import weka.gui.ExtensionFileFilter;
 *
  * @author Richard kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 8034 $
+ * @version $Revision: 12016 $
  */
 public class SimpleSetupPanel
-  extends JPanel {
+  extends AbstractSetupPanel {
 
   /** for serialization */
   private static final long serialVersionUID = 5257424515609176509L;
@@ -568,7 +567,16 @@ public class SimpleSetupPanel
     add(schemes, BorderLayout.CENTER);
     add(notes, BorderLayout.SOUTH);
   }
-  
+
+  /**
+   * Returns the name of the panel.
+   *
+   * @return		the name
+   */
+  public String getName() {
+    return "Simple";
+  }
+
   /**
    * Sets the selected item of an combobox, since using setSelectedItem(...)
    * doesn't work, if one checks object references!
@@ -887,7 +895,9 @@ public class SimpleSetupPanel
    * @param l a value of type 'PropertyChangeListener'
    */
   public void addPropertyChangeListener(PropertyChangeListener l) {
-    m_Support.addPropertyChangeListener(l);
+    if (m_Support != null && l != null) {
+      m_Support.addPropertyChangeListener(l);
+    }
   }
 
   /**
@@ -896,7 +906,9 @@ public class SimpleSetupPanel
    * @param l a value of type 'PropertyChangeListener'
    */
   public void removePropertyChangeListener(PropertyChangeListener l) {
-    m_Support.removePropertyChangeListener(l);
+    if (m_Support != null && l != null) {
+      m_Support.removePropertyChangeListener(l);
+    }
   }
 
   /**
@@ -1212,5 +1224,12 @@ public class SimpleSetupPanel
       return;
     }
     m_ResultsDestinationPathTField.setText(m_DestFileChooser.getSelectedFile().toString());
+  }
+
+  /**
+   * Hook method for cleaning up the interface after a switch.
+   */
+  public void cleanUpAfterSwitch() {
+    removeNotesFrame();
   }
 }

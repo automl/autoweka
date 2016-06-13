@@ -32,7 +32,7 @@ import weka.core.Utils;
  * be pruned using C4.5 procedures.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 8984 $
+ * @version $Revision: 11006 $
  */
 
 public class C45PruneableClassifierTree 
@@ -42,19 +42,19 @@ public class C45PruneableClassifierTree
   static final long serialVersionUID = -4813820170260388194L;
   
   /** True if the tree is to be pruned. */
-  boolean m_pruneTheTree = false;
+  protected boolean m_pruneTheTree = false;
   
   /** True if the tree is to be collapsed. */
-  boolean m_collapseTheTree = false;
+  protected boolean m_collapseTheTree = false;
 
   /** The confidence factor for pruning. */
-  float m_CF = 0.25f;
+  protected float m_CF = 0.25f;
 
   /** Is subtree raising to be performed? */
-  boolean m_subtreeRaising = true;
+  protected boolean m_subtreeRaising = true;
 
   /** Cleanup after the tree has been built. */
-  boolean m_cleanup = true;
+  protected boolean m_cleanup = true;
 
   /**
    * Constructor for pruneable tree structure. Stores reference
@@ -374,6 +374,6 @@ public class C45PruneableClassifierTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8984 $");
+    return RevisionUtils.extract("$Revision: 11006 $");
   }
 }

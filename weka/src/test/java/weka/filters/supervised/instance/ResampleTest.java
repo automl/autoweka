@@ -32,7 +32,7 @@ import junit.framework.TestSuite;
  * java weka.filters.supervised.instance.ResampleTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 8034 $
+ * @version $Revision: 11310 $
  */
 public class ResampleTest
   extends AbstractFilterTest {
@@ -70,8 +70,8 @@ public class ResampleTest
     ((Resample) m_Filter).setNoReplacement(true);
     Instances result = useFilter();
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
-    assertEquals("Expecting output to be 20% of input",
-                 (int) (m_Instances.numInstances() * 20.0 / 100),  result.numInstances());
+    assertEquals("Expecting output to be 3",
+                 3,  result.numInstances());
   }
 
   public void testSampleSizePercentNoReplacementInverted() {
@@ -80,9 +80,8 @@ public class ResampleTest
     ((Resample) m_Filter).setInvertSelection(true);
     Instances result = useFilter();
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
-    assertEquals("Expecting output to be 80% of input (20% inverted)",
-                 m_Instances.numInstances() 
-                 - (int) (m_Instances.numInstances() * 20.0 / 100),  result.numInstances());
+    assertEquals("Expecting output to be 18",
+                 18,  result.numInstances());
   }
 
   public void testNoBias() throws Exception {

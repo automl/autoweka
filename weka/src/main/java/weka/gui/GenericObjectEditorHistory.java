@@ -35,24 +35,22 @@ import weka.core.Utils;
 
 /**
  * A helper class for maintaining a history of objects selected in the GOE.
- *
- * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8082 $
+ * 
+ * @author fracpete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 10216 $
  */
-public class GenericObjectEditorHistory
-  implements Serializable {
+public class GenericObjectEditorHistory implements Serializable {
 
   /** for serialization. */
   private static final long serialVersionUID = -1255734638729633595L;
 
   /**
    * Event that gets sent when a history item gets selected.
-   *
-   * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 8082 $
+   * 
+   * @author fracpete (fracpete at waikato dot ac dot nz)
+   * @version $Revision: 10216 $
    */
-  public static class HistorySelectionEvent
-  extends EventObject {
+  public static class HistorySelectionEvent extends EventObject {
 
     /** for serialization. */
     private static final long serialVersionUID = 45824542929908105L;
@@ -62,9 +60,9 @@ public class GenericObjectEditorHistory
 
     /**
      * Initializes the event.
-     *
-     * @param source		the object that triggered the event
-     * @param historyItem	the selected history item
+     * 
+     * @param source the object that triggered the event
+     * @param historyItem the selected history item
      */
     public HistorySelectionEvent(Object source, Object historyItem) {
       super(source);
@@ -74,8 +72,8 @@ public class GenericObjectEditorHistory
 
     /**
      * Returns the selected history item.
-     *
-     * @return		the history item
+     * 
+     * @return the history item
      */
     public Object getHistoryItem() {
       return m_HistoryItem;
@@ -84,16 +82,16 @@ public class GenericObjectEditorHistory
 
   /**
    * Interface for classes that listen to selections of history items.
-   *
-   * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 8082 $
+   * 
+   * @author fracpete (fracpete at waikato dot ac dot nz)
+   * @version $Revision: 10216 $
    */
   public static interface HistorySelectionListener {
 
     /**
      * Gets called when a history item gets selected.
-     *
-     * @param e		the event
+     * 
+     * @param e the event
      */
     public void historySelected(HistorySelectionEvent e);
   }
@@ -108,7 +106,7 @@ public class GenericObjectEditorHistory
   public final static int MAX_LINE_LENGTH = 80;
 
   /** the history of objects. */
-  protected Vector m_History;
+  protected Vector<Object> m_History;
 
   /**
    * Initializes the history.
@@ -123,94 +121,97 @@ public class GenericObjectEditorHistory
    * Initializes members.
    */
   protected void initialize() {
-    m_History = new Vector();
+    m_History = new Vector<Object>();
   }
-  
+
   /**
    * Clears the history.
    */
   public synchronized void clear() {
     m_History.clear();
   }
-  
+
   /**
    * Adds the object to the history.
-   *
-   * @param obj		the object to add
+   * 
+   * @param obj the object to add
    */
   public synchronized void add(Object obj) {
     obj = copy(obj);
 
-    if (m_History.contains(obj))
+    if (m_History.contains(obj)) {
       m_History.remove(obj);
+    }
     m_History.insertElementAt(obj, 0);
 
-    while (m_History.size() > MAX_HISTORY_COUNT)
+    while (m_History.size() > MAX_HISTORY_COUNT) {
       m_History.remove(m_History.size() - 1);
+    }
   }
-  
+
   /**
    * Returns the number of entries in the history.
    * 
-   * @return		the size of the history
+   * @return the size of the history
    */
   public synchronized int size() {
     return m_History.size();
   }
-  
+
   /**
    * Returns the current history.
    * 
-   * @return		the history
+   * @return the history
    */
-  public synchronized Vector getHistory() {
+  public synchronized Vector<Object> getHistory() {
     return m_History;
   }
-  
+
   /**
    * Creates a copy of the object.
    * 
-   * @param obj		the object to copy
+   * @param obj the object to copy
    */
   protected Object copy(Object obj) {
-    SerializedObject 	so;
-    Object 		result;
-    
+    SerializedObject so;
+    Object result;
+
     try {
-      so     = new SerializedObject(obj);
+      so = new SerializedObject(obj);
       result = so.getObject();
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       result = null;
       e.printStackTrace();
     }
-    
+
     return result;
   }
 
   /**
    * Generates an HTML caption for the an entry in the history menu.
-   *
-   * @param obj		the object to create the caption for
-   * @return		the generated HTML captiopn
+   * 
+   * @param obj the object to create the caption for
+   * @return the generated HTML captiopn
    */
   protected String generateMenuItemCaption(Object obj) {
-    StringBuffer	result;
-    String		cmd;
-    String[]		lines;
-    int			i;
+    StringBuffer result;
+    String cmd;
+    String[] lines;
+    int i;
 
     result = new StringBuffer();
 
-    cmd    = Utils.toCommandLine(obj);
-    if (cmd.length() > MAX_HISTORY_LENGTH)
+    cmd = Utils.toCommandLine(obj);
+    if (cmd.length() > MAX_HISTORY_LENGTH) {
       cmd = cmd.substring(0, MAX_HISTORY_LENGTH) + "...";
+    }
 
-    lines  = Utils.breakUp(cmd, MAX_LINE_LENGTH);
+    lines = Utils.breakUp(cmd, MAX_LINE_LENGTH);
     result.append("<html>");
     for (i = 0; i < lines.length; i++) {
-      if (i > 0)
-	result.append("<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+      if (i > 0) {
+        result.append("<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+      }
       result.append(lines[i].trim());
     }
     result.append("</html>");
@@ -220,19 +221,21 @@ public class GenericObjectEditorHistory
 
   /**
    * Adds a menu item with the history to the popup menu.
-   *
-   * @param menu	the menu to add the history to
-   * @param current	the current object
-   * @param listener	the listener to attach to the menu items' ActionListener
+   * 
+   * @param menu the menu to add the history to
+   * @param current the current object
+   * @param listener the listener to attach to the menu items' ActionListener
    */
-  public void customizePopupMenu(JPopupMenu menu, Object current, HistorySelectionListener listener) {
-    JMenu		submenu;
-    JMenuItem		item;
-    int			i;
+  public void customizePopupMenu(JPopupMenu menu, Object current,
+    HistorySelectionListener listener) {
+    JMenu submenu;
+    JMenuItem item;
+    int i;
 
-    if (m_History.size() == 0)
+    if (m_History.size() == 0) {
       return;
-    
+    }
+
     submenu = new JMenu("History");
     menu.addSeparator();
     menu.add(submenu);
@@ -240,8 +243,9 @@ public class GenericObjectEditorHistory
     // clear history
     item = new JMenuItem("Clear history");
     item.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
-	m_History.clear();
+        m_History.clear();
       }
     });
     submenu.add(item);
@@ -249,14 +253,17 @@ public class GenericObjectEditorHistory
     // current history
     final HistorySelectionListener fListener = listener;
     for (i = 0; i < m_History.size(); i++) {
-      if (i == 0)
-	submenu.addSeparator();
+      if (i == 0) {
+        submenu.addSeparator();
+      }
       final Object history = m_History.get(i);
       item = new JMenuItem(generateMenuItemCaption(history));
       item.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  fListener.historySelected(new HistorySelectionEvent(fListener, history));
-	}
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          fListener.historySelected(new HistorySelectionEvent(fListener,
+            history));
+        }
       });
       submenu.add(item);
     }

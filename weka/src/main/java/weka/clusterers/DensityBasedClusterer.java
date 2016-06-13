@@ -26,29 +26,28 @@ import weka.core.Instance;
 /**
  * Interface for clusterers that can estimate the density for a given instance.
  * Implementations will typically extend AbstractDensityBasedClusterer.
- *
- * @author   Mark Hall (mhall@cs.waikato.ac.nz)
+ * 
+ * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version  $Revision: 8034 $
+ * @version $Revision: 9379 $
  */
 public interface DensityBasedClusterer extends Clusterer {
 
   /**
    * Returns the prior probability of each cluster.
-   *
+   * 
    * @return the prior probability for each cluster
-   * @exception Exception if priors could not be 
-   * returned successfully
+   * @exception Exception if priors could not be returned successfully
    */
   double[] clusterPriors() throws Exception;
 
   /**
-   * Computes the log of the conditional density (per cluster) for a given instance.
+   * Computes the log of the conditional density (per cluster) for a given
+   * instance.
    * 
    * @param instance the instance to compute the density for
    * @return an array containing the estimated densities
-   * @exception Exception if the density could not be computed
-   * successfully
+   * @exception Exception if the density could not be computed successfully
    */
   double[] logDensityPerClusterForInstance(Instance instance) throws Exception;
 
@@ -61,12 +60,22 @@ public interface DensityBasedClusterer extends Clusterer {
    */
   double logDensityForInstance(Instance instance) throws Exception;
 
-  /** 
+  /**
    * Returns the logs of the joint densities for a given instance.
-   *
-   * @param inst the instance 
+   * 
+   * @param inst the instance
    * @return the array of values
    * @exception Exception if values could not be computed
    */
   double[] logJointDensitiesForInstance(Instance inst) throws Exception;
+
+  /**
+   * Returns the cluster probability distribution for an instance.
+   * 
+   * @param instance the instance to be clustered
+   * @return the probability distribution
+   * @throws Exception if computation fails
+   */
+  @Override
+  double[] distributionForInstance(Instance instance) throws Exception;
 }

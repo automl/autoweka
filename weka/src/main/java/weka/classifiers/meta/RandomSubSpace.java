@@ -124,7 +124,7 @@ import weka.filters.unsupervised.attribute.Remove;
  *
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
  * @author Peter Reutemann (fracpete@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 11461 $
  */
 public class RandomSubSpace
   extends RandomizableParallelIteratedSingleClassifierEnhancer 
@@ -207,8 +207,8 @@ public class RandomSubSpace
    *
    * @return 		an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
-    Vector result = new Vector();
+  public Enumeration<Option> listOptions() {
+    Vector<Option> result = new Vector<Option>();
 
     result.addElement(new Option(
 	"\tSize of each subspace:\n"
@@ -216,10 +216,7 @@ public class RandomSubSpace
 	+ "\t\t>=1: absolute number of attributes\n",
 	"P", 1, "-P"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      result.addElement(enu.nextElement());
-    }
+    result.addAll(Collections.list(super.listOptions()));
     
     return result.elements();
   }
@@ -292,6 +289,8 @@ public class RandomSubSpace
       setSubSpaceSize(0.5);
 
     super.setOptions(options);
+    
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -300,18 +299,12 @@ public class RandomSubSpace
    * @return 		an array of strings suitable for passing to setOptions
    */
   public String [] getOptions() {
-    Vector        result;
-    String[]      options;
-    int           i;
-    
-    result  = new Vector();
+    Vector<String>        result = new Vector<String>();
 
     result.add("-P");
     result.add("" + getSubSpaceSize());
     
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
+    Collections.addAll(result, super.getOptions());
 
     return (String[]) result.toArray(new String[result.size()]);
   }
@@ -401,10 +394,9 @@ public class RandomSubSpace
     // can classifier handle the data?
     getCapabilities().testWithFail(data);
 
-    // remove instances with missing class
+    // get fresh Instances object
     m_data = new Instances(data);
-    m_data.deleteWithMissingClass();
-    
+       
     // only class? -> build ZeroR model
     if (m_data.numAttributes() == 1) {
       System.err.println(
@@ -483,9 +475,14 @@ public class RandomSubSpace
     
     double[] sums = new double [instance.numClasses()], newProbs; 
     
+    double numPreds = 0;
     for (int i = 0; i < m_NumIterations; i++) {
       if (instance.classAttribute().isNumeric() == true) {
-	sums[0] += m_Classifiers[i].classifyInstance(instance);
+        double pred = m_Classifiers[i].classifyInstance(instance);
+        if (!Utils.isMissingValue(pred)) {
+          sums[0] += pred;
+          numPreds++;
+        }
       } else {
 	newProbs = m_Classifiers[i].distributionForInstance(instance);
 	for (int j = 0; j < newProbs.length; j++)
@@ -493,7 +490,11 @@ public class RandomSubSpace
       }
     }
     if (instance.classAttribute().isNumeric() == true) {
-      sums[0] /= (double)m_NumIterations;
+      if (numPreds == 0) {
+        sums[0] = Utils.missingValue();
+      } else {
+        sums[0] /= numPreds;
+      }
       return sums;
     } else if (Utils.eq(Utils.sum(sums), 0)) {
       return sums;
@@ -537,7 +538,7 @@ public class RandomSubSpace
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 11461 $");
   }
 
   /**

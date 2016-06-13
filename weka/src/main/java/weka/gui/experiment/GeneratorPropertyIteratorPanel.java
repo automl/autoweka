@@ -34,31 +34,31 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import weka.core.FastVector;
 import weka.experiment.Experiment;
 import weka.experiment.PropertyNode;
 import weka.gui.GenericArrayEditor;
 import weka.gui.PropertySelectorDialog;
 
-/** 
- * This panel controls setting a list of values for an arbitrary
- * resultgenerator property for an experiment to iterate over.
- *
+/**
+ * This panel controls setting a list of values for an arbitrary resultgenerator
+ * property for an experiment to iterate over.
+ * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10295 $
  */
-public class GeneratorPropertyIteratorPanel
-  extends JPanel
-  implements ActionListener {
+public class GeneratorPropertyIteratorPanel extends JPanel implements
+  ActionListener {
 
   /** for serialization */
   private static final long serialVersionUID = -6026938995241632139L;
@@ -75,16 +75,17 @@ public class GeneratorPropertyIteratorPanel
   /** The experiment this all applies to */
   protected Experiment m_Exp;
 
-  /** Listeners who want to be notified about editing status of this
-      panel */
-  protected FastVector m_Listeners = new FastVector();
-  
+  /**
+   * Listeners who want to be notified about editing status of this panel
+   */
+  protected ArrayList<ActionListener> m_Listeners = new ArrayList<ActionListener>();
+
   /**
    * Creates the property iterator panel initially disabled.
    */
   public GeneratorPropertyIteratorPanel() {
 
-    String [] options = {"Disabled", "Enabled"};
+    String[] options = { "Disabled", "Enabled" };
     ComboBoxModel cbm = new DefaultComboBoxModel(options);
     m_StatusBox.setModel(cbm);
     m_StatusBox.setSelectedIndex(0);
@@ -96,35 +97,43 @@ public class GeneratorPropertyIteratorPanel
     GridBagLayout gb = new GridBagLayout();
     GridBagConstraints constraints = new GridBagConstraints();
     buttons.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
-    //    buttons.setLayout(new GridLayout(1, 2));
+    // buttons.setLayout(new GridLayout(1, 2));
     buttons.setLayout(gb);
-    constraints.gridx=0;constraints.gridy=0;constraints.weightx=5;
+    constraints.gridx = 0;
+    constraints.gridy = 0;
+    constraints.weightx = 5;
     constraints.fill = GridBagConstraints.HORIZONTAL;
-    constraints.gridwidth=1;constraints.gridheight=1;
-    constraints.insets = new Insets(0,2,0,2);
-    buttons.add(m_StatusBox,constraints);
-    constraints.gridx=1;constraints.gridy=0;constraints.weightx=5;
-    constraints.gridwidth=1;constraints.gridheight=1;
-    buttons.add(m_ConfigureBut,constraints);
+    constraints.gridwidth = 1;
+    constraints.gridheight = 1;
+    constraints.insets = new Insets(0, 2, 0, 2);
+    buttons.add(m_StatusBox, constraints);
+    constraints.gridx = 1;
+    constraints.gridy = 0;
+    constraints.weightx = 5;
+    constraints.gridwidth = 1;
+    constraints.gridheight = 1;
+    buttons.add(m_ConfigureBut, constraints);
     buttons.setMaximumSize(new Dimension(buttons.getMaximumSize().width,
-					   buttons.getMinimumSize().height));
+      buttons.getMinimumSize().height));
     setBorder(BorderFactory.createTitledBorder("Generator properties"));
     setLayout(new BorderLayout());
     add(buttons, BorderLayout.NORTH);
-    //    add(Box.createHorizontalGlue());
-    m_ArrayEditor.setBorder(BorderFactory.createEtchedBorder());
+    // add(Box.createHorizontalGlue());
+    ((JComponent) m_ArrayEditor.getCustomEditor()).setBorder(BorderFactory
+      .createEtchedBorder());
     m_ArrayEditor.addPropertyChangeListener(new PropertyChangeListener() {
+      @Override
       public void propertyChange(PropertyChangeEvent e) {
-	System.err.println("Updating experiment property iterator array");
-	m_Exp.setPropertyArray(m_ArrayEditor.getValue());
+        System.err.println("Updating experiment property iterator array");
+        m_Exp.setPropertyArray(m_ArrayEditor.getValue());
       }
     });
-    add(m_ArrayEditor, BorderLayout.CENTER);
+    add(m_ArrayEditor.getCustomEditor(), BorderLayout.CENTER);
   }
 
   /**
    * Creates the property iterator panel and sets the experiment.
-   *
+   * 
    * @param exp a value of type 'Experiment'
    */
   public GeneratorPropertyIteratorPanel(Experiment exp) {
@@ -134,8 +143,9 @@ public class GeneratorPropertyIteratorPanel
   }
 
   /**
-   * Returns true if the editor is currently in an active status---that
-   * is the array is active and able to be edited.
+   * Returns true if the editor is currently in an active status---that is the
+   * array is active and able to be edited.
+   * 
    * @return true if editor is active
    */
   public boolean getEditorActive() {
@@ -148,7 +158,7 @@ public class GeneratorPropertyIteratorPanel
 
   /**
    * Sets the experiment which will have the custom properties edited.
-   *
+   * 
    * @param exp a value of type 'Experiment'
    */
   public void setExperiment(Experiment exp) {
@@ -168,29 +178,29 @@ public class GeneratorPropertyIteratorPanel
 
   /**
    * Gets the user to select a property of the current resultproducer.
-   *
+   * 
    * @return APPROVE_OPTION if the selection went OK, otherwise the selection
-   * was cancelled.
+   *         was cancelled.
    */
   protected int selectProperty() {
-    
+
     final PropertySelectorDialog jd = new PropertySelectorDialog(null,
-					  m_Exp.getResultProducer());
+      m_Exp.getResultProducer());
     jd.setLocationRelativeTo(this);
     int result = jd.showDialog();
     if (result == PropertySelectorDialog.APPROVE_OPTION) {
       System.err.println("Property Selected");
-      PropertyNode [] path = jd.getPath();
+      PropertyNode[] path = jd.getPath();
       Object value = path[path.length - 1].value;
       PropertyDescriptor property = path[path.length - 1].property;
       // Make an array containing the propertyValue
-      Class propertyClass = property.getPropertyType();
+      Class<?> propertyClass = property.getPropertyType();
       m_Exp.setPropertyPath(path);
       m_Exp.setPropertyArray(Array.newInstance(propertyClass, 1));
-      Array.set(m_Exp.getPropertyArray(), 0, value);	
+      Array.set(m_Exp.getPropertyArray(), 0, value);
       // Pass it to the arrayeditor
       m_ArrayEditor.setValue(m_Exp.getPropertyArray());
-      m_ArrayEditor.repaint();
+      m_ArrayEditor.getCustomEditor().repaint();
       System.err.println("Set new array to array editor");
     } else {
       System.err.println("Cancelled");
@@ -200,9 +210,10 @@ public class GeneratorPropertyIteratorPanel
 
   /**
    * Handles the various button clicking type activities.
-   *
+   * 
    * @param e a value of type 'ActionEvent'
    */
+  @Override
   public void actionPerformed(ActionEvent e) {
 
     if (e.getSource() == m_ConfigureBut) {
@@ -210,49 +221,49 @@ public class GeneratorPropertyIteratorPanel
     } else if (e.getSource() == m_StatusBox) {
       // notify any listeners
       for (int i = 0; i < m_Listeners.size(); i++) {
-	ActionListener temp = ((ActionListener)m_Listeners.elementAt(i));
-	temp.actionPerformed(new ActionEvent(this, 
-					     ActionEvent.ACTION_PERFORMED, 
-					     "Editor status change"));
+        ActionListener temp = (m_Listeners.get(i));
+        temp.actionPerformed(new ActionEvent(this,
+          ActionEvent.ACTION_PERFORMED, "Editor status change"));
       }
 
       // Toggles whether the custom property is used
       if (m_StatusBox.getSelectedIndex() == 0) {
-	m_Exp.setUsePropertyIterator(false);
-	m_ConfigureBut.setEnabled(false);
-	m_ArrayEditor.setEnabled(false);
-	m_ArrayEditor.setValue(null);
-	validate();
+        m_Exp.setUsePropertyIterator(false);
+        m_ConfigureBut.setEnabled(false);
+        m_ArrayEditor.getCustomEditor().setEnabled(false);
+        m_ArrayEditor.setValue(null);
+        validate();
       } else {
-	if (m_Exp.getPropertyArray() == null) {
-	  selectProperty();
-	}
-	if (m_Exp.getPropertyArray() == null) {
-	  m_StatusBox.setSelectedIndex(0);
-	} else {
-	  m_Exp.setUsePropertyIterator(true);
-	  m_ConfigureBut.setEnabled(true);
-	  m_ArrayEditor.setEnabled(true);
-	}
-	validate();
+        if (m_Exp.getPropertyArray() == null) {
+          selectProperty();
+        }
+        if (m_Exp.getPropertyArray() == null) {
+          m_StatusBox.setSelectedIndex(0);
+        } else {
+          m_Exp.setUsePropertyIterator(true);
+          m_ConfigureBut.setEnabled(true);
+          m_ArrayEditor.getCustomEditor().setEnabled(true);
+        }
+        validate();
       }
     }
   }
 
   /**
    * Add a listener interested in kowing about editor status changes
+   * 
    * @param newA an listener to add
    */
   public void addActionListener(ActionListener newA) {
-    m_Listeners.addElement(newA);
+    m_Listeners.add(newA);
   }
 
   /**
    * Tests out the panel from the command line.
-   *
+   * 
    * @param args ignored.
    */
-  public static void main(String [] args) {
+  public static void main(String[] args) {
 
     try {
       final JFrame jf = new JFrame("Generator Property Iterator");
@@ -260,15 +271,16 @@ public class GeneratorPropertyIteratorPanel
       GeneratorPropertyIteratorPanel gp = new GeneratorPropertyIteratorPanel();
       jf.getContentPane().add(gp, BorderLayout.CENTER);
       jf.addWindowListener(new WindowAdapter() {
-	public void windowClosing(WindowEvent e) {
-	  jf.dispose();
-	  System.exit(0);
-	}
+        @Override
+        public void windowClosing(WindowEvent e) {
+          jf.dispose();
+          System.exit(0);
+        }
       });
       jf.pack();
       jf.setVisible(true);
       System.err.println("Short nap");
-      Thread.currentThread().sleep(3000);
+      Thread.sleep(3000);
       System.err.println("Done");
       gp.setExperiment(new Experiment());
     } catch (Exception ex) {

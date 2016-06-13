@@ -36,29 +36,29 @@ import weka.gui.PropertySheetPanel;
 
 /**
  * GUI Customizer for the incremental classifier evaluator bean
- *
+ * 
  * @author Mark Hall (mhall{[at}]pentaho{[dot]}org
- * @version $Revision: 8034 $
+ * @version $Revision: 10220 $
  */
-public class IncrementalClassifierEvaluatorCustomizer
-  extends JPanel
-  implements BeanCustomizer, CustomizerCloseRequester, 
-  CustomizerClosingListener {
+public class IncrementalClassifierEvaluatorCustomizer extends JPanel implements
+  BeanCustomizer, CustomizerCloseRequester, CustomizerClosingListener {
+
+  /** Added ID to avoid warning */
+  private static final long serialVersionUID = 443506897387629418L;
 
   /** for serialization */
-  //  private static final long serialVersionUID = 1229878140258668581L;
+  // private static final long serialVersionUID = 1229878140258668581L;
 
-  private PropertyChangeSupport m_pcSupport = 
-    new PropertyChangeSupport(this);
+  private final PropertyChangeSupport m_pcSupport = new PropertyChangeSupport(
+    this);
 
-  private PropertySheetPanel m_ieEditor = 
-    new PropertySheetPanel();
-  
+  private final PropertySheetPanel m_ieEditor = new PropertySheetPanel();
+
   private IncrementalClassifierEvaluator m_evaluator;
   private ModifyListener m_modifyListener;
-  
+
   private Window m_parent;
-  
+
   private int m_freqBackup;
   private boolean m_perClassBackup;
 
@@ -67,31 +67,34 @@ public class IncrementalClassifierEvaluatorCustomizer
 
     setLayout(new BorderLayout());
     add(m_ieEditor, BorderLayout.CENTER);
-    add(new javax.swing.JLabel("IncrementalClassifierEvaluatorCustomizer"), 
-	BorderLayout.NORTH);
+    add(new javax.swing.JLabel("IncrementalClassifierEvaluatorCustomizer"),
+      BorderLayout.NORTH);
     addButtons();
   }
-  
+
   private void addButtons() {
     JButton okBut = new JButton("OK");
     JButton cancelBut = new JButton("Cancel");
-    
+
     JPanel butHolder = new JPanel();
     butHolder.setLayout(new GridLayout(1, 2));
-    butHolder.add(okBut); butHolder.add(cancelBut);
+    butHolder.add(okBut);
+    butHolder.add(cancelBut);
     add(butHolder, BorderLayout.SOUTH);
-    
+
     okBut.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
-        m_modifyListener.
-        setModifiedStatus(IncrementalClassifierEvaluatorCustomizer.this, true);
+        m_modifyListener.setModifiedStatus(
+          IncrementalClassifierEvaluatorCustomizer.this, true);
         if (m_parent != null) {
           m_parent.dispose();
         }
       }
     });
-    
+
     cancelBut.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         customizerClosing();
         if (m_parent != null) {
@@ -100,14 +103,15 @@ public class IncrementalClassifierEvaluatorCustomizer
       }
     });
   }
-  
+
   /**
    * Set the object to be edited
-   *
+   * 
    * @param object a IncrementalClassifierEvaluator object
    */
+  @Override
   public void setObject(Object object) {
-    m_evaluator = ((IncrementalClassifierEvaluator)object);
+    m_evaluator = ((IncrementalClassifierEvaluator) object);
     m_ieEditor.setTarget(m_evaluator);
     m_freqBackup = m_evaluator.getStatusFrequency();
     m_perClassBackup = m_evaluator.getOutputPerClassInfoRetrievalStats();
@@ -115,18 +119,20 @@ public class IncrementalClassifierEvaluatorCustomizer
 
   /**
    * Add a property change listener
-   *
+   * 
    * @param pcl a <code>PropertyChangeListener</code> value
    */
+  @Override
   public void addPropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.addPropertyChangeListener(pcl);
   }
-  
+
   /**
    * Remove a property change listener
-   *
+   * 
    * @param pcl a <code>PropertyChangeListener</code> value
    */
+  @Override
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.removePropertyChangeListener(pcl);
   }

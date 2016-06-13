@@ -22,7 +22,7 @@
 package weka.filters.unsupervised.attribute;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -38,78 +38,88 @@ import weka.core.Utils;
 import weka.filters.SimpleStreamFilter;
 
 /**
- <!-- globalinfo-start -->
- * This filter is used for renaming attribute names.<br/>
+ * <!-- globalinfo-start --> This filter is used for renaming attribute names.<br/>
  * Regular expressions can be used in the matching and replacing.<br/>
  * See Javadoc of java.util.regex.Pattern class for more information:<br/>
  * http://java.sun.com/javase/6/docs/api/java/util/regex/Pattern.html
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -find &lt;regexp&gt;
+ * <pre>
+ * -find &lt;regexp&gt;
  *  The regular expression that the attribute names must match.
- *  (default: ([\s\S]+))</pre>
+ *  (default: ([\s\S]+))
+ * </pre>
  * 
- * <pre> -replace &lt;string&gt;
+ * <pre>
+ * -replace &lt;string&gt;
  *  The string to replace the regular expression of matching attributes with.
  *  Cannot be used in conjunction with '-remove'.
- *  (default: $0)</pre>
+ *  (default: $0)
+ * </pre>
  * 
- * <pre> -remove
+ * <pre>
+ * -remove
  *  In case the matching string needs to be removed instead of replaced.
  *  Cannot be used in conjunction with '-replace &lt;string&gt;'.
- *  (default: off)</pre>
+ *  (default: off)
+ * </pre>
  * 
- * <pre> -all
+ * <pre>
+ * -all
  *  Replaces all occurrences instead of just the first.
- *  (default: only first occurrence)</pre>
+ *  (default: only first occurrence)
+ * </pre>
  * 
- * <pre> -R &lt;range&gt;
+ * <pre>
+ * -R &lt;range&gt;
  *  The attribute range to work on.
  * This is a comma separated list of attribute indices, with "first" and "last" valid values.
  *  Specify an inclusive range with "-".
  *  E.g: "first-3,5,6-10,last".
- *  (default: first-last)</pre>
+ *  (default: first-last)
+ * </pre>
  * 
- * <pre> -V
+ * <pre>
+ * -V
  *  Inverts the attribute selection range.
- *  (default: off)</pre>
+ *  (default: off)
+ * </pre>
  * 
- <!-- options-end -->
- *
- * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * <!-- options-end -->
+ * 
+ * @author fracpete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 10215 $
  */
-public class RenameAttribute
-  extends SimpleStreamFilter {
+public class RenameAttribute extends SimpleStreamFilter {
 
   /** for serialization. */
   private static final long serialVersionUID = 4216491776378279596L;
 
   /** the regular expression that the attribute names have to match. */
   protected String m_Find = "([\\s\\S]+)";
-  
+
   /** the regular expression to replace the attribute name with. */
   protected String m_Replace = "$0";
-  
+
   /** the attribute range to work on. */
   protected Range m_AttributeIndices = new Range("first-last");
 
   /** whether to replace all occurrences or just the first. */
   protected boolean m_ReplaceAll = false;
-  
+
   /**
    * Returns a string describing this filter.
-   *
-   * @return 		a description of the filter suitable for
-   * 			displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the filter suitable for displaying in the
+   *         explorer/experimenter gui
    */
+  @Override
   public String globalInfo() {
-    return 
-        "This filter is used for renaming attribute names.\n"
+    return "This filter is used for renaming attribute names.\n"
       + "Regular expressions can be used in the matching and replacing.\n"
       + "See Javadoc of java.util.regex.Pattern class for more information:\n"
       + "http://java.sun.com/javase/6/docs/api/java/util/regex/Pattern.html";
@@ -117,164 +127,181 @@ public class RenameAttribute
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
-    Vector	result;
-    
-    result = new Vector();
+  @Override
+  public Enumeration<Option> listOptions() {
+
+    Vector<Option> result = new Vector<Option>(6);
 
     result.addElement(new Option(
-	"\tThe regular expression that the attribute names must match.\n"
-	+ "\t(default: ([\\s\\S]+))",
-	"find", 1, "-find <regexp>"));
+      "\tThe regular expression that the attribute names must match.\n"
+        + "\t(default: ([\\s\\S]+))", "find", 1, "-find <regexp>"));
 
     result.addElement(new Option(
-	"\tThe string to replace the regular expression of matching attributes with.\n"
-	+ "\tCannot be used in conjunction with '-remove'.\n"
-	+ "\t(default: $0)",
-	"replace", 1, "-replace <string>"));
+      "\tThe string to replace the regular expression of matching attributes with.\n"
+        + "\tCannot be used in conjunction with '-remove'.\n"
+        + "\t(default: $0)", "replace", 1, "-replace <string>"));
 
     result.addElement(new Option(
-	"\tIn case the matching string needs to be removed instead of replaced.\n"
-	+ "\tCannot be used in conjunction with '-replace <string>'.\n"
-	+ "\t(default: off)",
-	"remove", 0, "-remove"));
+      "\tIn case the matching string needs to be removed instead of replaced.\n"
+        + "\tCannot be used in conjunction with '-replace <string>'.\n"
+        + "\t(default: off)", "remove", 0, "-remove"));
 
     result.addElement(new Option(
-	"\tReplaces all occurrences instead of just the first.\n"
-	+ "\t(default: only first occurrence)",
-	"all", 0, "-all"));
+      "\tReplaces all occurrences instead of just the first.\n"
+        + "\t(default: only first occurrence)", "all", 0, "-all"));
 
-    result.addElement(new Option(
-	"\tThe attribute range to work on.\n"
-	+ "This is a comma separated list of attribute indices, with "
-        + "\"first\" and \"last\" valid values.\n"
-        + "\tSpecify an inclusive range with \"-\".\n"
-        + "\tE.g: \"first-3,5,6-10,last\".\n"
-	+ "\t(default: first-last)",
-	"R", 1, "-R <range>"));
+    result.addElement(new Option("\tThe attribute range to work on.\n"
+      + "This is a comma separated list of attribute indices, with "
+      + "\"first\" and \"last\" valid values.\n"
+      + "\tSpecify an inclusive range with \"-\".\n"
+      + "\tE.g: \"first-3,5,6-10,last\".\n" + "\t(default: first-last)", "R",
+      1, "-R <range>"));
 
-    result.addElement(new Option(
-	"\tInverts the attribute selection range.\n"
-	+ "\t(default: off)",
-	"V", 0, "-V"));
+    result.addElement(new Option("\tInverts the attribute selection range.\n"
+      + "\t(default: off)", "V", 0, "-V"));
+
+    result.addAll(Collections.list(super.listOptions()));
 
     return result.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -find &lt;regexp&gt;
+   * <pre>
+   * -find &lt;regexp&gt;
    *  The regular expression that the attribute names must match.
-   *  (default: ([\s\S]+))</pre>
+   *  (default: ([\s\S]+))
+   * </pre>
    * 
-   * <pre> -replace &lt;string&gt;
+   * <pre>
+   * -replace &lt;string&gt;
    *  The string to replace the regular expression of matching attributes with.
    *  Cannot be used in conjunction with '-remove'.
-   *  (default: $0)</pre>
+   *  (default: $0)
+   * </pre>
    * 
-   * <pre> -remove
+   * <pre>
+   * -remove
    *  In case the matching string needs to be removed instead of replaced.
    *  Cannot be used in conjunction with '-replace &lt;string&gt;'.
-   *  (default: off)</pre>
+   *  (default: off)
+   * </pre>
    * 
-   * <pre> -all
+   * <pre>
+   * -all
    *  Replaces all occurrences instead of just the first.
-   *  (default: only first occurrence)</pre>
+   *  (default: only first occurrence)
+   * </pre>
    * 
-   * <pre> -R &lt;range&gt;
+   * <pre>
+   * -R &lt;range&gt;
    *  The attribute range to work on.
    * This is a comma separated list of attribute indices, with "first" and "last" valid values.
    *  Specify an inclusive range with "-".
    *  E.g: "first-3,5,6-10,last".
-   *  (default: first-last)</pre>
+   *  (default: first-last)
+   * </pre>
    * 
-   * <pre> -V
+   * <pre>
+   * -V
    *  Inverts the attribute selection range.
-   *  (default: off)</pre>
+   *  (default: off)
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    String	tmpStr;
-    
-    tmpStr = Utils.getOption("find", options);
-    if (tmpStr.length() != 0)
+
+    String tmpStr = Utils.getOption("find", options);
+    if (tmpStr.length() != 0) {
       setFind(tmpStr);
-    else
+    } else {
       setFind("([\\s\\S]+)");
-    
+    }
+
     if (Utils.getFlag("remove", options)) {
       setReplace("");
-    }
-    else {
+    } else {
       tmpStr = Utils.getOption("replace", options);
-      if (tmpStr.length() > 0)
-	setReplace(tmpStr);
-      else
-	setReplace("$0");
+      if (tmpStr.length() > 0) {
+        setReplace(tmpStr);
+      } else {
+        setReplace("$0");
+      }
     }
 
     setReplaceAll(Utils.getFlag("all", options));
-    
+
     tmpStr = Utils.getOption("R", options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setAttributeIndices(tmpStr);
-    else
+    } else {
       setAttributeIndices("first-last");
+    }
 
     setInvertSelection(Utils.getFlag("V", options));
-    
-    if (getInputFormat() != null)
+
+    if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
+    }
+
+    super.setOptions(options);
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of the filter.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
+  @Override
   public String[] getOptions() {
-    Vector<String>	result;
 
-    result = new Vector<String>(Arrays.asList(super.getOptions()));
-    
+    Vector<String> result = new Vector<String>();
+
     result.add("-find");
     result.add(getFind());
-    
+
     if (getReplace().length() > 0) {
       result.add("-replace");
       result.add(getReplace());
-    }
-    else {
+    } else {
       result.add("-remove");
     }
-    
-    if (getReplaceAll())
+
+    if (getReplaceAll()) {
       result.add("-all");
-    
+    }
+
     result.add("-R");
     result.add(getAttributeIndices());
-    
-    if (getInvertSelection())
+
+    if (getInvertSelection()) {
       result.add("-V");
+    }
+
+    Collections.addAll(result, super.getOptions());
 
     return result.toArray(new String[result.size()]);
   }
 
   /**
    * Sets the regular expression that the attribute names must match.
-   *
-   * @param value 	the regular expression
+   * 
+   * @param value the regular expression
    */
   public void setFind(String value) {
     m_Find = value;
@@ -282,8 +309,8 @@ public class RenameAttribute
 
   /**
    * Returns the current regular expression for .
-   *
-   * @return 		a string containing a comma separated list of ranges
+   * 
+   * @return a string containing a comma separated list of ranges
    */
   public String getFind() {
     return m_Find;
@@ -291,9 +318,9 @@ public class RenameAttribute
 
   /**
    * Returns the tip text for this property.
-   *
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String findTipText() {
     return "The regular expression that the attribute names must match.";
@@ -301,8 +328,8 @@ public class RenameAttribute
 
   /**
    * Sets the regular expression to replace matching attribute names with.
-   *
-   * @param value 	the regular expression
+   * 
+   * @param value the regular expression
    */
   public void setReplace(String value) {
     m_Replace = value;
@@ -310,8 +337,8 @@ public class RenameAttribute
 
   /**
    * Returns the regular expression to replace matching attribute names with.
-   *
-   * @return 		the regular expression
+   * 
+   * @return the regular expression
    */
   public String getReplace() {
     return m_Replace;
@@ -319,20 +346,19 @@ public class RenameAttribute
 
   /**
    * Returns the tip text for this property.
-   *
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String replaceTipText() {
-    return 
-        "The regular expression to use for replacing the matching attribute "
+    return "The regular expression to use for replacing the matching attribute "
       + "names with.";
   }
 
   /**
    * Sets whether to replace all occurrences or just the first one.
-   *
-   * @param value 	if true then all occurrences are replace
+   * 
+   * @param value if true then all occurrences are replace
    */
   public void setReplaceAll(boolean value) {
     m_ReplaceAll = value;
@@ -340,8 +366,8 @@ public class RenameAttribute
 
   /**
    * Returns whether all occurrences are replaced or just the first one.
-   *
-   * @return 		true if all occurrences are replaced
+   * 
+   * @return true if all occurrences are replaced
    */
   public boolean getReplaceAll() {
     return m_ReplaceAll;
@@ -349,23 +375,21 @@ public class RenameAttribute
 
   /**
    * Returns the tip text for this property.
-   *
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String replaceAllTipText() {
-    return 
-        "If set to true, then all occurrences of the match will be replaced; "
+    return "If set to true, then all occurrences of the match will be replaced; "
       + "otherwise only the first.";
   }
 
   /**
    * Sets which attributes are to be acted on.
-   *
-   * @param value 	a string representing the list of attributes. Since
-   * 			the string will typically come from a user, attributes 
-   * 			are indexed from1. <br/>
-   * 			eg: first-3,5,6-last
+   * 
+   * @param value a string representing the list of attributes. Since the string
+   *          will typically come from a user, attributes are indexed from1. <br/>
+   *          eg: first-3,5,6-last
    */
   public void setAttributeIndices(String value) {
     m_AttributeIndices.setRanges(value);
@@ -373,7 +397,7 @@ public class RenameAttribute
 
   /**
    * Gets the current range selection.
-   *
+   * 
    * @return a string containing a comma separated list of ranges
    */
   public String getAttributeIndices() {
@@ -382,13 +406,12 @@ public class RenameAttribute
 
   /**
    * Returns the tip text for this property.
-   *
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String attributeIndicesTipText() {
-    return 
-        "Specify range of attributes to act on; "
+    return "Specify range of attributes to act on; "
       + "this is a comma separated list of attribute indices, with "
       + "\"first\" and \"last\" valid values; specify an inclusive "
       + "range with \"-\"; eg: \"first-3,5,6-10,last\".";
@@ -396,8 +419,8 @@ public class RenameAttribute
 
   /**
    * Sets whether to invert the selection of the attributes.
-   *
-   * @param value 	if true then the selection is inverted
+   * 
+   * @param value if true then the selection is inverted
    */
   public void setInvertSelection(boolean value) {
     m_AttributeIndices.setInvert(value);
@@ -405,8 +428,8 @@ public class RenameAttribute
 
   /**
    * Gets whether to invert the selection of the attributes.
-   *
-   * @return 		true if the selection is inverted
+   * 
+   * @return true if the selection is inverted
    */
   public boolean getInvertSelection() {
     return m_AttributeIndices.getInvert();
@@ -414,22 +437,22 @@ public class RenameAttribute
 
   /**
    * Returns the tip text for this property.
-   *
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String invertSelectionTipText() {
-    return 
-        "If set to true, the selection will be inverted; eg: the attribute "
+    return "If set to true, the selection will be inverted; eg: the attribute "
       + "indices '2-4' then mean everything apart from '2-4'.";
   }
 
-  /** 
+  /**
    * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
+   * 
+   * @return the capabilities of this object
+   * @see Capabilities
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
     result.disableAll();
@@ -437,79 +460,83 @@ public class RenameAttribute
     // attributes
     result.enableAllAttributes();
     result.enable(Capability.MISSING_VALUES);
-    
+
     // class
     result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
     result.enable(Capability.NO_CLASS);
-    
+
     return result;
   }
-  
+
   /**
-   * Determines the output format based on the input format and returns 
-   * this. In case the output format cannot be returned immediately, i.e.,
-   * hasImmediateOutputFormat() returns false, then this method will called
-   * from batchFinished() after the call of preprocess(Instances), in which,
-   * e.g., statistics for the actual processing step can be gathered.
-   *
-   * @param inputFormat     the input format to base the output format on
-   * @return                the output format
-   * @throws Exception      in case the determination goes wrong
+   * Determines the output format based on the input format and returns this. In
+   * case the output format cannot be returned immediately, i.e.,
+   * hasImmediateOutputFormat() returns false, then this method will called from
+   * batchFinished() after the call of preprocess(Instances), in which, e.g.,
+   * statistics for the actual processing step can be gathered.
+   * 
+   * @param inputFormat the input format to base the output format on
+   * @return the output format
+   * @throws Exception in case the determination goes wrong
    */
-  protected Instances determineOutputFormat(Instances inputFormat) throws Exception {
-    Instances			result;
-    Attribute			att;
-    ArrayList<Attribute>	atts;
-    int				i;
-    
+  @Override
+  protected Instances determineOutputFormat(Instances inputFormat)
+    throws Exception {
+    Instances result;
+    Attribute att;
+    ArrayList<Attribute> atts;
+    int i;
+
     m_AttributeIndices.setUpper(inputFormat.numAttributes() - 1);
-    
+
     // generate new header
     atts = new ArrayList<Attribute>();
     for (i = 0; i < inputFormat.numAttributes(); i++) {
       att = inputFormat.attribute(i);
       if (m_AttributeIndices.isInRange(i)) {
-	if (m_ReplaceAll)
-	  atts.add(att.copy(att.name().replaceAll(m_Find, m_Replace)));
-	else
-	  atts.add(att.copy(att.name().replaceFirst(m_Find, m_Replace)));
-      }
-      else {
-	atts.add((Attribute) att.copy());
+        if (m_ReplaceAll) {
+          atts.add(att.copy(att.name().replaceAll(m_Find, m_Replace)));
+        } else {
+          atts.add(att.copy(att.name().replaceFirst(m_Find, m_Replace)));
+        }
+      } else {
+        atts.add((Attribute) att.copy());
       }
     }
     result = new Instances(inputFormat.relationName(), atts, 0);
     result.setClassIndex(inputFormat.classIndex());
-    
+
     return result;
   }
 
   /**
-   * processes the given instance (may change the provided instance) and
-   * returns the modified version.
-   *
-   * @param instance    the instance to process
-   * @return            the modified data
-   * @throws Exception  in case the processing goes wrong
+   * processes the given instance (may change the provided instance) and returns
+   * the modified version.
+   * 
+   * @param instance the instance to process
+   * @return the modified data
+   * @throws Exception in case the processing goes wrong
    */
+  @Override
   protected Instance process(Instance instance) throws Exception {
     return (Instance) instance.copy();
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10215 $");
   }
 
   /**
    * Main method for executing this filter.
-   *
-   * @param args 	the arguments to the filter: use -h for help
+   * 
+   * @param args the arguments to the filter: use -h for help
    */
   public static void main(String[] args) {
     runFilter(new RenameAttribute(), args);

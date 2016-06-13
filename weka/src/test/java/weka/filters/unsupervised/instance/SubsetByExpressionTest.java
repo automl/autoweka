@@ -14,26 +14,25 @@
  */
 
 /*
- * Copyright (C) 2008 University of Waikato 
+ * Copyright (C) 2008-2014 University of Waikato 
  */
 
 package weka.filters.unsupervised.instance;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import junit.textui.TestRunner;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.filters.AbstractFilterTest;
 import weka.filters.Filter;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import junit.textui.TestRunner;
 
 /**
  * Tests SubsetByExpression. Run from the command line with: <p/>
  * java weka.filters.unsupervised.instance.SubsetByExpressionTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 11497 $
  */
 public class SubsetByExpressionTest
   extends AbstractFilterTest {
@@ -55,6 +54,7 @@ public class SubsetByExpressionTest
    *
    * @throws Exception 	if an error occurs reading the example instances.
    */
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
     
@@ -67,6 +67,7 @@ public class SubsetByExpressionTest
    * 
    * @return		the filter
    */
+  @Override
   public Filter getFilter() {
     return new SubsetByExpression();
   }
@@ -82,7 +83,7 @@ public class SubsetByExpressionTest
     result.setExpression(expr);
     return result;
   }
-  
+
   /**
    * Tests the "ismissing" functionality.
    */
@@ -114,6 +115,16 @@ public class SubsetByExpressionTest
   }
   
   /**
+   * Tests the "CLASS" shortcut with 'regexp'.
+   */
+  public void testClassRegexp() {
+    m_Filter = getFilter("CLASS regexp '(r|g)'");
+    Instances result = useFilter();
+    assertEquals(m_Instances.numAttributes(), result.numAttributes());
+    assertEquals(15, result.numInstances());
+  }
+  
+  /**
    * Tests the "CLASS" shortcut with 'is' over all class labels, using ' or '.
    */
   public void testClassIs2() {
@@ -124,13 +135,23 @@ public class SubsetByExpressionTest
   }
   
   /**
-   * Tests the "ATT1" shortcut with 'is'.
+   * Tests the "ATT1" placeholder with 'is'.
    */
   public void testAttIs() {
     m_Filter = getFilter("ATT1 is 'r'");
     Instances result = useFilter();
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
     assertEquals(12, result.numInstances());
+  }
+  
+  /**
+   * Tests the "ATT1" placeholder with 'regexp'.
+   */
+  public void testAttRegexp() {
+    m_Filter = getFilter("ATT1 regexp '(r|g)'");
+    Instances result = useFilter();
+    assertEquals(m_Instances.numAttributes(), result.numAttributes());
+    assertEquals(15, result.numInstances());
   }
   
   /**

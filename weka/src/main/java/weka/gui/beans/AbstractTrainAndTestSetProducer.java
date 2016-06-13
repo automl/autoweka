@@ -24,22 +24,22 @@ package weka.gui.beans;
 import java.awt.BorderLayout;
 import java.beans.EventSetDescriptor;
 import java.io.Serializable;
+import java.util.EventListener;
 import java.util.Vector;
 
 import javax.swing.JPanel;
 
 /**
  * Abstract base class for TrainAndTestSetProducers that contains default
- * implementations of add/remove listener methods and defualt
- * visual representation.
- *
+ * implementations of add/remove listener methods and defualt visual
+ * representation.
+ * 
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 8034 $
+ * @version $Revision: 10216 $
  */
-public abstract class AbstractTrainAndTestSetProducer 
-  extends JPanel
-  implements Visible, TrainingSetProducer, TestSetProducer, 
-	     BeanCommon, Serializable, DataSourceListener {
+public abstract class AbstractTrainAndTestSetProducer extends JPanel implements
+  Visible, TrainingSetProducer, TestSetProducer, BeanCommon, Serializable,
+  DataSourceListener {
 
   /** for serialization */
   private static final long serialVersionUID = -1809339823613492037L;
@@ -47,17 +47,16 @@ public abstract class AbstractTrainAndTestSetProducer
   /**
    * Objects listening for trainin set events
    */
-  protected Vector m_trainingListeners = new Vector();
+  protected Vector<EventListener> m_trainingListeners = new Vector<EventListener>();
 
   /**
    * Objects listening for test set events
    */
-  protected Vector m_testListeners = new Vector();
+  protected Vector<EventListener> m_testListeners = new Vector<EventListener>();
 
-  protected BeanVisual m_visual = 
-    new BeanVisual("AbstractTrainingSetProducer", 
-		   BeanVisual.ICON_PATH+"DefaultTrainTest.gif",
-		   BeanVisual.ICON_PATH+"DefaultTrainTest_animated.gif");
+  protected BeanVisual m_visual = new BeanVisual("AbstractTrainingSetProducer",
+    BeanVisual.ICON_PATH + "DefaultTrainTest.gif", BeanVisual.ICON_PATH
+      + "DefaultTrainTest_animated.gif");
 
   /**
    * non null if this object is a target for any events.
@@ -76,140 +75,150 @@ public abstract class AbstractTrainAndTestSetProducer
 
   /**
    * Subclass must implement
-   *
+   * 
    * @param e a <code>DataSetEvent</code> value
    */
+  @Override
   public abstract void acceptDataSet(DataSetEvent e);
 
   /**
    * Add a training set listener
-   *
+   * 
    * @param tsl a <code>TrainingSetListener</code> value
    */
+  @Override
   public synchronized void addTrainingSetListener(TrainingSetListener tsl) {
     m_trainingListeners.addElement(tsl);
   }
 
   /**
    * Remove a training set listener
-   *
+   * 
    * @param tsl a <code>TrainingSetListener</code> value
    */
+  @Override
   public synchronized void removeTrainingSetListener(TrainingSetListener tsl) {
     m_trainingListeners.removeElement(tsl);
   }
 
   /**
    * Add a test set listener
-   *
+   * 
    * @param tsl a <code>TestSetListener</code> value
    */
+  @Override
   public synchronized void addTestSetListener(TestSetListener tsl) {
     m_testListeners.addElement(tsl);
   }
 
   /**
    * Remove a test set listener
-   *
+   * 
    * @param tsl a <code>TestSetListener</code> value
    */
+  @Override
   public synchronized void removeTestSetListener(TestSetListener tsl) {
     m_testListeners.removeElement(tsl);
   }
 
   /**
    * Set the visual for this bean
-   *
+   * 
    * @param newVisual a <code>BeanVisual</code> value
    */
+  @Override
   public void setVisual(BeanVisual newVisual) {
     m_visual = newVisual;
   }
 
   /**
    * Get the visual for this bean
-   *
+   * 
    * @return a <code>BeanVisual</code> value
    */
+  @Override
   public BeanVisual getVisual() {
     return m_visual;
   }
-  
+
   /**
    * Use the default visual for this bean
    */
+  @Override
   public void useDefaultVisual() {
-    m_visual.loadIcons(BeanVisual.ICON_PATH+"DefaultTrainTest.gif",
-		       BeanVisual.ICON_PATH+"DefaultTrainTest_animated.gif");
+    m_visual.loadIcons(BeanVisual.ICON_PATH + "DefaultTrainTest.gif",
+      BeanVisual.ICON_PATH + "DefaultTrainTest_animated.gif");
   }
 
   /**
-   * Returns true if, at this time, 
-   * the object will accept a connection according to the supplied
-   * event name
-   *
+   * Returns true if, at this time, the object will accept a connection
+   * according to the supplied event name
+   * 
    * @param eventName the event
    * @return true if the object will accept a connection
    */
+  @Override
   public boolean connectionAllowed(String eventName) {
     return (m_listenee == null);
   }
 
   /**
-   * Returns true if, at this time, 
-   * the object will accept a connection according to the supplied
-   * EventSetDescriptor
-   *
+   * Returns true if, at this time, the object will accept a connection
+   * according to the supplied EventSetDescriptor
+   * 
    * @param esd the EventSetDescriptor
    * @return true if the object will accept a connection
    */
+  @Override
   public boolean connectionAllowed(EventSetDescriptor esd) {
     return connectionAllowed(esd.getName());
   }
 
   /**
-   * Notify this object that it has been registered as a listener with
-   * a source with respect to the supplied event name
-   *
+   * Notify this object that it has been registered as a listener with a source
+   * with respect to the supplied event name
+   * 
    * @param eventName the event
-   * @param source the source with which this object has been registered as
-   * a listener
+   * @param source the source with which this object has been registered as a
+   *          listener
    */
+  @Override
   public synchronized void connectionNotification(String eventName,
-						  Object source) {
+    Object source) {
     if (connectionAllowed(eventName)) {
       m_listenee = source;
     }
   }
 
   /**
-   * Notify this object that it has been deregistered as a listener with
-   * a source with respect to the supplied event name
-   *
+   * Notify this object that it has been deregistered as a listener with a
+   * source with respect to the supplied event name
+   * 
    * @param eventName the event
-   * @param source the source with which this object has been registered as
-   * a listener
+   * @param source the source with which this object has been registered as a
+   *          listener
    */
+  @Override
   public synchronized void disconnectionNotification(String eventName,
-						     Object source) {
+    Object source) {
     if (m_listenee == source) {
       m_listenee = null;
     }
   }
-  
+
   /**
    * Set a log for this bean
-   *
+   * 
    * @param logger a <code>weka.gui.Logger</code> value
    */
+  @Override
   public void setLog(weka.gui.Logger logger) {
     m_logger = logger;
   }
 
   /**
-   * Stop any processing that the bean might be doing.
-   * Subclass must implement
+   * Stop any processing that the bean might be doing. Subclass must implement
    */
+  @Override
   public abstract void stop();
 }
-

@@ -19,7 +19,6 @@
  *
  */
 
-
 package weka.filters.unsupervised.instance;
 
 import java.util.Enumeration;
@@ -37,27 +36,29 @@ import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
-/** 
- <!-- globalinfo-start -->
- * Randomly shuffles the order of instances passed through it. The random number generator is reset with the seed value whenever a new set of instances is passed in.
+/**
+ * <!-- globalinfo-start --> Randomly shuffles the order of instances passed
+ * through it. The random number generator is reset with the seed value whenever
+ * a new set of instances is passed in.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -S &lt;num&gt;
- *  Specify the random number seed (default 42)</pre>
+ * <pre>
+ * -S &lt;num&gt;
+ *  Specify the random number seed (default 42)
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 12037 $
  */
-public class Randomize 
-  extends Filter 
-  implements UnsupervisedFilter, OptionHandler {
-  
+public class Randomize extends Filter implements UnsupervisedFilter,
+  OptionHandler {
+
   /** for serialization */
   static final long serialVersionUID = 8854479785121877582L;
 
@@ -66,11 +67,12 @@ public class Randomize
 
   /** The current random number generator */
   protected Random m_Random;
-  
+
   /**
    * Returns a string describing this classifier
-   * @return a description of the classifier suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the classifier suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
     return "Randomly shuffles the order of instances passed through it. "
@@ -80,37 +82,40 @@ public class Randomize
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  @Override
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(1);
+    Vector<Option> newVector = new Vector<Option>(1);
 
     newVector.addElement(new Option(
-              "\tSpecify the random number seed (default 42)",
-              "S", 1, "-S <num>"));
+      "\tSpecify the random number seed (default 42)", "S", 1, "-S <num>"));
 
     return newVector.elements();
   }
 
-
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -S &lt;num&gt;
-   *  Specify the random number seed (default 42)</pre>
+   * <pre>
+   * -S &lt;num&gt;
+   *  Specify the random number seed (default 42)
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    
+
     String seedString = Utils.getOption('S', options);
     if (seedString.length() != 0) {
       setRandomSeed(Integer.parseInt(seedString));
@@ -125,26 +130,25 @@ public class Randomize
 
   /**
    * Gets the current settings of the filter.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
+  @Override
+  public String[] getOptions() {
 
-    String [] options = new String [2];
-    int current = 0;
+    Vector<String> options = new Vector<String>();
 
-    options[current++] = "-S"; options[current++] = "" + getRandomSeed();
+    options.add("-S");
+    options.add("" + getRandomSeed());
 
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    return options.toArray(new String[0]);
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String randomSeedTipText() {
     return "Seed for the random number generator.";
@@ -152,30 +156,31 @@ public class Randomize
 
   /**
    * Get the random number generator seed value.
-   *
+   * 
    * @return random number generator seed value.
    */
   public int getRandomSeed() {
-    
+
     return m_Seed;
   }
-  
+
   /**
    * Set the random number generator seed value.
-   *
+   * 
    * @param newRandomSeed value to use as the random number generator seed.
    */
   public void setRandomSeed(int newRandomSeed) {
-    
+
     m_Seed = newRandomSeed;
   }
 
-  /** 
+  /**
    * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
+   * 
+   * @return the capabilities of this object
+   * @see Capabilities
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
     result.disableAll();
@@ -183,24 +188,25 @@ public class Randomize
     // attributes
     result.enableAllAttributes();
     result.enable(Capability.MISSING_VALUES);
-    
+
     // class
     result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
     result.enable(Capability.NO_CLASS);
-    
+
     return result;
   }
-  
+
   /**
    * Sets the format of the input instances.
-   *
+   * 
    * @param instanceInfo an Instances object containing the input instance
-   * structure (any instances contained in the object are ignored - only the
-   * structure is required).
+   *          structure (any instances contained in the object are ignored -
+   *          only the structure is required).
    * @return true if the outputFormat may be collected immediately
    * @throws Exception if format cannot be processed
    */
+  @Override
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     super.setInputFormat(instanceInfo);
@@ -210,14 +216,14 @@ public class Randomize
   }
 
   /**
-   * Input an instance for filtering. Filter requires all
-   * training instances be read before producing output.
-   *
+   * Input an instance for filtering. Filter requires all training instances be
+   * read before producing output.
+   * 
    * @param instance the input instance
-   * @return true if the filtered instance may now be
-   * collected with output().
+   * @return true if the filtered instance may now be collected with output().
    * @throws IllegalStateException if no input structure has been defined
    */
+  @Override
   public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
@@ -237,17 +243,17 @@ public class Randomize
   }
 
   /**
-   * Signify that this batch of input to the filter is finished. If
-   * the filter requires all instances prior to filtering, output()
-   * may now be called to retrieve the filtered instances. Any
-   * subsequent instances filtered should be filtered based on setting
-   * obtained from the first batch (unless the setInputFormat has been
-   * re-assigned or new options have been set). This 
+   * Signify that this batch of input to the filter is finished. If the filter
+   * requires all instances prior to filtering, output() may now be called to
+   * retrieve the filtered instances. Any subsequent instances filtered should
+   * be filtered based on setting obtained from the first batch (unless the
+   * setInputFormat has been re-assigned or new options have been set). This
    * implementation randomizes all the instances received in the batch.
-   *
+   * 
    * @return true if there are instances pending output
-   * @throws IllegalStateException if no input format has been set. 
+   * @throws IllegalStateException if no input format has been set.
    */
+  @Override
   public boolean batchFinished() {
 
     if (getInputFormat() == null) {
@@ -258,30 +264,31 @@ public class Randomize
       getInputFormat().randomize(m_Random);
     }
     for (int i = 0; i < getInputFormat().numInstances(); i++) {
-      push(getInputFormat().instance(i));
+      push(getInputFormat().instance(i), false); // No need to copy because of bufferInput()
     }
     flushInput();
-    
+
     m_NewBatch = true;
     m_FirstBatchDone = true;
     return (numPendingOutput() != 0);
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**
    * Main method for testing this class.
-   *
+   * 
    * @param argv should contain arguments to the filter: use -h for help
    */
-  public static void main(String [] argv) {
+  public static void main(String[] argv) {
     runFilter(new Randomize(), argv);
   }
 }

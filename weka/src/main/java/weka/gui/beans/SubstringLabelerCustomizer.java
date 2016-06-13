@@ -15,7 +15,7 @@
 
 /*
  *    SubstringLabelerCustomizer.java
- *    Copyright (C) 2011-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2011-2013 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -50,10 +50,10 @@ import weka.gui.PropertySheetPanel;
  * Customizer class for the Substring labeler step
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 8995 $
+ * @version $Revision: 10383 $
  */
 public class SubstringLabelerCustomizer extends JPanel implements
-    EnvironmentHandler, BeanCustomizer, CustomizerCloseRequester {
+  EnvironmentHandler, BeanCustomizer, CustomizerCloseRequester {
 
   /** For serialization */
   private static final long serialVersionUID = 7636584212353183751L;
@@ -99,8 +99,8 @@ public class SubstringLabelerCustomizer extends JPanel implements
     m_attListField = new EnvironmentField(m_env);
     attListP.add(m_attListField, BorderLayout.CENTER);
     attListP
-        .setToolTipText("<html>Accepts a range of indexes (e.g. '1,2,6-10')<br> "
-            + "or a comma-separated list of named attributes</html>");
+      .setToolTipText("<html>Accepts a range of indexes (e.g. '1,2,6-10')<br> "
+        + "or a comma-separated list of named attributes</html>");
     JPanel matchP = new JPanel();
     matchP.setLayout(new BorderLayout());
     matchP.setBorder(BorderFactory.createTitledBorder("Match"));
@@ -119,35 +119,35 @@ public class SubstringLabelerCustomizer extends JPanel implements
     JPanel checkHolder = new JPanel();
     checkHolder.setLayout(new GridLayout(0, 2));
     JLabel attNameLab = new JLabel("Name of label attribute",
-        SwingConstants.RIGHT);
+      SwingConstants.RIGHT);
     checkHolder.add(attNameLab);
     m_matchAttNameField = new EnvironmentField(m_env);
     m_matchAttNameField.setText(m_labeler.getMatchAttributeName());
     checkHolder.add(m_matchAttNameField);
     JLabel regexLab = new JLabel("Match using a regular expression",
-        SwingConstants.RIGHT);
+      SwingConstants.RIGHT);
     regexLab
-        .setToolTipText("Use a regular expression rather than literal match");
+      .setToolTipText("Use a regular expression rather than literal match");
     checkHolder.add(regexLab);
     checkHolder.add(m_regexCheck);
     JLabel caseLab = new JLabel("Ignore case when matching",
-        SwingConstants.RIGHT);
+      SwingConstants.RIGHT);
     checkHolder.add(caseLab);
     checkHolder.add(m_ignoreCaseCheck);
     JLabel nominalBinaryLab = new JLabel("Make binary label attribute nominal",
-        SwingConstants.RIGHT);
+      SwingConstants.RIGHT);
     nominalBinaryLab
-        .setToolTipText("<html>If the label attribute is binary (i.e. no <br>"
-            + "explicit labels have been declared) then<br>this makes the resulting "
-            + "attribute nominal<br>rather than numeric.</html>");
+      .setToolTipText("<html>If the label attribute is binary (i.e. no <br>"
+        + "explicit labels have been declared) then<br>this makes the resulting "
+        + "attribute nominal<br>rather than numeric.</html>");
     checkHolder.add(nominalBinaryLab);
     checkHolder.add(m_nominalBinaryCheck);
     m_nominalBinaryCheck.setSelected(m_labeler.getNominalBinary());
     JLabel consumeNonMatchLab = new JLabel("Consume non-matching instances",
-        SwingConstants.RIGHT);
+      SwingConstants.RIGHT);
     consumeNonMatchLab
-        .setToolTipText("<html>When explicit labels have been defined, consume "
-            + "<br>(rather than output with missing value) instances</html>");
+      .setToolTipText("<html>When explicit labels have been defined, consume "
+        + "<br>(rather than output with missing value) instances</html>");
     checkHolder.add(consumeNonMatchLab);
     checkHolder.add(m_consumeNonMatchingCheck);
     m_consumeNonMatchingCheck.setSelected(m_labeler.getConsumeNonMatching());
@@ -175,7 +175,7 @@ public class SubstringLabelerCustomizer extends JPanel implements
     listPanel.add(butHolder, BorderLayout.NORTH);
     JScrollPane js = new JScrollPane(m_list);
     js.setBorder(BorderFactory
-        .createTitledBorder("Match-list list (rows applied in order)"));
+      .createTitledBorder("Match-list list (rows applied in order)"));
     listPanel.add(js, BorderLayout.CENTER);
     add(listPanel, BorderLayout.CENTER);
 
@@ -186,8 +186,8 @@ public class SubstringLabelerCustomizer extends JPanel implements
       public void propertyChange(PropertyChangeEvent e) {
         Object m = m_list.getSelectedValue();
         if (m != null) {
-          ((SubstringLabeler.Match) m).setAttsToApplyTo(m_attListField
-              .getText());
+          ((SubstringLabelerRules.SubstringLabelerMatchRule) m)
+            .setAttsToApplyTo(m_attListField.getText());
           m_list.repaint();
         }
       }
@@ -198,7 +198,8 @@ public class SubstringLabelerCustomizer extends JPanel implements
       public void propertyChange(PropertyChangeEvent e) {
         Object m = m_list.getSelectedValue();
         if (m != null) {
-          ((SubstringLabeler.Match) m).setMatch(m_matchField.getText());
+          ((SubstringLabelerRules.SubstringLabelerMatchRule) m)
+            .setMatch(m_matchField.getText());
           m_list.repaint();
         }
       }
@@ -209,7 +210,8 @@ public class SubstringLabelerCustomizer extends JPanel implements
       public void propertyChange(PropertyChangeEvent e) {
         Object m = m_list.getSelectedValue();
         if (m != null) {
-          ((SubstringLabeler.Match) m).setLabel(m_labelField.getText());
+          ((SubstringLabelerRules.SubstringLabelerMatchRule) m)
+            .setLabel(m_labelField.getText());
           m_list.repaint();
         }
       }
@@ -225,7 +227,7 @@ public class SubstringLabelerCustomizer extends JPanel implements
 
           Object entry = m_list.getSelectedValue();
           if (entry != null) {
-            SubstringLabeler.Match m = (SubstringLabeler.Match) entry;
+            SubstringLabelerRules.SubstringLabelerMatchRule m = (SubstringLabelerRules.SubstringLabelerMatchRule) entry;
             m_attListField.setText(m.getAttsToApplyTo());
             m_matchField.setText(m.getMatch());
             m_labelField.setText(m.getLabel());
@@ -239,16 +241,16 @@ public class SubstringLabelerCustomizer extends JPanel implements
     m_newBut.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        SubstringLabeler.Match m = new SubstringLabeler.Match();
+        SubstringLabelerRules.SubstringLabelerMatchRule m = new SubstringLabelerRules.SubstringLabelerMatchRule();
 
         String atts = (m_attListField.getText() != null) ? m_attListField
-            .getText() : "";
+          .getText() : "";
         m.setAttsToApplyTo(atts);
         String match = (m_matchField.getText() != null) ? m_matchField
-            .getText() : "";
+          .getText() : "";
         m.setMatch(match);
         String label = (m_labelField.getText() != null) ? m_labelField
-            .getText() : "";
+          .getText() : "";
         m.setLabel(label);
         m.setRegex(m_regexCheck.isSelected());
         m.setIgnoreCase(m_ignoreCaseCheck.isSelected());
@@ -298,7 +300,8 @@ public class SubstringLabelerCustomizer extends JPanel implements
       public void actionPerformed(ActionEvent e) {
         Object m = m_list.getSelectedValue();
         if (m != null) {
-          ((SubstringLabeler.Match) m).setRegex(m_regexCheck.isSelected());
+          ((SubstringLabelerRules.SubstringLabelerMatchRule) m)
+            .setRegex(m_regexCheck.isSelected());
           m_list.repaint();
         }
       }
@@ -309,8 +312,8 @@ public class SubstringLabelerCustomizer extends JPanel implements
       public void actionPerformed(ActionEvent e) {
         Object m = m_list.getSelectedValue();
         if (m != null) {
-          ((SubstringLabeler.Match) m).setIgnoreCase(m_ignoreCaseCheck
-              .isSelected());
+          ((SubstringLabelerRules.SubstringLabelerMatchRule) m)
+            .setIgnoreCase(m_ignoreCaseCheck.isSelected());
           m_list.repaint();
         }
       }
@@ -359,7 +362,8 @@ public class SubstringLabelerCustomizer extends JPanel implements
         m_upBut.setEnabled(true);
         m_downBut.setEnabled(true);
         for (String mPart : parts) {
-          SubstringLabeler.Match m = new SubstringLabeler.Match(mPart);
+          SubstringLabelerRules.SubstringLabelerMatchRule m = new SubstringLabelerRules.SubstringLabelerMatchRule(
+            mPart);
           m_listModel.addElement(m);
         }
 
@@ -420,8 +424,8 @@ public class SubstringLabelerCustomizer extends JPanel implements
   protected void closingOK() {
     StringBuffer buff = new StringBuffer();
     for (int i = 0; i < m_listModel.size(); i++) {
-      SubstringLabeler.Match m = (SubstringLabeler.Match) m_listModel
-          .elementAt(i);
+      SubstringLabelerRules.SubstringLabelerMatchRule m = (SubstringLabelerRules.SubstringLabelerMatchRule) m_listModel
+        .elementAt(i);
 
       buff.append(m.toStringInternal());
       if (i < m_listModel.size() - 1) {

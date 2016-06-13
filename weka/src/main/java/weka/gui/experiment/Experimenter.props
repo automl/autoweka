@@ -2,7 +2,10 @@
 # "simple" indicates that this property is only available for simple
 # experiments.
 #
-# $Revision: 5367 $
+# $Revision: 11944 $
+
+# the default setup panel (classname)
+SetupPanel=weka.gui.experiment.SimpleSetupPanel
 
 # the default extension in the file-dialog
 # possible values: 

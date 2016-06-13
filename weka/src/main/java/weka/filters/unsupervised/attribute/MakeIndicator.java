@@ -21,13 +21,13 @@
 
 package weka.filters.unsupervised.attribute;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -41,43 +41,51 @@ import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
-/** 
- <!-- globalinfo-start -->
- * A filter that creates a new dataset with a boolean attribute replacing a nominal attribute.  In the new dataset, a value of 1 is assigned to an instance that exhibits a particular range of attribute values, a 0 to an instance that doesn't. The boolean attribute is coded as numeric by default.
+/**
+ * <!-- globalinfo-start --> A filter that creates a new dataset with a boolean
+ * attribute replacing a nominal attribute. In the new dataset, a value of 1 is
+ * assigned to an instance that exhibits a particular range of attribute values,
+ * a 0 to an instance that doesn't. The boolean attribute is coded as numeric by
+ * default.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -C &lt;col&gt;
- *  Sets the attribute index.</pre>
+ * <pre>
+ * -C &lt;col&gt;
+ *  Sets the attribute index.
+ * </pre>
  * 
- * <pre> -V &lt;index1,index2-index4,...&gt;
+ * <pre>
+ * -V &lt;index1,index2-index4,...&gt;
  *  Specify the list of values to indicate. First and last are
- *  valid indexes (default last)</pre>
+ *  valid indexes (default last)
+ * </pre>
  * 
- * <pre> -N &lt;index&gt;
- *  Set if new boolean attribute nominal.</pre>
+ * <pre>
+ * -N &lt;index&gt;
+ *  Set if new boolean attribute nominal.
+ * </pre>
  * 
- <!-- options-end -->
- *
- * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 8034 $
+ * <!-- options-end -->
+ * 
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @version $Revision: 12037 $
  */
-public class MakeIndicator 
-  extends Filter
-  implements UnsupervisedFilter, StreamableFilter, OptionHandler {
+public class MakeIndicator extends Filter implements UnsupervisedFilter,
+  StreamableFilter, OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = 766001176862773163L;
-  
+
   /** The attribute's index setting. */
-  private SingleIndex m_AttIndex = new SingleIndex("last"); 
+  private final SingleIndex m_AttIndex = new SingleIndex("last");
 
   /** The value's index */
-  private Range m_ValIndex;
-  
+  private final Range m_ValIndex;
+
   /** Make boolean attribute numeric. */
   private boolean m_Numeric = true;
 
@@ -86,15 +94,16 @@ public class MakeIndicator
    */
   public MakeIndicator() {
 
-      m_ValIndex = new Range("last");
+    m_ValIndex = new Range("last");
   }
 
-  /** 
+  /**
    * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
+   * 
+   * @return the capabilities of this object
+   * @see Capabilities
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
     result.disableAll();
@@ -102,52 +111,55 @@ public class MakeIndicator
     // attributes
     result.enableAllAttributes();
     result.enable(Capability.MISSING_VALUES);
-    
+
     // class
     result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
     result.enable(Capability.NO_CLASS);
-    
+
     return result;
   }
 
   /**
    * Sets the format of the input instances.
-   *
-   * @param instanceInfo an Instances object containing the input 
-   * instance structure (any instances contained in the object are 
-   * ignored - only the structure is required).
+   * 
+   * @param instanceInfo an Instances object containing the input instance
+   *          structure (any instances contained in the object are ignored -
+   *          only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws UnsupportedAttributeTypeException the selecte attribute is not nominal
-   * @throws UnsupportedAttributeTypeException the selecte attribute has fewer than two values.
+   * @throws UnsupportedAttributeTypeException the selecte attribute is not
+   *           nominal
+   * @throws UnsupportedAttributeTypeException the selecte attribute has fewer
+   *           than two values.
    */
-  public boolean setInputFormat(Instances instanceInfo) 
-       throws Exception {
+  @Override
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     super.setInputFormat(instanceInfo);
     m_AttIndex.setUpper(instanceInfo.numAttributes() - 1);
-    m_ValIndex.setUpper(instanceInfo.attribute(m_AttIndex.
-					       getIndex()).numValues() - 1);
+    m_ValIndex.setUpper(instanceInfo.attribute(m_AttIndex.getIndex())
+      .numValues() - 1);
     if (!instanceInfo.attribute(m_AttIndex.getIndex()).isNominal()) {
-      throw new UnsupportedAttributeTypeException("Chosen attribute not nominal.");
+      throw new UnsupportedAttributeTypeException(
+        "Chosen attribute not nominal.");
     }
     if (instanceInfo.attribute(m_AttIndex.getIndex()).numValues() < 2) {
-      throw new UnsupportedAttributeTypeException("Chosen attribute has less " +
-						  "than two values.");
+      throw new UnsupportedAttributeTypeException("Chosen attribute has less "
+        + "than two values.");
     }
     setOutputFormat();
     return true;
   }
 
   /**
-   * Input an instance for filtering. The instance is processed
-   * and made available for output immediately.
-   *
+   * Input an instance for filtering. The instance is processed and made
+   * available for output immediately.
+   * 
    * @param instance the input instance
-   * @return true if the filtered instance may now be
-   * collected with output().
+   * @return true if the filtered instance may now be collected with output().
    * @throws IllegalStateException if no input format has been set.
    */
+  @Override
   public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
@@ -157,66 +169,72 @@ public class MakeIndicator
       resetQueue();
       m_NewBatch = false;
     }
-    Instance newInstance = (Instance)instance.copy();
+    Instance newInstance = (Instance) instance.copy();
     if (!newInstance.isMissing(m_AttIndex.getIndex())) {
-      if (m_ValIndex.isInRange((int)newInstance.value(m_AttIndex.getIndex()))) {
-	newInstance.setValue(m_AttIndex.getIndex(), 1);
+      if (m_ValIndex.isInRange((int) newInstance.value(m_AttIndex.getIndex()))) {
+        newInstance.setValue(m_AttIndex.getIndex(), 1);
       } else {
-	newInstance.setValue(m_AttIndex.getIndex(), 0);
+        newInstance.setValue(m_AttIndex.getIndex(), 0);
       }
     }
-    push(newInstance);
+    push(newInstance, false); // No need to copy instance
     return true;
   }
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  @Override
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(3);
+    Vector<Option> newVector = new Vector<Option>(3);
+
+    newVector.addElement(new Option("\tSets the attribute index.", "C", 1,
+      "-C <col>"));
 
     newVector.addElement(new Option(
-              "\tSets the attribute index.",
-              "C", 1, "-C <col>"));
-
-    newVector.addElement(new Option(
-              "\tSpecify the list of values to indicate. First and last are\n"+
-              "\tvalid indexes (default last)",
-              "V", 1, "-V <index1,index2-index4,...>"));
-    newVector.addElement(new Option(
-              "\tSet if new boolean attribute nominal.",
-              "N", 0, "-N <index>"));
+      "\tSpecify the list of values to indicate. First and last are\n"
+        + "\tvalid indexes (default last)", "V", 1,
+      "-V <index1,index2-index4,...>"));
+    newVector.addElement(new Option("\tSet if new boolean attribute nominal.",
+      "N", 0, "-N <index>"));
 
     return newVector.elements();
   }
 
-
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -C &lt;col&gt;
-   *  Sets the attribute index.</pre>
+   * <pre>
+   * -C &lt;col&gt;
+   *  Sets the attribute index.
+   * </pre>
    * 
-   * <pre> -V &lt;index1,index2-index4,...&gt;
+   * <pre>
+   * -V &lt;index1,index2-index4,...&gt;
    *  Specify the list of values to indicate. First and last are
-   *  valid indexes (default last)</pre>
+   *  valid indexes (default last)
+   * </pre>
    * 
-   * <pre> -N &lt;index&gt;
-   *  Set if new boolean attribute nominal.</pre>
+   * <pre>
+   * -N &lt;index&gt;
+   *  Set if new boolean attribute nominal.
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    
+
     String attIndex = Utils.getOption('C', options);
     if (attIndex.length() != 0) {
       setAttributeIndex(attIndex);
@@ -236,34 +254,34 @@ public class MakeIndicator
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
     }
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of the filter.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
+  @Override
+  public String[] getOptions() {
 
-    String [] options = new String [5];
-    int current = 0;
+    Vector<String> options = new Vector<String>();
 
-    options[current++] = "-C";
-    options[current++] = "" + (getAttributeIndex());
-    options[current++] = "-V"; 
-    options[current++] = getValueIndices();
+    options.add("-C");
+    options.add("" + (getAttributeIndex()));
+    options.add("-V");
+    options.add(getValueIndices());
     if (!getNumeric()) {
-      options[current++] = "-N"; 
+      options.add("-N");
     }
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+
+    return options.toArray(new String[0]);
   }
 
   /**
-   * @return a description of the filter suitable for
-   * displaying in the explorer/experimenter gui
+   * @return a description of the filter suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
 
@@ -275,8 +293,8 @@ public class MakeIndicator
   }
 
   /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String attributeIndexTipText() {
 
@@ -286,7 +304,7 @@ public class MakeIndicator
 
   /**
    * Get the index of the attribute used.
-   *
+   * 
    * @return the index of the attribute
    */
   public String getAttributeIndex() {
@@ -296,17 +314,17 @@ public class MakeIndicator
 
   /**
    * Sets index of the attribute used.
-   *
+   * 
    * @param attIndex the index of the attribute
    */
   public void setAttributeIndex(String attIndex) {
-    
+
     m_AttIndex.setSingleIndex(attIndex);
   }
 
   /**
    * Get the range containing the indicator values.
-   *
+   * 
    * @return the range containing the indicator values
    */
   public Range getValueRange() {
@@ -315,8 +333,8 @@ public class MakeIndicator
   }
 
   /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String valueIndicesTipText() {
 
@@ -328,7 +346,7 @@ public class MakeIndicator
 
   /**
    * Get the indices of the indicator values.
-   *
+   * 
    * @return the indices of the indicator values
    */
   public String getValueIndices() {
@@ -338,41 +356,41 @@ public class MakeIndicator
 
   /**
    * Sets indices of the indicator values.
-   *
+   * 
    * @param range the string representation of the indicator value indices
    * @see Range
    */
   public void setValueIndices(String range) {
-    
+
     m_ValIndex.setRanges(range);
   }
 
   /**
    * Sets index of the indicator value.
-   *
+   * 
    * @param index the index of the indicator value
    */
   public void setValueIndex(int index) {
 
-    setValueIndices("" +  (index + 1));
+    setValueIndices("" + (index + 1));
   }
 
   /**
    * Set which attributes are to be deleted (or kept if invert is true)
-   *
-   * @param indices an array containing indexes of attributes to select.
-   * Since the array will typically come from a program, attributes are indexed
-   * from 0.
+   * 
+   * @param indices an array containing indexes of attributes to select. Since
+   *          the array will typically come from a program, attributes are
+   *          indexed from 0.
    * @throws InvalidArgumentException if an invalid set of ranges is supplied
    */
-  public void setValueIndicesArray(int [] indices) {
-    
+  public void setValueIndicesArray(int[] indices) {
+
     setValueIndices(Range.indicesToRangeList(indices));
   }
 
   /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String numericTipText() {
 
@@ -382,7 +400,7 @@ public class MakeIndicator
 
   /**
    * Sets if the new Attribute is to be numeric.
-   *
+   * 
    * @param bool true if new Attribute is to be numeric
    */
   public void setNumeric(boolean bool) {
@@ -392,7 +410,7 @@ public class MakeIndicator
 
   /**
    * Check if new attribute is to be numeric.
-   *
+   * 
    * @return true if new attribute is to be numeric
    */
   public boolean getNumeric() {
@@ -404,36 +422,37 @@ public class MakeIndicator
    * Set the output format.
    */
   private void setOutputFormat() {
-    
+
     Instances newData;
-    FastVector newAtts, newVals;
-      
+    ArrayList<Attribute> newAtts;
+    ArrayList<String> newVals;
+
     // Compute new attributes
-    
-    newAtts = new FastVector(getInputFormat().numAttributes());
+
+    newAtts = new ArrayList<Attribute>(getInputFormat().numAttributes());
     for (int j = 0; j < getInputFormat().numAttributes(); j++) {
       Attribute att = getInputFormat().attribute(j);
       if (j != m_AttIndex.getIndex()) {
 
-	// We don't have to copy the attribute because the
-	// attribute index remains unchanged.
-	newAtts.addElement(att);
+        // We don't have to copy the attribute because the
+        // attribute index remains unchanged.
+        newAtts.add(att);
       } else {
-	if (m_Numeric) {
-	  newAtts.addElement(new Attribute(att.name()));
-	} else {
+        if (m_Numeric) {
+          newAtts.add(new Attribute(att.name()));
+        } else {
           String vals;
-          int [] sel = m_ValIndex.getSelection();
+          int[] sel = m_ValIndex.getSelection();
           if (sel.length == 1) {
             vals = att.value(sel[0]);
           } else {
-            vals = m_ValIndex.getRanges().replace(',','_');
+            vals = m_ValIndex.getRanges().replace(',', '_');
           }
-	  newVals = new FastVector(2);
-	  newVals.addElement("neg_" + vals);
-	  newVals.addElement("pos_" + vals);
-	  newAtts.addElement(new Attribute(att.name(), newVals));
-	}
+          newVals = new ArrayList<String>(2);
+          newVals.add("neg_" + vals);
+          newVals.add("pos_" + vals);
+          newAtts.add(new Attribute(att.name(), newVals));
+        }
       }
     }
 
@@ -442,23 +461,23 @@ public class MakeIndicator
     newData.setClassIndex(getInputFormat().classIndex());
     setOutputFormat(newData);
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
- 
+
   /**
    * Main method for testing this class.
-   *
-   * @param argv should contain arguments to the filter: 
-   * use -h for help
+   * 
+   * @param argv should contain arguments to the filter: use -h for help
    */
-  public static void main(String [] argv) {
+  public static void main(String[] argv) {
     runFilter(new MakeIndicator(), argv);
   }
 }

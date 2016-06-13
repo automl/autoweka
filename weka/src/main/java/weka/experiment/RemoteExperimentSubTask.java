@@ -27,21 +27,23 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 
 /**
- * Class to encapsulate an experiment as a task that can be executed on
- * a remote host.
- *
+ * Class to encapsulate an experiment as a task that can be executed on a remote
+ * host.
+ * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10204 $
  */
-public class RemoteExperimentSubTask
-  implements Task, RevisionHandler {
+public class RemoteExperimentSubTask implements Task, RevisionHandler {
+
+  /** ID added to avoid warning */
+  private static final long serialVersionUID = -1674092706571603720L;
 
   /* Info on the task */
   private TaskStatusInfo m_result = new TaskStatusInfo();
-  
+
   /* The (sub) experiment to execute */
   private Experiment m_experiment;
-  
+
   public RemoteExperimentSubTask() {
     m_result.setStatusMessage("Not running.");
     m_result.setExecutionStatus(TaskStatusInfo.TO_BE_RUN);
@@ -49,37 +51,39 @@ public class RemoteExperimentSubTask
 
   /**
    * Set the experiment for this sub task
+   * 
    * @param task the experiment
    */
   public void setExperiment(Experiment task) {
     m_experiment = task;
   }
-  
+
   /**
    * Get the experiment for this sub task
+   * 
    * @return this sub task's experiment
    */
   public Experiment getExperiment() {
     return m_experiment;
   }
-  
+
   /**
    * Run the experiment
    */
+  @Override
   public void execute() {
-    //      FastVector result = new FastVector();
+    // FastVector result = new FastVector();
     m_result = new TaskStatusInfo();
     m_result.setStatusMessage("Running...");
     String goodResult = "(sub)experiment completed successfully";
     String subTaskType;
     if (m_experiment.getRunLower() != m_experiment.getRunUpper()) {
       subTaskType = "(dataset "
-	+ ((File)m_experiment.getDatasets().elementAt(0)).getName();
+        + ((File) m_experiment.getDatasets().elementAt(0)).getName();
     } else {
-      subTaskType = "(exp run # "+
-	m_experiment.getRunLower();
+      subTaskType = "(exp run # " + m_experiment.getRunLower();
     }
-    try {	
+    try {
       System.err.println("Initializing " + subTaskType + ")...");
       m_experiment.initialize();
       System.err.println("Iterating " + subTaskType + ")...");
@@ -91,40 +95,36 @@ public class RemoteExperimentSubTask
       m_experiment.postProcess();
     } catch (Exception ex) {
       ex.printStackTrace();
-      String badResult =  "(sub)experiment " + subTaskType 
-	+ ") failed : "+ex.toString();
+      String badResult = "(sub)experiment " + subTaskType + ") failed : "
+        + ex.toString();
       m_result.setExecutionStatus(TaskStatusInfo.FAILED);
-      //	m_result.addElement(new Integer(RemoteExperiment.FAILED));
-      //	m_result.addElement(badResult);
+      // m_result.addElement(new Integer(RemoteExperiment.FAILED));
+      // m_result.addElement(badResult);
       m_result.setStatusMessage(badResult);
       m_result.setTaskResult("Failed");
-      //      return m_result;
+      // return m_result;
       return;
-    }            
-    //      m_result.addElement(new Integer(RemoteExperiment.FINISHED));
-    //      m_result.addElement(goodResult);
+    }
+    // m_result.addElement(new Integer(RemoteExperiment.FINISHED));
+    // m_result.addElement(goodResult);
     m_result.setExecutionStatus(TaskStatusInfo.FINISHED);
-    m_result.setStatusMessage(goodResult+" "+subTaskType+").");
+    m_result.setStatusMessage(goodResult + " " + subTaskType + ").");
     m_result.setTaskResult("No errors");
-    //    return m_result;
+    // return m_result;
   }
 
+  @Override
   public TaskStatusInfo getTaskStatus() {
     return m_result;
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10204 $");
   }
 }
-
-
-
-
-
-

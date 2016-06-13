@@ -6,7 +6,7 @@
 # url:     http://www.microsoft.com/
 # jdbc:    http://msdn2.microsoft.com/en-us/data/aa937724.aspx
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 5837 $
+# version: $Revision: 11885 $
 
 # JDBC driver (comma-separated list)
 jdbcDriver=com.microsoft.sqlserver.jdbc.SQLServerDriver
@@ -26,6 +26,7 @@ jdbcURL=jdbc:sqlserver://localhost;databaseName=blahblah
 # date, getDate() = 8;        --> date
 # text, getString() = 9;      --> string
 # time, getTime() = 10;       --> date
+# timestamp, getTime() = 11;  --> date
 
 varchar=0
 float=2

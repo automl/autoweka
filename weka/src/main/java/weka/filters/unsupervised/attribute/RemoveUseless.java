@@ -36,27 +36,30 @@ import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
-/** 
- <!-- globalinfo-start -->
- * This filter removes attributes that do not vary at all or that vary too much. All constant attributes are deleted automatically, along with any that exceed the maximum percentage of variance parameter. The maximum variance test is only applied to nominal attributes.
+/**
+ * <!-- globalinfo-start --> This filter removes attributes that do not vary at
+ * all or that vary too much. All constant attributes are deleted automatically,
+ * along with any that exceed the maximum percentage of variance parameter. The
+ * maximum variance test is only applied to nominal attributes.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -M &lt;max variance %&gt;
- *  Maximum variance percentage allowed (default 99)</pre>
+ * <pre>
+ * -M &lt;max variance %&gt;
+ *  Maximum variance percentage allowed (default 99)
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 12037 $
  */
-public class RemoveUseless 
-  extends Filter 
-  implements UnsupervisedFilter, OptionHandler {
-  
+public class RemoveUseless extends Filter implements UnsupervisedFilter,
+  OptionHandler {
+
   /** for serialization */
   static final long serialVersionUID = -8659417851407640038L;
 
@@ -66,12 +69,13 @@ public class RemoveUseless
   /** The type of attribute to delete */
   protected double m_maxVariancePercentage = 99.0;
 
-  /** 
+  /**
    * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
+   * 
+   * @return the capabilities of this object
+   * @see Capabilities
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
 
@@ -81,24 +85,25 @@ public class RemoveUseless
     result.enable(Capability.DATE_ATTRIBUTES);
     result.enable(Capability.STRING_ATTRIBUTES);
     result.enable(Capability.MISSING_VALUES);
-    
+
     // class
     result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
     result.enable(Capability.NO_CLASS);
-    
+
     return result;
   }
 
   /**
    * Sets the format of the input instances.
-   *
+   * 
    * @param instanceInfo an Instances object containing the input instance
-   * structure (any instances contained in the object are ignored - only the
-   * structure is required).
+   *          structure (any instances contained in the object are ignored -
+   *          only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the inputFormat can't be set successfully 
-   */ 
+   * @throws Exception if the inputFormat can't be set successfully
+   */
+  @Override
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     super.setInputFormat(instanceInfo);
@@ -108,11 +113,11 @@ public class RemoveUseless
 
   /**
    * Input an instance for filtering.
-   *
+   * 
    * @param instance the input instance
-   * @return true if the filtered instance may now be
-   * collected with output().
+   * @return true if the filtered instance may now be collected with output().
    */
+  @Override
   public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
@@ -125,9 +130,10 @@ public class RemoveUseless
     if (m_removeFilter != null) {
       m_removeFilter.input(instance);
       Instance processed = m_removeFilter.output();
-      processed.setDataset(getOutputFormat());
-      copyValues(processed, false, instance.dataset(), getOutputFormat());
-      push(processed);
+
+      copyValues(processed, false, instance.dataset(), outputFormatPeek());
+
+      push(processed, false); // No need to copy
       return true;
     }
     bufferInput(instance);
@@ -136,10 +142,11 @@ public class RemoveUseless
 
   /**
    * Signify that this batch of input to the filter is finished.
-   *
+   * 
    * @return true if there are instances pending output
    * @throws Exception if no input format defined
-   */  
+   */
+  @Override
   public boolean batchFinished() throws Exception {
 
     if (getInputFormat() == null) {
@@ -152,91 +159,98 @@ public class RemoveUseless
       Instances toFilter = getInputFormat();
       int[] attsToDelete = new int[toFilter.numAttributes()];
       int numToDelete = 0;
-      for(int i = 0; i < toFilter.numAttributes(); i++) {
-	if (i==toFilter.classIndex()) continue; // skip class
-	AttributeStats stats = toFilter.attributeStats(i);
-	if (stats.missingCount == toFilter.numInstances()) {
-	  attsToDelete[numToDelete++] = i;
-	} else if (stats.distinctCount < 2) {
-	  // remove constant attributes
-	  attsToDelete[numToDelete++] = i;
-	} else if (toFilter.attribute(i).isNominal()) {
-	  // remove nominal attributes that vary too much
-	  double variancePercent = (double) stats.distinctCount
-	    / (double)(stats.totalCount - stats.missingCount) * 100.0;
-	  if (variancePercent > m_maxVariancePercentage) {
-	      attsToDelete[numToDelete++] = i;
-	  }
-	}
+      for (int i = 0; i < toFilter.numAttributes(); i++) {
+        if (i == toFilter.classIndex()) {
+          continue; // skip class
+        }
+        AttributeStats stats = toFilter.attributeStats(i);
+        if (stats.missingCount == toFilter.numInstances()) {
+          attsToDelete[numToDelete++] = i;
+        } else if (stats.distinctCount < 2) {
+          // remove constant attributes
+          attsToDelete[numToDelete++] = i;
+        } else if (toFilter.attribute(i).isNominal()) {
+          // remove nominal attributes that vary too much
+          double variancePercent = (double) stats.distinctCount
+            / (double) (stats.totalCount - stats.missingCount) * 100.0;
+          if (variancePercent > m_maxVariancePercentage) {
+            attsToDelete[numToDelete++] = i;
+          }
+        }
       }
-      
+
       int[] finalAttsToDelete = new int[numToDelete];
       System.arraycopy(attsToDelete, 0, finalAttsToDelete, 0, numToDelete);
-      
+
       m_removeFilter = new Remove();
       m_removeFilter.setAttributeIndicesArray(finalAttsToDelete);
       m_removeFilter.setInvertSelection(false);
       m_removeFilter.setInputFormat(toFilter);
-      
+
       for (int i = 0; i < toFilter.numInstances(); i++) {
-	m_removeFilter.input(toFilter.instance(i));
+        m_removeFilter.input(toFilter.instance(i));
       }
       m_removeFilter.batchFinished();
 
       Instance processed;
       Instances outputDataset = m_removeFilter.getOutputFormat();
-    
+
       // restore old relation name to hide attribute filter stamp
       outputDataset.setRelationName(toFilter.relationName());
-    
+
       setOutputFormat(outputDataset);
       while ((processed = m_removeFilter.output()) != null) {
-	processed.setDataset(outputDataset);
-	push(processed);
+        processed.setDataset(outputDataset);
+        push(processed, false); // No need to copy
       }
     }
     flushInput();
-    
+
     m_NewBatch = true;
     return (numPendingOutput() != 0);
   }
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  @Override
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(1);
+    Vector<Option> newVector = new Vector<Option>(1);
 
     newVector.addElement(new Option(
-				    "\tMaximum variance percentage allowed (default 99)",
-				    "M", 1, "-M <max variance %>"));
-
+      "\tMaximum variance percentage allowed (default 99)", "M", 1,
+      "-M <max variance %>"));
 
     return newVector.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -M &lt;max variance %&gt;
-   *  Maximum variance percentage allowed (default 99)</pre>
+   * <pre>
+   * -M &lt;max variance %&gt;
+   *  Maximum variance percentage allowed (default 99)
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    
+
     String mString = Utils.getOption('M', options);
     if (mString.length() != 0) {
-      setMaximumVariancePercentageAllowed((int) Double.valueOf(mString).doubleValue());
+      setMaximumVariancePercentageAllowed((int) Double.valueOf(mString)
+        .doubleValue());
     } else {
       setMaximumVariancePercentageAllowed(99.0);
     }
@@ -244,36 +258,34 @@ public class RemoveUseless
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
     }
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of the filter.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
+  @Override
+  public String[] getOptions() {
 
-    String [] options = new String [2];
-    int current = 0;
+    Vector<String> options = new Vector<String>();
 
-    options[current++] = "-M";
-    options[current++] = "" + getMaximumVariancePercentageAllowed();
-    
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    options.add("-M");
+    options.add("" + getMaximumVariancePercentageAllowed());
+
+    return options.toArray(new String[0]);
   }
 
   /**
    * Returns a string describing this filter
-   *
-   * @return a description of the filter suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the filter suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "This filter removes attributes that do not vary at all or that vary "
+    return "This filter removes attributes that do not vary at all or that vary "
       + "too much. All constant attributes are deleted automatically, along "
       + "with any that exceed the maximum percentage of variance parameter. "
       + "The maximum variance test is only applied to nominal attributes.";
@@ -281,9 +293,9 @@ public class RemoveUseless
 
   /**
    * Returns the tip text for this property
-   *
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String maximumVariancePercentageAllowedTipText() {
 
@@ -295,40 +307,41 @@ public class RemoveUseless
   /**
    * Sets the maximum variance attributes are allowed to have before they are
    * deleted by the filter.
-   *
+   * 
    * @param maxVariance the maximum variance allowed, specified as a percentage
    */
   public void setMaximumVariancePercentageAllowed(double maxVariance) {
-    
+
     m_maxVariancePercentage = maxVariance;
   }
 
   /**
    * Gets the maximum variance attributes are allowed to have before they are
    * deleted by the filter.
-   *
+   * 
    * @return the maximum variance allowed, specified as a percentage
    */
   public double getMaximumVariancePercentageAllowed() {
 
     return m_maxVariancePercentage;
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**
    * Main method for testing this class.
-   *
+   * 
    * @param argv should contain arguments to the filter: use -h for help
    */
-  public static void main(String [] argv) {
+  public static void main(String[] argv) {
     runFilter(new RemoveUseless(), argv);
   }
 }

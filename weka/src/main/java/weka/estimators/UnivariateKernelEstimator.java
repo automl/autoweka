@@ -21,6 +21,7 @@
 
 package weka.estimators;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -28,18 +29,21 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 
+import weka.core.RevisionUtils;
 import weka.core.Statistics;
 import weka.core.Utils;
 
 /**
  * Simple weighted kernel density estimator.
- *
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 11318 $
  */
 public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
-                                                  UnivariateIntervalEstimator, 
-                                                  UnivariateQuantileEstimator {
+  UnivariateIntervalEstimator, UnivariateQuantileEstimator, Serializable {
+
+  /** For serialization */
+  private static final long serialVersionUID = -1163983347810498880L;
 
   /** The collection used to store the weighted values. */
   protected TreeMap<Double, Double> m_TM = new TreeMap<Double, Double>();
@@ -63,7 +67,7 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
   protected double m_MinWidth = 1.0E-6;
 
   /** Constant for Gaussian density. */
-  public static final double CONST = - 0.5 * Math.log(2 * Math.PI);
+  public static final double CONST = -0.5 * Math.log(2 * Math.PI);
 
   /** Threshold at which further kernels are no longer added to sum. */
   protected double m_Threshold = 1.0E-6;
@@ -72,11 +76,18 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
   protected int m_NumIntervals = 1000;
 
   /**
+   * Returns a string describing the estimator.
+   */
+  public String globalInfo() {
+    return "Provides a univariate kernel estimator.";
+  }
+  /**
    * Adds a value to the density estimator.
-   *
+   * 
    * @param value the value to add
    * @param weight the weight of the value
    */
+  @Override
   public void addValue(double value, double weight) {
 
     m_WeightedSum += value * weight;
@@ -90,13 +101,12 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
   }
 
   /**
-   * Updates bandwidth: the sample standard deviation is multiplied by
-   * the total weight to the power of the given exponent.
-   *
+   * Updates bandwidth: the sample standard deviation is multiplied by the total
+   * weight to the power of the given exponent.
+   * 
    * If the total weight is not greater than zero, the width is set to
-   * Double.MAX_VALUE. If that is not the case, but the width becomes
-   * smaller than m_MinWidth, the width is set to the value of
-   * m_MinWidth.
+   * Double.MAX_VALUE. If that is not the case, but the width becomes smaller
+   * than m_MinWidth, the width is set to the value of m_MinWidth.
    */
   public void updateWidth() {
 
@@ -120,14 +130,14 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
       m_Width = Double.MAX_VALUE;
     }
   }
-   
 
   /**
-   * Returns the interval for the given confidence value. 
+   * Returns the interval for the given confidence value.
    * 
    * @param conf the confidence value in the interval [0, 1]
    * @return the interval
    */
+  @Override
   public double[][] predictIntervals(double conf) {
 
     // Update the bandwidth
@@ -155,7 +165,7 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
     double sum = 0;
     boolean[] toUse = new boolean[probabilities.length];
     int k = 0;
-    while ((sum < conf) && (k < toUse.length)){
+    while ((sum < conf) && (k < toUse.length)) {
       toUse[sortedIndices[toUse.length - (k + 1)]] = true;
       sum += probabilities[sortedIndices[toUse.length - (k + 1)]];
       k++;
@@ -169,7 +179,7 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
 
     // The current interval
     double[] interval = null;
-    
+
     // Iterate through kernels
     boolean haveStartedInterval = false;
     for (int i = 0; i < m_NumIntervals; i++) {
@@ -211,6 +221,7 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
    * @param percentage the percentage
    * @return the quantile
    */
+  @Override
   public double predictQuantile(double percentage) {
 
     // Update the bandwidth
@@ -222,8 +233,6 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
     double max = m_TM.lastKey() + val * m_Width;
     double delta = (max - min) / m_NumIntervals;
 
-    // Compute approximate quantile
-    double[] probabilities = new double[m_NumIntervals];
     double sum = 0;
     double leftVal = Math.exp(logDensity(min));
     for (int i = 0; i < m_NumIntervals; i++) {
@@ -239,16 +248,16 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
 
   /**
    * Computes the logarithm of x and y given the logarithms of x and y.
-   *
-   * This is based on Tobias P. Mann's description in "Numerically
-   * Stable Hidden Markov Implementation" (2006).
+   * 
+   * This is based on Tobias P. Mann's description in "Numerically Stable Hidden
+   * Markov Implementation" (2006).
    */
   protected double logOfSum(double logOfX, double logOfY) {
 
     // Check for cases where log of zero is present
     if (Double.isNaN(logOfX)) {
       return logOfY;
-    } 
+    }
     if (Double.isNaN(logOfY)) {
       return logOfX;
     }
@@ -264,8 +273,8 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
   /**
    * Compute running sum of density values and weights.
    */
-  protected void runningSum(Set<Map.Entry<Double,Double>> c, double value, 
-                            double[] sums) {
+  protected void runningSum(Set<Map.Entry<Double, Double>> c, double value,
+    double[] sums) {
 
     // Auxiliary variables
     double offset = CONST - Math.log(m_Width);
@@ -273,9 +282,9 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
     double logSumOfWeights = Math.log(m_SumOfWeights);
 
     // Iterate through values
-    Iterator<Map.Entry<Double,Double>> itr = c.iterator();
-    while(itr.hasNext()) {
-      Map.Entry<Double,Double> entry = itr.next();
+    Iterator<Map.Entry<Double, Double>> itr = c.iterator();
+    while (itr.hasNext()) {
+      Map.Entry<Double, Double> entry = itr.next();
 
       // Skip entry if weight is zero because it cannot contribute to sum
       if (entry.getValue() > 0) {
@@ -286,7 +295,8 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
         sums[1] = logOfSum(sums[1], logWeight);
 
         // Can we stop assuming worst case?
-        if (logDensity + logSumOfWeights < logOfSum(logFactor + sums[0], logDensity + sums[1])) {
+        if (logDensity + logSumOfWeights < logOfSum(logFactor + sums[0],
+          logDensity + sums[1])) {
           break;
         }
       }
@@ -294,13 +304,12 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
   }
 
   /**
-   * Returns the natural logarithm of the density estimate at the given
-   * point.
-   *
+   * Returns the natural logarithm of the density estimate at the given point.
+   * 
    * @param value the value at which to evaluate
-   * @return the natural logarithm of the density estimate at the given
-   * value
+   * @return the natural logarithm of the density estimate at the given value
    */
+  @Override
   public double logDensity(double value) {
 
     // Update the bandwidth
@@ -315,7 +324,8 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
     runningSum(m_TM.tailMap(value, true).entrySet(), value, sums);
 
     // Examine left-hand size of value
-    runningSum(m_TM.headMap(value, false).descendingMap().entrySet(), value, sums);
+    runningSum(m_TM.headMap(value, false).descendingMap().entrySet(), value,
+      sums);
 
     // Need to normalize
     return sums[0] - Math.log(m_SumOfWeights);
@@ -324,11 +334,21 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
   /**
    * Returns textual description of this estimator.
    */
+  @Override
   public String toString() {
 
-    return "Kernel estimator with bandwidth " + m_Width + 
-      " and total weight " + m_SumOfWeights +
-      " based on\n" + m_TM.toString();
+    return "Kernel estimator with bandwidth " + m_Width + " and total weight "
+      + m_SumOfWeights + " based on\n" + m_TM.toString();
+  }
+
+  /**
+   * Returns the revision string.
+   * 
+   * @return the revision
+   */
+  @Override
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 11318 $");
   }
 
   /**
@@ -344,14 +364,14 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
 
     // Output the density estimator
     System.out.println(e);
-    
+
     // Monte Carlo integration
     double sum = 0;
     for (int i = 0; i < 1000; i++) {
       sum += Math.exp(e.logDensity(r.nextDouble() * 10.0 - 5.0));
     }
     System.out.println("Approximate integral: " + 10.0 * sum / 1000);
-    
+
     // Add Gaussian values into it
     for (int i = 0; i < 1000; i++) {
       e.addValue(0.1 * r.nextGaussian() - 3, 1);
@@ -369,14 +389,15 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
 
     // Check interval estimates
     double[][] Intervals = e.predictIntervals(0.9);
-    
+
     System.out.println("Printing kernel intervals ---------------------");
-    
-    for (int k = 0; k < Intervals.length; k++) {
-      System.out.println("Left: " + Intervals[k][0] + "\t Right: " + Intervals[k][1]);
+
+    for (double[] interval : Intervals) {
+      System.out.println("Left: " + interval[0] + "\t Right: " + interval[1]);
     }
-    
-    System.out.println("Finished kernel printing intervals ---------------------");
+
+    System.out
+      .println("Finished kernel printing intervals ---------------------");
 
     double Covered = 0;
     for (int i = 0; i < 1000; i++) {
@@ -386,14 +407,15 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
       } else {
         val = r.nextGaussian() * 0.25;
       }
-      for (int k = 0; k < Intervals.length; k++) {
-        if (val >= Intervals[k][0] && val <= Intervals[k][1]) {
+      for (double[] interval : Intervals) {
+        if (val >= interval[0] && val <= interval[1]) {
           Covered++;
           break;
         }
       }
     }
-    System.out.println("Coverage at 0.9 level for kernel intervals: " + Covered / 1000);
+    System.out.println("Coverage at 0.9 level for kernel intervals: " + Covered
+      / 1000);
 
     // Compare performance to normal estimator on normally distributed data
     UnivariateKernelEstimator eKernel = new UnivariateKernelEstimator();
@@ -401,8 +423,7 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
 
     for (int j = 1; j < 5; j++) {
       double numTrain = Math.pow(10, j);
-      System.out.println("Number of training cases: " +
-                         numTrain); 
+      System.out.println("Number of training cases: " + numTrain);
 
       // Add training cases
       for (int i = 0; i < numTrain; i++) {
@@ -418,7 +439,8 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
         double value = r.nextDouble() * 20.0 - 10.0;
         sum += Math.exp(eKernel.logDensity(value));
       }
-      System.out.println("Approximate integral for kernel estimator: " + 20.0 * sum / points);
+      System.out.println("Approximate integral for kernel estimator: " + 20.0
+        * sum / points);
 
       // Evaluate estimators
       double loglikelihoodKernel = 0, loglikelihoodNormal = 0;
@@ -427,72 +449,80 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
         loglikelihoodKernel += eKernel.logDensity(val);
         loglikelihoodNormal += eNormal.logDensity(val);
       }
-      System.out.println("Loglikelihood for kernel estimator: " +
-                         loglikelihoodKernel / 1000);
-      System.out.println("Loglikelihood for normal estimator: " +
-                         loglikelihoodNormal / 1000);
+      System.out.println("Loglikelihood for kernel estimator: "
+        + loglikelihoodKernel / 1000);
+      System.out.println("Loglikelihood for normal estimator: "
+        + loglikelihoodNormal / 1000);
 
       // Check interval estimates
       double[][] kernelIntervals = eKernel.predictIntervals(0.95);
       double[][] normalIntervals = eNormal.predictIntervals(0.95);
 
       System.out.println("Printing kernel intervals ---------------------");
-      
-      for (int k = 0; k < kernelIntervals.length; k++) {
-        System.out.println("Left: " + kernelIntervals[k][0] + "\t Right: " + kernelIntervals[k][1]);
+
+      for (double[] kernelInterval : kernelIntervals) {
+        System.out.println("Left: " + kernelInterval[0] + "\t Right: "
+          + kernelInterval[1]);
       }
 
-      System.out.println("Finished kernel printing intervals ---------------------");
+      System.out
+        .println("Finished kernel printing intervals ---------------------");
 
       System.out.println("Printing normal intervals ---------------------");
-      
-      for (int k = 0; k < normalIntervals.length; k++) {
-        System.out.println("Left: " + normalIntervals[k][0] + "\t Right: " + normalIntervals[k][1]);
+
+      for (double[] normalInterval : normalIntervals) {
+        System.out.println("Left: " + normalInterval[0] + "\t Right: "
+          + normalInterval[1]);
       }
 
-      System.out.println("Finished normal printing intervals ---------------------");
- 
+      System.out
+        .println("Finished normal printing intervals ---------------------");
+
       double kernelCovered = 0;
       double normalCovered = 0;
       for (int i = 0; i < 1000; i++) {
         double val = r.nextGaussian() * 1.5 + 0.5;
-        for (int k = 0; k < kernelIntervals.length; k++) {
-          if (val >= kernelIntervals[k][0] && val <= kernelIntervals[k][1]) {
+        for (double[] kernelInterval : kernelIntervals) {
+          if (val >= kernelInterval[0] && val <= kernelInterval[1]) {
             kernelCovered++;
             break;
           }
         }
-        for (int k = 0; k < normalIntervals.length; k++) {
-          if (val >= normalIntervals[k][0] && val <= normalIntervals[k][1]) {
+        for (double[] normalInterval : normalIntervals) {
+          if (val >= normalInterval[0] && val <= normalInterval[1]) {
             normalCovered++;
             break;
           }
         }
       }
-      System.out.println("Coverage at 0.95 level for kernel intervals: " + kernelCovered / 1000);
-      System.out.println("Coverage at 0.95 level for normal intervals: " + normalCovered / 1000);
-      
+      System.out.println("Coverage at 0.95 level for kernel intervals: "
+        + kernelCovered / 1000);
+      System.out.println("Coverage at 0.95 level for normal intervals: "
+        + normalCovered / 1000);
+
       kernelIntervals = eKernel.predictIntervals(0.8);
       normalIntervals = eNormal.predictIntervals(0.8);
       kernelCovered = 0;
       normalCovered = 0;
       for (int i = 0; i < 1000; i++) {
         double val = r.nextGaussian() * 1.5 + 0.5;
-        for (int k = 0; k < kernelIntervals.length; k++) {
-          if (val >= kernelIntervals[k][0] && val <= kernelIntervals[k][1]) {
+        for (double[] kernelInterval : kernelIntervals) {
+          if (val >= kernelInterval[0] && val <= kernelInterval[1]) {
             kernelCovered++;
             break;
           }
         }
-        for (int k = 0; k < normalIntervals.length; k++) {
-          if (val >= normalIntervals[k][0] && val <= normalIntervals[k][1]) {
+        for (double[] normalInterval : normalIntervals) {
+          if (val >= normalInterval[0] && val <= normalInterval[1]) {
             normalCovered++;
             break;
           }
         }
       }
-      System.out.println("Coverage at 0.8 level for kernel intervals: " + kernelCovered / 1000);
-      System.out.println("Coverage at 0.8 level for normal intervals: " + normalCovered / 1000);
+      System.out.println("Coverage at 0.8 level for kernel intervals: "
+        + kernelCovered / 1000);
+      System.out.println("Coverage at 0.8 level for normal intervals: "
+        + normalCovered / 1000);
     }
   }
 }

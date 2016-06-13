@@ -19,40 +19,36 @@
 
 package weka.classifiers.functions.supportVector;
 
-import weka.classifiers.functions.supportVector.AbstractKernelTest;
-import weka.classifiers.functions.supportVector.Kernel;
-import weka.core.matrix.Matrix;
-
-import java.io.File;
 import java.io.InputStreamReader;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import weka.core.matrix.Matrix;
 
 /**
- * Tests PrecomputedKernelMatrixKernel. Run from the command line with:<p/>
- * java weka.classifiers.functions.supportVector.PrecomputedKernelMatrixKernelTest
- *
+ * Tests PrecomputedKernelMatrixKernel. Run from the command line with:
+ * <p/>
+ * java
+ * weka.classifiers.functions.supportVector.PrecomputedKernelMatrixKernelTest
+ * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com
- * @version $Revision: 8034 $
+ * @version $Revision: 10160 $
  */
-public class PrecomputedKernelMatrixKernelTest 
-  extends AbstractKernelTest {
+public class PrecomputedKernelMatrixKernelTest extends AbstractKernelTest {
 
-  public PrecomputedKernelMatrixKernelTest(String name) { 
-    super(name);  
+  public PrecomputedKernelMatrixKernelTest(String name) {
+    super(name);
   }
 
   /** Creates a default PrecomputedKernelMatrixKernell */
+  @Override
   public Kernel getKernel() {
     PrecomputedKernelMatrixKernel pc = new PrecomputedKernelMatrixKernel();
 
     // load kernel matrix
     try {
-      pc.setKernelMatrix(
-         new Matrix(
-            new InputStreamReader(ClassLoader.getSystemResourceAsStream(
-                  "weka/classifiers/data/test.matrix"))));
+      pc.setKernelMatrix(new Matrix(new InputStreamReader(ClassLoader
+        .getSystemResourceAsStream("weka/classifiers/data/test.matrix"))));
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -64,7 +60,7 @@ public class PrecomputedKernelMatrixKernelTest
     return new TestSuite(PrecomputedKernelMatrixKernelTest.class);
   }
 
-  public static void main(String[] args){
+  public static void main(String[] args) {
     junit.textui.TestRunner.run(suite());
   }
 }

@@ -21,6 +21,7 @@
 
 package weka.core;
 
+import java.io.Serializable;
 import java.util.HashSet;
 
 /**
@@ -30,11 +31,13 @@ import java.util.HashSet;
  * associating names with the alternative behaviours.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a> 
- * @version $Revision: 8034 $
+ * @version $Revision: 11718 $
  */
 public class SelectedTag
-  implements RevisionHandler {
-  
+  implements RevisionHandler, Serializable {
+
+  private static final long serialVersionUID = 6947341624626504975L;
+
   /** The index of the selected tag */
   protected int m_Selected;
   
@@ -54,13 +57,19 @@ public class SelectedTag
     HashSet<Integer> ID = new HashSet<Integer>();
     HashSet<String> IDStr = new HashSet<String>();
     for (int i = 0; i < tags.length; i++) {
-      ID.add(new Integer(tags[i].getID()));
-      IDStr.add(tags[i].getIDStr());
+      Integer newID = new Integer(tags[i].getID());
+      if (!ID.contains(newID)) {
+        ID.add(newID);
+      } else {
+        throw new IllegalArgumentException("The IDs are not unique: " + newID + "!");
+      }
+      String IDstring = tags[i].getIDStr();
+      if (!IDStr.contains(IDstring)) {
+        IDStr.add(IDstring);
+      } else {
+        throw new IllegalArgumentException("The ID strings are not unique: " + IDstring + "!");
+      }
     }
-    if (ID.size() != tags.length)
-      throw new IllegalArgumentException("The IDs are not unique!");
-    if (IDStr.size() != tags.length)
-      throw new IllegalArgumentException("The ID strings are not unique!");
 
     for (int i = 0; i < tags.length; i++) {
       if (tags[i].getID() == tagID) {
@@ -146,6 +155,6 @@ public class SelectedTag
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 11718 $");
   }
 }

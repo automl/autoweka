@@ -28,19 +28,21 @@ import org.w3c.dom.Element;
 import weka.core.Attribute;
 
 /**
- * Abstract superclass for various types of field meta
- * data.
+ * Abstract superclass for various types of field meta data.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com
  * @version $Revision 1.0 $
  */
 public abstract class FieldMetaInfo implements Serializable {
 
+  /** ID added to avoid warning */
+  private static final long serialVersionUID = -6116715567129830143L;
+
   /**
    * Inner class for Values
    */
   public static class Value implements Serializable {
-    
+
     /**
      * For serialization
      */
@@ -48,35 +50,34 @@ public abstract class FieldMetaInfo implements Serializable {
 
     /** The value */
     protected String m_value;
-    
-    /** 
-     * The display value (might hold a human readable value - e.g.
-     * product name instead of cryptic code).
+
+    /**
+     * The display value (might hold a human readable value - e.g. product name
+     * instead of cryptic code).
      */
     protected String m_displayValue;
-    
+
     /**
-     * Enumerated type for the property. A value
-     * can be valid, invalid or indicate a value
-     * that should be considered as "missing".
+     * Enumerated type for the property. A value can be valid, invalid or
+     * indicate a value that should be considered as "missing".
      */
     public enum Property {
-      VALID ("valid"),
-      INVALID ("invalid"),
-      MISSING ("missing");
-      
+      VALID("valid"), INVALID("invalid"), MISSING("missing");
+
       private final String m_stringVal;
-      
+
       Property(String name) {
         m_stringVal = name;
       }
-      
+
+      @Override
       public String toString() {
         return m_stringVal;
       }
     }
+
     protected Property m_property = Property.VALID;
-    
+
     /**
      * Construct a value.
      * 
@@ -91,7 +92,7 @@ public abstract class FieldMetaInfo implements Serializable {
       }
       String property = value.getAttribute("property");
       if (property != null && property.length() > 0) {
-        for (Property p: Property.values()) {
+        for (Property p : Property.values()) {
           if (p.toString().equals(property)) {
             m_property = p;
             break;
@@ -99,7 +100,8 @@ public abstract class FieldMetaInfo implements Serializable {
         }
       }
     }
-    
+
+    @Override
     public String toString() {
       String retV = m_value;
       if (m_displayValue != null) {
@@ -107,25 +109,25 @@ public abstract class FieldMetaInfo implements Serializable {
       }
       return retV;
     }
-    
+
     public String getValue() {
       return m_value;
     }
-    
+
     public String getDisplayValue() {
       return m_displayValue;
     }
-    
+
     public Property getProperty() {
       return m_property;
     }
   }
-  
+
   /**
    * Inner class for an Interval.
    */
   public static class Interval implements Serializable {
-    
+
     /**
      * For serialization
      */
@@ -133,39 +135,39 @@ public abstract class FieldMetaInfo implements Serializable {
 
     /** The left boundary value */
     protected double m_leftMargin = Double.NEGATIVE_INFINITY;
-    
+
     /** The right boundary value */
     protected double m_rightMargin = Double.POSITIVE_INFINITY;
-    
+
     /**
      * Enumerated type for the closure.
      */
     public enum Closure {
-      OPENCLOSED ("openClosed", "(", "]"),
-      OPENOPEN ("openOpen", "(", ")"),
-      CLOSEDOPEN ("closedOpen", "[", ")"),
-      CLOSEDCLOSED ("closedClosed", "[", "]");
-      
+      OPENCLOSED("openClosed", "(", "]"), OPENOPEN("openOpen", "(", ")"), CLOSEDOPEN(
+        "closedOpen", "[", ")"), CLOSEDCLOSED("closedClosed", "[", "]");
+
       private final String m_stringVal;
       private final String m_left;
       private final String m_right;
-      
+
       Closure(String name, String left, String right) {
         m_stringVal = name;
         m_left = left;
         m_right = right;
       }
-      
+
+      @Override
       public String toString() {
         return m_stringVal;
       }
-      
+
       public String toString(double leftMargin, double rightMargin) {
         return m_left + leftMargin + "-" + rightMargin + m_right;
       }
     }
+
     protected Closure m_closure = Closure.OPENOPEN;
-    
+
     /**
      * Construct an interval.
      * 
@@ -179,14 +181,14 @@ public abstract class FieldMetaInfo implements Serializable {
       } catch (IllegalArgumentException ex) {
         throw new Exception("[Interval] Can't parse left margin as a number");
       }
-      
+
       String rightM = interval.getAttribute("rightMargin");
       try {
         m_rightMargin = Double.parseDouble(rightM);
       } catch (IllegalArgumentException ex) {
         throw new Exception("[Interval] Can't parse right margin as a number");
       }
-      
+
       String closure = interval.getAttribute("closure");
       if (closure == null || closure.length() == 0) {
         throw new Exception("[Interval] No closure specified!");
@@ -198,7 +200,7 @@ public abstract class FieldMetaInfo implements Serializable {
         }
       }
     }
-    
+
     /**
      * Returns true if this interval contains the supplied value.
      * 
@@ -207,7 +209,7 @@ public abstract class FieldMetaInfo implements Serializable {
      */
     public boolean containsValue(double value) {
       boolean result = false;
-      
+
       switch (m_closure) {
       case OPENCLOSED:
         if (value > m_leftMargin && value <= m_rightMargin) {
@@ -233,17 +235,17 @@ public abstract class FieldMetaInfo implements Serializable {
         result = false;
         break;
       }
-        
+
       return result;
     }
-    
+
+    @Override
     public String toString() {
       return m_closure.toString(m_leftMargin, m_rightMargin);
     }
   }
 
   // -----------------------------
-  
 
   /** the name of the field */
   protected String m_fieldName;
@@ -252,17 +254,16 @@ public abstract class FieldMetaInfo implements Serializable {
    * Enumerated type for the Optype
    */
   public enum Optype {
-    NONE ("none"), 
-    CONTINUOUS ("continuous"), 
-    CATEGORICAL ("categorical"),
-    ORDINAL ("ordinal");
-  
+    NONE("none"), CONTINUOUS("continuous"), CATEGORICAL("categorical"), ORDINAL(
+      "ordinal");
+
     private final String m_stringVal;
-    
+
     Optype(String name) {
       m_stringVal = name;
     }
-  
+
+    @Override
     public String toString() {
       return m_stringVal;
     }
@@ -270,7 +271,7 @@ public abstract class FieldMetaInfo implements Serializable {
 
   /** The optype for the target */
   protected Optype m_optype = Optype.NONE;
-  
+
   /**
    * Get the optype.
    * 
@@ -279,7 +280,7 @@ public abstract class FieldMetaInfo implements Serializable {
   public Optype getOptype() {
     return m_optype;
   }
-  
+
   /**
    * Get the name of this field.
    * 
@@ -288,7 +289,7 @@ public abstract class FieldMetaInfo implements Serializable {
   public String getFieldName() {
     return m_fieldName;
   }
-  
+
   /**
    * Construct a new FieldMetaInfo.
    * 
@@ -296,7 +297,7 @@ public abstract class FieldMetaInfo implements Serializable {
    */
   public FieldMetaInfo(Element field) {
     m_fieldName = field.getAttribute("name");
-    
+
     String opType = field.getAttribute("optype");
     if (opType != null && opType.length() > 0) {
       for (Optype o : Optype.values()) {
@@ -307,7 +308,7 @@ public abstract class FieldMetaInfo implements Serializable {
       }
     }
   }
-  
+
   /**
    * Return this field as an Attribute.
    * 

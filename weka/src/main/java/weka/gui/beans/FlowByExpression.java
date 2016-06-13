@@ -48,13 +48,16 @@ import weka.gui.Logger;
  * operators.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 9260 $
+ * @version $Revision: 10220 $
  */
 @KFStep(category = "Flow", toolTipText = "Route instances according to a boolean expression")
 public class FlowByExpression extends JPanel implements BeanCommon, Visible,
-    Serializable, InstanceListener, TrainingSetListener, TestSetListener,
-    DataSourceListener, EventConstraints, EnvironmentHandler, DataSource,
-    StructureProducer {
+  Serializable, InstanceListener, TrainingSetListener, TestSetListener,
+  DataSourceListener, EventConstraints, EnvironmentHandler, DataSource,
+  StructureProducer {
+
+  /** Added ID to avoid warning */
+  private static final long serialVersionUID = 2492050246494259885L;
 
   /**
    * Abstract base class for parts of a boolean expression.
@@ -180,7 +183,7 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
    * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
    */
   protected static class BracketNode extends ExpressionNode implements
-      Serializable {
+    Serializable {
 
     /** For serialization */
     private static final long serialVersionUID = 8732159083173001115L;
@@ -332,7 +335,7 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
 
       if (expression.charAt(0) != '(') {
         throw new IllegalArgumentException(
-            "Malformed expression! Was expecting a \"(\"");
+          "Malformed expression! Was expecting a \"(\"");
       }
 
       expression = expression.substring(1, expression.length());
@@ -361,7 +364,7 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
   }
 
   protected static class ExpressionClause extends ExpressionNode implements
-      Serializable {
+    Serializable {
 
     /** For serialization */
     private static final long serialVersionUID = 2754006654981248325L;
@@ -400,8 +403,8 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
       EQUALS(" = ") {
         @Override
         boolean evaluate(Instance inst, int lhsAttIndex, String rhsOperand,
-            double numericOperand, Pattern regexPattern,
-            boolean rhsIsAttribute, int rhsAttIndex) {
+          double numericOperand, Pattern regexPattern, boolean rhsIsAttribute,
+          int rhsAttIndex) {
 
           if (rhsIsAttribute) {
             if (inst.isMissing(lhsAttIndex) && inst.isMissing(rhsAttIndex)) {
@@ -422,18 +425,18 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
       NOTEQUAL(" != ") {
         @Override
         boolean evaluate(Instance inst, int lhsAttIndex, String rhsOperand,
-            double numericOperand, Pattern regexPattern,
-            boolean rhsIsAttribute, int rhsAttIndex) {
+          double numericOperand, Pattern regexPattern, boolean rhsIsAttribute,
+          int rhsAttIndex) {
 
           return !EQUALS.evaluate(inst, lhsAttIndex, rhsOperand,
-              numericOperand, regexPattern, rhsIsAttribute, rhsAttIndex);
+            numericOperand, regexPattern, rhsIsAttribute, rhsAttIndex);
         }
       },
       LESSTHAN(" < ") {
         @Override
         boolean evaluate(Instance inst, int lhsAttIndex, String rhsOperand,
-            double numericOperand, Pattern regexPattern,
-            boolean rhsIsAttribute, int rhsAttIndex) {
+          double numericOperand, Pattern regexPattern, boolean rhsIsAttribute,
+          int rhsAttIndex) {
 
           if (rhsIsAttribute) {
             if (inst.isMissing(lhsAttIndex) || inst.isMissing(rhsAttIndex)) {
@@ -451,8 +454,8 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
       LESSTHANEQUAL(" <= ") {
         @Override
         boolean evaluate(Instance inst, int lhsAttIndex, String rhsOperand,
-            double numericOperand, Pattern regexPattern,
-            boolean rhsIsAttribute, int rhsAttIndex) {
+          double numericOperand, Pattern regexPattern, boolean rhsIsAttribute,
+          int rhsAttIndex) {
 
           if (rhsIsAttribute) {
             if (inst.isMissing(lhsAttIndex) || inst.isMissing(rhsAttIndex)) {
@@ -470,28 +473,28 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
       GREATERTHAN(" > ") {
         @Override
         boolean evaluate(Instance inst, int lhsAttIndex, String rhsOperand,
-            double numericOperand, Pattern regexPattern,
-            boolean rhsIsAttribute, int rhsAttIndex) {
+          double numericOperand, Pattern regexPattern, boolean rhsIsAttribute,
+          int rhsAttIndex) {
 
           return !LESSTHANEQUAL.evaluate(inst, lhsAttIndex, rhsOperand,
-              numericOperand, regexPattern, rhsIsAttribute, rhsAttIndex);
+            numericOperand, regexPattern, rhsIsAttribute, rhsAttIndex);
         }
       },
       GREATERTHANEQUAL(" >= ") {
         @Override
         boolean evaluate(Instance inst, int lhsAttIndex, String rhsOperand,
-            double numericOperand, Pattern regexPattern,
-            boolean rhsIsAttribute, int rhsAttIndex) {
+          double numericOperand, Pattern regexPattern, boolean rhsIsAttribute,
+          int rhsAttIndex) {
 
           return !LESSTHAN.evaluate(inst, lhsAttIndex, rhsOperand,
-              numericOperand, regexPattern, rhsIsAttribute, rhsAttIndex);
+            numericOperand, regexPattern, rhsIsAttribute, rhsAttIndex);
         }
       },
       ISMISSING(" isMissing ") {
         @Override
         boolean evaluate(Instance inst, int lhsAttIndex, String rhsOperand,
-            double numericOperand, Pattern regexPattern,
-            boolean rhsIsAttribute, int rhsAttIndex) {
+          double numericOperand, Pattern regexPattern, boolean rhsIsAttribute,
+          int rhsAttIndex) {
 
           return (inst.isMissing(lhsAttIndex));
         }
@@ -499,8 +502,8 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
       CONTAINS(" contains ") {
         @Override
         boolean evaluate(Instance inst, int lhsAttIndex, String rhsOperand,
-            double numericOperand, Pattern regexPattern,
-            boolean rhsIsAttribute, int rhsAttIndex) {
+          double numericOperand, Pattern regexPattern, boolean rhsIsAttribute,
+          int rhsAttIndex) {
 
           if (inst.isMissing(lhsAttIndex)) {
             return false;
@@ -533,8 +536,8 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
       STARTSWITH(" startsWith ") {
         @Override
         boolean evaluate(Instance inst, int lhsAttIndex, String rhsOperand,
-            double numericOperand, Pattern regexPattern,
-            boolean rhsIsAttribute, int rhsAttIndex) {
+          double numericOperand, Pattern regexPattern, boolean rhsIsAttribute,
+          int rhsAttIndex) {
 
           if (inst.isMissing(lhsAttIndex)) {
             return false;
@@ -567,8 +570,8 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
       ENDSWITH(" endsWith ") {
         @Override
         boolean evaluate(Instance inst, int lhsAttIndex, String rhsOperand,
-            double numericOperand, Pattern regexPattern,
-            boolean rhsIsAttribute, int rhsAttIndex) {
+          double numericOperand, Pattern regexPattern, boolean rhsIsAttribute,
+          int rhsAttIndex) {
 
           if (inst.isMissing(lhsAttIndex)) {
             return false;
@@ -601,8 +604,8 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
       REGEX(" regex ") {
         @Override
         boolean evaluate(Instance inst, int lhsAttIndex, String rhsOperand,
-            double numericOperand, Pattern regexPattern,
-            boolean rhsIsAttribute, int rhsAttIndex) {
+          double numericOperand, Pattern regexPattern, boolean rhsIsAttribute,
+          int rhsAttIndex) {
 
           if (inst.isMissing(lhsAttIndex)) {
             return false;
@@ -624,8 +627,8 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
       };
 
       abstract boolean evaluate(Instance inst, int lhsAttIndex,
-          String rhsOperand, double numericOperand, Pattern regexPattern,
-          boolean rhsIsAttribute, int rhsAttIndex);
+        String rhsOperand, double numericOperand, Pattern regexPattern,
+        boolean rhsIsAttribute, int rhsAttIndex);
 
       private final String m_stringVal;
 
@@ -653,7 +656,7 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
      *          the result so far
      */
     public ExpressionClause(ExpressionType operator, String lhsAttributeName,
-        String rhsOperand, boolean rhsIsAttribute, boolean isAnOr) {
+      String rhsOperand, boolean rhsIsAttribute, boolean isAnOr) {
       m_operator = operator;
       m_lhsAttributeName = lhsAttributeName;
       m_rhsOperand = rhsOperand;
@@ -694,7 +697,7 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
       }
       if (lhs == null) {
         throw new IllegalArgumentException("Data does not contain attribute "
-            + "\"" + m_resolvedLhsName + "\"");
+          + "\"" + m_resolvedLhsName + "\"");
       }
       m_lhsAttIndex = lhs.index();
 
@@ -721,14 +724,14 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
         }
         if (rhs == null) {
           throw new IllegalArgumentException("Data does not contain attribute "
-              + "\"" + m_resolvedRhsOperand + "\"");
+            + "\"" + m_resolvedRhsOperand + "\"");
         }
         m_rhsAttIndex = rhs.index();
       } else if (m_operator != ExpressionType.CONTAINS
-          && m_operator != ExpressionType.STARTSWITH
-          && m_operator != ExpressionType.ENDSWITH
-          && m_operator != ExpressionType.REGEX
-          && m_operator != ExpressionType.ISMISSING) {
+        && m_operator != ExpressionType.STARTSWITH
+        && m_operator != ExpressionType.ENDSWITH
+        && m_operator != ExpressionType.REGEX
+        && m_operator != ExpressionType.ISMISSING) {
         // make sure the operand is parseable as a number (unless missing has
         // been specified - equals only)
         if (lhs.isNominal()) {
@@ -736,14 +739,14 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
 
           if (m_numericOperand < 0) {
             throw new IllegalArgumentException("Unknown nominal value '"
-                + m_resolvedRhsOperand + "' for attribute '" + lhs.name() + "'");
+              + m_resolvedRhsOperand + "' for attribute '" + lhs.name() + "'");
           }
         } else {
           try {
             m_numericOperand = Double.parseDouble(m_resolvedRhsOperand);
           } catch (NumberFormatException e) {
             throw new IllegalArgumentException("\"" + m_resolvedRhsOperand
-                + "\" is not parseable as a number!");
+              + "\" is not parseable as a number!");
           }
         }
       }
@@ -757,7 +760,7 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
     public boolean evaluate(Instance inst, boolean result) {
 
       boolean thisNode = m_operator.evaluate(inst, m_lhsAttIndex, m_rhsOperand,
-          m_numericOperand, m_regexPattern, m_rhsIsAttribute, m_rhsAttIndex);
+        m_numericOperand, m_regexPattern, m_rhsIsAttribute, m_rhsAttIndex);
 
       if (isNegated()) {
         thisNode = !thisNode;
@@ -850,15 +853,15 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
 
       if (expression.charAt(0) != '[') {
         throw new IllegalArgumentException(
-            "Was expecting a \"[\" to start this ExpressionClause!");
+          "Was expecting a \"[\" to start this ExpressionClause!");
       }
       expression = expression.substring(1, expression.length());
       m_lhsAttributeName = expression.substring(0, expression.indexOf("@EC@"));
       expression = expression.substring(expression.indexOf("@EC@") + 4,
-          expression.length());
+        expression.length());
       String oppName = expression.substring(0, expression.indexOf("@EC@"));
       expression = expression.substring(expression.indexOf("@EC@") + 4,
-          expression.length());
+        expression.length());
       for (ExpressionType n : ExpressionType.values()) {
         if (n.toString().equals(oppName)) {
           m_operator = n;
@@ -875,7 +878,7 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
       m_rhsOperand = expression.substring(0, expression.indexOf(']'));
 
       expression = expression.substring(expression.indexOf(']') + 1,
-          expression.length()); // remove "]"
+        expression.length()); // remove "]"
       if (expression.charAt(0) == ' ') {
         expression = expression.substring(1, expression.length());
       }
@@ -935,8 +938,8 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
    * Default visual filters
    */
   protected BeanVisual m_visual = new BeanVisual("FlowByExpression",
-      BeanVisual.ICON_PATH + "FlowByExpression.png", BeanVisual.ICON_PATH
-          + "FlowByExpression.png");
+    BeanVisual.ICON_PATH + "FlowByExpression.png", BeanVisual.ICON_PATH
+      + "FlowByExpression.png");
 
   /**
    * Constructor
@@ -950,12 +953,12 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
 
   public String globalInfo() {
     return "Splits incoming instances (or instance stream) according to the "
-        + "evaluation of a logical expression. The expression can test the values of "
-        + "one or more incoming attributes. The test can involve constants or comparing "
-        + "one attribute's values to another. Inequalities along with string operations "
-        + "such as contains, starts-with, ends-with and regular expressions may be used "
-        + "as operators. \"True\" instances can be sent to one downstream step and "
-        + "\"False\" instances sent to another.";
+      + "evaluation of a logical expression. The expression can test the values of "
+      + "one or more incoming attributes. The test can involve constants or comparing "
+      + "one attribute's values to another. Inequalities along with string operations "
+      + "such as contains, starts-with, ends-with and regular expressions may be used "
+      + "as operators. \"True\" instances can be sent to one downstream step and "
+      + "\"False\" instances sent to another.";
   }
 
   /**
@@ -1025,11 +1028,11 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
 
     if (m_downstream[0] == null || m_downstream[1] == null) {
       if (m_downstream[0] == null
-          && m_downstream[1] instanceof DataSourceListener) {
+        && m_downstream[1] instanceof DataSourceListener) {
         m_downstream[0] = dsl;
         return;
       } else if (m_downstream[1] == null
-          && m_downstream[0] instanceof DataSourceListener) {
+        && m_downstream[0] instanceof DataSourceListener) {
         m_downstream[1] = dsl;
         return;
       }
@@ -1069,11 +1072,11 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
 
     if (m_downstream[0] == null || m_downstream[1] == null) {
       if (m_downstream[0] == null
-          && m_downstream[1] instanceof InstanceListener) {
+        && m_downstream[1] instanceof InstanceListener) {
         m_downstream[0] = dsl;
         return;
       } else if (m_downstream[1] == null
-          && m_downstream[0] instanceof InstanceListener) {
+        && m_downstream[0] instanceof InstanceListener) {
         m_downstream[1] = dsl;
         return;
       }
@@ -1105,8 +1108,8 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
 
       if (eventName.equals("dataSet")) {
         return ((EventConstraints) m_listenee).eventGeneratable(eventName)
-            || ((EventConstraints) m_listenee).eventGeneratable("trainingSet")
-            || ((EventConstraints) m_listenee).eventGeneratable("testSet");
+          || ((EventConstraints) m_listenee).eventGeneratable("trainingSet")
+          || ((EventConstraints) m_listenee).eventGeneratable("testSet");
       }
 
       return ((EventConstraints) m_listenee).eventGeneratable(eventName);
@@ -1130,24 +1133,24 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
     }
 
     if (m_downstream[0] != null
-        && ((BeanCommon) m_downstream[0]).getCustomName().equals(
-            m_customNameOfTrueStep)) {
+      && ((BeanCommon) m_downstream[0]).getCustomName().equals(
+        m_customNameOfTrueStep)) {
       m_indexOfTrueStep = 0;
     }
     if (m_downstream[0] != null
-        && ((BeanCommon) m_downstream[0]).getCustomName().equals(
-            m_customNameOfFalseStep)) {
+      && ((BeanCommon) m_downstream[0]).getCustomName().equals(
+        m_customNameOfFalseStep)) {
       m_indexOfFalseStep = 0;
     }
 
     if (m_downstream[1] != null
-        && ((BeanCommon) m_downstream[1]).getCustomName().equals(
-            m_customNameOfTrueStep)) {
+      && ((BeanCommon) m_downstream[1]).getCustomName().equals(
+        m_customNameOfTrueStep)) {
       m_indexOfTrueStep = 1;
     }
     if (m_downstream[1] != null
-        && ((BeanCommon) m_downstream[1]).getCustomName().equals(
-            m_customNameOfFalseStep)) {
+      && ((BeanCommon) m_downstream[1]).getCustomName().equals(
+        m_customNameOfFalseStep)) {
       m_indexOfFalseStep = 1;
     }
 
@@ -1208,7 +1211,7 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
       if (m_indexOfFalseStep >= 0) {
         DataSetEvent d = new DataSetEvent(this, falseBatch);
         ((DataSourceListener) m_downstream[m_indexOfFalseStep])
-            .acceptDataSet(d);
+          .acceptDataSet(d);
       }
     } else {
       if (m_indexOfTrueStep >= 0) {
@@ -1254,11 +1257,11 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
       m_ie.setStructure(structure);
       if (m_indexOfTrueStep >= 0) {
         ((InstanceListener) m_downstream[m_indexOfTrueStep])
-            .acceptInstance(m_ie);
+          .acceptInstance(m_ie);
       }
       if (m_indexOfFalseStep >= 0) {
         ((InstanceListener) m_downstream[m_indexOfFalseStep])
-            .acceptInstance(m_ie);
+          .acceptInstance(m_ie);
       }
     } else {
       Instance inst = e.getInstance();
@@ -1276,23 +1279,23 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
             if (m_indexOfTrueStep >= 0) {
               m_ie.setInstance(inst);
               ((InstanceListener) m_downstream[m_indexOfTrueStep])
-                  .acceptInstance(m_ie);
+                .acceptInstance(m_ie);
             }
             if (m_indexOfFalseStep >= 0) {
               m_ie.setInstance(null);
               ((InstanceListener) m_downstream[m_indexOfFalseStep])
-                  .acceptInstance(m_ie);
+                .acceptInstance(m_ie);
             }
           } else {
             if (m_indexOfFalseStep >= 0) {
               m_ie.setInstance(inst);
               ((InstanceListener) m_downstream[m_indexOfFalseStep])
-                  .acceptInstance(m_ie);
+                .acceptInstance(m_ie);
             }
             if (m_indexOfTrueStep >= 0) {
               m_ie.setInstance(null);
               ((InstanceListener) m_downstream[m_indexOfTrueStep])
-                  .acceptInstance(m_ie);
+                .acceptInstance(m_ie);
             }
           }
         } else {
@@ -1300,11 +1303,11 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
           m_ie.setInstance(null);
           if (m_indexOfTrueStep >= 0) {
             ((InstanceListener) m_downstream[m_indexOfTrueStep])
-                .acceptInstance(m_ie);
+              .acceptInstance(m_ie);
           }
           if (m_indexOfFalseStep >= 0) {
             ((InstanceListener) m_downstream[m_indexOfFalseStep])
-                .acceptInstance(m_ie);
+              .acceptInstance(m_ie);
           }
         }
 
@@ -1320,12 +1323,12 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
         if (result) {
           if (m_indexOfTrueStep >= 0) {
             ((InstanceListener) m_downstream[m_indexOfTrueStep])
-                .acceptInstance(m_ie);
+              .acceptInstance(m_ie);
           }
         } else {
           if (m_indexOfFalseStep >= 0) {
             ((InstanceListener) m_downstream[m_indexOfFalseStep])
-                .acceptInstance(m_ie);
+              .acceptInstance(m_ie);
           }
         }
       }
@@ -1337,7 +1340,7 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
   @Override
   public void useDefaultVisual() {
     m_visual.loadIcons(BeanVisual.ICON_PATH + "FlowByExpression.png",
-        BeanVisual.ICON_PATH + "FlowByExpression.png");
+      BeanVisual.ICON_PATH + "FlowByExpression.png");
     m_visual.setText("FlowByExpression");
   }
 
@@ -1446,12 +1449,12 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
     }
 
     if (eventName.equals("dataSet")
-        && (m_downstream == null || m_downstream.length == 0)) {
+      && (m_downstream == null || m_downstream.length == 0)) {
       return null;
     }
 
     if (eventName.equals("instance")
-        && (m_downstream == null || m_downstream.length == 0)) {
+      && (m_downstream == null || m_downstream.length == 0)) {
       return null;
     }
 

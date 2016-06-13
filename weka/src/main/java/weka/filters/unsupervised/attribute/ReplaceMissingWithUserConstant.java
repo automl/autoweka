@@ -23,6 +23,7 @@ package weka.filters.unsupervised.attribute;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
@@ -45,16 +46,17 @@ import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
 /**
- <!-- globalinfo-start -->
- * Replaces all missing values for nominal, string, numeric and date attributes in the dataset with user-supplied constant values.
+ * <!-- globalinfo-start --> Replaces all missing values for nominal, string,
+ * numeric and date attributes in the dataset with user-supplied constant
+ * values.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 9197 $
+ * @version $Revision: 12037 $
  */
 public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
-    implements UnsupervisedFilter, StreamableFilter, EnvironmentHandler {
+  implements UnsupervisedFilter, StreamableFilter, EnvironmentHandler {
 
   /** For serialization */
   private static final long serialVersionUID = -7334039452189350356L;
@@ -108,7 +110,7 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
   public String globalInfo() {
 
     return "Replaces all missing values for nominal, string, numeric and date "
-        + "attributes in the dataset with user-supplied constant values.";
+      + "attributes in the dataset with user-supplied constant values.";
   }
 
   @Override
@@ -129,32 +131,31 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
   }
 
   @Override
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector<Option> opts = new Vector<Option>();
+    Vector<Option> opts = new Vector<Option>(5);
 
-    opts.addElement(new Option(
+    opts
+      .addElement(new Option(
         "\tSpecify list of attributes to replace missing values for "
-            + "\n\t(as weka range list of indices or a comma separated list of attribute names).\n"
-            + "\t(default: consider all attributes)", "R", 1,
+          + "\n\t(as weka range list of indices or a comma separated list of attribute names).\n"
+          + "\t(default: consider all attributes)", "R", 1,
         "-A <index1,index2-index4,... | att-name1,att-name2,...>"));
 
     opts.addElement(new Option(
-        "\tSpecify the replacement constant for nominal/string attributes",
-        "N", 1, "-N"));
+      "\tSpecify the replacement constant for nominal/string attributes", "N",
+      1, "-N"));
     opts.addElement(new Option(
-        "\tSpecify the replacement constant for numeric attributes"
-            + "\n\t(default: 0)", "R", 1, "-R"));
+      "\tSpecify the replacement constant for numeric attributes"
+        + "\n\t(default: 0)", "R", 1, "-R"));
     opts.addElement(new Option(
-        "\tSpecify the replacement constant for date attributes", "D", 1, "-D"));
+      "\tSpecify the replacement constant for date attributes", "D", 1, "-D"));
     opts.addElement(new Option(
-        "\tSpecify the date format for parsing the replacement date constant"
-            + "\n\t(default: yyyy-MM-dd'T'HH:mm:ss)", "F", 1, "-F"));
+      "\tSpecify the date format for parsing the replacement date constant"
+        + "\n\t(default: yyyy-MM-dd'T'HH:mm:ss)", "F", 1, "-F"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      opts.addElement((Option) enu.nextElement());
-    }
+    opts.addAll(Collections.list(super.listOptions()));
+
     return opts.elements();
   }
 
@@ -163,40 +164,53 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -A &lt;index1,index2-index4,... | att-name1,att-name2,...&gt;
+   * <pre>
+   * -A &lt;index1,index2-index4,... | att-name1,att-name2,...&gt;
    *  Specify list of attributes to replace missing values for 
    *  (as weka range list of indices or a comma separated list of attribute names).
-   *  (default: consider all attributes)</pre>
+   *  (default: consider all attributes)
+   * </pre>
    * 
-   * <pre> -N
-   *  Specify the replacement constant for nominal/string attributes</pre>
+   * <pre>
+   * -N
+   *  Specify the replacement constant for nominal/string attributes
+   * </pre>
    * 
-   * <pre> -R
+   * <pre>
+   * -R
    *  Specify the replacement constant for numeric attributes
-   *  (default: 0)</pre>
+   *  (default: 0)
+   * </pre>
    * 
-   * <pre> -D
-   *  Specify the replacement constant for date attributes</pre>
+   * <pre>
+   * -D
+   *  Specify the replacement constant for date attributes
+   * </pre>
    * 
-   * <pre> -F
+   * <pre>
+   * -F
    *  Specify the date format for parsing the replacement date constant
-   *  (default: yyyy-MM-dd'T'HH:mm:ss)</pre>
+   *  (default: yyyy-MM-dd'T'HH:mm:ss)
+   * </pre>
    * 
-   * <pre> -unset-class-temporarily
+   * <pre>
+   * -unset-class-temporarily
    *  Unsets the class index temporarily before the filter is
    *  applied to the data.
-   *  (default: no)</pre>
+   *  (default: no)
+   * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
   @Override
   public void setOptions(String[] options) throws Exception {
+
     String atts = Utils.getOption('A', options);
     if (atts.length() > 0) {
       setAttributes(atts);
@@ -218,10 +232,15 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
     if (formatString.length() > 0) {
       setDateFormat(formatString);
     }
+
+    super.setOptions(options);
+
+    Utils.checkForRemainingOptions(options);
   }
 
   @Override
   public String[] getOptions() {
+
     ArrayList<String> options = new ArrayList<String>();
 
     if (getAttributes().length() > 0) {
@@ -249,6 +268,8 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
       options.add(getDateFormat());
     }
 
+    Collections.addAll(options, super.getOptions());
+
     return options.toArray(new String[1]);
   }
 
@@ -259,11 +280,11 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
    */
   public String attributesTipText() {
     return "Specify range of attributes to act on."
-        + " This is a comma separated list of attribute indices, with"
-        + " \"first\" and \"last\" valid values. Specify an inclusive"
-        + " range with \"-\". E.g: \"first-3,5,6-10,last\". Can alternatively"
-        + " specify a comma separated list of attribute names. Note that "
-        + " you can't mix indices and attribute names in the same list";
+      + " This is a comma separated list of attribute indices, with"
+      + " \"first\" and \"last\" valid values. Specify an inclusive"
+      + " range with \"-\". E.g: \"first-3,5,6-10,last\". Can alternatively"
+      + " specify a comma separated list of attribute names. Note that "
+      + " you can't mix indices and attribute names in the same list";
   }
 
   /**
@@ -409,13 +430,13 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
 
     try {
       if (m_resolvedNominalStringConstant != null
-          && m_resolvedNominalStringConstant.length() > 0) {
+        && m_resolvedNominalStringConstant.length() > 0) {
         m_resolvedNominalStringConstant = m_env
-            .substitute(m_resolvedNominalStringConstant);
+          .substitute(m_resolvedNominalStringConstant);
       }
 
       if (m_resolvedNumericConstant != null
-          && m_resolvedNumericConstant.length() > 0) {
+        && m_resolvedNumericConstant.length() > 0) {
         m_resolvedNumericConstant = m_env.substitute(m_resolvedNumericConstant);
       }
 
@@ -442,7 +463,7 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
       String[] parts = m_resolvedRange.split(",");
       if (parts.length == 0) {
         throw new Exception(
-            "Must specify which attributes to replace missing values for!");
+          "Must specify which attributes to replace missing values for!");
       }
 
       StringBuffer indexList = new StringBuffer();
@@ -451,7 +472,7 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
         Attribute a = instanceInfo.attribute(att);
         if (a == null) {
           throw new Exception("I can't find the requested attribute '" + att
-              + "' in the incoming instances.");
+            + "' in the incoming instances.");
         }
         indexList.append(",").append(a.index() + 1);
       }
@@ -472,46 +493,47 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
           hasNominal = true;
         } else if (instanceInfo.attribute(i).isString()) {
           hasString = true;
-        } else if (instanceInfo.attribute(i).isNumeric()) {
-          hasNumeric = true;
         } else if (instanceInfo.attribute(i).isDate()) {
           hasDate = true;
+        } else if (instanceInfo.attribute(i).isNumeric()) {
+          hasNumeric = true;
         }
       }
     }
 
     if (hasNominal || hasString) {
       if (m_resolvedNominalStringConstant == null
-          || m_resolvedNominalStringConstant.length() == 0) {
+        || m_resolvedNominalStringConstant.length() == 0) {
         if (m_resolvedNumericConstant != null
-            && m_resolvedNumericConstant.length() > 0) {
+          && m_resolvedNumericConstant.length() > 0) {
           // use the supplied numeric constant as a nominal value
           m_resolvedNominalStringConstant = "" + m_resolvedNumericConstant;
         } else {
           throw new Exception("Data contains nominal/string attributes and no "
-              + "replacement constant has been supplied");
+            + "replacement constant has been supplied");
         }
       }
     }
 
-    if (hasNumeric
-        && (m_numericConstant == null || m_numericConstant.length() == 0)) {
-      if (m_resolvedNominalStringConstant != null
+    if (hasNumeric) {
+      if (m_numericConstant == null || m_numericConstant.length() == 0) {
+        if (m_resolvedNominalStringConstant != null
           && m_resolvedNominalStringConstant.length() > 0) {
-        // use the supplied nominal constant as numeric replacement
-        // value (if we can parse it as a number)
-        try {
-          Double.parseDouble(m_resolvedNominalStringConstant);
-          m_resolvedNumericConstant = m_resolvedNominalStringConstant;
-        } catch (NumberFormatException e) {
-          throw new Exception(
+          // use the supplied nominal constant as numeric replacement
+          // value (if we can parse it as a number)
+          try {
+            Double.parseDouble(m_resolvedNominalStringConstant);
+            m_resolvedNumericConstant = m_resolvedNominalStringConstant;
+          } catch (NumberFormatException e) {
+            throw new Exception(
               "Data contains numeric attributes and no numeric "
-                  + "constant has been supplied. Unable to parse nominal "
-                  + "constant as a number either.");
-        }
-      } else {
-        throw new Exception("Data contains numeric attributes and no "
+                + "constant has been supplied. Unable to parse nominal "
+                + "constant as a number either.");
+          }
+        } else {
+          throw new Exception("Data contains numeric attributes and no "
             + "replacement constant has been supplied");
+        }
       }
 
       try {
@@ -523,10 +545,10 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
 
     if (hasDate) {
       if (m_resolvedDateConstant == null
-          || m_resolvedDateConstant.length() == 0) {
+        || m_resolvedDateConstant.length() == 0) {
         throw new Exception(
-            "Data contains date attributes and no replacement constant has been "
-                + "supplied");
+          "Data contains date attributes and no replacement constant has been "
+            + "supplied");
       }
 
       SimpleDateFormat sdf = new SimpleDateFormat(m_resolvedDateFormat);
@@ -545,10 +567,12 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
         if (temp.isNominal()) {
           if (temp.indexOfValue(m_resolvedNominalStringConstant) < 0) {
             List<String> values = new ArrayList<String>();
+
+            values.add(m_resolvedNominalStringConstant);
             for (int j = 0; j < temp.numValues(); j++) {
               values.add(temp.value(j));
             }
-            values.add(m_resolvedNominalStringConstant);
+
             Attribute newAtt = new Attribute(temp.name(), values);
             newAtt.setWeight(temp.weight());
             updatedNoms.add(newAtt);
@@ -597,13 +621,16 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
     for (int i = 0; i < inst.numAttributes(); i++) {
       if (inst.isMissing(i) && m_selectedRange.isInRange(i)) {
         if (i != inst.classIndex()) {
-          if (inst.attribute(i).isNumeric()) {
+          if (inst.attribute(i).isDate()) {
+            vals[i] = m_dateConstVal;
+          } else if (inst.attribute(i).isNumeric()) {
             vals[i] = m_numericConstVal;
           } else if (inst.attribute(i).isNominal()) {
             // vals[i] = inst.attribute(i).numValues();
             int temp = inst.attribute(i).indexOfValue(
-                m_resolvedNominalStringConstant);
-            vals[i] = (temp >= 0) ? temp : inst.attribute(i).numValues();
+              m_resolvedNominalStringConstant);
+            // vals[i] = (temp >= 0) ? temp : inst.attribute(i).numValues();
+            vals[i] = (temp >= 0) ? temp : 0;
           } else if (inst.attribute(i).isString()) {
             // a bit of a hack here to try and detect if we're running in
             // streaming
@@ -614,14 +641,12 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
             // value, the current instance's value, is maintained in memory)
             if (inst.attribute(i).numValues() <= 1) {
               outputFormatPeek().attribute(i).setStringValue(
-                  m_resolvedNominalStringConstant);
+                m_resolvedNominalStringConstant);
               vals[i] = 0;
             } else {
               vals[i] = outputFormatPeek().attribute(i).addStringValue(
-                  m_resolvedNominalStringConstant);
+                m_resolvedNominalStringConstant);
             }
-          } else if (inst.attribute(i).isDate()) {
-            vals[i] = m_dateConstVal;
           } else {
             vals[i] = inst.value(i);
           }
@@ -629,22 +654,32 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
           vals[i] = inst.value(i);
         }
       } else {
-        if (inst.attribute(i).isString()) {
-          // a bit of a hack here to try and detect if we're running in
-          // streaming
-          // mode or batch mode. If the string attribute has only one value in
-          // the
-          // header then it is likely that we're running in streaming mode
-          // (where only one
-          // value, the current instance's value, is maintained in memory)
-          if (inst.attribute(i).numValues() <= 1) {
-            outputFormatPeek().attribute(i).setStringValue(inst.stringValue(i));
-          } else {
-            outputFormatPeek().attribute(i).addStringValue(inst.stringValue(i));
-          }
-          vals[i] = outputFormatPeek().attribute(i).indexOfValue(
+        if (m_selectedRange.isInRange(i)) {
+          // in range but not missing
+          if (inst.attribute(i).isString()) {
+            // a bit of a hack here to try and detect if we're running in
+            // streaming
+            // mode or batch mode. If the string attribute has only one value in
+            // the
+            // header then it is likely that we're running in streaming mode
+            // (where only one
+            // value, the current instance's value, is maintained in memory)
+            if (inst.attribute(i).numValues() <= 1) {
+              outputFormatPeek().attribute(i).setStringValue(
+                inst.stringValue(i));
+            } else {
+              outputFormatPeek().attribute(i).addStringValue(
+                inst.stringValue(i));
+            }
+            vals[i] = outputFormatPeek().attribute(i).indexOfValue(
               inst.stringValue(i));
+          } else if (inst.attribute(i).isNominal() && i != inst.classIndex()) {
+            vals[i] = inst.value(i) + 1;
+          } else {
+            vals[i] = inst.value(i);
+          }
         } else {
+          // missing but not in range
           vals[i] = inst.value(i);
         }
       }
@@ -662,7 +697,7 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
      * copyValues(newInst, false, inst.dataset(), getOutputFormat());
      * newInst.setDataset(getOutputFormat());
      */
-    push(newInst);
+    push(newInst, false); // No need to copy
 
     return true;
   }
@@ -679,7 +714,7 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 9197 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**
@@ -691,4 +726,3 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
     runFilter(new ReplaceMissingWithUserConstant(), args);
   }
 }
-

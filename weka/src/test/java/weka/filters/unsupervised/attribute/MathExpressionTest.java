@@ -33,7 +33,7 @@ import junit.framework.TestSuite;
  * java weka.filters.unsupervised.attribute.MathExpressionTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 11497 $
  */
 public class MathExpressionTest 
   extends AbstractFilterTest {
@@ -53,7 +53,11 @@ public class MathExpressionTest
   /** Creates a MathExpression filter with the given expression */
   protected Filter getFilter(String expression) {
     MathExpression f = new MathExpression();
-    f.setExpression(expression);
+    try {
+      f.setExpression(expression);
+    } catch (Exception e) {
+      throw new RuntimeException("Error during compilation of expression!", e);
+    }
     f.setIgnoreRange("" + (m_AttIndex + 1));
     f.setInvertSelection(true);
     return f;
@@ -77,15 +81,14 @@ public class MathExpressionTest
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
     assertEquals(m_Instances.numInstances(), result.numInstances());
     // check statistics
-    boolean equal = true;
     for (int i = 0; i < result.numInstances(); i++) {
       if (!Utils.eq(stats, result.instance(i).value(m_AttIndex))) {
-        equal = false;
+        fail("Filter and Attribute statistics differ ('" + expr +
+            "', reference = " + stats + ", computed = " +
+            result.instance(i).value(m_AttIndex) + ")!");
         break;
       }
     }
-    if (!equal)
-      fail("Filter and Attribute statistics differ ('" + expr + "')!");
   }
 
   /**

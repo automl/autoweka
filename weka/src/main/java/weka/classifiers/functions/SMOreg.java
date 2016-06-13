@@ -21,9 +21,6 @@
 
 package weka.classifiers.functions;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.functions.supportVector.PolyKernel;
@@ -50,6 +47,10 @@ import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.filters.unsupervised.attribute.Standardize;
+
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -155,7 +156,7 @@ import weka.filters.unsupervised.attribute.Standardize;
  <!-- options-end -->
  *
  * @author  Remco Bouckaert (remco@cs.waikato.ac.nz,rrb@xm.co.nz)
- * @version $Revision: 8123 $
+ * @version $Revision: 12558 $
  */
 public class SMOreg 
   extends AbstractClassifier 
@@ -259,9 +260,9 @@ public class SMOreg
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
-    Enumeration enm;
-    Vector result = new Vector();
+  public Enumeration<Option> listOptions() {
+    
+    Vector<Option> result = new Vector<Option>();
     
     result.addElement(new Option(
 	"\tThe complexity constant C.\n"
@@ -283,24 +284,22 @@ public class SMOreg
 	+ "\t(default: weka.classifiers.functions.supportVector.PolyKernel)",
 	"K", 1, "-K <classname and parameters>"));
 
+    result.addAll(Collections.list(super.listOptions()));
+    
     result.addElement(new Option(
 	"",
 	"", 0, "\nOptions specific to optimizer ('-I') "
 	+ getRegOptimizer().getClass().getName() + ":"));
 
-    enm = ((OptionHandler) getRegOptimizer()).listOptions();
-    while (enm.hasMoreElements())
-      result.addElement(enm.nextElement());
+    result.addAll(Collections.list(((OptionHandler) getRegOptimizer()).listOptions()));
 
     result.addElement(new Option(
 	"",
 	"", 0, "\nOptions specific to kernel ('-K') "
 	+ getKernel().getClass().getName() + ":"));
     
-    enm = ((OptionHandler) getKernel()).listOptions();
-    while (enm.hasMoreElements())
-      result.addElement(enm.nextElement());
-
+    result.addAll(Collections.list(((OptionHandler) getKernel()).listOptions()));
+   
     return result.elements();
   }
   
@@ -420,6 +419,10 @@ public class SMOreg
     else {
       setKernel(new PolyKernel());
     }
+    
+    super.setOptions(options);
+    
+    Utils.checkForRemainingOptions(options);
   }
   
   /**
@@ -428,15 +431,8 @@ public class SMOreg
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    int       	i;
-    Vector    	result;
-    String[]  	options;
-
-    result = new Vector();
-
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
+    
+    Vector<String>    	result = new Vector<String>();
     
     result.add("-C");
     result.add("" + getC());
@@ -450,6 +446,8 @@ public class SMOreg
     result.add("-K");
     result.add("" + getKernel().getClass().getName() + " " + Utils.joinOptions(getKernel().getOptions()));
 
+    Collections.addAll(result, super.getOptions());
+    
     return (String[]) result.toArray(new String[result.size()]);	  
   }
   
@@ -473,6 +471,7 @@ public class SMOreg
     // class
     result.disableAllClasses();
     result.disableAllClassDependencies();
+    result.disable(Capability.NO_CLASS);
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
@@ -749,8 +748,8 @@ public class SMOreg
    * 
    * @return an enumeration of the measure names
    */
-  public Enumeration enumerateMeasures() {
-    Vector result = new Vector();
+  public Enumeration<String> enumerateMeasures() {
+    Vector<String> result = new Vector<String>();
     
     result.addElement("measureKernelEvaluations");
     result.addElement("measureCacheHits");
@@ -805,7 +804,7 @@ public class SMOreg
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8123 $");
+    return RevisionUtils.extract("$Revision: 12558 $");
   }
   
   /**

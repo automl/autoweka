@@ -201,6 +201,12 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         attributeEvalClass = null;
         attributeEvalArgs = new String[0];
         wLog = null;
+
+        // work around broken XML parsers
+        Properties props = System.getProperties();
+        props.setProperty("org.xml.sax.parser", "com.sun.org.apache.xerces.internal.parsers.SAXParser");
+        props.setProperty("javax.xml.parsers.DocumentBuilderFactory", "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
+        props.setProperty("javax.xml.parsers.SAXParserFactory", "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl");
     }
 
     public static String getResamplingType(){
@@ -790,6 +796,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             res += "\n";
             res += eval.toClassDetailsString();
         } catch(Exception e) { }
+
+        res += "\n\nFor better performance, try giving Auto-WEKA more time.";
 
         return res;
     }

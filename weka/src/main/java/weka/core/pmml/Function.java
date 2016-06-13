@@ -196,11 +196,11 @@ public abstract class Function implements Serializable {
       result = new BuiltInMath(BuiltInMath.MathFunc.CEIL);
     } else if (name.equals(BuiltInMath.MathFunc.ROUND.toString())) {
       result = new BuiltInMath(BuiltInMath.MathFunc.ROUND);
-    } else if (name.equals(BuiltInString.StringFunc.UPPERCASE)) {
+    } else if (name.equals(BuiltInString.StringFunc.UPPERCASE.toString())) {
       result = new BuiltInString(BuiltInString.StringFunc.UPPERCASE);
-    } else if (name.equals(BuiltInString.StringFunc.SUBSTRING)) {
+    } else if (name.equals(BuiltInString.StringFunc.SUBSTRING.toString())) {
       result = new BuiltInString(BuiltInString.StringFunc.SUBSTRING);
-    } else if (name.equals(BuiltInString.StringFunc.TRIMBLANKS)) {
+    } else if (name.equals(BuiltInString.StringFunc.TRIMBLANKS.toString())) {
       result = new BuiltInString(BuiltInString.StringFunc.TRIMBLANKS);
     }
     

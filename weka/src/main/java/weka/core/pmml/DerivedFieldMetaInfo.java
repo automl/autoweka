@@ -32,47 +32,49 @@ import weka.core.Attribute;
 import weka.core.Instances;
 
 public class DerivedFieldMetaInfo extends FieldMetaInfo implements Serializable {
-  
+
   /** for serialization */
-  
+  private static final long serialVersionUID = 875736989396755241L;
+
   /** display name */
   protected String m_displayName = null;
-  
-  /** 
-   * the list of values (if the field is ordinal) - may be of size zero if none are specified.
-   * If none are specified, we may be able to construct this by querying the Expression in
-   * this derived field 
+
+  /**
+   * the list of values (if the field is ordinal) - may be of size zero if none
+   * are specified. If none are specified, we may be able to construct this by
+   * querying the Expression in this derived field
    */
   protected ArrayList<Value> m_values = new ArrayList<Value>();
-  
+
   /** the single expression that defines the value of this field */
   protected Expression m_expression;
-  
-  public DerivedFieldMetaInfo(Element derivedField, ArrayList<Attribute> fieldDefs,
-                              TransformationDictionary transDict) throws Exception {
+
+  public DerivedFieldMetaInfo(Element derivedField,
+    ArrayList<Attribute> fieldDefs, TransformationDictionary transDict) throws Exception {
     super(derivedField);
     // m_fieldName = derivedField.getAttribute("name");
     String displayName = derivedField.getAttribute("displayName");
     if (displayName != null && displayName.length() > 0) {
       m_displayName = displayName;
     }
-    
+
     // get any values
     NodeList valL = derivedField.getElementsByTagName("Value");
     if (valL.getLength() > 0) {
       for (int i = 0; i < valL.getLength(); i++) {
         Node valueN = valL.item(i);
         if (valueN.getNodeType() == Node.ELEMENT_NODE) {
-          Value v = new Value((Element)valueN);
+          Value v = new Value((Element) valueN);
           m_values.add(v);
         }
       }
     }
-    
+
     // now get the expression
-    m_expression = Expression.getExpression(derivedField, m_optype, fieldDefs, transDict);
+    m_expression = Expression.getExpression(derivedField, m_optype, fieldDefs,
+      transDict);
   }
-  
+
   /**
    * Upadate the field definitions for this derived field
    * 
@@ -82,7 +84,7 @@ public class DerivedFieldMetaInfo extends FieldMetaInfo implements Serializable 
   public void setFieldDefs(ArrayList<Attribute> fieldDefs) throws Exception {
     m_expression.setFieldDefs(fieldDefs);
   }
-  
+
   /**
    * Upadate the field definitions for this derived field
    * 
@@ -96,26 +98,27 @@ public class DerivedFieldMetaInfo extends FieldMetaInfo implements Serializable 
     }
     setFieldDefs(tempDefs);
   }
-  
+
   /**
    * Get this derived field as an Attribute.
    * 
    * @return an Attribute for this derived field.
    */
+  @Override
   public Attribute getFieldAsAttribute() {
     return m_expression.getOutputDef().copy(m_fieldName);
   }
-  
+
   /**
-   * Get the derived field value for the given incoming vector of
-   * values. Incoming values are assumed to be in the same order
-   * as the attributes supplied in the field definitions ArrayList
-   * used to construct this DerivedField.
+   * Get the derived field value for the given incoming vector of values.
+   * Incoming values are assumed to be in the same order as the attributes
+   * supplied in the field definitions ArrayList used to construct this
+   * DerivedField.
    * 
-   * If the optype of this derived field is continuous, then a real
-   * number is returned. Otherwise, the number returned is the index
-   * of the categorical/ordinal value corresponding to result of computing
-   * the derived field value.
+   * If the optype of this derived field is continuous, then a real number is
+   * returned. Otherwise, the number returned is the index of the
+   * categorical/ordinal value corresponding to result of computing the derived
+   * field value.
    * 
    * @param incoming the incoming parameter values
    * @return the result of computing the derived value
@@ -124,12 +127,13 @@ public class DerivedFieldMetaInfo extends FieldMetaInfo implements Serializable 
   public double getDerivedValue(double[] incoming) throws Exception {
     return m_expression.getResult(incoming);
   }
-  
+
+  @Override
   public String toString() {
     StringBuffer buff = new StringBuffer();
     buff.append(getFieldAsAttribute() + "\nexpression:\n");
     buff.append(m_expression + "\n");
-    
+
     return buff.toString();
   }
 }

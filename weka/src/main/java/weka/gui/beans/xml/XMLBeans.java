@@ -56,14 +56,12 @@ import weka.gui.beans.MetaBean;
 import weka.gui.beans.Visible;
 
 /**
- * This class serializes and deserializes a KnowledgeFlow setup to and fro XML.
- * <br>
+ * This class serializes and deserializes a KnowledgeFlow setup to and fro XML. <br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8074 $
+ * @version $Revision: 10221 $
  */
-public class XMLBeans 
-  extends XMLBasicSerialization {
+public class XMLBeans extends XMLBasicSerialization {
 
   /** the value of the id property */
   public final static String VAL_ID = "id";
@@ -79,42 +77,42 @@ public class XMLBeans
 
   /** the value of the customName property */
   public final static String VAL_CUSTOM_NAME = "custom_name";
- 
+
   /** the value of the source property */
   public final static String VAL_SOURCEID = "source_id";
- 
+
   /** the value of the target property */
   public final static String VAL_TARGETID = "target_id";
-  
+
   /** the value of the eventname property */
   public final static String VAL_EVENTNAME = "eventname";
-  
+
   /** the value of the hidden property */
   public final static String VAL_HIDDEN = "hidden";
-  
+
   /** the value of the file property */
   public final static String VAL_FILE = "file";
-  
+
   /** the value of the dir property */
   public final static String VAL_DIR = "dir";
-  
+
   /** the value of the prefix property */
   public final static String VAL_PREFIX = "prefix";
 
   public final static String VAL_RELATIVE_PATH = "useRelativePath";
-  
+
   /** the value of the options property */
   public final static String VAL_OPTIONS = "options";
-  
+
   /** the value of the saver property */
   public final static String VAL_SAVER = "wrappedAlgorithm";
-  
+
   /** the value of the loader property */
   public final static String VAL_LOADER = "wrappedAlgorithm";
-  
+
   /** the value of the text property */
   public final static String VAL_TEXT = "text";
-  
+
   /** the value of the beanContext property */
   public final static String VAL_BEANCONTEXT = "beanContext";
 
@@ -129,7 +127,7 @@ public class XMLBeans
 
   /** the value of the green property */
   public final static String VAL_GREEN = "green";
-  
+
   /** the value of the blue property */
   public final static String VAL_BLUE = "blue";
 
@@ -138,152 +136,174 @@ public class XMLBeans
 
   /** the value of the style property */
   public final static String VAL_STYLE = "style";
- 
+
   /** the value of the location property */
   public final static String VAL_LOCATION = "location";
- 
+
   /** the value of the size property */
   public final static String VAL_SIZE = "size";
- 
+
   /** the value of the color property */
   public final static String VAL_COLOR = "color";
-  
+
   /** the value of the font property */
   public final static String VAL_FONT = "font";
-  
+
   /** the value of the iconpath property */
   public final static String VAL_ICONPATH = "iconPath";
-  
+
   /** the value of the animatedIconPath property */
   public final static String VAL_ANIMATEDICONPATH = "animatedIconPath";
-  
+
   /** the value of the associatedConnections property */
   public final static String VAL_ASSOCIATEDCONNECTIONS = "associatedConnections";
-  
+
   /** the value of the input property */
   public final static String VAL_INPUTS = "inputs";
-  
+
   /** the value of the input id property */
   public final static String VAL_INPUTSID = "inputs_id";
-  
+
   /** the value of the outputs id property */
   public final static String VAL_OUTPUTS = "outputs";
-  
+
   /** the value of the outputs property */
   public final static String VAL_OUTPUTSID = "outputs_id";
-  
+
   /** the value of the subFlow property */
   public final static String VAL_SUBFLOW = "subFlow";
-  
+
   /** the value of the originalCoords property */
   public final static String VAL_ORIGINALCOORDS = "originalCoords";
-  
+
   /** the value of the relationNameForFilename property (Saver) */
   public final static String VAL_RELATIONNAMEFORFILENAME = "relationNameForFilename";
 
-  /** the index in the Vector, where the BeanInstances are stored 
-   * (Instances and Connections are stored in a Vector and then serialized) */
+  /**
+   * the index in the Vector, where the BeanInstances are stored (Instances and
+   * Connections are stored in a Vector and then serialized)
+   */
   public final static int INDEX_BEANINSTANCES = 0;
 
-  /** the index in the Vector, where the BeanConnections are stored
-  * (Instances and Connections are stored in a Vector and then serialized) */
+  /**
+   * the index in the Vector, where the BeanConnections are stored (Instances
+   * and Connections are stored in a Vector and then serialized)
+   */
   public final static int INDEX_BEANCONNECTIONS = 1;
-  
+
   /** the component that manages the layout of the beans */
   protected JComponent m_BeanLayout;
-  
+
   /** keeps track of the BeanInstances read so far, used for the BeanConnections */
-  protected Vector m_BeanInstances;
-  
+  protected Vector<Object> m_BeanInstances;
+
   /** keeps track of the BeanInstances read so far, used for the BeanConnections */
-  protected Vector m_BeanInstancesID;
+  protected Vector<Integer> m_BeanInstancesID;
 
   /** whether to ignore the BeanConnection */
   protected boolean m_IgnoreBeanConnections;
-  
+
   /** the current MetaBean (for the BeanConnections) */
   protected MetaBean m_CurrentMetaBean;
 
   /** the identifier for regular BeanConnections */
   protected final static String REGULAR_CONNECTION = "regular_connection";
-  
-  /** the relation between Bean and connection, MetaBean BeanConnections
-   * are stored under the reference of the MetaBean, regular connections 
-   * are stored under REGULAR_CONNECTION. The relation has the following 
-   * format (is a string): sourcePos,targetPos,event,hidden
-   * @see #REGULAR_CONNECTION */
-  protected Hashtable m_BeanConnectionRelation;
-  
-  /** the data that is about to be read/written contains a complete layout 
-   * @see #m_DataType */
+
+  /**
+   * the relation between Bean and connection, MetaBean BeanConnections are
+   * stored under the reference of the MetaBean, regular connections are stored
+   * under REGULAR_CONNECTION. The relation has the following format (is a
+   * string): sourcePos,targetPos,event,hidden
+   * 
+   * @see #REGULAR_CONNECTION
+   */
+  protected Hashtable<Object, Vector<String>> m_BeanConnectionRelation;
+
+  /**
+   * the data that is about to be read/written contains a complete layout
+   * 
+   * @see #m_DataType
+   */
   public final static int DATATYPE_LAYOUT = 0;
-  
-  /** the data that is about to be read/written contains user-components, i.e., 
-   * Metabeans 
-   * @see #m_DataType */
+
+  /**
+   * the data that is about to be read/written contains user-components, i.e.,
+   * Metabeans
+   * 
+   * @see #m_DataType
+   */
   public final static int DATATYPE_USERCOMPONENTS = 1;
-  
-  /** the type of data that is be read/written
+
+  /**
+   * the type of data that is be read/written
+   * 
    * @see #DATATYPE_LAYOUT
-   * @see #DATATYPE_USERCOMPONENTS */
+   * @see #DATATYPE_USERCOMPONENTS
+   */
   protected int m_DataType = DATATYPE_LAYOUT;
-  
-  /** the beancontext to use for loading from XML and the beancontext is
-   * null in the bean */
+
+  /**
+   * the beancontext to use for loading from XML and the beancontext is null in
+   * the bean
+   */
   protected BeanContextSupport m_BeanContextSupport = null;
-  
-  /** The index of the vector of bean instances or connections to use.
-   * this corresponds to a tab in the main KnowledgeFlow UI
+
+  /**
+   * The index of the vector of bean instances or connections to use. this
+   * corresponds to a tab in the main KnowledgeFlow UI
    */
   protected int m_vectorIndex = 0;
-  
+
   /**
    * initializes the serialization for layouts
    * 
-   * @param layout      the component that manages the layout
-   * @param context     the bean context support to use
-   * @param tab         the index of the vector of bean instances or connections
-   * to use (this corresponds to a visible tab in the main KnowledgeFlow UI)
-   * @throws Exception  if initialization fails
+   * @param layout the component that manages the layout
+   * @param context the bean context support to use
+   * @param tab the index of the vector of bean instances or connections to use
+   *          (this corresponds to a visible tab in the main KnowledgeFlow UI)
+   * @throws Exception if initialization fails
    */
   public XMLBeans(JComponent layout, BeanContextSupport context, int tab) throws Exception {
     this(layout, context, DATATYPE_LAYOUT, tab);
   }
-  
+
   /**
    * initializes the serialization for different types of data
    * 
-   * @param layout      the component that manages the layout
-   * @param context     the bean context support to use
-   * @param datatype    the type of data to read/write
-   * @throws Exception  if initialization fails
+   * @param layout the component that manages the layout
+   * @param context the bean context support to use
+   * @param datatype the type of data to read/write
+   * @throws Exception if initialization fails
    */
-  public XMLBeans(JComponent layout, BeanContextSupport context, int datatype, 
-      int tab) throws Exception {
+  public XMLBeans(JComponent layout, BeanContextSupport context, int datatype,
+    int tab) throws Exception {
     super();
-    
+
     m_vectorIndex = tab;
     m_BeanLayout = layout;
     m_BeanContextSupport = context;
     setDataType(datatype);
   }
-  
+
   /**
    * sets what kind of data is to be read/written
-   * @param value       the type of data
+   * 
+   * @param value the type of data
    * @see #m_DataType
    */
   public void setDataType(int value) {
-    if (value == DATATYPE_LAYOUT)
+    if (value == DATATYPE_LAYOUT) {
       m_DataType = value;
-    else if (value == DATATYPE_USERCOMPONENTS)
+    } else if (value == DATATYPE_USERCOMPONENTS) {
       m_DataType = value;
-    else
+    } else {
       System.out.println("DataType '" + value + "' is unknown!");
+    }
   }
-  
+
   /**
    * returns the type of data that is to be read/written
+   * 
    * @return the type of data
    * @see #m_DataType
    */
@@ -297,14 +317,16 @@ public class XMLBeans
    * 
    * @throws Exception if something goes wrong
    */
+  @Override
   public void clear() throws Exception {
-    Vector<String>	classnames;
-    int			i;
-    
+    Vector<String> classnames;
+    int i;
+
     super.clear();
-    
-    // ignore: suppress unnecessary GUI stuff 
-    // needs to be checked for new Java versions (might introduce new properties) 
+
+    // ignore: suppress unnecessary GUI stuff
+    // needs to be checked for new Java versions (might introduce new
+    // properties)
     // - works with Java 1.5
     m_Properties.addIgnored("UI");
     m_Properties.addIgnored("actionMap");
@@ -339,8 +361,10 @@ public class XMLBeans
     m_Properties.addIgnored("visible");
 
     // special ignore
-    m_Properties.addIgnored("size");  // otherwise you get an endless loop with Dimension!
-    m_Properties.addIgnored("location");  // otherwise you get an endless loop with Point!
+    m_Properties.addIgnored("size"); // otherwise you get an endless loop with
+                                     // Dimension!
+    m_Properties.addIgnored("location"); // otherwise you get an endless loop
+                                         // with Point!
 
     // allow
     m_Properties.addAllowed(weka.gui.beans.BeanInstance.class, "x");
@@ -348,34 +372,49 @@ public class XMLBeans
     m_Properties.addAllowed(weka.gui.beans.BeanInstance.class, "bean");
     m_Properties.addAllowed(weka.gui.beans.Saver.class, "wrappedAlgorithm");
     m_Properties.addAllowed(weka.gui.beans.Loader.class, "wrappedAlgorithm");
-    m_Properties.addAllowed(weka.gui.beans.Saver.class, "relationNameForFilename");
-    if (getDataType() == DATATYPE_LAYOUT)
+    m_Properties.addAllowed(weka.gui.beans.Saver.class,
+      "relationNameForFilename");
+    if (getDataType() == DATATYPE_LAYOUT) {
       m_Properties.addAllowed(weka.gui.beans.Loader.class, "beanContext");
-    else
-      m_Properties.addIgnored(weka.gui.beans.Loader.class, "beanContext");   // TODO: more classes???
+    } else {
+      m_Properties.addIgnored(weka.gui.beans.Loader.class, "beanContext"); // TODO:
+                                                                           // more
+                                                                           // classes???
+    }
     m_Properties.addAllowed(weka.gui.beans.Filter.class, "filter");
     m_Properties.addAllowed(weka.gui.beans.Associator.class, "associator");
-    m_Properties.addAllowed(weka.gui.beans.Classifier.class, "wrappedAlgorithm");
+    m_Properties
+      .addAllowed(weka.gui.beans.Classifier.class, "wrappedAlgorithm");
     m_Properties.addAllowed(weka.gui.beans.Clusterer.class, "wrappedAlgorithm");
     m_Properties.addAllowed(weka.gui.beans.Classifier.class, "executionSlots");
     m_Properties.addAllowed(weka.gui.beans.Classifier.class, "blockOnLastFold");
-    m_Properties.addAllowed(weka.gui.beans.Classifier.class, "resetIncrementalClassifier");
-    m_Properties.addAllowed(weka.gui.beans.Classifier.class, "updateIncrementalClassifier");
-    m_Properties.addAllowed(weka.gui.beans.Classifier.class, "loadClassifierFileName");
+    m_Properties.addAllowed(weka.gui.beans.Classifier.class,
+      "resetIncrementalClassifier");
+    m_Properties.addAllowed(weka.gui.beans.Classifier.class,
+      "updateIncrementalClassifier");
+    m_Properties.addAllowed(weka.gui.beans.Classifier.class,
+      "loadClassifierFileName");
 
     m_Properties.addAllowed(weka.classifiers.Classifier.class, "debug");
     m_Properties.addAllowed(weka.classifiers.Classifier.class, "options");
     m_Properties.addAllowed(weka.associations.Associator.class, "options");
     m_Properties.addAllowed(weka.clusterers.Clusterer.class, "options");
     m_Properties.addAllowed(weka.filters.Filter.class, "options");
-    
-    m_Properties.addAllowed(weka.core.converters.DatabaseSaver.class, "options");
-    m_Properties.addAllowed(weka.core.converters.DatabaseLoader.class, "options");
-    m_Properties.addAllowed(weka.core.converters.TextDirectoryLoader.class, "options");
+    m_Properties.addAllowed(weka.core.converters.Saver.class, "options");
+    m_Properties.addAllowed(weka.core.converters.Loader.class, "options");
 
-    // we assume that classes implementing SplitEvaluator also implement OptionHandler
+    m_Properties
+      .addAllowed(weka.core.converters.DatabaseSaver.class, "options");
+    m_Properties.addAllowed(weka.core.converters.DatabaseLoader.class,
+      "options");
+    m_Properties.addAllowed(weka.core.converters.TextDirectoryLoader.class,
+      "options");
+
+    // we assume that classes implementing SplitEvaluator also implement
+    // OptionHandler
     m_Properties.addAllowed(weka.experiment.SplitEvaluator.class, "options");
-    // we assume that classes implementing ResultProducer also implement OptionHandler
+    // we assume that classes implementing ResultProducer also implement
+    // OptionHandler
     m_Properties.addAllowed(weka.experiment.ResultProducer.class, "options");
 
     // read/write methods
@@ -386,55 +425,63 @@ public class XMLBeans
     m_CustomMethods.register(this, ColorUIResource.class, "ColorUIResource");
     m_CustomMethods.register(this, FontUIResource.class, "FontUIResource");
 
-    m_CustomMethods.register(this, weka.gui.beans.BeanInstance.class, "BeanInstance");
-    m_CustomMethods.register(this, weka.gui.beans.BeanConnection.class, "BeanConnection");
-    m_CustomMethods.register(this, weka.gui.beans.BeanVisual.class, "BeanVisual");
+    m_CustomMethods.register(this, weka.gui.beans.BeanInstance.class,
+      "BeanInstance");
+    m_CustomMethods.register(this, weka.gui.beans.BeanConnection.class,
+      "BeanConnection");
+    m_CustomMethods.register(this, weka.gui.beans.BeanVisual.class,
+      "BeanVisual");
     m_CustomMethods.register(this, weka.gui.beans.Saver.class, "BeanSaver");
     m_CustomMethods.register(this, weka.gui.beans.MetaBean.class, "MetaBean");
 
     classnames = ConverterUtils.getFileLoaders();
-    for (i = 0; i < classnames.size(); i++)
-      m_CustomMethods.register(this, Class.forName(classnames.get(i)), "Loader");
+    for (i = 0; i < classnames.size(); i++) {
+      m_CustomMethods
+        .register(this, Class.forName(classnames.get(i)), "Loader");
+    }
     classnames = ConverterUtils.getFileSavers();
-    for (i = 0; i < classnames.size(); i++)
+    for (i = 0; i < classnames.size(); i++) {
       m_CustomMethods.register(this, Class.forName(classnames.get(i)), "Saver");
-    
+    }
+
     // other variables
-    m_BeanInstances          = null;
-    m_BeanInstancesID        = null;
-    m_CurrentMetaBean        = null;
-    m_IgnoreBeanConnections  = true;
+    m_BeanInstances = null;
+    m_BeanInstancesID = null;
+    m_CurrentMetaBean = null;
+    m_IgnoreBeanConnections = true;
     m_BeanConnectionRelation = null;
   }
-  
+
   /**
-   * traverses over all BeanInstances (or MetaBeans) and stores them in a vector 
+   * traverses over all BeanInstances (or MetaBeans) and stores them in a vector
    * (recurses into MetaBeans, since the sub-BeanInstances are not visible)
-   * @param list       the BeanInstances/MetaBeans to traverse
+   * 
+   * @param list the BeanInstances/MetaBeans to traverse
    */
-  protected void addBeanInstances(Vector list) {
-    int             i;
-    BeanInstance    beaninst;
-    
+  protected void addBeanInstances(Vector<Object> list) {
+    int i;
+    BeanInstance beaninst;
+
     for (i = 0; i < list.size(); i++) {
       if (list.get(i) instanceof BeanInstance) {
         beaninst = (BeanInstance) list.get(i);
-        
+
         m_BeanInstancesID.add(new Integer(m_BeanInstances.size()));
         m_BeanInstances.add(beaninst);
-        
-        if (beaninst.getBean() instanceof MetaBean)
+
+        if (beaninst.getBean() instanceof MetaBean) {
           addBeanInstances(((MetaBean) beaninst.getBean()).getBeansInSubFlow());
-      }
-      else if (list.get(i) instanceof MetaBean) {
+        }
+      } else if (list.get(i) instanceof MetaBean) {
         addBeanInstances(((MetaBean) list.get(i)).getBeansInSubFlow());
-      }
-      else {
-        System.out.println("addBeanInstances does not support Vectors of class '" + list.get(i) + "'!");
+      } else {
+        System.out
+          .println("addBeanInstances does not support Vectors of class '"
+            + list.get(i) + "'!");
       }
     }
   }
-  
+
   /**
    * enables derived classes to due some pre-processing on the objects, that's
    * about to be serialized. Right now it only returns the object.
@@ -443,132 +490,139 @@ public class XMLBeans
    * @return the possibly altered object
    * @throws Exception if post-processing fails
    */
+  @Override
+  @SuppressWarnings("unchecked")
   protected Object writePreProcess(Object o) throws Exception {
     o = super.writePreProcess(o);
-    
-    // gather all BeanInstances, also the ones in MetaBeans
-    m_BeanInstances   = new Vector();
-    m_BeanInstancesID = new Vector();
-    
-    switch (getDataType()) {
-      case DATATYPE_LAYOUT:
-        addBeanInstances(BeanInstance.getBeanInstances(m_vectorIndex));
-        break;
 
-      case DATATYPE_USERCOMPONENTS:
-        addBeanInstances((Vector) o);
-        break;
-        
-      default:
-        System.out.println("writePreProcess: data type '" + getDataType() + "' is not recognized!");
-        break;
+    // gather all BeanInstances, also the ones in MetaBeans
+    m_BeanInstances = new Vector<Object>();
+    m_BeanInstancesID = new Vector<Integer>();
+
+    switch (getDataType()) {
+    case DATATYPE_LAYOUT:
+      addBeanInstances(BeanInstance.getBeanInstances(m_vectorIndex));
+      break;
+
+    case DATATYPE_USERCOMPONENTS:
+      addBeanInstances((Vector<Object>) o);
+      break;
+
+    default:
+      System.out.println("writePreProcess: data type '" + getDataType()
+        + "' is not recognized!");
+      break;
     }
-    
+
     return o;
   }
-  
+
   /**
-   * enables derived classes to add other properties to the DOM tree, e.g.
-   * ones that do not apply to the get/set convention of beans. only implemented
-   * with empty method body.
+   * enables derived classes to add other properties to the DOM tree, e.g. ones
+   * that do not apply to the get/set convention of beans. only implemented with
+   * empty method body.
    * 
    * @param o the object that is serialized into XML
    * @throws Exception if post-processing fails
    */
+  @Override
   protected void writePostProcess(Object o) throws Exception {
-    Element         root;
-    NodeList        list;
-    Element         conns;
-    Element         child;
-    int             i;
+    Element root;
+    NodeList list;
+    Element conns;
+    Element child;
+    int i;
 
-    // since not all BeanConnections get saved to XML (e.g., MetaBeans in the 
-    // UserToolBar) if one saves a layout, the numbering in the Vector of the 
+    // since not all BeanConnections get saved to XML (e.g., MetaBeans in the
+    // UserToolBar) if one saves a layout, the numbering in the Vector of the
     // BeanConnections is not correct. The "name" attribute of the nodes has
     // to be modified
     if (getDataType() == DATATYPE_LAYOUT) {
-      root  = m_Document.getDocument().getDocumentElement();
+      root = m_Document.getDocument().getDocumentElement();
       conns = (Element) root.getChildNodes().item(INDEX_BEANCONNECTIONS);
-      list  = conns.getChildNodes();
+      list = conns.getChildNodes();
       for (i = 0; i < list.getLength(); i++) {
         child = (Element) list.item(i);
         child.setAttribute(ATT_NAME, "" + i);
       }
     }
   }
-  
+
   /**
-   * additional pre-processing can happen in derived classes before the 
-   * actual reading from XML (working on the raw XML). right now it does 
-   * nothing with the document, only empties the help-vector for the
-   * BeanInstances and reads the IDs for the BeanInstances, s.t. the correct
-   * references can be set again
+   * additional pre-processing can happen in derived classes before the actual
+   * reading from XML (working on the raw XML). right now it does nothing with
+   * the document, only empties the help-vector for the BeanInstances and reads
+   * the IDs for the BeanInstances, s.t. the correct references can be set again
    * 
    * @param document the document to pre-process
    * @return the processed object
    * @throws Exception if post-processing fails
    * @see #m_BeanInstances
    */
+  @Override
   protected Document readPreProcess(Document document) throws Exception {
-    NodeList        list;
-    int             i;
-    Element         node;
-    String          clsName;
-    Vector          children;
-    int             id;
-    int             n;
-    Element         child;
-    
-    m_BeanInstances   = new Vector();
-    m_BeanInstancesID = new Vector();
-    
+    NodeList list;
+    int i;
+    Element node;
+    String clsName;
+    Vector<Element> children;
+    int id;
+    int n;
+    Element child;
+
+    m_BeanInstances = new Vector<Object>();
+    m_BeanInstancesID = new Vector<Integer>();
+
     // get all BeanInstance nodes
-    list    = document.getElementsByTagName("*");
+    list = document.getElementsByTagName("*");
     clsName = BeanInstance.class.getName();
     for (i = 0; i < list.getLength(); i++) {
       node = (Element) list.item(i);
-      
+
       // is it a BeanInstance?
       if (node.getAttribute(ATT_CLASS).equals(clsName)) {
         children = XMLDocument.getChildTags(node);
-        id       = m_BeanInstancesID.size();
-        
+        id = m_BeanInstancesID.size();
+
         // get id-tag (if available)
         for (n = 0; n < children.size(); n++) {
-          child = (Element) children.get(n);
-          if (child.getAttribute(ATT_NAME).equals(VAL_ID))
-            id = readIntFromXML((Element) child);
+          child = children.get(n);
+          if (child.getAttribute(ATT_NAME).equals(VAL_ID)) {
+            id = readIntFromXML(child);
+          }
         }
-        
+
         m_BeanInstancesID.add(new Integer(id));
       }
     }
-    
+
     m_BeanInstances.setSize(m_BeanInstancesID.size());
-    
+
     // set MetaBean to null
     m_CurrentMetaBean = null;
 
     // no BeanConnections -> see readPostProcess(Object)
     m_IgnoreBeanConnections = true;
-    
+
     // reset BeanConnection-Relations
-    m_BeanConnectionRelation = new Hashtable();
-    
+    m_BeanConnectionRelation = new Hashtable<Object, Vector<String>>();
+
     return document;
   }
-  
+
   /**
-   * puts the given BeanConnection onto the next null in the given Vector,
-   * or at the end of the list, if no null is found.
-   * (during the de-serializing, no BeanConnections are set, only nulls)
-   * @param conn      the connection to add to the list
-   * @param list      the list to add the BeanConnection to
+   * puts the given BeanConnection onto the next null in the given Vector, or at
+   * the end of the list, if no null is found. (during the de-serializing, no
+   * BeanConnections are set, only nulls)
+   * 
+   * @param conn the connection to add to the list
+   * @param list the list to add the BeanConnection to
    */
-  protected void setBeanConnection(BeanConnection conn, Vector list) {
-    int         i;
-    boolean     added;
-    
+  protected void setBeanConnection(BeanConnection conn,
+    Vector<BeanConnection> list) {
+    int i;
+    boolean added;
+
     added = false;
     for (i = 0; i < list.size(); i++) {
       if (list.get(i) == null) {
@@ -577,13 +631,15 @@ public class XMLBeans
         break;
       }
     }
-    
-    if (!added)
+
+    if (!added) {
       list.add(conn);
+    }
   }
-  
+
   /**
    * generates a connection based on the given parameters
+   * 
    * @param sourcePos the source position in the m_BeanInstances vector
    * @param targetPos the target position in the m_BeanInstances vector
    * @param event the name of the event, i.e., the connection
@@ -591,138 +647,151 @@ public class XMLBeans
    * @return the generated BeanConnection
    * @throws Exception if something goes wrong
    */
-  protected BeanConnection createBeanConnection(int sourcePos, int targetPos, String event, boolean hidden) throws Exception {
-    BeanConnection          result;
-    BeanInfo                compInfo;
-    EventSetDescriptor[]    esds;
-    int                     i;
-    BeanInstance            instSource;
-    BeanInstance            instTarget;
+  protected BeanConnection createBeanConnection(int sourcePos, int targetPos,
+    String event, boolean hidden) throws Exception {
+    BeanConnection result;
+    BeanInfo compInfo;
+    EventSetDescriptor[] esds;
+    int i;
+    BeanInstance instSource;
+    BeanInstance instTarget;
 
     result = null;
-    
+
     // was there a connection?
-    if ( (sourcePos == -1) || (targetPos == -1) )
+    if ((sourcePos == -1) || (targetPos == -1)) {
       return result;
-    
+    }
+
     instSource = (BeanInstance) m_BeanInstances.get(sourcePos);
     instTarget = (BeanInstance) m_BeanInstances.get(targetPos);
-    
-    compInfo = Introspector.getBeanInfo(((BeanInstance) m_BeanInstances.get(sourcePos)).getBean().getClass());
-    esds     = compInfo.getEventSetDescriptors();
+
+    compInfo = Introspector.getBeanInfo(((BeanInstance) m_BeanInstances
+      .get(sourcePos)).getBean().getClass());
+    esds = compInfo.getEventSetDescriptors();
 
     for (i = 0; i < esds.length; i++) {
       if (esds[i].getName().equals(event)) {
-        result = new BeanConnection(instSource, instTarget, esds[i], m_vectorIndex);
-        ((BeanConnection) result).setHidden(hidden);
+        result = new BeanConnection(instSource, instTarget, esds[i],
+          m_vectorIndex);
+        result.setHidden(hidden);
         break;
       }
     }
-    
+
     return result;
   }
-  
+
   /**
-   * rebuilds all the connections for a certain key in the hashtable.
-   * for the ones being part of a MetaBean, no new instance is built, but only
-   * the reference to the actual BeanConnection set.
-   * @param deserialized    the deserialized knowledgeflow
-   * @param key             the key of the hashtable to rebuild all connections for
+   * rebuilds all the connections for a certain key in the hashtable. for the
+   * ones being part of a MetaBean, no new instance is built, but only the
+   * reference to the actual BeanConnection set.
+   * 
+   * @param deserialized the deserialized knowledgeflow
+   * @param key the key of the hashtable to rebuild all connections for
    * @throws Exception if something goes wrong
    */
-  protected void rebuildBeanConnections(Vector deserialized, Object key) throws Exception {
-    int                     i;
-    int                     n;
-    int                     sourcePos;
-    int                     targetPos;
-    String                  event;
-    boolean                 hidden;
-    Vector                  conns;
-    BeanConnection          conn;
-    StringTokenizer         tok;
-    Vector                  beanconns;
+  @SuppressWarnings("unchecked")
+  protected void rebuildBeanConnections(Vector<Vector<?>> deserialized,
+    Object key) throws Exception {
+    int i;
+    int n;
+    int sourcePos;
+    int targetPos;
+    String event;
+    boolean hidden;
+    Vector<String> conns;
+    BeanConnection conn;
+    StringTokenizer tok;
+    Vector<BeanConnection> beanconns;
 
-    conns = (Vector) m_BeanConnectionRelation.get(key);
-    
+    conns = m_BeanConnectionRelation.get(key);
+
     // no connections?
-    if (conns == null)
+    if (conns == null) {
       return;
-    
+    }
+
     for (n = 0; n < conns.size(); n++) {
-      tok       = new StringTokenizer(conns.get(n).toString(), ",");
-      conn      = null;
+      tok = new StringTokenizer(conns.get(n).toString(), ",");
+      conn = null;
       sourcePos = Integer.parseInt(tok.nextToken());
       targetPos = Integer.parseInt(tok.nextToken());
-      event     = tok.nextToken();
-      hidden    = stringToBoolean(tok.nextToken());
+      event = tok.nextToken();
+      hidden = stringToBoolean(tok.nextToken());
 
       // regular connection? -> new instance
       // or MetaBean from user toolbar
-      if ( (!(key instanceof MetaBean)) || (getDataType() == DATATYPE_USERCOMPONENTS)) {
+      if ((!(key instanceof MetaBean))
+        || (getDataType() == DATATYPE_USERCOMPONENTS)) {
         conn = createBeanConnection(sourcePos, targetPos, event, hidden);
       }
-      // MetaBean? -> find BeanConnection 
+      // MetaBean? -> find BeanConnection
       else {
         beanconns = BeanConnection.getConnections(m_vectorIndex);
-        
+
         for (i = 0; i < beanconns.size(); i++) {
-          conn = (BeanConnection) beanconns.get(i);
-          if (    (conn.getSource() == (BeanInstance) m_BeanInstances.get(sourcePos))
-               && (conn.getTarget() == (BeanInstance) m_BeanInstances.get(targetPos))
-               && (conn.getEventName().equals(event)) ) {
+          conn = beanconns.get(i);
+          if ((conn.getSource() == m_BeanInstances.get(sourcePos))
+            && (conn.getTarget() == m_BeanInstances.get(targetPos))
+            && (conn.getEventName().equals(event))) {
             break;
           }
           conn = null;
         }
       }
-      
+
       // add the connection to the corresponding list/MetaBean
-      if (key instanceof MetaBean)
+      if (key instanceof MetaBean) {
         setBeanConnection(conn, ((MetaBean) key).getAssociatedConnections());
-      else
-        setBeanConnection(conn, (Vector) deserialized.get(INDEX_BEANCONNECTIONS));
+      } else {
+        setBeanConnection(conn,
+          (Vector<BeanConnection>) deserialized.get(INDEX_BEANCONNECTIONS));
+      }
     }
   }
-  
+
   /**
-   * removes the given meta beans from the layout, since they're only listed
-   * in the user toolbar
+   * removes the given meta beans from the layout, since they're only listed in
+   * the user toolbar
    * 
-   * @param metabeans         the list of MetaBeans in the user toolbar
+   * @param metabeans the list of MetaBeans in the user toolbar
    */
-  protected void removeUserToolBarBeans(Vector metabeans) {
-    int           i;
-    int           n;
-    MetaBean      meta;
-    Vector        subflow;
-    BeanInstance  beaninst;
-    
+  protected void removeUserToolBarBeans(Vector<?> metabeans) {
+    int i;
+    int n;
+    MetaBean meta;
+    Vector<Object> subflow;
+    BeanInstance beaninst;
+
     for (i = 0; i < metabeans.size(); i++) {
-      meta    = (MetaBean) metabeans.get(i);
+      meta = (MetaBean) metabeans.get(i);
       subflow = meta.getSubFlow();
-      
+
       for (n = 0; n < subflow.size(); n++) {
         beaninst = (BeanInstance) subflow.get(n);
         beaninst.removeBean(m_BeanLayout);
       }
     }
   }
-  
+
   /**
-   * additional post-processing can happen in derived classes after reading 
-   * from XML. re-builds the BeanConnections.
+   * additional post-processing can happen in derived classes after reading from
+   * XML. re-builds the BeanConnections.
    * 
    * @param o the object to perform some additional processing on
    * @return the processed object
    * @throws Exception if post-processing fails
    */
+  @SuppressWarnings("unchecked")
+  @Override
   protected Object readPostProcess(Object o) throws Exception {
-    Enumeration             enm;
-    Vector                  deserialized;
-    Object                  key;
+    Enumeration<Object> enm;
+    Vector<Vector<?>> deserialized;
+    Object key;
 
-    deserialized = (Vector) super.readPostProcess(o);
-    
+    deserialized = (Vector<Vector<?>>) super.readPostProcess(o);
+
     // rebuild the actual connections
     rebuildBeanConnections(deserialized, REGULAR_CONNECTION);
 
@@ -730,76 +799,83 @@ public class XMLBeans
     enm = m_BeanConnectionRelation.keys();
     while (enm.hasMoreElements()) {
       key = enm.nextElement();
-      
+
       // skip the regular connections
-      if (!(key instanceof MetaBean))
+      if (!(key instanceof MetaBean)) {
         continue;
-      
+      }
+
       rebuildBeanConnections(deserialized, key);
     }
 
     // remove MetaBean and subflow from BeanInstance (not part of the flow!)
-    if (getDataType() == DATATYPE_USERCOMPONENTS)
+    if (getDataType() == DATATYPE_USERCOMPONENTS) {
       removeUserToolBarBeans(deserialized);
-    
+    }
+
     return deserialized;
   }
 
   /**
    * returns the relation for the given MetaBean, for the regular connections,
    * null has to be used
-   * @param meta      the MetaBean (or null for regular connections) to retrieve
-   *                  the connections for
-   * @return          the associated connections
+   * 
+   * @param meta the MetaBean (or null for regular connections) to retrieve the
+   *          connections for
+   * @return the associated connections
    * @see #REGULAR_CONNECTION
    */
-  protected Vector getBeanConnectionRelation(MetaBean meta) {
-    Vector      result;
-    Object      key;
-    
-    if (meta == null)
+  protected Vector<String> getBeanConnectionRelation(MetaBean meta) {
+    Vector<String> result;
+    Object key;
+
+    if (meta == null) {
       key = REGULAR_CONNECTION;
-    else
+    } else {
       key = meta;
-    
-    // not yet in there?
-    if (!m_BeanConnectionRelation.containsKey(key)) {
-      m_BeanConnectionRelation.put(key, new Vector());
     }
 
-    result = (Vector) m_BeanConnectionRelation.get(key);
-    
+    // not yet in there?
+    if (!m_BeanConnectionRelation.containsKey(key)) {
+      m_BeanConnectionRelation.put(key, new Vector<String>());
+    }
+
+    result = m_BeanConnectionRelation.get(key);
+
     return result;
   }
-  
+
   /**
-   * adds the given connection-relation for the specified MetaBean (or null in 
+   * adds the given connection-relation for the specified MetaBean (or null in
    * case of regular connections)
-   * @param meta        the MetaBean (or null for regular connections) to add
-   *                    the relationship for
-   * @param connection  the connection relation to add
+   * 
+   * @param meta the MetaBean (or null for regular connections) to add the
+   *          relationship for
+   * @param connection the connection relation to add
    */
   protected void addBeanConnectionRelation(MetaBean meta, String connection) {
-    Vector      relations;
-    Object      key;
-    
+    Vector<String> relations;
+    Object key;
+
     relations = getBeanConnectionRelation(meta);
-    
+
     // add relation
     relations.add(connection);
-    
+
     // update
-    if (meta == null)
+    if (meta == null) {
       key = REGULAR_CONNECTION;
-    else
+    } else {
       key = meta;
+    }
     m_BeanConnectionRelation.put(key, relations);
   }
-  
+
   /**
    * adds the given Color to a DOM structure.
    * 
-   * @param parent the parent of this object, e.g. the class this object is a member of
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
    * @param o the Object to describe in XML
    * @param name the name of the object
    * @return the node that was created
@@ -807,23 +883,24 @@ public class XMLBeans
    */
   public Element writeColor(Element parent, Object o, String name)
     throws Exception {
-    
-    Element     node;
-    Color       color;
+
+    Element node;
+    Color color;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), name);
-    
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
     m_CurrentNode = parent;
-    
+
     color = (Color) o;
-    node  = addElement(parent, name, color.getClass().getName(), false);
+    node = addElement(parent, name, color.getClass().getName(), false);
 
     writeIntToXML(node, color.getRed(), VAL_RED);
     writeIntToXML(node, color.getGreen(), VAL_GREEN);
     writeIntToXML(node, color.getBlue(), VAL_BLUE);
-    
+
     return node;
   }
 
@@ -835,42 +912,45 @@ public class XMLBeans
    * @throws Exception if instantiation fails
    */
   public Object readColor(Element node) throws Exception {
-    Object      result;
-    Vector      children;
-    Element     child;
-    int         i;
-    int         red;
-    int         green;
-    int         blue;
-    String      name;
+    Object result;
+    Vector<Element> children;
+    Element child;
+    int i;
+    int red;
+    int green;
+    int blue;
+    String name;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
-    
-    result   = null;
+
+    result = null;
     children = XMLDocument.getChildTags(node);
-    red      = 0;
-    green    = 0;
-    blue     = 0;
+    red = 0;
+    green = 0;
+    blue = 0;
 
     for (i = 0; i < children.size(); i++) {
-      child = (Element) children.get(i);
-      name  = child.getAttribute(ATT_NAME);
+      child = children.get(i);
+      name = child.getAttribute(ATT_NAME);
 
-      if (name.equals(VAL_RED))
+      if (name.equals(VAL_RED)) {
         red = readIntFromXML(child);
-      else if (name.equals(VAL_GREEN))
+      } else if (name.equals(VAL_GREEN)) {
         green = readIntFromXML(child);
-      else if (name.equals(VAL_BLUE))
+      } else if (name.equals(VAL_BLUE)) {
         blue = readIntFromXML(child);
-      else
+      } else {
         System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+          + "' is not a recognized name for " + node.getAttribute(ATT_NAME)
+          + "!");
+      }
     }
-    
+
     result = new Color(red, green, blue);
 
     return result;
@@ -879,30 +959,32 @@ public class XMLBeans
   /**
    * adds the given Dimension to a DOM structure.
    * 
-   * @param parent the parent of this object, e.g. the class this object is a member of
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
    * @param o the Object to describe in XML
    * @param name the name of the object
    * @return the node that was created
    * @throws Exception if the DOM creation fails
    */
   public Element writeDimension(Element parent, Object o, String name)
-      throws Exception {
-    
-    Element     node;
-    Dimension   dim;
+    throws Exception {
+
+    Element node;
+    Dimension dim;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), name);
-    
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
     m_CurrentNode = parent;
-    
+
     dim = (Dimension) o;
     node = addElement(parent, name, dim.getClass().getName(), false);
 
     writeDoubleToXML(node, dim.getWidth(), VAL_WIDTH);
     writeDoubleToXML(node, dim.getHeight(), VAL_HEIGHT);
-    
+
     return node;
   }
 
@@ -914,38 +996,41 @@ public class XMLBeans
    * @throws Exception if instantiation fails
    */
   public Object readDimension(Element node) throws Exception {
-    Object      result;
-    Vector      children;
-    Element     child;
-    int         i;
-    double      width;
-    double      height;
-    String      name;
+    Object result;
+    Vector<Element> children;
+    Element child;
+    int i;
+    double width;
+    double height;
+    String name;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
-    
-    result   = null;
+
+    result = null;
     children = XMLDocument.getChildTags(node);
-    width    = 0;
-    height   = 0;
+    width = 0;
+    height = 0;
 
     for (i = 0; i < children.size(); i++) {
-      child = (Element) children.get(i);
-      name  = child.getAttribute(ATT_NAME);
+      child = children.get(i);
+      name = child.getAttribute(ATT_NAME);
 
-      if (name.equals(VAL_WIDTH))
+      if (name.equals(VAL_WIDTH)) {
         width = readDoubleFromXML(child);
-      else if (name.equals(VAL_HEIGHT))
+      } else if (name.equals(VAL_HEIGHT)) {
         height = readDoubleFromXML(child);
-      else
+      } else {
         System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+          + "' is not a recognized name for " + node.getAttribute(ATT_NAME)
+          + "!");
+      }
     }
-    
+
     result = new Dimension();
     ((Dimension) result).setSize(width, height);
 
@@ -955,31 +1040,33 @@ public class XMLBeans
   /**
    * adds the given Font to a DOM structure.
    * 
-   * @param parent the parent of this object, e.g. the class this object is a member of
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
    * @param o the Object to describe in XML
    * @param name the name of the object
    * @return the node that was created
    * @throws Exception if the DOM creation fails
    */
   public Element writeFont(Element parent, Object o, String name)
-      throws Exception {
-    
-    Element     node;
-    Font        font;
+    throws Exception {
+
+    Element node;
+    Font font;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), name);
-    
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
     m_CurrentNode = parent;
-    
+
     font = (Font) o;
     node = addElement(parent, name, font.getClass().getName(), false);
 
     invokeWriteToXML(node, font.getName(), VAL_NAME);
     writeIntToXML(node, font.getStyle(), VAL_STYLE);
     writeIntToXML(node, font.getSize(), VAL_SIZE);
-    
+
     return node;
   }
 
@@ -991,42 +1078,45 @@ public class XMLBeans
    * @throws Exception if instantiation fails
    */
   public Object readFont(Element node) throws Exception {
-    Object      result;
-    Vector      children;
-    Element     child;
-    int         i;
-    int         style;
-    int         size;
-    String      name;
-    String      fontname;
+    Object result;
+    Vector<Element> children;
+    Element child;
+    int i;
+    int style;
+    int size;
+    String name;
+    String fontname;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
-    
-    result   = null;
+
+    result = null;
     children = XMLDocument.getChildTags(node);
     fontname = "";
-    style    = 0;
-    size     = 0;
+    style = 0;
+    size = 0;
 
     for (i = 0; i < children.size(); i++) {
-      child = (Element) children.get(i);
-      name  = child.getAttribute(ATT_NAME);
+      child = children.get(i);
+      name = child.getAttribute(ATT_NAME);
 
-      if (name.equals(VAL_NAME))
+      if (name.equals(VAL_NAME)) {
         name = (String) invokeReadFromXML(child);
-      else if (name.equals(VAL_STYLE))
+      } else if (name.equals(VAL_STYLE)) {
         style = readIntFromXML(child);
-      else if (name.equals(VAL_SIZE))
+      } else if (name.equals(VAL_SIZE)) {
         size = readIntFromXML(child);
-      else
+      } else {
         System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+          + "' is not a recognized name for " + node.getAttribute(ATT_NAME)
+          + "!");
+      }
     }
-    
+
     result = new Font(fontname, style, size);
 
     return result;
@@ -1035,30 +1125,32 @@ public class XMLBeans
   /**
    * adds the given Point to a DOM structure.
    * 
-   * @param parent the parent of this object, e.g. the class this object is a member of
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
    * @param o the Object to describe in XML
    * @param name the name of the object
    * @return the node that was created
    * @throws Exception if the DOM creation fails
    */
   public Element writePoint(Element parent, Object o, String name)
-      throws Exception {
-    
-    Element     node;
-    Point       p;
+    throws Exception {
+
+    Element node;
+    Point p;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), name);
-    
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
     m_CurrentNode = parent;
-    
-    p    = (Point) o;
+
+    p = (Point) o;
     node = addElement(parent, name, p.getClass().getName(), false);
 
     writeDoubleToXML(node, p.getX(), VAL_X);
     writeDoubleToXML(node, p.getY(), VAL_Y);
-    
+
     return node;
   }
 
@@ -1070,38 +1162,41 @@ public class XMLBeans
    * @throws Exception if instantiation fails
    */
   public Object readPoint(Element node) throws Exception {
-    Object      result;
-    Vector      children;
-    Element     child;
-    int         i;
-    double      x;
-    double      y;
-    String      name;
+    Object result;
+    Vector<Element> children;
+    Element child;
+    int i;
+    double x;
+    double y;
+    String name;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
-    
-    result   = null;
+
+    result = null;
     children = XMLDocument.getChildTags(node);
-    x        = 0;
-    y        = 0;
+    x = 0;
+    y = 0;
 
     for (i = 0; i < children.size(); i++) {
-      child = (Element) children.get(i);
-      name  = child.getAttribute(ATT_NAME);
+      child = children.get(i);
+      name = child.getAttribute(ATT_NAME);
 
-      if (name.equals(VAL_X))
+      if (name.equals(VAL_X)) {
         x = readDoubleFromXML(child);
-      else if (name.equals(VAL_Y))
+      } else if (name.equals(VAL_Y)) {
         y = readDoubleFromXML(child);
-      else
+      } else {
         System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+          + "' is not a recognized name for " + node.getAttribute(ATT_NAME)
+          + "!");
+      }
     }
-    
+
     result = new Point();
     ((Point) result).setLocation(x, y);
 
@@ -1111,28 +1206,30 @@ public class XMLBeans
   /**
    * adds the given ColorUIResource to a DOM structure.
    * 
-   * @param parent the parent of this object, e.g. the class this object is a member of
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
    * @param o the Object to describe in XML
    * @param name the name of the object
    * @return the node that was created
    * @throws Exception if the DOM creation fails
    */
   public Element writeColorUIResource(Element parent, Object o, String name)
-      throws Exception {
-    
-    Element           node;
-    ColorUIResource   resource;
+    throws Exception {
+
+    Element node;
+    ColorUIResource resource;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), name);
-    
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
     m_CurrentNode = parent;
-    
+
     resource = (ColorUIResource) o;
-    node     = addElement(parent, name, resource.getClass().getName(), false);
+    node = addElement(parent, name, resource.getClass().getName(), false);
     invokeWriteToXML(node, new Color(resource.getRGB()), VAL_COLOR);
-    
+
     return node;
   }
 
@@ -1144,34 +1241,37 @@ public class XMLBeans
    * @throws Exception if instantiation fails
    */
   public Object readColorUIResource(Element node) throws Exception {
-    Object      result;
-    Vector      children;
-    Element     child;
-    int         i;
-    String      name;
-    Color       color;
+    Object result;
+    Vector<Element> children;
+    Element child;
+    int i;
+    String name;
+    Color color;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
-    
-    result   = null;
+
+    result = null;
     children = XMLDocument.getChildTags(node);
-    color    = null;
+    color = null;
 
     for (i = 0; i < children.size(); i++) {
-      child = (Element) children.get(i);
-      name  = child.getAttribute(ATT_NAME);
+      child = children.get(i);
+      name = child.getAttribute(ATT_NAME);
 
-      if (name.equals(VAL_COLOR))
+      if (name.equals(VAL_COLOR)) {
         color = (Color) invokeReadFromXML(child);
-      else
+      } else {
         System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+          + "' is not a recognized name for " + node.getAttribute(ATT_NAME)
+          + "!");
+      }
     }
-    
+
     result = new ColorUIResource(color);
 
     return result;
@@ -1180,28 +1280,31 @@ public class XMLBeans
   /**
    * adds the given FontUIResource to a DOM structure.
    * 
-   * @param parent the parent of this object, e.g. the class this object is a member of
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
    * @param o the Object to describe in XML
    * @param name the name of the object
    * @return the node that was created
    * @throws Exception if the DOM creation fails
    */
   public Element writeFontUIResource(Element parent, Object o, String name)
-      throws Exception {
-    
-    Element           node;
-    FontUIResource    resource;
+    throws Exception {
+
+    Element node;
+    FontUIResource resource;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), name);
-    
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
     m_CurrentNode = parent;
-    
+
     resource = (FontUIResource) o;
-    node     = addElement(parent, name, resource.getClass().getName(), false);
-    invokeWriteToXML(node, new Font(resource.getName(), resource.getStyle(), resource.getSize()), VAL_COLOR);
-    
+    node = addElement(parent, name, resource.getClass().getName(), false);
+    invokeWriteToXML(node, new Font(resource.getName(), resource.getStyle(),
+      resource.getSize()), VAL_COLOR);
+
     return node;
   }
 
@@ -1213,34 +1316,37 @@ public class XMLBeans
    * @throws Exception if instantiation fails
    */
   public Object readFontUIResource(Element node) throws Exception {
-    Object      result;
-    Vector      children;
-    Element     child;
-    int         i;
-    String      name;
-    Font        font;
+    Object result;
+    Vector<Element> children;
+    Element child;
+    int i;
+    String name;
+    Font font;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
-    
-    result   = null;
+
+    result = null;
     children = XMLDocument.getChildTags(node);
-    font     = null;
+    font = null;
 
     for (i = 0; i < children.size(); i++) {
-      child = (Element) children.get(i);
-      name  = child.getAttribute(ATT_NAME);
+      child = children.get(i);
+      name = child.getAttribute(ATT_NAME);
 
-      if (name.equals(VAL_FONT))
+      if (name.equals(VAL_FONT)) {
         font = (Font) invokeReadFromXML(child);
-      else
+      } else {
         System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+          + "' is not a recognized name for " + node.getAttribute(ATT_NAME)
+          + "!");
+      }
     }
-    
+
     result = new FontUIResource(font);
 
     return result;
@@ -1249,37 +1355,51 @@ public class XMLBeans
   /**
    * adds the given BeanInstance to a DOM structure.
    * 
-   * @param parent the parent of this object, e.g. the class this object is a member of
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
    * @param o the Object to describe in XML
    * @param name the name of the object
    * @return the node that was created
    * @throws Exception if the DOM creation fails
    */
   public Element writeBeanInstance(Element parent, Object o, String name)
-      throws Exception {
-    
-    Element         node;
-    BeanInstance    beaninst;
+    throws Exception {
+
+    Element node;
+    BeanInstance beaninst;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), name);
-    
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
     m_CurrentNode = parent;
-    
+
     beaninst = (BeanInstance) o;
-    node     = addElement(parent, name, beaninst.getClass().getName(), false);
+    node = addElement(parent, name, beaninst.getClass().getName(), false);
 
     writeIntToXML(node, m_BeanInstances.indexOf(beaninst), VAL_ID);
-    writeIntToXML(node, beaninst.getX() + beaninst.getWidth()  / 2, VAL_X);   // x is thought to be in the center?
-    writeIntToXML(node, beaninst.getY() + beaninst.getHeight() / 2, VAL_Y);   // y is thought to be in the center?
+    int w = beaninst.getWidth() / 2;
+    int h = beaninst.getHeight() / 2;
+    // If a bean instance doesn't have dimensions (0 widht/height) then it means
+    // that it hasn't been rendered (yet). In this case we'll
+    // use half the known width/height of the icons so that the
+    // position does not change
+    if (w == 0 && h == 0) {
+      w = 28;
+      h = 28;
+    }
+    writeIntToXML(node, beaninst.getX() + w, VAL_X); // x is thought to be in
+                                                     // the center?
+    writeIntToXML(node, beaninst.getY() + h, VAL_Y); // y is thought to be in
+                                                     // the center?
     if (beaninst.getBean() instanceof BeanCommon) {
       // write the custom name of this bean
-      String custName = ((BeanCommon)beaninst.getBean()).getCustomName();
+      String custName = ((BeanCommon) beaninst.getBean()).getCustomName();
       invokeWriteToXML(node, custName, VAL_CUSTOM_NAME);
     }
     invokeWriteToXML(node, beaninst.getBean(), VAL_BEAN);
-    
+
     return node;
   }
 
@@ -1291,35 +1411,36 @@ public class XMLBeans
    * @throws Exception if instantiation fails
    */
   public Object readBeanInstance(Element node) throws Exception {
-    Object          result;
-    Vector          children;
-    Element         child;
-    String          name;
-    int             i;
-    int             x;
-    int             y;
-    int             id;
-    Object          bean;
-    BeanVisual      visual;
-    BeanInstance    beaninst;
+    Object result;
+    Vector<Element> children;
+    Element child;
+    String name;
+    int i;
+    int x;
+    int y;
+    int id;
+    Object bean;
+    BeanVisual visual;
+    BeanInstance beaninst;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
-    
-    result   = null;
+
+    result = null;
     children = XMLDocument.getChildTags(node);
-    id       = -1;
-    x        = 0;
-    y        = 0;
-    bean     = null;
+    id = -1;
+    x = 0;
+    y = 0;
+    bean = null;
     String customName = null;
 
     for (i = 0; i < children.size(); i++) {
-      child = (Element) children.get(i);
-      name  = child.getAttribute(ATT_NAME);
+      child = children.get(i);
+      name = child.getAttribute(ATT_NAME);
 
       if (name.equals(VAL_ID)) {
         id = readIntFromXML(child);
@@ -1328,18 +1449,19 @@ public class XMLBeans
       } else if (name.equals(VAL_Y)) {
         y = readIntFromXML(child);
       } else if (name.equals(VAL_CUSTOM_NAME)) {
-        customName = (String)invokeReadFromXML(child);
+        customName = (String) invokeReadFromXML(child);
       } else if (name.equals(VAL_BEAN)) {
         bean = invokeReadFromXML(child);
       } else {
         System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+          + "' is not a recognized name for " + node.getAttribute(ATT_NAME)
+          + "!");
       }
     }
-    
-    result   = new BeanInstance(m_BeanLayout, bean, x, y, m_vectorIndex);  
+
+    result = new BeanInstance(m_BeanLayout, bean, x, y, m_vectorIndex);
     beaninst = (BeanInstance) result;
-    
+
     // set parent of BeanVisual
     if (beaninst.getBean() instanceof weka.gui.beans.Visible) {
       visual = ((Visible) beaninst.getBean()).getVisual();
@@ -1349,16 +1471,15 @@ public class XMLBeans
       }
     }
 
-    if (beaninst.getBean() instanceof BeanCommon &&
-        customName != null) {
-      ((BeanCommon)beaninst.getBean()).setCustomName(customName);
+    if (beaninst.getBean() instanceof BeanCommon && customName != null) {
+      ((BeanCommon) beaninst.getBean()).setCustomName(customName);
     }
-    
+
     // no IDs -> get next null position
     if (id == -1) {
       for (i = 0; i < m_BeanInstances.size(); i++) {
         if (m_BeanInstances.get(i) == null) {
-          id = ((Integer) m_BeanInstancesID.get(i)).intValue();
+          id = m_BeanInstancesID.get(i).intValue();
           break;
         }
       }
@@ -1371,14 +1492,15 @@ public class XMLBeans
 
     // no current MetaBean
     m_CurrentMetaBean = null;
-    
+
     return result;
   }
 
   /**
    * adds the given BeanConncetion to a DOM structure.
    * 
-   * @param parent the parent of this object, e.g. the class this object is a member of
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
    * @param o the Object to describe in XML
    * @param name the name of the object
    * @return the node that was created
@@ -1386,47 +1508,48 @@ public class XMLBeans
    */
   public Element writeBeanConnection(Element parent, Object o, String name)
     throws Exception {
-    
-    Element           node;
-    BeanConnection    beanconn;
-    int               source;
-    int               target;
-    int               sourcePos;
-    int               targetPos;
+
+    Element node;
+    BeanConnection beanconn;
+    int source;
+    int target;
+    int sourcePos;
+    int targetPos;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), name);
-    
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
     m_CurrentNode = parent;
-    
+
     beanconn = (BeanConnection) o;
-    node     = null;
+    node = null;
 
     // get position
     sourcePos = m_BeanInstances.indexOf(beanconn.getSource());
     targetPos = m_BeanInstances.indexOf(beanconn.getTarget());
-    
-    // get id (if Connection is from a Bean in the UserToolBar, it's not listed! -> ignore it)
-    if ( (sourcePos > -1) && (targetPos > -1) ) {
-      source = ((Integer) m_BeanInstancesID.get(sourcePos)).intValue();
-      target = ((Integer) m_BeanInstancesID.get(targetPos)).intValue();
+
+    // get id (if Connection is from a Bean in the UserToolBar, it's not listed!
+    // -> ignore it)
+    if ((sourcePos > -1) && (targetPos > -1)) {
+      source = m_BeanInstancesID.get(sourcePos).intValue();
+      target = m_BeanInstancesID.get(targetPos).intValue();
+    } else {
+      source = -1;
+      target = -1;
     }
-    else {
-       source = -1;
-       target = -1;
-    }
-    
+
     // connection exists in the layout?
-    if ( (source > -1) && (target > -1) ) {
+    if ((source > -1) && (target > -1)) {
       node = addElement(parent, name, beanconn.getClass().getName(), false);
-  
+
       writeIntToXML(node, source, VAL_SOURCEID);
       writeIntToXML(node, target, VAL_TARGETID);
       invokeWriteToXML(node, beanconn.getEventName(), VAL_EVENTNAME);
       writeBooleanToXML(node, beanconn.isHidden(), VAL_HIDDEN);
     }
-    
+
     return node;
   }
 
@@ -1438,56 +1561,60 @@ public class XMLBeans
    * @throws Exception if instantiation fails
    */
   public Object readBeanConnection(Element node) throws Exception {
-    Object                  result;
-    Vector                  children;
-    Element                 child;
-    String                  name;
-    int                     i;
-    int                     source;
-    int                     target;
-    int                     sourcePos;
-    int                     targetPos;
-    String                  event;
-    boolean                 hidden;
+    Object result;
+    Vector<Element> children;
+    Element child;
+    String name;
+    int i;
+    int source;
+    int target;
+    int sourcePos;
+    int targetPos;
+    String event;
+    boolean hidden;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
-    
-    result   = null;
+
+    result = null;
     children = XMLDocument.getChildTags(node);
-    source   = 0;
-    target   = 0;
-    event    = "";
-    hidden   = false;
+    source = 0;
+    target = 0;
+    event = "";
+    hidden = false;
 
     for (i = 0; i < children.size(); i++) {
-      child = (Element) children.get(i);
-      name  = child.getAttribute(ATT_NAME);
+      child = children.get(i);
+      name = child.getAttribute(ATT_NAME);
 
-      if (name.equals(VAL_SOURCEID))
+      if (name.equals(VAL_SOURCEID)) {
         source = readIntFromXML(child);
-      else if (name.equals(VAL_TARGETID))
+      } else if (name.equals(VAL_TARGETID)) {
         target = readIntFromXML(child);
-      else if (name.equals(VAL_EVENTNAME))
+      } else if (name.equals(VAL_EVENTNAME)) {
         event = (String) invokeReadFromXML(child);
-      else if (name.equals(VAL_HIDDEN))
+      } else if (name.equals(VAL_HIDDEN)) {
         hidden = readBooleanFromXML(child);
-      else
+      } else {
         System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+          + "' is not a recognized name for " + node.getAttribute(ATT_NAME)
+          + "!");
+      }
     }
 
     // get position of id
     sourcePos = m_BeanInstancesID.indexOf(new Integer(source));
     targetPos = m_BeanInstancesID.indexOf(new Integer(target));
-    
+
     // do we currently ignore the connections?
     // Note: necessary because of the MetaBeans
     if (m_IgnoreBeanConnections) {
-      addBeanConnectionRelation(m_CurrentMetaBean, sourcePos + "," + targetPos + "," + event + "," + hidden);
+      addBeanConnectionRelation(m_CurrentMetaBean, sourcePos + "," + targetPos
+        + "," + event + "," + hidden);
       return result;
     }
 
@@ -1496,126 +1623,137 @@ public class XMLBeans
 
     return result;
   }
-  
+
   /**
    * adds the given Loader (a bean) to a DOM structure.
    * 
-   * @param parent the parent of this object, e.g. the class this object is a member of
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
    * @param o the Object to describe in XML
    * @param name the name of the object
    * @return the node that was created
    * @throws Exception if the DOM creation fails
    */
   public Element writeBeanLoader(Element parent, Object o, String name)
-      throws Exception {
-    
-    Element                 node;
-    weka.gui.beans.Loader   loader;
+    throws Exception {
+
+    Element node;
+    weka.gui.beans.Loader loader;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), name);
-    
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
     m_CurrentNode = parent;
-    
+
     loader = (weka.gui.beans.Loader) o;
-    node   = addElement(parent, name, loader.getClass().getName(), false);
+    node = addElement(parent, name, loader.getClass().getName(), false);
 
     invokeWriteToXML(node, loader.getLoader(), VAL_LOADER);
     invokeWriteToXML(node, loader.getBeanContext(), VAL_BEANCONTEXT);
-    
+
     return node;
   }
 
   /**
    * adds the given Saver (a bean) to a DOM structure.
    * 
-   * @param parent the parent of this object, e.g. the class this object is a member of
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
    * @param o the Object to describe in XML
    * @param name the name of the object
    * @return the node that was created
    * @throws Exception if the DOM creation fails
    */
   public Element writeBeanSaver(Element parent, Object o, String name)
-      throws Exception {
-    
-    Element                 node;
-    weka.gui.beans.Saver    saver;
+    throws Exception {
+
+    Element node;
+    weka.gui.beans.Saver saver;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), name);
-    
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
     m_CurrentNode = parent;
-    
+
     saver = (weka.gui.beans.Saver) o;
-    node   = addElement(parent, name, saver.getClass().getName(), false);
-    invokeWriteToXML(node, saver.getRelationNameForFilename(), VAL_RELATIONNAMEFORFILENAME);
+    node = addElement(parent, name, saver.getClass().getName(), false);
+    invokeWriteToXML(node, saver.getRelationNameForFilename(),
+      VAL_RELATIONNAMEFORFILENAME);
 
     invokeWriteToXML(node, saver.getSaverTemplate(), VAL_SAVER);
-    
+
     return node;
   }
-  
+
   /**
    * adds the given Loader to a DOM structure.
    * 
-   * @param parent the parent of this object, e.g. the class this object is a member of
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
    * @param o the Object to describe in XML
    * @param name the name of the object
    * @return the node that was created
    * @throws Exception if the DOM creation fails
    */
   public Element writeLoader(Element parent, Object o, String name)
-      throws Exception {
-    
-    Element                       node;
-    weka.core.converters.Loader   loader;
-    File                          file;
-    boolean                       known;
+    throws Exception {
+
+    Element node;
+    weka.core.converters.Loader loader;
+    File file;
+    boolean known;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), name);
-    
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
     m_CurrentNode = parent;
-    
+
     loader = (weka.core.converters.Loader) o;
-    node   = addElement(parent, name, loader.getClass().getName(), false);
-    known  = true;
-    file   = null;
+    node = addElement(parent, name, loader.getClass().getName(), false);
+    known = true;
+    file = null;
 
     // file
-    if (loader instanceof weka.core.converters.AbstractFileLoader)
+    if (loader instanceof weka.core.converters.AbstractFileLoader) {
       file = ((weka.core.converters.AbstractFileLoader) loader).retrieveFile();
-    else
+    } else {
       known = false;
+    }
 
-    if (!known)
-      System.out.println("WARNING: unknown loader class '" + loader.getClass().getName() + "' - cannot retrieve file!");
+    if (!known) {
+      System.out.println("WARNING: unknown loader class '"
+        + loader.getClass().getName() + "' - cannot retrieve file!");
+    }
 
     Boolean relativeB = null;
     if (loader instanceof weka.core.converters.FileSourcedConverter) {
-      boolean relative = ((weka.core.converters.FileSourcedConverter)loader).getUseRelativePath();
+      boolean relative = ((weka.core.converters.FileSourcedConverter) loader)
+        .getUseRelativePath();
       relativeB = new Boolean(relative);
     }
-    
+
     // only save it, if it's a real file!
-    if ( (file == null) || (file.isDirectory()) ) {
+    if ((file == null) || (file.isDirectory())) {
       invokeWriteToXML(node, "", VAL_FILE);
     } else {
-      String withResourceSeparators = file.getPath().replace(File.pathSeparatorChar, '/');
-      boolean notAbsolute = 
-        (((weka.core.converters.AbstractFileLoader) loader).getUseRelativePath() ||
-        (loader instanceof EnvironmentHandler 
-            && Environment.containsEnvVariables(file.getPath())) ||
-            this.getClass().getClassLoader().getResource(withResourceSeparators) != null ||
-            !file.exists());
-      
-      String path = (notAbsolute)
-        ? file.getPath()
-        : file.getAbsolutePath();
-      // Replace any windows file separators with forward slashes (Java under windows can
+      String withResourceSeparators = file.getPath().replace(
+        File.pathSeparatorChar, '/');
+      boolean notAbsolute = (((weka.core.converters.AbstractFileLoader) loader)
+        .getUseRelativePath()
+        || (loader instanceof EnvironmentHandler && Environment
+          .containsEnvVariables(file.getPath()))
+        || this.getClass().getClassLoader().getResource(withResourceSeparators) != null || !file
+        .exists());
+
+      String path = (notAbsolute) ? file.getPath() : file.getAbsolutePath();
+      // Replace any windows file separators with forward slashes (Java under
+      // windows can
       // read paths with forward slashes (apparantly)
       path = path.replace('\\', '/');
       invokeWriteToXML(node, path, VAL_FILE);
@@ -1623,12 +1761,12 @@ public class XMLBeans
     if (relativeB != null) {
       invokeWriteToXML(node, relativeB.toString(), VAL_RELATIVE_PATH);
     }
-    
+
     if (loader instanceof weka.core.OptionHandler) {
-      String[] opts = ((weka.core.OptionHandler)loader).getOptions();
+      String[] opts = ((weka.core.OptionHandler) loader).getOptions();
       invokeWriteToXML(node, opts, VAL_OPTIONS);
     }
-    
+
     return node;
   }
 
@@ -1640,36 +1778,37 @@ public class XMLBeans
    * @throws Exception if instantiation fails
    */
   public Object readLoader(Element node) throws Exception {
-    Object      result;
-    Vector      children;
-    Element     child;
-    int         i;
-    String      name;
-    String      file;
-    File        fl;
+    Object result;
+    Vector<Element> children;
+    Element child;
+    int i;
+    String name;
+    String file;
+    File fl;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
-    
-    result   = Class.forName(node.getAttribute(ATT_CLASS)).newInstance();
+
+    result = Class.forName(node.getAttribute(ATT_CLASS)).newInstance();
     children = XMLDocument.getChildTags(node);
-    file     = "";
+    file = "";
     Object relativeB = null;
     boolean relative = false;
 
     for (i = 0; i < children.size(); i++) {
-      child = (Element) children.get(i);
-      name  = child.getAttribute(ATT_NAME);
+      child = children.get(i);
+      name = child.getAttribute(ATT_NAME);
 
       if (name.equals(VAL_FILE)) {
         file = (String) invokeReadFromXML(child);
       } else if (name.equals(VAL_RELATIVE_PATH)) {
         relativeB = readFromXML(child);
         if (relativeB instanceof Boolean) {
-          relative = ((Boolean)relativeB).booleanValue();
+          relative = ((Boolean) relativeB).booleanValue();
         }
       } else {
         readFromXML(result, name, child);
@@ -1677,11 +1816,13 @@ public class XMLBeans
     }
 
     if (result instanceof weka.core.converters.FileSourcedConverter) {
-      ((weka.core.converters.FileSourcedConverter)result).setUseRelativePath(relative);
+      ((weka.core.converters.FileSourcedConverter) result)
+        .setUseRelativePath(relative);
     }
 
-    if (file.equals(""))
+    if (file.equals("")) {
       file = null;
+    }
 
     // set file only, if it exists
     if (file != null) {
@@ -1689,103 +1830,105 @@ public class XMLBeans
 
       boolean containsEnv = false;
       containsEnv = Environment.containsEnvVariables(file);
-      
-      fl = new File(file);      
+
+      fl = new File(file);
       // only test for existence if the path does not contain environment vars
-      // (trust that after they are resolved that everything is hunky dory). Also 
+      // (trust that after they are resolved that everything is hunky dory).
+      // Also
       // don't test if the file can be found as a resource in the classath
-      if (containsEnv || fl.exists() || 
-          this.getClass().getClassLoader().getResource(file) != null) {
-        ((weka.core.converters.AbstractFileLoader) result).setSource(new File(file));
+      if (containsEnv || fl.exists()
+        || this.getClass().getClassLoader().getResource(file) != null) {
+        ((weka.core.converters.AbstractFileLoader) result).setSource(new File(
+          file));
       } else {
-        System.out.println("WARNING: The file '" + tempFile + "' does not exist!");
+        System.out.println("WARNING: The file '" + tempFile
+          + "' does not exist!");
       }
     }
-    
+
     return result;
   }
 
   /**
    * adds the given Saver to a DOM structure.
    * 
-   * @param parent the parent of this object, e.g. the class this object is a member of
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
    * @param o the Object to describe in XML
    * @param name the name of the object
    * @return the node that was created
    * @throws Exception if the DOM creation fails
    */
   public Element writeSaver(Element parent, Object o, String name)
-      throws Exception {
-    
-    Element                     node;
-    weka.core.converters.Saver  saver;
-    File                        file;
-    String			prefix;
-    String			dir;
-    boolean                     known;
+    throws Exception {
+
+    Element node;
+    weka.core.converters.Saver saver;
+    String prefix;
+    String dir;
+    boolean known;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), name);
-    
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
     m_CurrentNode = parent;
-    
-    saver  = (weka.core.converters.Saver) o;
-    node   = addElement(parent, name, saver.getClass().getName(), false);
-    known  = true;
-    file   = null;
+
+    saver = (weka.core.converters.Saver) o;
+    node = addElement(parent, name, saver.getClass().getName(), false);
+    known = true;
     prefix = "";
-    dir    = "";
+    dir = "";
 
     // file
     if (saver instanceof weka.core.converters.AbstractFileSaver) {
-      file   = ((weka.core.converters.AbstractFileSaver) saver).retrieveFile();
+      ((weka.core.converters.AbstractFileSaver) saver).retrieveFile();
       prefix = ((weka.core.converters.AbstractFileSaver) saver).filePrefix();
-      dir    = ((weka.core.converters.AbstractFileSaver) saver).retrieveDir();
-      // Replace any windows file separators with forward slashes (Java under windows can
+      dir = ((weka.core.converters.AbstractFileSaver) saver).retrieveDir();
+      // Replace any windows file separators with forward slashes (Java under
+      // windows can
       // read paths with forward slashes (apparantly)
       dir = dir.replace('\\', '/');
-    }
-    else {
+    } else {
       known = false;
     }
-    
-    if (!known)
-      System.out.println("WARNING: unknown saver class '" + saver.getClass().getName() + "' - cannot retrieve file!");
+
+    if (!known) {
+      System.out.println("WARNING: unknown saver class '"
+        + saver.getClass().getName() + "' - cannot retrieve file!");
+    }
 
     Boolean relativeB = null;
     if (saver instanceof weka.core.converters.FileSourcedConverter) {
-      boolean relative = ((weka.core.converters.FileSourcedConverter)saver).getUseRelativePath();
+      boolean relative = ((weka.core.converters.FileSourcedConverter) saver)
+        .getUseRelativePath();
       relativeB = new Boolean(relative);
     }
-    
 
-//    if ( (file == null) || (file.isDirectory()) ) {
-      invokeWriteToXML(node, "",     VAL_FILE);
-      invokeWriteToXML(node, dir,    VAL_DIR);
-      invokeWriteToXML(node, prefix, VAL_PREFIX);
-/*    }
-    else {
-      String path = (((weka.core.converters.FileSourcedConverter) saver).getUseRelativePath())
-        ? file.getPath()
-        : file.getAbsolutePath();
-      // Replace any windows file separators with forward slashes (Java under windows can
-      // read paths with forward slashes (apparantly)
-      path = path.replace('\\', '/');
-      invokeWriteToXML(node, path, VAL_FILE);
-      invokeWriteToXML(node, dir, VAL_DIR);
-      invokeWriteToXML(node, prefix, VAL_PREFIX);
-    }*/
+    // if ( (file == null) || (file.isDirectory()) ) {
+    invokeWriteToXML(node, "", VAL_FILE);
+    invokeWriteToXML(node, dir, VAL_DIR);
+    invokeWriteToXML(node, prefix, VAL_PREFIX);
+    /*
+     * } else { String path = (((weka.core.converters.FileSourcedConverter)
+     * saver).getUseRelativePath()) ? file.getPath() : file.getAbsolutePath();
+     * // Replace any windows file separators with forward slashes (Java under
+     * windows can // read paths with forward slashes (apparantly) path =
+     * path.replace('\\', '/'); invokeWriteToXML(node, path, VAL_FILE);
+     * invokeWriteToXML(node, dir, VAL_DIR); invokeWriteToXML(node, prefix,
+     * VAL_PREFIX); }
+     */
 
     if (relativeB != null) {
       invokeWriteToXML(node, relativeB.toString(), VAL_RELATIVE_PATH);
     }
-    
+
     if (saver instanceof weka.core.OptionHandler) {
-      String[] opts = ((weka.core.OptionHandler)saver).getOptions();
+      String[] opts = ((weka.core.OptionHandler) saver).getOptions();
       invokeWriteToXML(node, opts, VAL_OPTIONS);
     }
-    
+
     return node;
   }
 
@@ -1797,33 +1940,34 @@ public class XMLBeans
    * @throws Exception if instantiation fails
    */
   public Object readSaver(Element node) throws Exception {
-    Object      result;
-    Vector      children;
-    Element     child;
-    int         i;
-    String      name;
-    String      file;
-    String	dir;
-    String	prefix;
+    Object result;
+    Vector<Element> children;
+    Element child;
+    int i;
+    String name;
+    String file;
+    String dir;
+    String prefix;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
-    
-    result   = Class.forName(node.getAttribute(ATT_CLASS)).newInstance();
+
+    result = Class.forName(node.getAttribute(ATT_CLASS)).newInstance();
     children = XMLDocument.getChildTags(node);
-    file     = null;
-    dir      = null;
-    prefix   = null;
+    file = null;
+    dir = null;
+    prefix = null;
 
     Object relativeB = null;
     boolean relative = false;
 
     for (i = 0; i < children.size(); i++) {
-      child = (Element) children.get(i);
-      name  = child.getAttribute(ATT_NAME);
+      child = children.get(i);
+      name = child.getAttribute(ATT_NAME);
 
       if (name.equals(VAL_FILE)) {
         file = (String) invokeReadFromXML(child);
@@ -1834,58 +1978,62 @@ public class XMLBeans
       } else if (name.equals(VAL_RELATIVE_PATH)) {
         relativeB = readFromXML(child);
         if (relativeB instanceof Boolean) {
-          relative = ((Boolean)relativeB).booleanValue();
+          relative = ((Boolean) relativeB).booleanValue();
         }
       } else {
         readFromXML(result, name, child);
       }
     }
 
-    if ( (file != null) && (file.length() == 0) )
+    if ((file != null) && (file.length() == 0)) {
       file = null;
+    }
 
     // savers only get directory and prefix, not file (KnowledgeFlow sets the
     // file/destination based on the relation, dir and prefix)
-    if ( (dir != null) && (prefix != null) ) {
+    if ((dir != null) && (prefix != null)) {
       ((weka.core.converters.AbstractFileSaver) result).setDir(dir);
       ((weka.core.converters.AbstractFileSaver) result).setFilePrefix(prefix);
     }
 
     if (result instanceof weka.core.converters.FileSourcedConverter) {
-      ((weka.core.converters.FileSourcedConverter)result).setUseRelativePath(relative);
+      ((weka.core.converters.FileSourcedConverter) result)
+        .setUseRelativePath(relative);
     }
-    
+
     return result;
   }
 
   /**
    * adds the given BeanVisual to a DOM structure.
    * 
-   * @param parent the parent of this object, e.g. the class this object is a member of
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
    * @param o the Object to describe in XML
    * @param name the name of the object
    * @return the node that was created
    * @throws Exception if the DOM creation fails
    */
   public Element writeBeanVisual(Element parent, Object o, String name)
-      throws Exception {
-    
-    Element         node;
-    BeanVisual      visual;
+    throws Exception {
+
+    Element node;
+    BeanVisual visual;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), name);
-    
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
     m_CurrentNode = parent;
-    
+
     visual = (BeanVisual) o;
-    node   = writeToXML(parent, o, name);
+    node = writeToXML(parent, o, name);
 
     // add icon paths
-    invokeWriteToXML(node, visual.getIconPath(),         VAL_ICONPATH);
+    invokeWriteToXML(node, visual.getIconPath(), VAL_ICONPATH);
     invokeWriteToXML(node, visual.getAnimatedIconPath(), VAL_ANIMATEDICONPATH);
-    
+
     return node;
   }
 
@@ -1897,123 +2045,131 @@ public class XMLBeans
    * @throws Exception if instantiation fails
    */
   public Object readBeanVisual(Element node) throws Exception {
-    Object      result;
-    Vector      children;
-    Element     child;
-    int         i;
-    String      name;
-    String      text;
-    String      iconPath;
-    String      animIconPath;
+    Object result;
+    Vector<Element> children;
+    Element child;
+    int i;
+    String name;
+    String text;
+    String iconPath;
+    String animIconPath;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
-    
-    result       = null;
-    children     = XMLDocument.getChildTags(node);
-    text         = "";
-    iconPath     = "";
+
+    result = null;
+    children = XMLDocument.getChildTags(node);
+    text = "";
+    iconPath = "";
     animIconPath = "";
 
     // find text
     for (i = 0; i < children.size(); i++) {
-      child = (Element) children.get(i);
-      name  = child.getAttribute(ATT_NAME);
+      child = children.get(i);
+      name = child.getAttribute(ATT_NAME);
 
-      if (name.equals(VAL_TEXT))
+      if (name.equals(VAL_TEXT)) {
         text = (String) invokeReadFromXML(child);
-      else if (name.equals(VAL_ICONPATH))
+      } else if (name.equals(VAL_ICONPATH)) {
         iconPath = (String) invokeReadFromXML(child);
-      else if (name.equals(VAL_ANIMATEDICONPATH))
+      } else if (name.equals(VAL_ANIMATEDICONPATH)) {
         animIconPath = (String) invokeReadFromXML(child);
+      }
     }
 
     result = new BeanVisual(text, iconPath, animIconPath);
-    
+
     // set rest of properties
-    for (i = 0; i < children.size(); i++)
-      readFromXML(result, node.getAttribute(ATT_NAME), (Element) children.get(i));
-    
+    for (i = 0; i < children.size(); i++) {
+      readFromXML(result, node.getAttribute(ATT_NAME), children.get(i));
+    }
+
     return result;
   }
-  
+
   /**
-   * returns the IDs for the given BeanInstances, i.e., the stored IDs
-   * in m_BeanInstancesID, based on m_BeanInstances
+   * returns the IDs for the given BeanInstances, i.e., the stored IDs in
+   * m_BeanInstancesID, based on m_BeanInstances
    * 
-   * @param beans       the beans to retrieve the IDs for
-   * @return            the IDs for the given BeanInstances
+   * @param beans the beans to retrieve the IDs for
+   * @return the IDs for the given BeanInstances
    * @see #m_BeanInstances
    * @see #m_BeanInstancesID
    */
-  protected Vector getIDsForBeanInstances(Vector beans) {
-    Vector        result;
-    int           i;
-    int           pos;
-    
-    result = new Vector();
+  protected Vector<Integer> getIDsForBeanInstances(Vector<Object> beans) {
+    Vector<Integer> result;
+    int i;
+    int pos;
+
+    result = new Vector<Integer>();
 
     for (i = 0; i < beans.size(); i++) {
       pos = m_BeanInstances.indexOf(beans.get(i));
       result.add(m_BeanInstancesID.get(pos));
     }
-    
+
     return result;
   }
-  
+
   /**
    * adds the given MetaBean to a DOM structure.
    * 
-   * @param parent the parent of this object, e.g. the class this object is a member of
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
    * @param o the Object to describe in XML
    * @param name the name of the object
    * @return the node that was created
    * @throws Exception if the DOM creation fails
    */
   public Element writeMetaBean(Element parent, Object o, String name)
-      throws Exception {
-    
-    Element         node;
-    MetaBean        meta;
+    throws Exception {
+
+    Element node;
+    MetaBean meta;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), name);
-    
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
     m_CurrentNode = parent;
-    
+
     meta = (MetaBean) o;
     node = writeToXML(parent, o, name);
 
-    invokeWriteToXML(node, getIDsForBeanInstances(meta.getBeansInInputs()), VAL_INPUTSID);
-    invokeWriteToXML(node, getIDsForBeanInstances(meta.getBeansInOutputs()), VAL_OUTPUTSID);
-    
+    invokeWriteToXML(node, getIDsForBeanInstances(meta.getBeansInInputs()),
+      VAL_INPUTSID);
+    invokeWriteToXML(node, getIDsForBeanInstances(meta.getBeansInOutputs()),
+      VAL_OUTPUTSID);
+
     return node;
   }
-  
+
   /**
-   * returns a vector with references to BeanInstances according to the IDs
-   * in the given Vector.
-   * @param ids       contains the IDs of the BeanInstances
-   * @return          the corresponding BeanInstances
+   * returns a vector with references to BeanInstances according to the IDs in
+   * the given Vector.
+   * 
+   * @param ids contains the IDs of the BeanInstances
+   * @return the corresponding BeanInstances
    * @see #m_BeanInstances
    * @see #m_BeanInstancesID
    */
-  protected Vector getBeanInstancesForIDs(Vector ids) {
-    Vector        result;
-    int           i;
-    int           pos;
-    
-    result = new Vector();
-    
+  protected Vector<Object> getBeanInstancesForIDs(Vector<Integer> ids) {
+    Vector<Object> result;
+    int i;
+    int pos;
+
+    result = new Vector<Object>();
+
     for (i = 0; i < ids.size(); i++) {
       pos = m_BeanInstancesID.indexOf(ids.get(i));
       result.add(m_BeanInstances.get(pos));
     }
-    
+
     return result;
   }
 
@@ -2024,61 +2180,66 @@ public class XMLBeans
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
    */
+  @SuppressWarnings("unchecked")
   public Object readMetaBean(Element node) throws Exception {
-    Object          result;
-    Vector          children;
-    Element         child;
-    int             i;
-    String          name;
-    Vector          inputs;
-    Vector          outputs;
-    Vector          coords;
-    MetaBean        bean;
+    Object result;
+    Vector<Element> children;
+    Element child;
+    int i;
+    String name;
+    Vector<Integer> inputs;
+    Vector<Integer> outputs;
+    Vector<Point> coords;
+    MetaBean bean;
 
     // for debugging only
-    if (DEBUG)
-       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
-    
-    result   = new MetaBean();
+
+    result = new MetaBean();
     children = XMLDocument.getChildTags(node);
-    inputs   = new Vector();
-    outputs  = new Vector();
-    coords   = new Vector();
-    
+    inputs = new Vector<Integer>();
+    outputs = new Vector<Integer>();
+    coords = new Vector<Point>();
+
     // the current MetaBean
     m_CurrentMetaBean = (MetaBean) result;
 
     for (i = 0; i < children.size(); i++) {
-      child = (Element) children.get(i);
-      name  = child.getAttribute(ATT_NAME);
+      child = children.get(i);
+      name = child.getAttribute(ATT_NAME);
 
-      if (name.equals(VAL_ASSOCIATEDCONNECTIONS))
-        ((MetaBean) result).setAssociatedConnections((Vector) invokeReadFromXML(child));
-      else if (name.equals(VAL_INPUTSID))
-        inputs = (Vector) invokeReadFromXML(child);
-      else if (name.equals(VAL_OUTPUTSID))
-        outputs = (Vector) invokeReadFromXML(child);
-      else if (name.equals(VAL_SUBFLOW))
-        ((MetaBean) result).setSubFlow((Vector) invokeReadFromXML(child));
-      else if (name.equals(VAL_ORIGINALCOORDS))
-        coords = (Vector) invokeReadFromXML(child);
-      else if (name.equals(VAL_INPUTS))
+      if (name.equals(VAL_ASSOCIATEDCONNECTIONS)) {
+        ((MetaBean) result)
+          .setAssociatedConnections((Vector<BeanConnection>) invokeReadFromXML(child));
+      } else if (name.equals(VAL_INPUTSID)) {
+        inputs = (Vector<Integer>) invokeReadFromXML(child);
+      } else if (name.equals(VAL_OUTPUTSID)) {
+        outputs = (Vector<Integer>) invokeReadFromXML(child);
+      } else if (name.equals(VAL_SUBFLOW)) {
+        ((MetaBean) result)
+          .setSubFlow((Vector<Object>) invokeReadFromXML(child));
+      } else if (name.equals(VAL_ORIGINALCOORDS)) {
+        coords = (Vector<Point>) invokeReadFromXML(child);
+      } else if (name.equals(VAL_INPUTS)) {
         System.out.println("INFO: '" + name + "' will be restored later.");
-      else if (name.equals(VAL_OUTPUTS))
+      } else if (name.equals(VAL_OUTPUTS)) {
         System.out.println("INFO: '" + name + "' will be restored later.");
-      else
+      } else {
         readFromXML(result, name, child);
+      }
     }
 
     bean = (MetaBean) result;
-    
+
     // set inputs and outputs, after the beans have been instantiated
     bean.setInputs(getBeanInstancesForIDs(inputs));
     bean.setOutputs(getBeanInstancesForIDs(outputs));
     bean.setOriginalCoords(coords);
-    
+
     return result;
   }
 }

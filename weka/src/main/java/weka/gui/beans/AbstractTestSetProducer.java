@@ -24,24 +24,22 @@ package weka.gui.beans;
 import java.awt.BorderLayout;
 import java.beans.EventSetDescriptor;
 import java.io.Serializable;
+import java.util.EventListener;
 import java.util.Vector;
 
 import javax.swing.JPanel;
 
 /**
- * Abstract class for TestSetProducers that contains default
- * implementations of add/remove listener methods and defualt
- * visual representation.
- *
+ * Abstract class for TestSetProducers that contains default implementations of
+ * add/remove listener methods and defualt visual representation.
+ * 
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 8034 $
+ * @version $Revision: 10216 $
  * @since 1.0
  * @see TestSetProducer
  */
-public abstract class AbstractTestSetProducer
-  extends JPanel
-  implements TestSetProducer, Visible, 
-	     BeanCommon, Serializable {
+public abstract class AbstractTestSetProducer extends JPanel implements
+  TestSetProducer, Visible, BeanCommon, Serializable {
 
   /** for serialization */
   private static final long serialVersionUID = -7905764845789349839L;
@@ -49,12 +47,11 @@ public abstract class AbstractTestSetProducer
   /**
    * Objects listening to us
    */
-  protected Vector m_listeners = new Vector();
+  protected Vector<EventListener> m_listeners = new Vector<EventListener>();
 
-  protected BeanVisual m_visual = 
-    new BeanVisual("AbstractTestSetProducer", 
-		    BeanVisual.ICON_PATH+"DefaultTrainTest.gif",
-		    BeanVisual.ICON_PATH+"DefaultTrainTest_animated.gif");
+  protected BeanVisual m_visual = new BeanVisual("AbstractTestSetProducer",
+    BeanVisual.ICON_PATH + "DefaultTrainTest.gif", BeanVisual.ICON_PATH
+      + "DefaultTrainTest_animated.gif");
 
   /**
    * non null if this object is a target for any events.
@@ -77,115 +74,123 @@ public abstract class AbstractTestSetProducer
 
   /**
    * Add a listener for test sets
-   *
+   * 
    * @param tsl a <code>TestSetListener</code> value
    */
+  @Override
   public synchronized void addTestSetListener(TestSetListener tsl) {
     m_listeners.addElement(tsl);
   }
 
   /**
    * Remove a listener for test sets
-   *
+   * 
    * @param tsl a <code>TestSetListener</code> value
    */
+  @Override
   public synchronized void removeTestSetListener(TestSetListener tsl) {
     m_listeners.removeElement(tsl);
   }
 
   /**
    * Set the visual for this bean
-   *
+   * 
    * @param newVisual a <code>BeanVisual</code> value
    */
+  @Override
   public void setVisual(BeanVisual newVisual) {
     m_visual = newVisual;
   }
-  
+
   /**
    * Get the visual for this bean
-   *
+   * 
    * @return a <code>BeanVisual</code> value
    */
+  @Override
   public BeanVisual getVisual() {
     return m_visual;
   }
-  
+
   /**
    * Use the default visual for this bean
    */
+  @Override
   public void useDefaultVisual() {
-    m_visual.loadIcons(BeanVisual.ICON_PATH+"DefaultTrainTest.gif",
-		       BeanVisual.ICON_PATH+"DefaultTrainTest_animated.gif");
+    m_visual.loadIcons(BeanVisual.ICON_PATH + "DefaultTrainTest.gif",
+      BeanVisual.ICON_PATH + "DefaultTrainTest_animated.gif");
   }
 
   /**
-   * Returns true if, at this time, 
-   * the object will accept a connection according to the supplied
-   * event name
-   *
+   * Returns true if, at this time, the object will accept a connection
+   * according to the supplied event name
+   * 
    * @param eventName the event name
    * @return true if the object will accept a connection
    */
+  @Override
   public boolean connectionAllowed(String eventName) {
     return (m_listenee == null);
   }
 
   /**
-   * Returns true if, at this time, 
-   * the object will accept a connection according to the supplied
-   * EventSetDescriptor
-   *
+   * Returns true if, at this time, the object will accept a connection
+   * according to the supplied EventSetDescriptor
+   * 
    * @param esd the EventSetDescriptor
    * @return true if the object will accept a connection
    */
+  @Override
   public boolean connectionAllowed(EventSetDescriptor esd) {
     return connectionAllowed(esd.getName());
   }
 
   /**
-   * Notify this object that it has been registered as a listener with
-   * a source with respect to the supplied event name
-   *
+   * Notify this object that it has been registered as a listener with a source
+   * with respect to the supplied event name
+   * 
    * @param eventName the event name
-   * @param source the source with which this object has been registered as
-   * a listener
+   * @param source the source with which this object has been registered as a
+   *          listener
    */
+  @Override
   public synchronized void connectionNotification(String eventName,
-						  Object source) {
+    Object source) {
     if (connectionAllowed(eventName)) {
       m_listenee = source;
     }
   }
 
   /**
-   * Notify this object that it has been deregistered as a listener with
-   * a source with respect to the supplied event name
-   *
+   * Notify this object that it has been deregistered as a listener with a
+   * source with respect to the supplied event name
+   * 
    * @param eventName the event name
-   * @param source the source with which this object has been registered as
-   * a listener
+   * @param source the source with which this object has been registered as a
+   *          listener
    */
+  @Override
   public synchronized void disconnectionNotification(String eventName,
-						     Object source) {
+    Object source) {
     if (m_listenee == source) {
       m_listenee = null;
     }
   }
-      
+
   /**
    * Set a logger
-   *
+   * 
    * @param logger a <code>weka.gui.Logger</code> value
    */
+  @Override
   public void setLog(weka.gui.Logger logger) {
     m_logger = logger;
   }
 
   /**
-   * Stop any processing that the bean might be doing.
-   * Subclass must implement
+   * Stop any processing that the bean might be doing. Subclass must implement
    */
+  @Override
   public abstract void stop();
 
 }

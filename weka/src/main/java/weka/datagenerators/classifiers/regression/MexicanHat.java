@@ -21,13 +21,14 @@
 
 package weka.datagenerators.classifiers.regression;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -36,59 +37,79 @@ import weka.core.Utils;
 import weka.datagenerators.RegressionGenerator;
 
 /**
- <!-- globalinfo-start -->
- * A data generator for the simple 'Mexian Hat' function:<br/>
- *    y = sin|x| / |x|<br/>
- * In addition to this simple function, the amplitude can be changed and gaussian noise can be added.
+ * <!-- globalinfo-start --> A data generator for the simple 'Mexian Hat'
+ * function:<br/>
+ * y = sin|x| / |x|<br/>
+ * In addition to this simple function, the amplitude can be changed and
+ * gaussian noise can be added.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -h
- *  Prints this help.</pre>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -o &lt;file&gt;
+ * <pre>
+ * -h
+ *  Prints this help.
+ * </pre>
+ * 
+ * <pre>
+ * -o &lt;file&gt;
  *  The name of the output file, otherwise the generated data is
- *  printed to stdout.</pre>
+ *  printed to stdout.
+ * </pre>
  * 
- * <pre> -r &lt;name&gt;
- *  The name of the relation.</pre>
+ * <pre>
+ * -r &lt;name&gt;
+ *  The name of the relation.
+ * </pre>
  * 
- * <pre> -d
- *  Whether to print debug informations.</pre>
+ * <pre>
+ * -d
+ *  Whether to print debug informations.
+ * </pre>
  * 
- * <pre> -S
- *  The seed for random function (default 1)</pre>
+ * <pre>
+ * -S
+ *  The seed for random function (default 1)
+ * </pre>
  * 
- * <pre> -n &lt;num&gt;
- *  The number of examples to generate (default 100)</pre>
+ * <pre>
+ * -n &lt;num&gt;
+ *  The number of examples to generate (default 100)
+ * </pre>
  * 
- * <pre> -A &lt;num&gt;
- *  The amplitude multiplier (default 1.0).</pre>
+ * <pre>
+ * -A &lt;num&gt;
+ *  The amplitude multiplier (default 1.0).
+ * </pre>
  * 
- * <pre> -R &lt;num&gt;..&lt;num&gt;
- *  The range x is randomly drawn from (default -10.0..10.0).</pre>
+ * <pre>
+ * -R &lt;num&gt;..&lt;num&gt;
+ *  The range x is randomly drawn from (default -10.0..10.0).
+ * </pre>
  * 
- * <pre> -N &lt;num&gt;
- *  The noise rate (default 0.0).</pre>
+ * <pre>
+ * -N &lt;num&gt;
+ *  The noise rate (default 0.0).
+ * </pre>
  * 
- * <pre> -V &lt;num&gt;
- *  The noise variance (default 1.0).</pre>
+ * <pre>
+ * -V &lt;num&gt;
+ *  The noise variance (default 1.0).
+ * </pre>
  * 
- <!-- options-end -->
- *
- * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * <!-- options-end -->
+ * 
+ * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 10203 $
  */
 
-public class MexicanHat
-  extends RegressionGenerator {
+public class MexicanHat extends RegressionGenerator {
 
   /** for serialization */
   static final long serialVersionUID = 4577016375261512975L;
-  
+
   /** the amplitude of y */
   protected double m_Amplitude;
 
@@ -119,152 +140,170 @@ public class MexicanHat
     setNoiseRate(defaultNoiseRate());
     setNoiseVariance(defaultNoiseVariance());
   }
-  
+
   /**
    * Returns a string describing this data generator.
-   *
-   * @return a description of the data generator suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the data generator suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "A data generator for the simple 'Mexian Hat' function:\n"
-        + "   y = sin|x| / |x|\n"
-        + "In addition to this simple function, the amplitude can be changed and "
-        + "gaussian noise can be added.";
+    return "A data generator for the simple 'Mexian Hat' function:\n"
+      + "   y = sin|x| / |x|\n"
+      + "In addition to this simple function, the amplitude can be changed and "
+      + "gaussian noise can be added.";
   }
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options
    */
-  public Enumeration listOptions() {
-    Vector result = enumToVector(super.listOptions());
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> result = enumToVector(super.listOptions());
+
+    result.addElement(new Option("\tThe amplitude multiplier (default "
+      + defaultAmplitude() + ").", "A", 1, "-A <num>"));
 
     result.addElement(new Option(
-              "\tThe amplitude multiplier (default " 
-              + defaultAmplitude() + ").",
-              "A", 1, "-A <num>"));
+      "\tThe range x is randomly drawn from (default " + defaultMinRange()
+        + ".." + defaultMaxRange() + ").", "R", 1, "-R <num>..<num>"));
 
-    result.addElement(new Option(
-              "\tThe range x is randomly drawn from (default " 
-              + defaultMinRange() + ".." + defaultMaxRange() + ").",
-              "R", 1, "-R <num>..<num>"));
+    result.addElement(new Option("\tThe noise rate (default "
+      + defaultNoiseRate() + ").", "N", 1, "-N <num>"));
 
-    result.addElement(new Option(
-              "\tThe noise rate (default " 
-              + defaultNoiseRate() + ").",
-              "N", 1, "-N <num>"));
-
-    result.addElement(new Option(
-              "\tThe noise variance (default "
-              + defaultNoiseVariance() + ").",
-              "V", 1, "-V <num>"));
+    result.addElement(new Option("\tThe noise variance (default "
+      + defaultNoiseVariance() + ").", "V", 1, "-V <num>"));
 
     return result.elements();
   }
-  
+
   /**
-   * Parses a list of options for this object. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a list of options for this object.
+   * <p/>
    * 
-   * <pre> -h
-   *  Prints this help.</pre>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -o &lt;file&gt;
+   * <pre>
+   * -h
+   *  Prints this help.
+   * </pre>
+   * 
+   * <pre>
+   * -o &lt;file&gt;
    *  The name of the output file, otherwise the generated data is
-   *  printed to stdout.</pre>
+   *  printed to stdout.
+   * </pre>
    * 
-   * <pre> -r &lt;name&gt;
-   *  The name of the relation.</pre>
+   * <pre>
+   * -r &lt;name&gt;
+   *  The name of the relation.
+   * </pre>
    * 
-   * <pre> -d
-   *  Whether to print debug informations.</pre>
+   * <pre>
+   * -d
+   *  Whether to print debug informations.
+   * </pre>
    * 
-   * <pre> -S
-   *  The seed for random function (default 1)</pre>
+   * <pre>
+   * -S
+   *  The seed for random function (default 1)
+   * </pre>
    * 
-   * <pre> -n &lt;num&gt;
-   *  The number of examples to generate (default 100)</pre>
+   * <pre>
+   * -n &lt;num&gt;
+   *  The number of examples to generate (default 100)
+   * </pre>
    * 
-   * <pre> -A &lt;num&gt;
-   *  The amplitude multiplier (default 1.0).</pre>
+   * <pre>
+   * -A &lt;num&gt;
+   *  The amplitude multiplier (default 1.0).
+   * </pre>
    * 
-   * <pre> -R &lt;num&gt;..&lt;num&gt;
-   *  The range x is randomly drawn from (default -10.0..10.0).</pre>
+   * <pre>
+   * -R &lt;num&gt;..&lt;num&gt;
+   *  The range x is randomly drawn from (default -10.0..10.0).
+   * </pre>
    * 
-   * <pre> -N &lt;num&gt;
-   *  The noise rate (default 0.0).</pre>
+   * <pre>
+   * -N &lt;num&gt;
+   *  The noise rate (default 0.0).
+   * </pre>
    * 
-   * <pre> -V &lt;num&gt;
-   *  The noise variance (default 1.0).</pre>
+   * <pre>
+   * -V &lt;num&gt;
+   *  The noise variance (default 1.0).
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    String        tmpStr;
-   
+    String tmpStr;
+
     super.setOptions(options);
 
     tmpStr = Utils.getOption('A', options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setAmplitude(Double.parseDouble(tmpStr));
-    else
+    } else {
       setAmplitude(defaultAmplitude());
+    }
 
     tmpStr = Utils.getOption('R', options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setRange(tmpStr);
-    else
+    } else {
       setRange(defaultMinRange() + ".." + defaultMaxRange());
-    
+    }
+
     tmpStr = Utils.getOption('N', options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setNoiseRate(Double.parseDouble(tmpStr));
-    else
+    } else {
       setNoiseRate(defaultNoiseRate());
+    }
 
     tmpStr = Utils.getOption('V', options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setNoiseVariance(Double.parseDouble(tmpStr));
-    else
+    } else {
       setNoiseVariance(defaultNoiseVariance());
+    }
   }
 
   /**
    * Gets the current settings of the datagenerator BIRCHCluster.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
+  @Override
   public String[] getOptions() {
-    Vector        result;
-    String[]      options;
-    int           i;
-    
-    result  = new Vector();
-    options = removeBlacklist(super.getOptions());
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
+    Vector<String> result;
+    String[] options;
 
-    result.add("-A"); 
+    result = new Vector<String>();
+    options = removeBlacklist(super.getOptions());
+    Collections.addAll(result, options);
+
+    result.add("-A");
     result.add("" + getAmplitude());
 
-    result.add("-R"); 
+    result.add("-R");
     result.add("" + getRange());
 
-    result.add("-N"); 
+    result.add("-N");
     result.add("" + getNoiseRate());
 
-    result.add("-V"); 
+    result.add("-V");
     result.add("" + getNoiseVariance());
-    
-    return (String[]) result.toArray(new String[result.size()]);
+
+    return result.toArray(new String[result.size()]);
   }
 
   /**
@@ -278,27 +317,27 @@ public class MexicanHat
 
   /**
    * Gets the amplitude multiplier.
-   *
+   * 
    * @return the amplitude multiplier
    */
-  public double getAmplitude() { 
-    return m_Amplitude; 
+  public double getAmplitude() {
+    return m_Amplitude;
   }
-  
+
   /**
    * Sets the amplitude multiplier.
-   *
+   * 
    * @param value the amplitude multiplier
    */
   public void setAmplitude(double value) {
     m_Amplitude = value;
   }
-  
+
   /**
    * Returns the tip text for this property
    * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String amplitudeTipText() {
     return "The amplitude of the mexican hat.";
@@ -306,9 +345,9 @@ public class MexicanHat
 
   /**
    * Sets the upper and lower boundary for the range of x
-   *
-   * @param fromTo the string containing the upper and lower boundary for
-   *               the range of x, separated by ..
+   * 
+   * @param fromTo the string containing the upper and lower boundary for the
+   *          range of x, separated by ..
    */
   protected void setRange(String fromTo) {
     int i = fromTo.indexOf("..");
@@ -320,22 +359,21 @@ public class MexicanHat
 
   /**
    * Gets the upper and lower boundary for the range of x
-   *
-   * @return the string containing the upper and lower boundary for
-   *         the range of x, separated by ..
+   * 
+   * @return the string containing the upper and lower boundary for the range of
+   *         x, separated by ..
    */
   protected String getRange() {
-    String fromTo = "" 
-                    + Utils.doubleToString(getMinRange(), 2) + ".."
-                    + Utils.doubleToString(getMaxRange(), 2);
+    String fromTo = "" + Utils.doubleToString(getMinRange(), 2) + ".."
+      + Utils.doubleToString(getMaxRange(), 2);
     return fromTo;
   }
-  
+
   /**
    * Returns the tip text for this property
    * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   protected String rangeTipText() {
     return "The upper and lower boundary for the range x is drawn from randomly.";
@@ -352,7 +390,7 @@ public class MexicanHat
 
   /**
    * Sets the lower boundary for the range of x
-   *
+   * 
    * @param value the lower boundary
    */
   public void setMinRange(double value) {
@@ -361,18 +399,18 @@ public class MexicanHat
 
   /**
    * Gets the lower boundary for the range of x
-   *
+   * 
    * @return the lower boundary for the range of x
    */
   public double getMinRange() {
     return m_MinRange;
   }
-  
+
   /**
    * Returns the tip text for this property
    * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String minRangeTipText() {
     return "The lower boundary for the range x is drawn from randomly.";
@@ -389,7 +427,7 @@ public class MexicanHat
 
   /**
    * Sets the upper boundary for the range of x
-   *
+   * 
    * @param value the upper boundary
    */
   public void setMaxRange(double value) {
@@ -398,18 +436,18 @@ public class MexicanHat
 
   /**
    * Gets the upper boundary for the range of x
-   *
+   * 
    * @return the upper boundary for the range of x
    */
   public double getMaxRange() {
     return m_MaxRange;
   }
-  
+
   /**
    * Returns the tip text for this property
    * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String maxRangeTipText() {
     return "The upper boundary for the range x is drawn from randomly.";
@@ -426,27 +464,27 @@ public class MexicanHat
 
   /**
    * Gets the gaussian noise rate.
-   *
+   * 
    * @return the gaussian noise rate
    */
-  public double getNoiseRate() { 
-    return m_NoiseRate; 
+  public double getNoiseRate() {
+    return m_NoiseRate;
   }
-  
+
   /**
    * Sets the gaussian noise rate.
-   *
+   * 
    * @param value the gaussian noise rate
    */
   public void setNoiseRate(double value) {
     m_NoiseRate = value;
   }
-  
+
   /**
    * Returns the tip text for this property
    * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String noiseRateTipText() {
     return "The gaussian noise rate to use.";
@@ -463,115 +501,119 @@ public class MexicanHat
 
   /**
    * Gets the noise variance
-   *
+   * 
    * @return the noise variance
    */
-  public double getNoiseVariance() { 
-    return m_NoiseVariance; 
+  public double getNoiseVariance() {
+    return m_NoiseVariance;
   }
-  
+
   /**
    * Sets the noise variance
-   *
+   * 
    * @param value the noise variance
    */
   public void setNoiseVariance(double value) {
-    if (value > 0)
+    if (value > 0) {
       m_NoiseVariance = value;
-    else
+    } else {
       throw new IllegalArgumentException(
-          "Noise variance needs to be > 0 (provided: " + value + ")!");
+        "Noise variance needs to be > 0 (provided: " + value + ")!");
+    }
   }
-  
+
   /**
    * Returns the tip text for this property
    * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String noiseVarianceTipText() {
     return "The noise variance to use.";
   }
 
   /**
-   * Return if single mode is set for the given data generator
-   * mode depends on option setting and or generator type.
+   * Return if single mode is set for the given data generator mode depends on
+   * option setting and or generator type.
    * 
    * @return single mode flag
    * @throws Exception if mode is not set yet
    */
+  @Override
   public boolean getSingleModeFlag() throws Exception {
     return true;
   }
 
   /**
-   * Initializes the format for the dataset produced. 
-   * Must be called before the generateExample or generateExamples
-   * methods are used.
-   * Re-initializes the random number generator with the given seed.
-   *
-   * @return the format for the dataset 
+   * Initializes the format for the dataset produced. Must be called before the
+   * generateExample or generateExamples methods are used. Re-initializes the
+   * random number generator with the given seed.
+   * 
+   * @return the format for the dataset
    * @throws Exception if the generating of the format failed
-   * @see  #getSeed()
+   * @see #getSeed()
    */
+  @Override
   public Instances defineDataFormat() throws Exception {
-    FastVector      atts;
+    ArrayList<Attribute> atts;
 
-    m_Random      = new Random(getSeed());
+    m_Random = new Random(getSeed());
     m_NoiseRandom = new Random(getSeed());
 
     // number of examples is the same as given per option
     setNumExamplesAct(getNumExamples());
 
     // initialize dataset format
-    atts = new FastVector();
-    atts.addElement(new Attribute("x"));
-    atts.addElement(new Attribute("y"));
-    
+    atts = new ArrayList<Attribute>();
+    atts.add(new Attribute("x"));
+    atts.add(new Attribute("y"));
+
     m_DatasetFormat = new Instances(getRelationNameToUse(), atts, 0);
-    
+
     return m_DatasetFormat;
   }
 
   /**
-   * Generates one example of the dataset. 
-   *
+   * Generates one example of the dataset.
+   * 
    * @return the generated example
    * @throws Exception if the format of the dataset is not yet defined
-   * @throws Exception if the generator only works with generateExamples
-   * which means in non single mode
+   * @throws Exception if the generator only works with generateExamples which
+   *           means in non single mode
    */
+  @Override
   public Instance generateExample() throws Exception {
-    Instance    result;
-    Random      rand;
-    double      x;
-    double      y;
-    double[]    atts;
+    Instance result;
+    Random rand;
+    double x;
+    double y;
+    double[] atts;
 
     result = null;
-    rand   = getRandom();
+    rand = getRandom();
 
-    if (m_DatasetFormat == null)
+    if (m_DatasetFormat == null) {
       throw new Exception("Dataset format not defined.");
+    }
 
     // generate attributes
     atts = new double[m_DatasetFormat.numAttributes()];
-    
+
     // random x
     x = rand.nextDouble();
     // fit into range
     x = x * (getMaxRange() - getMinRange()) + getMinRange();
-    
+
     // generate y
-    if (Utils.eq(x, 0))
+    if (Utils.eq(x, 0)) {
       y = getAmplitude();
-    else
-      y = getAmplitude() 
-          * StrictMath.sin(StrictMath.abs(x)) / StrictMath.abs(x);
+    } else {
+      y = getAmplitude() * StrictMath.sin(StrictMath.abs(x))
+        / StrictMath.abs(x);
+    }
     // noise
-    y = y + getAmplitude() 
-            * m_NoiseRandom.nextGaussian() 
-            * getNoiseRate() * getNoiseVariance();
+    y = y + getAmplitude() * m_NoiseRandom.nextGaussian() * getNoiseRate()
+      * getNoiseVariance();
 
     atts[0] = x;
     atts[1] = y;
@@ -579,69 +621,73 @@ public class MexicanHat
 
     // dataset reference
     result.setDataset(m_DatasetFormat);
-    
+
     return result;
   }
 
   /**
    * Generates all examples of the dataset. Re-initializes the random number
    * generator with the given seed, before generating instances.
-   *
+   * 
    * @return the generated dataset
    * @throws Exception if the format of the dataset is not yet defined
-   * @throws Exception if the generator only works with generateExample,
-   * which means in single mode
-   * @see   #getSeed()
+   * @throws Exception if the generator only works with generateExample, which
+   *           means in single mode
+   * @see #getSeed()
    */
+  @Override
   public Instances generateExamples() throws Exception {
-    Instances       result;
-    int             i;
+    Instances result;
+    int i;
 
-    result   = new Instances(m_DatasetFormat, 0);
+    result = new Instances(m_DatasetFormat, 0);
     m_Random = new Random(getSeed());
 
-    for (i = 0; i < getNumExamplesAct(); i++)
+    for (i = 0; i < getNumExamplesAct(); i++) {
       result.add(generateExample());
+    }
 
     return result;
   }
 
   /**
-   * Generates a comment string that documentates the data generator.
-   * By default this string is added at the beginning of the produced output
-   * as ARFF file type, next after the options.
+   * Generates a comment string that documentates the data generator. By default
+   * this string is added at the beginning of the produced output as ARFF file
+   * type, next after the options.
    * 
    * @return string contains info about the generated rules
    */
-  public String generateStart () {
+  @Override
+  public String generateStart() {
     return "";
   }
 
   /**
-   * Generates a comment string that documentats the data generator.
-   * By default this string is added at the end of theproduces output
-   * as ARFF file type.
+   * Generates a comment string that documentats the data generator. By default
+   * this string is added at the end of theproduces output as ARFF file type.
    * 
    * @return string contains info about the generated rules
    * @throws Exception if the generating of the documentaion fails
    */
+  @Override
   public String generateFinished() throws Exception {
     return "";
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10203 $");
   }
 
   /**
    * Main method for testing this class.
-   *
-   * @param args should contain arguments for the data producer: 
+   * 
+   * @param args should contain arguments for the data producer:
    */
   public static void main(String[] args) {
     runDataGenerator(new MexicanHat(), args);

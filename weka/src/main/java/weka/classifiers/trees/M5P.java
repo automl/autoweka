@@ -32,20 +32,24 @@ import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
- <!-- globalinfo-start -->
- * M5Base. Implements base routines for generating M5 Model trees and rules<br/>
- * The original algorithm M5 was invented by R. Quinlan and Yong Wang made improvements.<br/>
+ * <!-- globalinfo-start --> M5Base. Implements base routines for generating M5
+ * Model trees and rules<br/>
+ * The original algorithm M5 was invented by R. Quinlan and Yong Wang made
+ * improvements.<br/>
  * <br/>
  * For more information see:<br/>
  * <br/>
- * Ross J. Quinlan: Learning with Continuous Classes. In: 5th Australian Joint Conference on Artificial Intelligence, Singapore, 343-348, 1992.<br/>
+ * Ross J. Quinlan: Learning with Continuous Classes. In: 5th Australian Joint
+ * Conference on Artificial Intelligence, Singapore, 343-348, 1992.<br/>
  * <br/>
- * Y. Wang, I. H. Witten: Induction of model trees for predicting continuous classes. In: Poster papers of the 9th European Conference on Machine Learning, 1997.
+ * Y. Wang, I. H. Witten: Induction of model trees for predicting continuous
+ * classes. In: Poster papers of the 9th European Conference on Machine
+ * Learning, 1997.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- technical-bibtex-start -->
- * BibTeX:
+ * <!-- globalinfo-end -->
+ * 
+ * <!-- technical-bibtex-start --> BibTeX:
+ * 
  * <pre>
  * &#64;inproceedings{Quinlan1992,
  *    address = {Singapore},
@@ -66,40 +70,48 @@ import weka.core.Utils;
  * }
  * </pre>
  * <p/>
- <!-- technical-bibtex-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- technical-bibtex-end -->
  * 
- * <pre> -N
- *  Use unpruned tree/rules</pre>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -U
- *  Use unsmoothed predictions</pre>
+ * <pre>
+ * -N
+ *  Use unpruned tree/rules
+ * </pre>
  * 
- * <pre> -R
- *  Build regression tree/rule rather than a model tree/rule</pre>
+ * <pre>
+ * -U
+ *  Use unsmoothed predictions
+ * </pre>
  * 
- * <pre> -M &lt;minimum number of instances&gt;
+ * <pre>
+ * -R
+ *  Build regression tree/rule rather than a model tree/rule
+ * </pre>
+ * 
+ * <pre>
+ * -M &lt;minimum number of instances&gt;
  *  Set minimum number of instances per leaf
- *  (default 4)</pre>
+ *  (default 4)
+ * </pre>
  * 
- * <pre> -L
+ * <pre>
+ * -L
  *  Save instances at the nodes in
- *  the tree (for visualization purposes)</pre>
+ *  the tree (for visualization purposes)
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 8034 $
+ * @version $Revision: 10153 $
  */
-public class M5P 
-  extends M5Base 
-  implements Drawable {
+public class M5P extends M5Base implements Drawable {
 
   /** for serialization */
   static final long serialVersionUID = -6118439039768244417L;
-  
+
   /**
    * Creates a new <code>M5P</code> instance.
    */
@@ -109,25 +121,27 @@ public class M5P
   }
 
   /**
-   *  Returns the type of graph this classifier
-   *  represents.
-   *  @return Drawable.TREE
-   */   
+   * Returns the type of graph this classifier represents.
+   * 
+   * @return Drawable.TREE
+   */
+  @Override
   public int graphType() {
-      return Drawable.TREE;
+    return Drawable.TREE;
   }
 
   /**
    * Return a dot style String describing the tree.
-   *
+   * 
    * @return a <code>String</code> value
    * @throws Exception if an error occurs
    */
+  @Override
   public String graph() throws Exception {
     StringBuffer text = new StringBuffer();
-    
+
     text.append("digraph M5Tree {\n");
-    Rule temp = (Rule)m_ruleSet.elementAt(0);
+    Rule temp = m_ruleSet.get(0);
     temp.topOfTree().graph(text);
     text.append("}\n");
     return text.toString();
@@ -136,19 +150,18 @@ public class M5P
   /**
    * Returns the tip text for this property
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String saveInstancesTipText() {
-    return 
-        "Whether to save instance data at each node in the tree for "
+    return "Whether to save instance data at each node in the tree for "
       + "visualization purposes.";
   }
 
   /**
-   * Set whether to save instance data at each node in the
-   * tree for visualization purposes
-   *
+   * Set whether to save instance data at each node in the tree for
+   * visualization purposes
+   * 
    * @param save a <code>boolean</code> value
    */
   public void setSaveInstances(boolean save) {
@@ -157,7 +170,7 @@ public class M5P
 
   /**
    * Get whether instance data is being save.
-   *
+   * 
    * @return a <code>boolean</code> value
    */
   public boolean getSaveInstances() {
@@ -169,48 +182,60 @@ public class M5P
    * 
    * @return an enumeration of all the available options
    */
-  public Enumeration listOptions() {
-    Enumeration superOpts = super.listOptions();
-    
-    Vector newVector = new Vector();
+  @Override
+  public Enumeration<Option> listOptions() {
+    Enumeration<Option> superOpts = super.listOptions();
+
+    Vector<Option> newVector = new Vector<Option>();
     while (superOpts.hasMoreElements()) {
-      newVector.addElement((Option)superOpts.nextElement());
+      newVector.addElement(superOpts.nextElement());
     }
 
     newVector.addElement(new Option("\tSave instances at the nodes in\n"
-				    +"\tthe tree (for visualization purposes)",
-				    "L", 0, "-L"));
+      + "\tthe tree (for visualization purposes)", "L", 0, "-L"));
     return newVector.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <pre> -N
-   *  Use unpruned tree/rules</pre>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -U
-   *  Use unsmoothed predictions</pre>
+   * <pre>
+   * -N
+   *  Use unpruned tree/rules
+   * </pre>
    * 
-   * <pre> -R
-   *  Build regression tree/rule rather than a model tree/rule</pre>
+   * <pre>
+   * -U
+   *  Use unsmoothed predictions
+   * </pre>
    * 
-   * <pre> -M &lt;minimum number of instances&gt;
+   * <pre>
+   * -R
+   *  Build regression tree/rule rather than a model tree/rule
+   * </pre>
+   * 
+   * <pre>
+   * -M &lt;minimum number of instances&gt;
    *  Set minimum number of instances per leaf
-   *  (default 4)</pre>
+   *  (default 4)
+   * </pre>
    * 
-   * <pre> -L
+   * <pre>
+   * -L
    *  Save instances at the nodes in
-   *  the tree (for visualization purposes)</pre>
+   *  the tree (for visualization purposes)
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
     setSaveInstances(Utils.getFlag('L', options));
     super.setOptions(options);
@@ -221,14 +246,15 @@ public class M5P
    * 
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
+  @Override
+  public String[] getOptions() {
     String[] superOpts = super.getOptions();
-    String [] options = new String [superOpts.length+1];
+    String[] options = new String[superOpts.length + 1];
     int current = superOpts.length;
     for (int i = 0; i < current; i++) {
       options[i] = superOpts[i];
     }
-    
+
     if (getSaveInstances()) {
       options[current++] = "-L";
     }
@@ -239,14 +265,15 @@ public class M5P
 
     return options;
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10153 $");
   }
 
   /**
@@ -256,5 +283,5 @@ public class M5P
    */
   public static void main(String[] args) {
     runClassifier(new M5P(), args);
-  } 
+  }
 }
