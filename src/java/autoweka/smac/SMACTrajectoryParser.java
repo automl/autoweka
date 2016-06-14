@@ -68,11 +68,8 @@ public class SMACTrajectoryParser extends TrajectoryParser
                     score = Float.parseFloat(matcher.group(2));
 
                     log.debug("Time: {}, score: {}", time, score);
-                    {
-                       currentBest = score;
-                       argString = filterArgString(params, matcher.group(3));
-                       traj.addPoint(new Trajectory.Point(time, score, argString));
-                   }
+                    argString = filterArgString(params, matcher.group(3));
+                    traj.addPoint(new Trajectory.Point(time, score, argString));
                 }
                 else
                 {
