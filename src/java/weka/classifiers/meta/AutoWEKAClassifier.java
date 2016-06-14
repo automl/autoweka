@@ -203,13 +203,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         wLog = null;
     }
 
-    public static String getResamplingType(){
-        if(DEFAULT_RESAMPLING==Resampling.CrossValidation || DEFAULT_RESAMPLING==Resampling.MultiLevel || DEFAULT_RESAMPLING==Resampling.RandomSubSampling ){
-          return "examineFolds";
-        }else{
-          return "parseTrajectory";
-        }
-    }
 
     /**
     * Find the best classifier, arguments, and attribute selection for the data.
