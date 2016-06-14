@@ -53,8 +53,6 @@ public class SMACTrajectoryParser extends TrajectoryParser
 
             String line;
             Matcher matcher;
-            //SMAC starts with a crazy large number - let's ignore that
-            double currentBest = 1e100;
             String argString = null;
             double time = 0;
             double score = Float.MAX_VALUE;
