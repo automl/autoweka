@@ -11,7 +11,10 @@ import java.io.FileInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> bugfix
 /**
  *  Generic class that gets called from an SMBO method, completes the evaluation, and returns the result back up to the SMBO method.
  *

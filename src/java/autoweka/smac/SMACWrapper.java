@@ -13,10 +13,6 @@ import autoweka.Wrapper;
 import autoweka.ClassifierResult;
 import autoweka.Util;
 
-import autoweka.Configuration;
-import autoweka.ConfigurationCollection;
-import autoweka.ConfigurationRanker;
-
 public class SMACWrapper extends Wrapper
 {
     private boolean mRawEval = false;
