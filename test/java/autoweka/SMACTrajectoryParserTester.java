@@ -16,6 +16,7 @@ import static org.junit.Assert.*;
 
 public class SMACTrajectoryParserTester{
 
+  @Test
   public static void parseTrajectoryTest(){
     File folderFile = new File("test/experiment_folder");
     Experiment e = Experiment.createFromFolder(folderFile);
