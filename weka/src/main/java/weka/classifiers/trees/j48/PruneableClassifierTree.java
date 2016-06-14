@@ -34,7 +34,7 @@ import weka.core.Utils;
  * be pruned using a pruning set. 
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 8984 $
+ * @version $Revision: 11006 $
  */
 public class PruneableClassifierTree 
   extends ClassifierTree {
@@ -43,16 +43,16 @@ public class PruneableClassifierTree
   static final long serialVersionUID = -555775736857600201L;
 
   /** True if the tree is to be pruned. */
-  private boolean pruneTheTree = false;
+  protected boolean pruneTheTree = false;
 
   /** How many subsets of equal size? One used for pruning, the rest for training. */
-  private int numSets = 3;
+  protected int numSets = 3;
 
   /** Cleanup after the tree has been built. */
-  private boolean m_cleanup = true;
+  protected boolean m_cleanup = true;
 
   /** The random number seed. */
-  private int m_seed = 1;
+  protected int m_seed = 1;
 
   /**
    * Constructor for pruneable tree structure. Stores reference
@@ -234,6 +234,6 @@ public class PruneableClassifierTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8984 $");
+    return RevisionUtils.extract("$Revision: 11006 $");
   }
 }

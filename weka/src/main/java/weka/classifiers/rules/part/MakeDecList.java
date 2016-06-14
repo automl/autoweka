@@ -38,29 +38,32 @@ import weka.core.Utils;
 
 /**
  * Class for handling a decision list.
- *
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 11006 $
  */
-public class MakeDecList
-  implements Serializable, CapabilitiesHandler, RevisionHandler {
+public class MakeDecList implements Serializable, CapabilitiesHandler,
+  RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -1427481323245079123L;
 
   /** Vector storing the rules. */
-  private Vector theRules;
+  private Vector<ClassifierDecList> theRules;
 
   /** The confidence for C45-type pruning. */
   private double CF = 0.25f;
 
   /** Minimum number of objects */
-  private int minNumObj;
+  private final int minNumObj;
 
   /** The model selection method. */
-  private ModelSelection toSelectModeL;
+  private final ModelSelection toSelectModeL;
 
-  /** How many subsets of equal size? One used for pruning, the rest for training. */
+  /**
+   * How many subsets of equal size? One used for pruning, the rest for
+   * training.
+   */
   private int numSetS = 3;
 
   /** Use reduced error pruning? */
@@ -75,8 +78,7 @@ public class MakeDecList
   /**
    * Constructor for unpruned dec list.
    */
-  public MakeDecList(ModelSelection toSelectLocModel,
-		     int minNum){
+  public MakeDecList(ModelSelection toSelectLocModel, int minNum) {
 
     toSelectModeL = toSelectLocModel;
     reducedErrorPruning = false;
@@ -87,8 +89,7 @@ public class MakeDecList
   /**
    * Constructor for dec list pruned using C4.5 pruning.
    */
-  public MakeDecList(ModelSelection toSelectLocModel, double cf,
-		     int minNum){
+  public MakeDecList(ModelSelection toSelectLocModel, double cf, int minNum) {
 
     toSelectModeL = toSelectLocModel;
     CF = cf;
@@ -100,8 +101,8 @@ public class MakeDecList
   /**
    * Constructor for dec list pruned using hold-out pruning.
    */
-  public MakeDecList(ModelSelection toSelectLocModel, int num,
-		     int minNum, int seed){
+  public MakeDecList(ModelSelection toSelectLocModel, int num, int minNum,
+    int seed) {
 
     toSelectModeL = toSelectLocModel;
     numSetS = num;
@@ -113,9 +114,10 @@ public class MakeDecList
 
   /**
    * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
+   * 
+   * @return the capabilities of this classifier
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = new Capabilities(this);
     result.disableAll();
@@ -129,32 +131,29 @@ public class MakeDecList
     // class
     result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
-    
+
     return result;
   }
 
   /**
    * Builds dec list.
-   *
+   * 
    * @exception Exception if dec list can't be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
-    
+
     // can classifier handle the data?
     getCapabilities().testWithFail(data);
 
     // remove instances with missing class
     data = new Instances(data);
     data.deleteWithMissingClass();
-    
+
     ClassifierDecList currentRule;
     double currentWeight;
-    Instances oldGrowData, newGrowData, oldPruneData,
-      newPruneData;
-    int numRules = 0;
-    
-    theRules = new Vector();
-    if ((reducedErrorPruning) && !(unpruned)){ 
+    Instances oldGrowData, newGrowData, oldPruneData, newPruneData;
+    theRules = new Vector<ClassifierDecList>();
+    if ((reducedErrorPruning) && !(unpruned)) {
       Random random = new Random(m_seed);
       data.randomize(random);
       data.stratify(numSetS);
@@ -165,55 +164,47 @@ public class MakeDecList
       oldPruneData = null;
     }
 
-    while (Utils.gr(oldGrowData.numInstances(),0)){
+    while (Utils.gr(oldGrowData.numInstances(), 0)) {
 
       // Create rule
       if (unpruned) {
-	currentRule = new ClassifierDecList(toSelectModeL,
-					    minNumObj);
-	((ClassifierDecList)currentRule).buildRule(oldGrowData);
+        currentRule = new ClassifierDecList(toSelectModeL, minNumObj);
+        currentRule.buildRule(oldGrowData);
       } else if (reducedErrorPruning) {
-	currentRule = new PruneableDecList(toSelectModeL,
-					   minNumObj);
-	((PruneableDecList)currentRule).buildRule(oldGrowData, 
-						  oldPruneData);
+        currentRule = new PruneableDecList(toSelectModeL, minNumObj);
+        ((PruneableDecList) currentRule).buildRule(oldGrowData, oldPruneData);
       } else {
-	currentRule = new C45PruneableDecList(toSelectModeL, CF,
-					      minNumObj);
-	((C45PruneableDecList)currentRule).buildRule(oldGrowData);
+        currentRule = new C45PruneableDecList(toSelectModeL, CF, minNumObj);
+        ((C45PruneableDecList) currentRule).buildRule(oldGrowData);
       }
-      numRules++;
-
       // Remove instances from growing data
-      newGrowData = new Instances(oldGrowData,
-				  oldGrowData.numInstances());
-      Enumeration enu = oldGrowData.enumerateInstances();
+      newGrowData = new Instances(oldGrowData, oldGrowData.numInstances());
+      Enumeration<Instance> enu = oldGrowData.enumerateInstances();
       while (enu.hasMoreElements()) {
-	Instance instance = (Instance) enu.nextElement();
-	currentWeight = currentRule.weight(instance);
-	if (Utils.sm(currentWeight,1)) {
-	  instance.setWeight(instance.weight()*(1-currentWeight));
-	  newGrowData.add(instance);
-	}
+        Instance instance = enu.nextElement();
+        currentWeight = currentRule.weight(instance);
+        if (Utils.sm(currentWeight, 1)) {
+          instance.setWeight(instance.weight() * (1 - currentWeight));
+          newGrowData.add(instance);
+        }
       }
       newGrowData.compactify();
       oldGrowData = newGrowData;
-      
+
       // Remove instances from pruning data
       if ((reducedErrorPruning) && !(unpruned)) {
-	newPruneData = new Instances(oldPruneData,
-					     oldPruneData.numInstances());
-	enu = oldPruneData.enumerateInstances();
-	while (enu.hasMoreElements()) {
-	  Instance instance = (Instance) enu.nextElement();
-	  currentWeight = currentRule.weight(instance);
-	  if (Utils.sm(currentWeight,1)) {
-	    instance.setWeight(instance.weight()*(1-currentWeight));
-	    newPruneData.add(instance);
-	  }
-	}
-	newPruneData.compactify();
-	oldPruneData = newPruneData;
+        newPruneData = new Instances(oldPruneData, oldPruneData.numInstances());
+        enu = oldPruneData.enumerateInstances();
+        while (enu.hasMoreElements()) {
+          Instance instance = enu.nextElement();
+          currentWeight = currentRule.weight(instance);
+          if (Utils.sm(currentWeight, 1)) {
+            instance.setWeight(instance.weight() * (1 - currentWeight));
+            newPruneData.add(instance);
+          }
+        }
+        newPruneData.compactify();
+        oldPruneData = newPruneData;
       }
       theRules.addElement(currentRule);
     }
@@ -222,65 +213,64 @@ public class MakeDecList
   /**
    * Outputs the classifier into a string.
    */
-  public String toString(){
+  @Override
+  public String toString() {
 
     StringBuffer text = new StringBuffer();
 
-    for (int i=0;i<theRules.size();i++)
-      text.append((ClassifierDecList)theRules.elementAt(i)+"\n");
-    text.append("Number of Rules  : \t"+theRules.size()+"\n");
+    for (int i = 0; i < theRules.size(); i++) {
+      text.append(theRules.elementAt(i) + "\n");
+    }
+    text.append("Number of Rules  : \t" + theRules.size() + "\n");
 
     return text.toString();
   }
 
-  /** 
+  /**
    * Classifies an instance.
-   *
+   * 
    * @exception Exception if instance can't be classified
    */
-  public double classifyInstance(Instance instance) 
-       throws Exception {
+  public double classifyInstance(Instance instance) throws Exception {
 
     double maxProb = -1;
-    double [] sumProbs;
+    double[] sumProbs;
     int maxIndex = 0;
 
     sumProbs = distributionForInstance(instance);
     for (int j = 0; j < sumProbs.length; j++) {
-      if (Utils.gr(sumProbs[j],maxProb)){
-	maxIndex = j;
-	maxProb = sumProbs[j];
+      if (Utils.gr(sumProbs[j], maxProb)) {
+        maxIndex = j;
+        maxProb = sumProbs[j];
       }
     }
 
-    return (double)maxIndex;
+    return maxIndex;
   }
 
-  /** 
+  /**
    * Returns the class distribution for an instance.
-   *
+   * 
    * @exception Exception if distribution can't be computed
    */
-  public double[] distributionForInstance(Instance instance) 
-       throws Exception {
+  public double[] distributionForInstance(Instance instance) throws Exception {
 
-    double [] currentProbs = null;
-    double [] sumProbs;
+    double[] currentProbs = null;
+    double[] sumProbs;
     double currentWeight, weight = 1;
-    int i,j;
-	
+    int i, j;
+
     // Get probabilities.
-    sumProbs = new double [instance.numClasses()];
+    sumProbs = new double[instance.numClasses()];
     i = 0;
-    while (Utils.gr(weight,0)){
-      currentWeight = 
-	((ClassifierDecList)theRules.elementAt(i)).weight(instance);
-      if (Utils.gr(currentWeight,0)) {
-	currentProbs = ((ClassifierDecList)theRules.elementAt(i)).
-	  distributionForInstance(instance);
-	for (j = 0; j < sumProbs.length; j++)
-	  sumProbs[j] += weight*currentProbs[j];
-	weight = weight*(1-currentWeight);
+    while (Utils.gr(weight, 0)) {
+      currentWeight = theRules.elementAt(i).weight(instance);
+      if (Utils.gr(currentWeight, 0)) {
+        currentProbs = theRules.elementAt(i).distributionForInstance(instance);
+        for (j = 0; j < sumProbs.length; j++) {
+          sumProbs[j] += weight * currentProbs[j];
+        }
+        weight = weight * (1 - currentWeight);
       }
       i++;
     }
@@ -291,17 +281,18 @@ public class MakeDecList
   /**
    * Outputs the number of rules in the classifier.
    */
-  public int numRules(){
+  public int numRules() {
 
     return theRules.size();
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 11006 $");
   }
 }

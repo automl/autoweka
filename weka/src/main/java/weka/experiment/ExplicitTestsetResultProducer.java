@@ -23,12 +23,14 @@ package weka.experiment;
 
 import java.io.File;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.TimeZone;
 import java.util.Vector;
 
 import weka.core.AdditionalMeasureProducer;
+import weka.core.Environment;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -39,105 +41,137 @@ import weka.core.WekaException;
 import weka.core.converters.ConverterUtils.DataSource;
 
 /**
- <!-- globalinfo-start -->
- * Loads the external test set and calls the appropriate SplitEvaluator to generate some results.<br/>
+ * <!-- globalinfo-start --> Loads the external test set and calls the
+ * appropriate SplitEvaluator to generate some results.<br/>
  * The filename of the test set is constructed as follows:<br/>
- *    &lt;dir&gt; + / + &lt;prefix&gt; + &lt;relation-name&gt; + &lt;suffix&gt;<br/>
- * The relation-name can be modified by using the regular expression to replace the matching sub-string with a specified replacement string. In order to get rid of the string that the Weka filters add to the end of the relation name, just use '.*-weka' as the regular expression to find.<br/>
- * The suffix determines the type of file to load, i.e., one is not restricted to ARFF files. As long as Weka recognizes the extension specified in the suffix, the data will be loaded with one of Weka's converters.
+ * &lt;dir&gt; + / + &lt;prefix&gt; + &lt;relation-name&gt; + &lt;suffix&gt;<br/>
+ * The relation-name can be modified by using the regular expression to replace
+ * the matching sub-string with a specified replacement string. In order to get
+ * rid of the string that the Weka filters add to the end of the relation name,
+ * just use '.*-weka' as the regular expression to find.<br/>
+ * The suffix determines the type of file to load, i.e., one is not restricted
+ * to ARFF files. As long as Weka recognizes the extension specified in the
+ * suffix, the data will be loaded with one of Weka's converters.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -D
- * Save raw split evaluator output.</pre>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -O &lt;file/directory name/path&gt;
+ * <pre>
+ * -D
+ * Save raw split evaluator output.
+ * </pre>
+ * 
+ * <pre>
+ * -O &lt;file/directory name/path&gt;
  *  The filename where raw output will be stored.
  *  If a directory name is specified then then individual
  *  outputs will be gzipped, otherwise all output will be
  *  zipped to the named file. Use in conjuction with -D.
- *  (default: splitEvalutorOut.zip)</pre>
+ *  (default: splitEvalutorOut.zip)
+ * </pre>
  * 
- * <pre> -W &lt;class name&gt;
+ * <pre>
+ * -W &lt;class name&gt;
  *  The full class name of a SplitEvaluator.
- *  eg: weka.experiment.ClassifierSplitEvaluator</pre>
+ *  eg: weka.experiment.ClassifierSplitEvaluator
+ * </pre>
  * 
- * <pre> -R
- *  Set when data is to be randomized.</pre>
+ * <pre>
+ * -R
+ *  Set when data is to be randomized.
+ * </pre>
  * 
- * <pre> -dir &lt;directory&gt;
+ * <pre>
+ * -dir &lt;directory&gt;
  *  The directory containing the test sets.
- *  (default: current directory)</pre>
+ *  (default: current directory)
+ * </pre>
  * 
- * <pre> -prefix &lt;string&gt;
+ * <pre>
+ * -prefix &lt;string&gt;
  *  An optional prefix for the test sets (before the relation name).
- * (default: empty string)</pre>
+ * (default: empty string)
+ * </pre>
  * 
- * <pre> -suffix &lt;string&gt;
+ * <pre>
+ * -suffix &lt;string&gt;
  *  The suffix to append to the test set.
- *  (default: _test.arff)</pre>
+ *  (default: _test.arff)
+ * </pre>
  * 
- * <pre> -find &lt;regular expression&gt;
+ * <pre>
+ * -find &lt;regular expression&gt;
  *  The regular expression to search the relation name with.
  *  Not used if an empty string.
- *  (default: empty string)</pre>
+ *  (default: empty string)
+ * </pre>
  * 
- * <pre> -replace &lt;string&gt;
+ * <pre>
+ * -replace &lt;string&gt;
  *  The replacement string for the all the matches of '-find'.
- *  (default: empty string)</pre>
+ *  (default: empty string)
+ * </pre>
  * 
- * <pre> 
+ * <pre>
  * Options specific to split evaluator weka.experiment.ClassifierSplitEvaluator:
  * </pre>
  * 
- * <pre> -W &lt;class name&gt;
+ * <pre>
+ * -W &lt;class name&gt;
  *  The full class name of the classifier.
- *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+ *  eg: weka.classifiers.bayes.NaiveBayes
+ * </pre>
  * 
- * <pre> -C &lt;index&gt;
+ * <pre>
+ * -C &lt;index&gt;
  *  The index of the class for which IR statistics
- *  are to be output. (default 1)</pre>
+ *  are to be output. (default 1)
+ * </pre>
  * 
- * <pre> -I &lt;index&gt;
+ * <pre>
+ * -I &lt;index&gt;
  *  The index of an attribute to output in the
  *  results. This attribute should identify an
  *  instance in order to know which instances are
  *  in the test set of a cross validation. if 0
- *  no output (default 0).</pre>
+ *  no output (default 0).
+ * </pre>
  * 
- * <pre> -P
+ * <pre>
+ * -P
  *  Add target and prediction columns to the result
- *  for each fold.</pre>
+ *  for each fold.
+ * </pre>
  * 
- * <pre> 
+ * <pre>
  * Options specific to classifier weka.classifiers.rules.ZeroR:
  * </pre>
  * 
- * <pre> -D
+ * <pre>
+ * -D
  *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
+ *  may output additional info to the console
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * All options after -- will be passed to the split evaluator.
- *
+ * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10203 $
  */
-public class ExplicitTestsetResultProducer 
-  implements ResultProducer, OptionHandler, AdditionalMeasureProducer, 
-             RevisionHandler {
-  
+public class ExplicitTestsetResultProducer implements ResultProducer,
+  OptionHandler, AdditionalMeasureProducer, RevisionHandler {
+
   /** for serialization. */
   private static final long serialVersionUID = 2613585409333652530L;
 
   /** the default suffix. */
   public final static String DEFAULT_SUFFIX = "_test.arff";
-  
+
   /** The dataset of interest. */
   protected Instances m_Instances;
 
@@ -175,9 +209,8 @@ public class ExplicitTestsetResultProducer
   protected OutputZipper m_ZipDest = null;
 
   /** The destination output file/directory for raw output. */
-  protected File m_OutputFile = new File(
-			        new File(System.getProperty("user.dir")), 
-				"splitEvalutorOut.zip");
+  protected File m_OutputFile = new File(new File(
+    System.getProperty("user.dir")), "splitEvalutorOut.zip");
 
   /** The name of the key field containing the dataset name. */
   public static String DATASET_FIELD_NAME = "Dataset";
@@ -188,15 +221,16 @@ public class ExplicitTestsetResultProducer
   /** The name of the result field containing the timestamp. */
   public static String TIMESTAMP_FIELD_NAME = "Date_time";
 
+  protected transient Environment m_env;
+
   /**
    * Returns a string describing this result producer.
    * 
-   * @return 		a description of the result producer suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return a description of the result producer suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
-    return
-        "Loads the external test set and calls the appropriate "
+    return "Loads the external test set and calls the appropriate "
       + "SplitEvaluator to generate some results.\n"
       + "The filename of the test set is constructed as follows:\n"
       + "   <dir> + / + <prefix> + <relation-name> + <suffix>\n"
@@ -213,234 +247,272 @@ public class ExplicitTestsetResultProducer
 
   /**
    * Returns an enumeration describing the available options..
-   *
-   * @return 		an enumeration of all the available options.
+   * 
+   * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
-    Vector result = new Vector();
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> result = new Vector<Option>();
+
+    result.addElement(new Option("Save raw split evaluator output.", "D", 0,
+      "-D"));
 
     result.addElement(new Option(
-	"Save raw split evaluator output.",
-	"D", 0, "-D"));
+      "\tThe filename where raw output will be stored.\n"
+        + "\tIf a directory name is specified then then individual\n"
+        + "\toutputs will be gzipped, otherwise all output will be\n"
+        + "\tzipped to the named file. Use in conjuction with -D.\n"
+        + "\t(default: splitEvalutorOut.zip)", "O", 1,
+      "-O <file/directory name/path>"));
+
+    result.addElement(new Option("\tThe full class name of a SplitEvaluator.\n"
+      + "\teg: weka.experiment.ClassifierSplitEvaluator", "W", 1,
+      "-W <class name>"));
+
+    result.addElement(new Option("\tSet when data is to be randomized.", "R",
+      0, "-R"));
+
+    result.addElement(new Option("\tThe directory containing the test sets.\n"
+      + "\t(default: current directory)", "dir", 1, "-dir <directory>"));
 
     result.addElement(new Option(
-	"\tThe filename where raw output will be stored.\n"
-	+"\tIf a directory name is specified then then individual\n"
-	+"\toutputs will be gzipped, otherwise all output will be\n"
-	+"\tzipped to the named file. Use in conjuction with -D.\n"
-	+"\t(default: splitEvalutorOut.zip)", 
-	"O", 1, "-O <file/directory name/path>"));
+      "\tAn optional prefix for the test sets (before the relation name).\n"
+        + "(default: empty string)", "prefix", 1, "-prefix <string>"));
+
+    result
+      .addElement(new Option("\tThe suffix to append to the test set.\n"
+        + "\t(default: " + DEFAULT_SUFFIX + ")", "suffix", 1,
+        "-suffix <string>"));
 
     result.addElement(new Option(
-	"\tThe full class name of a SplitEvaluator.\n"
-	+"\teg: weka.experiment.ClassifierSplitEvaluator", 
-	"W", 1, "-W <class name>"));
+      "\tThe regular expression to search the relation name with.\n"
+        + "\tNot used if an empty string.\n" + "\t(default: empty string)",
+      "find", 1, "-find <regular expression>"));
 
     result.addElement(new Option(
-	"\tSet when data is to be randomized.",
-	"R", 0 ,"-R"));
+      "\tThe replacement string for the all the matches of '-find'.\n"
+        + "\t(default: empty string)", "replace", 1, "-replace <string>"));
 
-    result.addElement(new Option(
-	"\tThe directory containing the test sets.\n"
-	+ "\t(default: current directory)", 
-	"dir", 1, "-dir <directory>"));
-
-    result.addElement(new Option(
-	"\tAn optional prefix for the test sets (before the relation name).\n"
-	+ "(default: empty string)", 
-	"prefix", 1, "-prefix <string>"));
-
-    result.addElement(new Option(
-	"\tThe suffix to append to the test set.\n"
-	+ "\t(default: " + DEFAULT_SUFFIX + ")", 
-	"suffix", 1, "-suffix <string>"));
-
-    result.addElement(new Option(
-	"\tThe regular expression to search the relation name with.\n"
-	+ "\tNot used if an empty string.\n"
-	+ "\t(default: empty string)", 
-	"find", 1, "-find <regular expression>"));
-
-    result.addElement(new Option(
-	"\tThe replacement string for the all the matches of '-find'.\n"
-	+ "\t(default: empty string)", 
-	"replace", 1, "-replace <string>"));
-    
-    if ((m_SplitEvaluator != null) && (m_SplitEvaluator instanceof OptionHandler)) {
-      result.addElement(new Option(
-	  "",
-	  "", 0, "\nOptions specific to split evaluator "
-	  + m_SplitEvaluator.getClass().getName() + ":"));
-      Enumeration enu = ((OptionHandler)m_SplitEvaluator).listOptions();
-      while (enu.hasMoreElements())
-	result.addElement(enu.nextElement());
+    if ((m_SplitEvaluator != null)
+      && (m_SplitEvaluator instanceof OptionHandler)) {
+      result.addElement(new Option("", "", 0,
+        "\nOptions specific to split evaluator "
+          + m_SplitEvaluator.getClass().getName() + ":"));
+      result.addAll(Collections.list(((OptionHandler) m_SplitEvaluator)
+        .listOptions()));
     }
-    
+
     return result.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <pre> -D
-   * Save raw split evaluator output.</pre>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -O &lt;file/directory name/path&gt;
+   * <pre>
+   * -D
+   * Save raw split evaluator output.
+   * </pre>
+   * 
+   * <pre>
+   * -O &lt;file/directory name/path&gt;
    *  The filename where raw output will be stored.
    *  If a directory name is specified then then individual
    *  outputs will be gzipped, otherwise all output will be
    *  zipped to the named file. Use in conjuction with -D.
-   *  (default: splitEvalutorOut.zip)</pre>
+   *  (default: splitEvalutorOut.zip)
+   * </pre>
    * 
-   * <pre> -W &lt;class name&gt;
+   * <pre>
+   * -W &lt;class name&gt;
    *  The full class name of a SplitEvaluator.
-   *  eg: weka.experiment.ClassifierSplitEvaluator</pre>
+   *  eg: weka.experiment.ClassifierSplitEvaluator
+   * </pre>
    * 
-   * <pre> -R
-   *  Set when data is to be randomized.</pre>
+   * <pre>
+   * -R
+   *  Set when data is to be randomized.
+   * </pre>
    * 
-   * <pre> -dir &lt;directory&gt;
+   * <pre>
+   * -dir &lt;directory&gt;
    *  The directory containing the test sets.
-   *  (default: current directory)</pre>
+   *  (default: current directory)
+   * </pre>
    * 
-   * <pre> -prefix &lt;string&gt;
+   * <pre>
+   * -prefix &lt;string&gt;
    *  An optional prefix for the test sets (before the relation name).
-   * (default: empty string)</pre>
+   * (default: empty string)
+   * </pre>
    * 
-   * <pre> -suffix &lt;string&gt;
+   * <pre>
+   * -suffix &lt;string&gt;
    *  The suffix to append to the test set.
-   *  (default: _test.arff)</pre>
+   *  (default: _test.arff)
+   * </pre>
    * 
-   * <pre> -find &lt;regular expression&gt;
+   * <pre>
+   * -find &lt;regular expression&gt;
    *  The regular expression to search the relation name with.
    *  Not used if an empty string.
-   *  (default: empty string)</pre>
+   *  (default: empty string)
+   * </pre>
    * 
-   * <pre> -replace &lt;string&gt;
+   * <pre>
+   * -replace &lt;string&gt;
    *  The replacement string for the all the matches of '-find'.
-   *  (default: empty string)</pre>
+   *  (default: empty string)
+   * </pre>
    * 
-   * <pre> 
+   * <pre>
    * Options specific to split evaluator weka.experiment.ClassifierSplitEvaluator:
    * </pre>
    * 
-   * <pre> -W &lt;class name&gt;
+   * <pre>
+   * -W &lt;class name&gt;
    *  The full class name of the classifier.
-   *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+   *  eg: weka.classifiers.bayes.NaiveBayes
+   * </pre>
    * 
-   * <pre> -C &lt;index&gt;
+   * <pre>
+   * -C &lt;index&gt;
    *  The index of the class for which IR statistics
-   *  are to be output. (default 1)</pre>
+   *  are to be output. (default 1)
+   * </pre>
    * 
-   * <pre> -I &lt;index&gt;
+   * <pre>
+   * -I &lt;index&gt;
    *  The index of an attribute to output in the
    *  results. This attribute should identify an
    *  instance in order to know which instances are
    *  in the test set of a cross validation. if 0
-   *  no output (default 0).</pre>
+   *  no output (default 0).
+   * </pre>
    * 
-   * <pre> -P
+   * <pre>
+   * -P
    *  Add target and prediction columns to the result
-   *  for each fold.</pre>
+   *  for each fold.
+   * </pre>
    * 
-   * <pre> 
+   * <pre>
    * Options specific to classifier weka.classifiers.rules.ZeroR:
    * </pre>
    * 
-   * <pre> -D
+   * <pre>
+   * -D
    *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
+   *  may output additional info to the console
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * All options after -- will be passed to the split evaluator.
-   *
-   * @param options 	the list of options as an array of strings
-   * @throws Exception 	if an option is not supported
+   * 
+   * @param options the list of options as an array of strings
+   * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    String	tmpStr;
-    
+    String tmpStr;
+
     setRawOutput(Utils.getFlag('D', options));
     setRandomizeData(!Utils.getFlag('R', options));
 
     tmpStr = Utils.getOption('O', options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setOutputFile(new File(tmpStr));
+    }
 
     tmpStr = Utils.getOption("dir", options);
-    if (tmpStr.length() > 0)
+    if (tmpStr.length() > 0) {
       setTestsetDir(new File(tmpStr));
-    else
+    } else {
       setTestsetDir(new File(System.getProperty("user.dir")));
+    }
 
     tmpStr = Utils.getOption("prefix", options);
-    if (tmpStr.length() > 0)
+    if (tmpStr.length() > 0) {
       setTestsetPrefix(tmpStr);
-    else
+    } else {
       setTestsetPrefix("");
+    }
 
     tmpStr = Utils.getOption("suffix", options);
-    if (tmpStr.length() > 0)
+    if (tmpStr.length() > 0) {
       setTestsetSuffix(tmpStr);
-    else
+    } else {
       setTestsetSuffix(DEFAULT_SUFFIX);
-    
+    }
+
     tmpStr = Utils.getOption("find", options);
-    if (tmpStr.length() > 0)
+    if (tmpStr.length() > 0) {
       setRelationFind(tmpStr);
-    else
+    } else {
       setRelationFind("");
-    
+    }
+
     tmpStr = Utils.getOption("replace", options);
-    if ((tmpStr.length() > 0) && (getRelationFind().length() > 0))
+    if ((tmpStr.length() > 0) && (getRelationFind().length() > 0)) {
       setRelationReplace(tmpStr);
-    else
+    } else {
       setRelationReplace("");
-    
+    }
+
     tmpStr = Utils.getOption('W', options);
-    if (tmpStr.length() == 0)
-      throw new Exception("A SplitEvaluator must be specified with the -W option.");
-    
+    if (tmpStr.length() == 0) {
+      throw new Exception(
+        "A SplitEvaluator must be specified with the -W option.");
+    }
+
     // Do it first without options, so if an exception is thrown during
     // the option setting, listOptions will contain options for the actual
     // SE.
-    setSplitEvaluator((SplitEvaluator)Utils.forName(SplitEvaluator.class, tmpStr, null));
-    if (getSplitEvaluator() instanceof OptionHandler)
-      ((OptionHandler) getSplitEvaluator()).setOptions(Utils.partitionOptions(options));
+    setSplitEvaluator((SplitEvaluator) Utils.forName(SplitEvaluator.class,
+      tmpStr, null));
+    if (getSplitEvaluator() instanceof OptionHandler) {
+      ((OptionHandler) getSplitEvaluator()).setOptions(Utils
+        .partitionOptions(options));
+    }
   }
 
   /**
    * Gets the current settings of the result producer.
-   *
-   * @return 		an array of strings suitable for passing to setOptions
+   * 
+   * @return an array of strings suitable for passing to setOptions
    */
+  @Override
   public String[] getOptions() {
-    Vector<String>	result;
-    String[] 		seOptions;
-    int			i;
-    
+    Vector<String> result;
+    String[] seOptions;
+    int i;
+
     result = new Vector<String>();
-    
-    seOptions = new String [0];
-    if ((m_SplitEvaluator != null) && (m_SplitEvaluator instanceof OptionHandler))
-      seOptions = ((OptionHandler)m_SplitEvaluator).getOptions();
 
-    if (getRawOutput())
+    seOptions = new String[0];
+    if ((m_SplitEvaluator != null)
+      && (m_SplitEvaluator instanceof OptionHandler)) {
+      seOptions = ((OptionHandler) m_SplitEvaluator).getOptions();
+    }
+
+    if (getRawOutput()) {
       result.add("-D");
-    
-    if (!getRandomizeData())
-      result.add("-R");
+    }
 
-    result.add("-O"); 
+    if (!getRandomizeData()) {
+      result.add("-R");
+    }
+
+    result.add("-O");
     result.add(getOutputFile().getName());
 
     result.add("-dir");
     result.add(getTestsetDir().getPath());
-    
+
     if (getTestsetPrefix().length() > 0) {
       result.add("-prefix");
       result.add(getTestsetPrefix());
@@ -448,14 +520,14 @@ public class ExplicitTestsetResultProducer
 
     result.add("-suffix");
     result.add(getTestsetSuffix());
-    
+
     if (getRelationFind().length() > 0) {
       result.add("-find");
       result.add(getRelationFind());
-      
+
       if (getRelationReplace().length() > 0) {
-	result.add("-replace");
-	result.add(getRelationReplace());
+        result.add("-replace");
+        result.add(getRelationReplace());
       }
     }
 
@@ -463,11 +535,12 @@ public class ExplicitTestsetResultProducer
       result.add("-W");
       result.add(getSplitEvaluator().getClass().getName());
     }
-    
+
     if (seOptions.length > 0) {
       result.add("--");
-      for (i = 0; i < seOptions.length; i++)
-	result.add(seOptions[i]);
+      for (i = 0; i < seOptions.length; i++) {
+        result.add(seOptions[i]);
+      }
     }
 
     return result.toArray(new String[result.size()]);
@@ -475,195 +548,215 @@ public class ExplicitTestsetResultProducer
 
   /**
    * Sets the dataset that results will be obtained for.
-   *
+   * 
    * @param instances a value of type 'Instances'.
    */
+  @Override
   public void setInstances(Instances instances) {
     m_Instances = instances;
   }
 
   /**
-   * Set a list of method names for additional measures to look for
-   * in SplitEvaluators. This could contain many measures (of which only a
-   * subset may be produceable by the current SplitEvaluator) if an experiment
-   * is the type that iterates over a set of properties.
+   * Set a list of method names for additional measures to look for in
+   * SplitEvaluators. This could contain many measures (of which only a subset
+   * may be produceable by the current SplitEvaluator) if an experiment is the
+   * type that iterates over a set of properties.
    * 
-   * @param additionalMeasures 	an array of measure names, null if none
+   * @param additionalMeasures an array of measure names, null if none
    */
+  @Override
   public void setAdditionalMeasures(String[] additionalMeasures) {
     m_AdditionalMeasures = additionalMeasures;
 
     if (m_SplitEvaluator != null) {
-      System.err.println(
-	  "ExplicitTestsetResultProducer: setting additional "
-	  + "measures for split evaluator");
+      System.err.println("ExplicitTestsetResultProducer: setting additional "
+        + "measures for split evaluator");
       m_SplitEvaluator.setAdditionalMeasures(m_AdditionalMeasures);
     }
   }
-  
+
   /**
-   * Returns an enumeration of any additional measure names that might be
-   * in the SplitEvaluator.
+   * Returns an enumeration of any additional measure names that might be in the
+   * SplitEvaluator.
    * 
-   * @return 		an enumeration of the measure names
+   * @return an enumeration of the measure names
    */
-  public Enumeration enumerateMeasures() {
-    Vector result = new Vector();
+  @Override
+  public Enumeration<String> enumerateMeasures() {
+    Vector<String> result = new Vector<String>();
     if (m_SplitEvaluator instanceof AdditionalMeasureProducer) {
-      Enumeration en = ((AdditionalMeasureProducer)m_SplitEvaluator).enumerateMeasures();
+      Enumeration<String> en = ((AdditionalMeasureProducer) m_SplitEvaluator)
+        .enumerateMeasures();
       while (en.hasMoreElements()) {
-	String mname = (String) en.nextElement();
-	result.addElement(mname);
+        String mname = en.nextElement();
+        result.add(mname);
       }
     }
     return result.elements();
   }
-  
+
   /**
    * Returns the value of the named measure.
    * 
-   * @param additionalMeasureName 	the name of the measure to query for its value
-   * @return 				the value of the named measure
-   * @throws IllegalArgumentException 	if the named measure is not supported
+   * @param additionalMeasureName the name of the measure to query for its value
+   * @return the value of the named measure
+   * @throws IllegalArgumentException if the named measure is not supported
    */
+  @Override
   public double getMeasure(String additionalMeasureName) {
-    if (m_SplitEvaluator instanceof AdditionalMeasureProducer)
-      return ((AdditionalMeasureProducer)m_SplitEvaluator).getMeasure(additionalMeasureName);
-    else
-      throw new IllegalArgumentException(
-	  "ExplicitTestsetResultProducer: "
-	  + "Can't return value for : " + additionalMeasureName
-	  + ". " + m_SplitEvaluator.getClass().getName() + " "
-	  + "is not an AdditionalMeasureProducer");
+    if (m_SplitEvaluator instanceof AdditionalMeasureProducer) {
+      return ((AdditionalMeasureProducer) m_SplitEvaluator)
+        .getMeasure(additionalMeasureName);
+    } else {
+      throw new IllegalArgumentException("ExplicitTestsetResultProducer: "
+        + "Can't return value for : " + additionalMeasureName + ". "
+        + m_SplitEvaluator.getClass().getName() + " "
+        + "is not an AdditionalMeasureProducer");
+    }
   }
-  
+
   /**
    * Sets the object to send results of each run to.
-   *
-   * @param listener 	a value of type 'ResultListener'
+   * 
+   * @param listener a value of type 'ResultListener'
    */
+  @Override
   public void setResultListener(ResultListener listener) {
     m_ResultListener = listener;
   }
 
   /**
-   * Gets a Double representing the current date and time.
-   * eg: 1:46pm on 20/5/1999 -> 19990520.1346
-   *
-   * @return 		a value of type Double
+   * Gets a Double representing the current date and time. eg: 1:46pm on
+   * 20/5/1999 -> 19990520.1346
+   * 
+   * @return a value of type Double
    */
   public static Double getTimestamp() {
     Calendar now = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
     double timestamp = now.get(Calendar.YEAR) * 10000
-      + (now.get(Calendar.MONTH) + 1) * 100
-      + now.get(Calendar.DAY_OF_MONTH)
-      + now.get(Calendar.HOUR_OF_DAY) / 100.0
-      + now.get(Calendar.MINUTE) / 10000.0;
+      + (now.get(Calendar.MONTH) + 1) * 100 + now.get(Calendar.DAY_OF_MONTH)
+      + now.get(Calendar.HOUR_OF_DAY) / 100.0 + now.get(Calendar.MINUTE)
+      / 10000.0;
     return new Double(timestamp);
   }
 
   /**
    * Prepare to generate results.
-   *
-   * @throws Exception 	if an error occurs during preprocessing.
+   * 
+   * @throws Exception if an error occurs during preprocessing.
    */
+  @Override
   public void preProcess() throws Exception {
-    if (m_SplitEvaluator == null)
+    if (m_SplitEvaluator == null) {
       throw new Exception("No SplitEvalutor set");
+    }
 
-    if (m_ResultListener == null)
+    if (m_ResultListener == null) {
       throw new Exception("No ResultListener set");
+    }
 
     m_ResultListener.preProcess(this);
   }
-  
+
   /**
-   * Perform any postprocessing. When this method is called, it indicates
-   * that no more requests to generate results for the current experiment
-   * will be sent.
-   *
-   * @throws Exception 	if an error occurs
+   * Perform any postprocessing. When this method is called, it indicates that
+   * no more requests to generate results for the current experiment will be
+   * sent.
+   * 
+   * @throws Exception if an error occurs
    */
+  @Override
   public void postProcess() throws Exception {
     m_ResultListener.postProcess(this);
     if (m_debugOutput) {
       if (m_ZipDest != null) {
-	m_ZipDest.finished();
-	m_ZipDest = null;
+        m_ZipDest.finished();
+        m_ZipDest = null;
       }
     }
   }
 
   /**
-   * Gets the keys for a specified run number. Different run
-   * numbers correspond to different randomizations of the data. Keys
-   * produced should be sent to the current ResultListener
-   *
-   * @param run 	the run number to get keys for.
-   * @throws Exception 	if a problem occurs while getting the keys
+   * Gets the keys for a specified run number. Different run numbers correspond
+   * to different randomizations of the data. Keys produced should be sent to
+   * the current ResultListener
+   * 
+   * @param run the run number to get keys for.
+   * @throws Exception if a problem occurs while getting the keys
    */
+  @Override
   public void doRunKeys(int run) throws Exception {
-    if (m_Instances == null)
+    if (m_Instances == null) {
       throw new Exception("No Instances set");
+    }
 
     // Add in some fields to the key like run number, dataset name
     Object[] seKey = m_SplitEvaluator.getKey();
-    Object[] key = new Object [seKey.length + 2];
+    Object[] key = new Object[seKey.length + 2];
     key[0] = Utils.backQuoteChars(m_Instances.relationName());
     key[1] = "" + run;
     System.arraycopy(seKey, 0, key, 2, seKey.length);
     if (m_ResultListener.isResultRequired(this, key)) {
       try {
-	m_ResultListener.acceptResult(this, key, null);
-      }
-      catch (Exception ex) {
-	// Save the train and test datasets for debugging purposes?
-	throw ex;
+        m_ResultListener.acceptResult(this, key, null);
+      } catch (Exception ex) {
+        // Save the train and test datasets for debugging purposes?
+        throw ex;
       }
     }
   }
 
   /**
-   * Generates a new filename for the given relation based on the current 
-   * setup.
+   * Generates a new filename for the given relation based on the current setup.
    * 
-   * @param inst	the instances to create the filename for
-   * @return		the generated filename
+   * @param inst the instances to create the filename for
+   * @return the generated filename
    */
   protected String createFilename(Instances inst) {
-    String	result;
-    String	name;
+    String result;
+    String name;
 
     name = inst.relationName();
-    if (getRelationFind().length() > 0)
+    if (getRelationFind().length() > 0) {
       name = name.replaceAll(getRelationFind(), getRelationReplace());
-    
-    result  = getTestsetDir().getPath() + File.separator;
-    result += getTestsetPrefix() + name + getTestsetSuffix();
-    
-    return result;
-  }
-  
-  /**
-   * Gets the results for a specified run number. Different run
-   * numbers correspond to different randomizations of the data. Results
-   * produced should be sent to the current ResultListener
-   *
-   * @param run 	the run number to get results for.
-   * @throws Exception 	if a problem occurs while getting the results
-   */
-  public void doRun(int run) throws Exception {
-    if (getRawOutput()) {
-      if (m_ZipDest == null)
-	m_ZipDest = new OutputZipper(m_OutputFile);
     }
 
-    if (m_Instances == null)
+    result = getTestsetDir().getPath() + File.separator;
+    result += getTestsetPrefix() + name + getTestsetSuffix();
+
+    // substitute the run number (and any other variables)
+    // if specified
+    try {
+      result = m_env.substitute(result);
+    } catch (Exception ex) {
+    }
+
+    return result;
+  }
+
+  /**
+   * Gets the results for a specified run number. Different run numbers
+   * correspond to different randomizations of the data. Results produced should
+   * be sent to the current ResultListener
+   * 
+   * @param run the run number to get results for.
+   * @throws Exception if a problem occurs while getting the results
+   */
+  @Override
+  public void doRun(int run) throws Exception {
+    if (getRawOutput()) {
+      if (m_ZipDest == null) {
+        m_ZipDest = new OutputZipper(m_OutputFile);
+      }
+    }
+
+    if (m_Instances == null) {
       throw new Exception("No Instances set");
-    
+    }
+
     // Add in some fields to the key like run number, dataset name
     Object[] seKey = m_SplitEvaluator.getKey();
-    Object[] key = new Object [seKey.length + 2];
+    Object[] key = new Object[seKey.length + 2];
     key[0] = Utils.backQuoteChars(m_Instances.relationName());
     key[1] = "" + run;
     System.arraycopy(seKey, 0, key, 2, seKey.length);
@@ -671,70 +764,70 @@ public class ExplicitTestsetResultProducer
       // training set
       Instances train = new Instances(m_Instances);
       if (m_randomize) {
-	Random rand = new Random(run);
-	train.randomize(rand);
+        Random rand = new Random(run);
+        train.randomize(rand);
       }
+
+      if (m_env == null) {
+        m_env = new Environment();
+      }
+      m_env.addVariable("RUN_NUMBER", "" + run);
 
       // test set
       String filename = createFilename(train);
       File file = new File(filename);
-      if (!file.exists())
-	throw new WekaException("Test set '" + filename + "' not found!");
+      if (!file.exists()) {
+        throw new WekaException("Test set '" + filename + "' not found!");
+      }
       Instances test = DataSource.read(filename);
       // can we set the class attribute safely?
-      if (train.numAttributes() == test.numAttributes())
-	test.setClassIndex(train.classIndex());
-      else
-	throw new WekaException(
-	    "Train and test set (= " + filename + ") "
-	    + "differ in number of attributes: "
-	    + train.numAttributes() + " != " + test.numAttributes());
-      // test headers
-      if (!train.equalHeaders(test))
-	throw new WekaException(
-	    "Train and test set (= " + filename + ") "
-	    + "are not compatible:\n"
-	    + train.equalHeadersMsg(test));
-      
-      try {
-	Object[] seResults = m_SplitEvaluator.getResult(train, test);
-	Object[] results = new Object [seResults.length + 1];
-	results[0] = getTimestamp();
-	System.arraycopy(seResults, 0, results, 1,
-			 seResults.length);
-	if (m_debugOutput) {
-	  String resultName = 
-	    (""+run+"."+
-	     Utils.backQuoteChars(train.relationName())
-	     +"."
-	     +m_SplitEvaluator.toString()).replace(' ','_');
-	  resultName = Utils.removeSubstring(resultName, 
-					     "weka.classifiers.");
-	  resultName = Utils.removeSubstring(resultName, 
-					     "weka.filters.");
-	  resultName = Utils.removeSubstring(resultName, 
-					     "weka.attributeSelection.");
-	  m_ZipDest.zipit(m_SplitEvaluator.getRawResultOutput(), resultName);
-	}
-	m_ResultListener.acceptResult(this, key, results);
+      if (train.numAttributes() == test.numAttributes()) {
+        test.setClassIndex(train.classIndex());
+      } else {
+        throw new WekaException("Train and test set (= " + filename + ") "
+          + "differ in number of attributes: " + train.numAttributes() + " != "
+          + test.numAttributes());
       }
-      catch (Exception e) {
-	// Save the train and test datasets for debugging purposes?
-	throw e;
+      // test headers
+      if (!train.equalHeaders(test)) {
+        throw new WekaException("Train and test set (= " + filename + ") "
+          + "are not compatible:\n" + train.equalHeadersMsg(test));
+      }
+
+      try {
+        Object[] seResults = m_SplitEvaluator.getResult(train, test);
+        Object[] results = new Object[seResults.length + 1];
+        results[0] = getTimestamp();
+        System.arraycopy(seResults, 0, results, 1, seResults.length);
+        if (m_debugOutput) {
+          String resultName = ("" + run + "."
+            + Utils.backQuoteChars(train.relationName()) + "." + m_SplitEvaluator
+            .toString()).replace(' ', '_');
+          resultName = Utils.removeSubstring(resultName, "weka.classifiers.");
+          resultName = Utils.removeSubstring(resultName, "weka.filters.");
+          resultName = Utils.removeSubstring(resultName,
+            "weka.attributeSelection.");
+          m_ZipDest.zipit(m_SplitEvaluator.getRawResultOutput(), resultName);
+        }
+        m_ResultListener.acceptResult(this, key, results);
+      } catch (Exception e) {
+        // Save the train and test datasets for debugging purposes?
+        throw e;
       }
     }
   }
 
   /**
-   * Gets the names of each of the columns produced for a single run.
-   * This method should really be static.
-   *
-   * @return 		an array containing the name of each column
+   * Gets the names of each of the columns produced for a single run. This
+   * method should really be static.
+   * 
+   * @return an array containing the name of each column
    */
+  @Override
   public String[] getKeyNames() {
     String[] keyNames = m_SplitEvaluator.getKeyNames();
     // Add in the names of our extra key fields
-    String[] newKeyNames = new String [keyNames.length + 2];
+    String[] newKeyNames = new String[keyNames.length + 2];
     newKeyNames[0] = DATASET_FIELD_NAME;
     newKeyNames[1] = RUN_FIELD_NAME;
     System.arraycopy(keyNames, 0, newKeyNames, 2, keyNames.length);
@@ -742,16 +835,17 @@ public class ExplicitTestsetResultProducer
   }
 
   /**
-   * Gets the data types of each of the columns produced for a single run.
-   * This method should really be static.
-   *
-   * @return 		an array containing objects of the type of each column. 
-   * 			The objects should be Strings, or Doubles.
+   * Gets the data types of each of the columns produced for a single run. This
+   * method should really be static.
+   * 
+   * @return an array containing objects of the type of each column. The objects
+   *         should be Strings, or Doubles.
    */
+  @Override
   public Object[] getKeyTypes() {
     Object[] keyTypes = m_SplitEvaluator.getKeyTypes();
     // Add in the types of our extra fields
-    Object[] newKeyTypes = new String [keyTypes.length + 2];
+    Object[] newKeyTypes = new String[keyTypes.length + 2];
     newKeyTypes[0] = new String();
     newKeyTypes[1] = new String();
     System.arraycopy(keyTypes, 0, newKeyTypes, 2, keyTypes.length);
@@ -759,75 +853,81 @@ public class ExplicitTestsetResultProducer
   }
 
   /**
-   * Gets the names of each of the columns produced for a single run.
-   * This method should really be static.
-   *
-   * @return 		an array containing the name of each column
+   * Gets the names of each of the columns produced for a single run. This
+   * method should really be static.
+   * 
+   * @return an array containing the name of each column
    */
+  @Override
   public String[] getResultNames() {
     String[] resultNames = m_SplitEvaluator.getResultNames();
     // Add in the names of our extra Result fields
-    String[] newResultNames = new String [resultNames.length + 1];
+    String[] newResultNames = new String[resultNames.length + 1];
     newResultNames[0] = TIMESTAMP_FIELD_NAME;
     System.arraycopy(resultNames, 0, newResultNames, 1, resultNames.length);
     return newResultNames;
   }
 
   /**
-   * Gets the data types of each of the columns produced for a single run.
-   * This method should really be static.
-   *
-   * @return 		an array containing objects of the type of each column. 
-   * 			The objects should be Strings, or Doubles.
+   * Gets the data types of each of the columns produced for a single run. This
+   * method should really be static.
+   * 
+   * @return an array containing objects of the type of each column. The objects
+   *         should be Strings, or Doubles.
    */
+  @Override
   public Object[] getResultTypes() {
     Object[] resultTypes = m_SplitEvaluator.getResultTypes();
     // Add in the types of our extra Result fields
-    Object[] newResultTypes = new Object [resultTypes.length + 1];
+    Object[] newResultTypes = new Object[resultTypes.length + 1];
     newResultTypes[0] = new Double(0);
     System.arraycopy(resultTypes, 0, newResultTypes, 1, resultTypes.length);
     return newResultTypes;
   }
 
   /**
-   * Gets a description of the internal settings of the result
-   * producer, sufficient for distinguishing a ResultProducer
-   * instance from another with different settings (ignoring
-   * those settings set through this interface). For example,
-   * a cross-validation ResultProducer may have a setting for the
-   * number of folds. For a given state, the results produced should
-   * be compatible. Typically if a ResultProducer is an OptionHandler,
-   * this string will represent the command line arguments required
-   * to set the ResultProducer to that state.
-   *
-   * @return 		the description of the ResultProducer state, or null
-   * 			if no state is defined
+   * Gets a description of the internal settings of the result producer,
+   * sufficient for distinguishing a ResultProducer instance from another with
+   * different settings (ignoring those settings set through this interface).
+   * For example, a cross-validation ResultProducer may have a setting for the
+   * number of folds. For a given state, the results produced should be
+   * compatible. Typically if a ResultProducer is an OptionHandler, this string
+   * will represent the command line arguments required to set the
+   * ResultProducer to that state.
+   * 
+   * @return the description of the ResultProducer state, or null if no state is
+   *         defined
    */
+  @Override
   public String getCompatibilityState() {
-    String 	result;
-    
+    String result;
+
     result = "";
-    if (getRandomizeData())
+    if (getRandomizeData()) {
       result += " -R";
+    }
 
     result += " -dir " + getTestsetDir();
-    
-    if (getTestsetPrefix().length() > 0)
+
+    if (getTestsetPrefix().length() > 0) {
       result += " -prefix " + getTestsetPrefix();
-    
+    }
+
     result += " -suffix " + getTestsetSuffix();
-    
+
     if (getRelationFind().length() > 0) {
       result += " -find " + getRelationFind();
-      
-      if (getRelationReplace().length() > 0)
+
+      if (getRelationReplace().length() > 0) {
         result += " -replace " + getRelationReplace();
+      }
     }
-    
-    if (m_SplitEvaluator == null)
+
+    if (m_SplitEvaluator == null) {
       result += " <null SplitEvaluator>";
-    else
+    } else {
       result += " -W " + m_SplitEvaluator.getClass().getName();
+    }
 
     return result + " --";
   }
@@ -835,61 +935,61 @@ public class ExplicitTestsetResultProducer
   /**
    * Returns the tip text for this property.
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String outputFileTipText() {
     return "Set the destination for saving raw output. If the rawOutput "
-      +"option is selected, then output from the splitEvaluator for "
-      +"individual train-test splits is saved. If the destination is a "
-      +"directory, "
-      +"then each output is saved to an individual gzip file; if the "
-      +"destination is a file, then each output is saved as an entry "
-      +"in a zip file.";
+      + "option is selected, then output from the splitEvaluator for "
+      + "individual train-test splits is saved. If the destination is a "
+      + "directory, "
+      + "then each output is saved to an individual gzip file; if the "
+      + "destination is a file, then each output is saved as an entry "
+      + "in a zip file.";
   }
 
   /**
    * Get the value of OutputFile.
-   *
-   * @return 		Value of OutputFile.
+   * 
+   * @return Value of OutputFile.
    */
   public File getOutputFile() {
     return m_OutputFile;
   }
-  
+
   /**
    * Set the value of OutputFile.
-   *
-   * @param value 	Value to assign to OutputFile.
+   * 
+   * @param value Value to assign to OutputFile.
    */
   public void setOutputFile(File value) {
     m_OutputFile = value;
-  }  
+  }
 
   /**
    * Returns the tip text for this property.
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String randomizeDataTipText() {
-    return "Do not randomize dataset and do not perform probabilistic rounding " +
-      "if true";
+    return "Do not randomize dataset and do not perform probabilistic rounding "
+      + "if true";
   }
 
   /**
    * Get if dataset is to be randomized.
    * 
-   * @return 		true if dataset is to be randomized
+   * @return true if dataset is to be randomized
    */
   public boolean getRandomizeData() {
     return m_randomize;
   }
-  
+
   /**
    * Set to true if dataset is to be randomized.
    * 
-   * @param value 		true if dataset is to be randomized
+   * @param value true if dataset is to be randomized
    */
   public void setRandomizeData(boolean value) {
     m_randomize = value;
@@ -898,27 +998,27 @@ public class ExplicitTestsetResultProducer
   /**
    * Returns the tip text for this property.
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String rawOutputTipText() {
     return "Save raw output (useful for debugging). If set, then output is "
-      +"sent to the destination specified by outputFile";
+      + "sent to the destination specified by outputFile";
   }
 
   /**
    * Get if raw split evaluator output is to be saved.
    * 
-   * @return 		true if raw split evalutor output is to be saved
+   * @return true if raw split evalutor output is to be saved
    */
   public boolean getRawOutput() {
     return m_debugOutput;
   }
-  
+
   /**
    * Set to true if raw split evaluator output is to be saved.
    * 
-   * @param value 		true if output is to be saved
+   * @param value true if output is to be saved
    */
   public void setRawOutput(boolean value) {
     m_debugOutput = value;
@@ -927,27 +1027,27 @@ public class ExplicitTestsetResultProducer
   /**
    * Returns the tip text for this property.
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String splitEvaluatorTipText() {
     return "The evaluator to apply to the test data. "
-      +"This may be a classifier, regression scheme etc.";
+      + "This may be a classifier, regression scheme etc.";
   }
 
   /**
    * Get the SplitEvaluator.
-   *
-   * @return 		the SplitEvaluator.
+   * 
+   * @return the SplitEvaluator.
    */
   public SplitEvaluator getSplitEvaluator() {
     return m_SplitEvaluator;
   }
-  
+
   /**
    * Set the SplitEvaluator.
-   *
-   * @param value 	new SplitEvaluator to use.
+   * 
+   * @param value new SplitEvaluator to use.
    */
   public void setSplitEvaluator(SplitEvaluator value) {
     m_SplitEvaluator = value;
@@ -957,8 +1057,8 @@ public class ExplicitTestsetResultProducer
   /**
    * Returns the tip text for this property.
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String testsetDirTipText() {
     return "The directory containing the test sets.";
@@ -966,27 +1066,27 @@ public class ExplicitTestsetResultProducer
 
   /**
    * Returns the currently set directory for the test sets.
-   *
-   * @return 		the directory
+   * 
+   * @return the directory
    */
   public File getTestsetDir() {
     return m_TestsetDir;
   }
-  
+
   /**
    * Sets the directory to use for the test sets.
-   *
-   * @param value 	the directory to use
+   * 
+   * @param value the directory to use
    */
   public void setTestsetDir(File value) {
     m_TestsetDir = value;
-  }  
+  }
 
   /**
    * Returns the tip text for this property.
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String testsetPrefixTipText() {
     return "The prefix to use for the filename of the test sets.";
@@ -994,89 +1094,88 @@ public class ExplicitTestsetResultProducer
 
   /**
    * Returns the currently set prefix.
-   *
-   * @return 		the prefix
+   * 
+   * @return the prefix
    */
   public String getTestsetPrefix() {
     return m_TestsetPrefix;
   }
-  
+
   /**
    * Sets the prefix to use for the test sets.
-   *
-   * @param value 	the prefix
+   * 
+   * @param value the prefix
    */
   public void setTestsetPrefix(String value) {
     m_TestsetPrefix = value;
-  }  
+  }
 
   /**
    * Returns the tip text for this property.
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String testsetSuffixTipText() {
-    return 
-        "The suffix to use for the filename of the test sets - must contain "
+    return "The suffix to use for the filename of the test sets - must contain "
       + "the file extension.";
   }
 
   /**
    * Returns the currently set suffix.
-   *
-   * @return 		the suffix
+   * 
+   * @return the suffix
    */
   public String getTestsetSuffix() {
     return m_TestsetSuffix;
   }
-  
+
   /**
    * Sets the suffix to use for the test sets.
-   *
-   * @param value 	the suffix
+   * 
+   * @param value the suffix
    */
   public void setTestsetSuffix(String value) {
-    if ((value == null) || (value.length() == 0))
+    if ((value == null) || (value.length() == 0)) {
       value = DEFAULT_SUFFIX;
+    }
     m_TestsetSuffix = value;
-  }  
+  }
 
   /**
    * Returns the tip text for this property.
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String relationFindTipText() {
-    return 
-        "The regular expression to use for removing parts of the relation "
+    return "The regular expression to use for removing parts of the relation "
       + "name, ignored if empty.";
   }
 
   /**
    * Returns the currently set regular expression to use on the relation name.
-   *
-   * @return 		the regular expression
+   * 
+   * @return the regular expression
    */
   public String getRelationFind() {
     return m_RelationFind;
   }
-  
+
   /**
    * Sets the regular expression to use on the relation name.
-   *
-   * @param value 	the regular expression
+   * 
+   * @param value the regular expression
    */
   public void setRelationFind(String value) {
     m_RelationFind = value;
-  }  
+  }
 
   /**
    * Returns the tip text for this property.
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String relationReplaceTipText() {
     return "The string to replace all matches of the regular expression with.";
@@ -1084,43 +1183,46 @@ public class ExplicitTestsetResultProducer
 
   /**
    * Returns the currently set replacement string to use on the relation name.
-   *
-   * @return 		the replacement string
+   * 
+   * @return the replacement string
    */
   public String getRelationReplace() {
     return m_RelationReplace;
   }
-  
+
   /**
    * Sets the replacement string to use on the relation name.
-   *
-   * @param value 	the regular expression
+   * 
+   * @param value the regular expression
    */
   public void setRelationReplace(String value) {
     m_RelationReplace = value;
-  }  
+  }
 
   /**
    * Gets a text descrption of the result producer.
-   *
-   * @return 		a text description of the result producer.
+   * 
+   * @return a text description of the result producer.
    */
+  @Override
   public String toString() {
     String result = "ExplicitTestsetResultProducer: ";
     result += getCompatibilityState();
-    if (m_Instances == null)
+    if (m_Instances == null) {
       result += ": <null Instances>";
-    else
+    } else {
       result += ": " + Utils.backQuoteChars(m_Instances.relationName());
+    }
     return result;
   }
 
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10203 $");
   }
 }

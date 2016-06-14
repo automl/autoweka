@@ -39,28 +39,32 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 /**
- <!-- globalinfo-start -->
- * CorrelationAttributeEval :<br/>
+ * <!-- globalinfo-start --> CorrelationAttributeEval :<br/>
  * <br/>
- * Evaluates the worth of an attribute by measuring the correlation (Pearson's) between it and the class.<br/>
+ * Evaluates the worth of an attribute by measuring the correlation (Pearson's)
+ * between it and the class.<br/>
  * <br/>
- * Nominal attributes are considered on a value by value basis by treating each value as an indicator. An overall correlation for a nominal attribute is arrived at via a weighted average.<br/>
+ * Nominal attributes are considered on a value by value basis by treating each
+ * value as an indicator. An overall correlation for a nominal attribute is
+ * arrived at via a weighted average.<br/>
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -D
- *  Output detailed info for nominal attributes</pre>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- <!-- options-end -->
+ * <pre>
+ * -D
+ *  Output detailed info for nominal attributes
+ * </pre>
+ * 
+ * <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 9049 $
+ * @version $Revision: 10172 $
  */
 public class CorrelationAttributeEval extends ASEvaluation implements
-    AttributeEvaluator, OptionHandler {
+  AttributeEvaluator, OptionHandler {
 
   /** For serialization */
   private static final long serialVersionUID = -4931946995055872438L;
@@ -82,10 +86,10 @@ public class CorrelationAttributeEval extends ASEvaluation implements
    */
   public String globalInfo() {
     return "CorrelationAttributeEval :\n\nEvaluates the worth of an attribute "
-        + "by measuring the correlation (Pearson's) between it and the class.\n\n"
-        + "Nominal attributes are considered on a value by "
-        + "value basis by treating each value as an indicator. An overall "
-        + "correlation for a nominal attribute is arrived at via a weighted average.\n";
+      + "by measuring the correlation (Pearson's) between it and the class.\n\n"
+      + "Nominal attributes are considered on a value by "
+      + "value basis by treating each value as an indicator. An overall "
+      + "correlation for a nominal attribute is arrived at via a weighted average.\n";
   }
 
   /**
@@ -118,26 +122,29 @@ public class CorrelationAttributeEval extends ASEvaluation implements
    * @return an enumeration of all the available options.
    **/
   @Override
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
     // TODO Auto-generated method stub
     Vector<Option> newVector = new Vector<Option>();
 
     newVector.addElement(new Option(
-        "\tOutput detailed info for nominal attributes", "D", 0, "-D"));
+      "\tOutput detailed info for nominal attributes", "D", 0, "-D"));
 
     return newVector.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -D
-   *  Output detailed info for nominal attributes</pre>
+   * <pre>
+   * -D
+   *  Output detailed info for nominal attributes
+   * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -271,7 +278,7 @@ public class CorrelationAttributeEval extends ASEvaluation implements
     for (int i = 0; i < data.numAttributes(); i++) {
       if (data.attribute(i).isNominal() && i != classIndex) {
         nomAtts[i] = new double[data.attribute(i).numValues()][data
-            .numInstances()];
+          .numInstances()];
         Arrays.fill(nomAtts[i][0], 1.0); // set zero index for this att to all
                                          // 1's
         nominalIndexes.add(i);
@@ -286,7 +293,7 @@ public class CorrelationAttributeEval extends ASEvaluation implements
         Instance current = data.instance(i);
         for (int j = 0; j < current.numValues(); j++) {
           if (current.attribute(current.index(j)).isNominal()
-              && current.index(j) != classIndex) {
+            && current.index(j) != classIndex) {
             // Will need to check for zero in case this isn't a sparse
             // instance (unless we add 1 and subtract 1)
             nomAtts[current.index(j)][(int) current.valueSparse(j)][i] += 1;
@@ -303,7 +310,7 @@ public class CorrelationAttributeEval extends ASEvaluation implements
       for (Integer i : numericIndexes) {
         double[] numAttVals = data.attributeToDoubleArray(i);
         m_correlations[i] = Utils.correlation(numAttVals, classVals,
-            numAttVals.length);
+          numAttVals.length);
 
         if (m_correlations[i] == 1.0) {
           // check for zero variance (useless numeric attribute)
@@ -325,13 +332,13 @@ public class CorrelationAttributeEval extends ASEvaluation implements
 
           if (m_detailedOutput) {
             m_detailedOutputBuff.append("\n\n")
-                .append(data.attribute(i).name());
+              .append(data.attribute(i).name());
           }
 
           for (int j = 0; j < data.attribute(i).numValues(); j++) {
             sumForValue = Utils.sum(nomAtts[i][j]);
             corr = Utils
-                .correlation(nomAtts[i][j], classVals, classVals.length);
+              .correlation(nomAtts[i][j], classVals, classVals.length);
 
             // useless attribute - all instances have the same value
             if (sumForValue == numInstances || sumForValue == 0) {
@@ -345,7 +352,7 @@ public class CorrelationAttributeEval extends ASEvaluation implements
 
             if (m_detailedOutput) {
               m_detailedOutputBuff.append("\n\t")
-                  .append(data.attribute(i).value(j)).append(": ");
+                .append(data.attribute(i).value(j)).append(": ");
               m_detailedOutputBuff.append(Utils.doubleToString(corr, 6));
             }
           }
@@ -356,7 +363,7 @@ public class CorrelationAttributeEval extends ASEvaluation implements
       // class is nominal
       // TODO extra dimension for storing instance weights too
       double[][] binarizedClasses = new double[data.classAttribute()
-          .numValues()][data.numInstances()];
+        .numValues()][data.numInstances()];
 
       // this is equal to the number of instances for all inst weights = 1
       double[] classValCounts = new double[data.classAttribute().numValues()];
@@ -380,7 +387,7 @@ public class CorrelationAttributeEval extends ASEvaluation implements
 
           for (int j = 0; j < data.classAttribute().numValues(); j++) {
             corr = Utils.correlation(numAttVals, binarizedClasses[j],
-                numAttVals.length);
+              numAttVals.length);
             if (corr < 0.0) {
               corr = -corr;
             }
@@ -402,7 +409,7 @@ public class CorrelationAttributeEval extends ASEvaluation implements
         for (Integer i : nominalIndexes) {
           if (m_detailedOutput) {
             m_detailedOutputBuff.append("\n\n")
-                .append(data.attribute(i).name());
+              .append(data.attribute(i).name());
           }
 
           double sumForAtt = 0;
@@ -418,7 +425,7 @@ public class CorrelationAttributeEval extends ASEvaluation implements
 
               // corr between value j and class k
               corr = Utils.correlation(nomAtts[i][j], binarizedClasses[k],
-                  binarizedClasses[k].length);
+                binarizedClasses[k].length);
 
               // useless attribute - all instances have the same value
               if (sumForValue == numInstances || sumForValue == 0) {
@@ -434,9 +441,9 @@ public class CorrelationAttributeEval extends ASEvaluation implements
 
             if (m_detailedOutput) {
               m_detailedOutputBuff.append("\n\t")
-                  .append(data.attribute(i).value(j)).append(": ");
+                .append(data.attribute(i).value(j)).append(": ");
               m_detailedOutputBuff.append(Utils.doubleToString(avgCorrForValue,
-                  6));
+                6));
             }
           }
 
@@ -451,14 +458,15 @@ public class CorrelationAttributeEval extends ASEvaluation implements
       m_detailedOutputBuff.append("\n");
     }
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return            the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 9049 $");
+    return RevisionUtils.extract("$Revision: 10172 $");
   }
 
   /**
@@ -470,4 +478,3 @@ public class CorrelationAttributeEval extends ASEvaluation implements
     runEvaluator(new CorrelationAttributeEval(), args);
   }
 }
-

@@ -21,6 +21,7 @@
 
 package weka.estimators;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -28,19 +29,23 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
+import weka.core.RevisionUtils;
 import weka.core.Statistics;
 import weka.core.Utils;
 
 /**
- * Simple histogram density estimator. Uses equal-frequency histograms
- * based on the specified number of bins (default: 10).
- *
+ * Simple histogram density estimator. Uses equal-frequency histograms based on
+ * the specified number of bins (default: 10).
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 11318 $
  */
-public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDensityEstimator,
-                                                                   UnivariateIntervalEstimator,
-                                                                   UnivariateQuantileEstimator {
+public class UnivariateEqualFrequencyHistogramEstimator implements
+  UnivariateDensityEstimator, UnivariateIntervalEstimator,
+  UnivariateQuantileEstimator, Serializable {
+
+  /** For serialization */
+  private static final long serialVersionUID = -3180287591539683137L;
 
   /** The collection used to store the weighted values. */
   protected TreeMap<Double, Double> m_TM = new TreeMap<Double, Double>();
@@ -73,7 +78,7 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
   protected double m_MinWidth = 1.0E-6;
 
   /** Constant for Gaussian density. */
-  public static final double CONST = - 0.5 * Math.log(2 * Math.PI);
+  public static final double CONST = -0.5 * Math.log(2 * Math.PI);
 
   /** The number of intervals used to approximate prediction interval. */
   protected int m_NumIntervals = 1000;
@@ -82,8 +87,14 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
   protected boolean m_UpdateWeightsOnly = false;
 
   /**
-   * Gets the number of bins 
-   *
+   * Returns a string describing the estimator.
+   */
+  public String globalInfo() {
+    return "Provides a univariate histogram estimator based on equal-frequency bins.";
+  }
+  /**
+   * Gets the number of bins
+   * 
    * @return the number of bins.
    */
   public int getNumBins() {
@@ -92,8 +103,8 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
   }
 
   /**
-   * Sets the number of bins 
-   *
+   * Sets the number of bins
+   * 
    * @param numBins the number of bins
    */
   public void setNumBins(int numBins) {
@@ -102,8 +113,8 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
   }
 
   /**
-   * Triggers construction of estimator based on current data
-   * and then initializes the statistics.
+   * Triggers construction of estimator based on current data and then
+   * initializes the statistics.
    */
   public void initializeStatistics() {
 
@@ -114,7 +125,7 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
     m_WeightedSumSquared = 0;
     m_SumOfWeights = 0;
     m_Weights = null;
-  }    
+  }
 
   /**
    * Sets whether only weights should be udpated.
@@ -134,10 +145,11 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
 
   /**
    * Adds a value to the density estimator.
-   *
+   * 
    * @param value the value to add
    * @param weight the weight of the value
    */
+  @Override
   public void addValue(double value, double weight) {
 
     // Add data point to collection
@@ -176,14 +188,14 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
     if (variance < 0) {
       variance = 0;
     }
-    
+
     // Compute kernel bandwidth
     m_Width = Math.sqrt(variance) * Math.pow(m_SumOfWeights, m_Exponent);
-    
+
     if (m_Width <= m_MinWidth) {
       m_Width = m_MinWidth;
     }
-    
+
     // Do we need to update weights only
     if (getUpdateWeightsOnly()) {
       updateWeightsOnly();
@@ -191,22 +203,24 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
       updateBoundariesAndWeights();
     }
   }
-   
+
   /**
    * Updates the weights only.
    */
   protected void updateWeightsOnly() throws IllegalArgumentException {
 
     // Get values and keys from tree map
-    Iterator<Map.Entry<Double,Double>> itr = m_TM.entrySet().iterator();
+    Iterator<Map.Entry<Double, Double>> itr = m_TM.entrySet().iterator();
     int j = 1;
     m_Weights = new double[m_Boundaries.length - 1];
-    while(itr.hasNext()) {
-      Map.Entry<Double,Double> entry = itr.next();
+    while (itr.hasNext()) {
+      Map.Entry<Double, Double> entry = itr.next();
       double value = entry.getKey();
       double weight = entry.getValue();
-      if ((value < m_Boundaries[0]) || (value > m_Boundaries[m_Boundaries.length - 1])) {
-        throw new IllegalArgumentException("Out-of-range value during weight update");
+      if ((value < m_Boundaries[0])
+        || (value > m_Boundaries[m_Boundaries.length - 1])) {
+        throw new IllegalArgumentException(
+          "Out-of-range value during weight update");
       }
       while (value > m_Boundaries[j]) {
         j++;
@@ -223,10 +237,10 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
     // Get values and keys from tree map
     double[] values = new double[m_TM.size()];
     double[] weights = new double[m_TM.size()];
-    Iterator<Map.Entry<Double,Double>> itr = m_TM.entrySet().iterator();
+    Iterator<Map.Entry<Double, Double>> itr = m_TM.entrySet().iterator();
     int j = 0;
-    while(itr.hasNext()) {
-      Map.Entry<Double,Double> entry = itr.next();
+    while (itr.hasNext()) {
+      Map.Entry<Double, Double> entry = itr.next();
       values[j] = entry.getKey();
       weights[j] = entry.getValue();
       j++;
@@ -250,7 +264,8 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
       if (weightSumSoFar >= freq) {
 
         // Is this break point worse than the last one?
-        if (((freq - lastWeightSum) < (weightSumSoFar - freq)) && (lastIndex != -1)) {
+        if (((freq - lastWeightSum) < (weightSumSoFar - freq))
+          && (lastIndex != -1)) {
           cutPoints[cpindex] = (values[lastIndex] + values[lastIndex + 1]) / 2;
           weightSumSoFar -= lastWeightSum;
           binWeights[cpindex] = lastWeightSum;
@@ -264,7 +279,8 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
           lastIndex = -1;
         }
         cpindex++;
-        freq = (sumOfWeights + weightSumSoFar) / ((cutPoints.length + 1) - cpindex);
+        freq = (sumOfWeights + weightSumSoFar)
+          / ((cutPoints.length + 1) - cpindex);
       } else {
         lastIndex = i;
         lastWeightSum = weightSumSoFar;
@@ -273,7 +289,7 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
 
     // Check whether there was another possibility for a cut point
     if ((cpindex < cutPoints.length) && (lastIndex != -1)) {
-      cutPoints[cpindex] = (values[lastIndex] + values[lastIndex + 1]) / 2;      
+      cutPoints[cpindex] = (values[lastIndex] + values[lastIndex + 1]) / 2;
       binWeights[cpindex] = lastWeightSum;
       cpindex++;
       binWeights[cpindex] = weightSumSoFar - lastWeightSum;
@@ -299,14 +315,14 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
       System.arraycopy(binWeights, 0, m_Weights, 0, cpindex + 1);
     }
   }
-   
 
   /**
-   * Returns the interval for the given confidence value. 
+   * Returns the interval for the given confidence value.
    * 
    * @param conf the confidence value in the interval [0, 1]
    * @return the interval
    */
+  @Override
   public double[][] predictIntervals(double conf) {
 
     // Update the bandwidth
@@ -334,7 +350,7 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
     double sum = 0;
     boolean[] toUse = new boolean[probabilities.length];
     int k = 0;
-    while ((sum < conf) && (k < toUse.length)){
+    while ((sum < conf) && (k < toUse.length)) {
       toUse[sortedIndices[toUse.length - (k + 1)]] = true;
       sum += probabilities[sortedIndices[toUse.length - (k + 1)]];
       k++;
@@ -348,7 +364,7 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
 
     // The current interval
     double[] interval = null;
-    
+
     // Iterate through kernels
     boolean haveStartedInterval = false;
     for (int i = 0; i < m_NumIntervals; i++) {
@@ -384,13 +400,13 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
     return intervals.toArray(new double[0][0]);
   }
 
-
   /**
    * Returns the quantile for the given percentage.
    * 
    * @param percentage the percentage
    * @return the quantile
    */
+  @Override
   public double predictQuantile(double percentage) {
 
     // Update the bandwidth
@@ -402,8 +418,6 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
     double max = m_TM.lastKey() + val * m_Width;
     double delta = (max - min) / m_NumIntervals;
 
-    // Compute approximate quantile
-    double[] probabilities = new double[m_NumIntervals];
     double sum = 0;
     double leftVal = Math.exp(logDensity(min));
     for (int i = 0; i < m_NumIntervals; i++) {
@@ -418,13 +432,12 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
   }
 
   /**
-   * Returns the natural logarithm of the density estimate at the given
-   * point.
-   *
+   * Returns the natural logarithm of the density estimate at the given point.
+   * 
    * @param value the value at which to evaluate
-   * @return the natural logarithm of the density estimate at the given
-   * value
+   * @return the natural logarithm of the density estimate at the given value
    */
+  @Override
   public double logDensity(double value) {
 
     // Update boundaries if necessary
@@ -447,10 +460,10 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
       } else {
         val = value - m_TM.lastKey();
       }
-      return (CONST - Math.log(m_Width) - 0.5 * (val * val / (m_Width * m_Width))) -
-        Math.log(m_SumOfWeights + 2); 
+      return (CONST - Math.log(m_Width) - 0.5 * (val * val / (m_Width * m_Width)))
+        - Math.log(m_SumOfWeights + 2);
     }
-    
+
     // Is value exactly equal to right-most boundary?
     if (index == m_Boundaries.length - 1) {
       index--;
@@ -461,43 +474,56 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
         index = -index - 2;
       }
     }
-    
+
     // Figure out of width
     double width = m_Boundaries[index + 1] - m_Boundaries[index];
 
     // Density compontent from smeared-out data point
-    double densSmearedOut = 1.0 / ((m_SumOfWeights + 2) * (m_Boundaries[m_Boundaries.length - 1] -
-                                                           m_Boundaries[0]));
+    double densSmearedOut = 1.0 / ((m_SumOfWeights + 2) * (m_Boundaries[m_Boundaries.length - 1] - m_Boundaries[0]));
 
     // Return log of density
     if (m_Weights[index] <= 0) {
 
-      /*      System.out.println(value);
-      System.out.println(this);
-      System.exit(1);*/
+      /*
+       * System.out.println(value); System.out.println(this); System.exit(1);
+       */
       // Just use one smeared-out data point
       return Math.log(densSmearedOut);
     } else {
-      return Math.log(densSmearedOut + m_Weights[index] / ((m_SumOfWeights + 2) * width));
+      return Math.log(densSmearedOut + m_Weights[index]
+        / ((m_SumOfWeights + 2) * width));
     }
+  }
+
+  /**
+   * Returns the revision string.
+   * 
+   * @return the revision
+   */
+  @Override
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 11318 $");
   }
 
   /**
    * Returns textual description of this estimator.
    */
+  @Override
   public String toString() {
 
     StringBuffer text = new StringBuffer();
 
-    text.append("EqualFrequencyHistogram estimator\n\n" +
-                "Bandwidth for out of range cases " + m_Width + 
-                ", total weight " + m_SumOfWeights);
+    text.append("EqualFrequencyHistogram estimator\n\n"
+      + "Bandwidth for out of range cases " + m_Width + ", total weight "
+      + m_SumOfWeights);
 
     if (m_Boundaries != null) {
       text.append("\nLeft boundary\tRight boundary\tWeight\n");
       for (int i = 0; i < m_Boundaries.length - 1; i++) {
-        text.append(m_Boundaries[i] + "\t" + m_Boundaries[i + 1] + "\t" + m_Weights[i] + "\t" +
-                    Math.exp(logDensity((m_Boundaries[i + 1] + m_Boundaries[i]) / 2)) + "\n");
+        text.append(m_Boundaries[i] + "\t" + m_Boundaries[i + 1] + "\t"
+          + m_Weights[i] + "\t"
+          + Math.exp(logDensity((m_Boundaries[i + 1] + m_Boundaries[i]) / 2))
+          + "\n");
       }
     }
 
@@ -517,14 +543,14 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
 
     // Output the density estimator
     System.out.println(e);
-    
+
     // Monte Carlo integration
     double sum = 0;
     for (int i = 0; i < 1000; i++) {
       sum += Math.exp(e.logDensity(r.nextDouble() * 10.0 - 5.0));
     }
     System.out.println("Approximate integral: " + 10.0 * sum / 1000);
-    
+
     // Add Gaussian values into it
     for (int i = 0; i < 1000; i++) {
       e.addValue(0.1 * r.nextGaussian() - 3, 1);
@@ -546,14 +572,15 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
 
     // Check interval estimates
     double[][] Intervals = e.predictIntervals(0.9);
-    
+
     System.out.println("Printing histogram intervals ---------------------");
-    
-    for (int k = 0; k < Intervals.length; k++) {
-      System.out.println("Left: " + Intervals[k][0] + "\t Right: " + Intervals[k][1]);
+
+    for (double[] interval : Intervals) {
+      System.out.println("Left: " + interval[0] + "\t Right: " + interval[1]);
     }
-    
-    System.out.println("Finished histogram printing intervals ---------------------");
+
+    System.out
+      .println("Finished histogram printing intervals ---------------------");
 
     double Covered = 0;
     for (int i = 0; i < 1000; i++) {
@@ -563,30 +590,30 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
       } else {
         val = r.nextGaussian() * 0.25;
       }
-      for (int k = 0; k < Intervals.length; k++) {
-        if (val >= Intervals[k][0] && val <= Intervals[k][1]) {
+      for (double[] interval : Intervals) {
+        if (val >= interval[0] && val <= interval[1]) {
           Covered++;
           break;
         }
       }
     }
-    System.out.println("Coverage at 0.9 level for histogram intervals: " + Covered / 1000);
+    System.out.println("Coverage at 0.9 level for histogram intervals: "
+      + Covered / 1000);
 
     for (int j = 1; j < 5; j++) {
       double numTrain = Math.pow(10, j);
-      System.out.println("Number of training cases: " +
-                         numTrain); 
+      System.out.println("Number of training cases: " + numTrain);
 
       // Compare performance to normal estimator on normally distributed data
       UnivariateEqualFrequencyHistogramEstimator eHistogram = new UnivariateEqualFrequencyHistogramEstimator();
       UnivariateNormalEstimator eNormal = new UnivariateNormalEstimator();
-      
+
       // Add training cases
       for (int i = 0; i < numTrain; i++) {
         double val = r.nextGaussian() * 1.5 + 0.5;
-        /*        if (j == 4) {
-          System.err.println(val);
-          }*/
+        /*
+         * if (j == 4) { System.err.println(val); }
+         */
         eHistogram.addValue(val, 1);
         eNormal.addValue(val, 1);
       }
@@ -599,7 +626,8 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
         sum += Math.exp(eHistogram.logDensity(value));
       }
       System.out.println(eHistogram);
-      System.out.println("Approximate integral for histogram estimator: " + 20.0 * sum / points);
+      System.out.println("Approximate integral for histogram estimator: "
+        + 20.0 * sum / points);
 
       // Evaluate estimators
       double loglikelihoodHistogram = 0, loglikelihoodNormal = 0;
@@ -608,72 +636,80 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
         loglikelihoodHistogram += eHistogram.logDensity(val);
         loglikelihoodNormal += eNormal.logDensity(val);
       }
-      System.out.println("Loglikelihood for histogram estimator: " +
-                         loglikelihoodHistogram / 1000);
-      System.out.println("Loglikelihood for normal estimator: " +
-                         loglikelihoodNormal / 1000);
+      System.out.println("Loglikelihood for histogram estimator: "
+        + loglikelihoodHistogram / 1000);
+      System.out.println("Loglikelihood for normal estimator: "
+        + loglikelihoodNormal / 1000);
 
       // Check interval estimates
       double[][] histogramIntervals = eHistogram.predictIntervals(0.95);
       double[][] normalIntervals = eNormal.predictIntervals(0.95);
 
       System.out.println("Printing histogram intervals ---------------------");
-      
-      for (int k = 0; k < histogramIntervals.length; k++) {
-        System.out.println("Left: " + histogramIntervals[k][0] + "\t Right: " + histogramIntervals[k][1]);
+
+      for (double[] histogramInterval : histogramIntervals) {
+        System.out.println("Left: " + histogramInterval[0] + "\t Right: "
+          + histogramInterval[1]);
       }
 
-      System.out.println("Finished histogram printing intervals ---------------------");
+      System.out
+        .println("Finished histogram printing intervals ---------------------");
 
       System.out.println("Printing normal intervals ---------------------");
-      
-      for (int k = 0; k < normalIntervals.length; k++) {
-        System.out.println("Left: " + normalIntervals[k][0] + "\t Right: " + normalIntervals[k][1]);
+
+      for (double[] normalInterval : normalIntervals) {
+        System.out.println("Left: " + normalInterval[0] + "\t Right: "
+          + normalInterval[1]);
       }
 
-      System.out.println("Finished normal printing intervals ---------------------");
- 
+      System.out
+        .println("Finished normal printing intervals ---------------------");
+
       double histogramCovered = 0;
       double normalCovered = 0;
       for (int i = 0; i < 1000; i++) {
         double val = r.nextGaussian() * 1.5 + 0.5;
-        for (int k = 0; k < histogramIntervals.length; k++) {
-          if (val >= histogramIntervals[k][0] && val <= histogramIntervals[k][1]) {
+        for (double[] histogramInterval : histogramIntervals) {
+          if (val >= histogramInterval[0] && val <= histogramInterval[1]) {
             histogramCovered++;
             break;
           }
         }
-        for (int k = 0; k < normalIntervals.length; k++) {
-          if (val >= normalIntervals[k][0] && val <= normalIntervals[k][1]) {
+        for (double[] normalInterval : normalIntervals) {
+          if (val >= normalInterval[0] && val <= normalInterval[1]) {
             normalCovered++;
             break;
           }
         }
       }
-      System.out.println("Coverage at 0.95 level for histogram intervals: " + histogramCovered / 1000);
-      System.out.println("Coverage at 0.95 level for normal intervals: " + normalCovered / 1000);
-      
+      System.out.println("Coverage at 0.95 level for histogram intervals: "
+        + histogramCovered / 1000);
+      System.out.println("Coverage at 0.95 level for normal intervals: "
+        + normalCovered / 1000);
+
       histogramIntervals = eHistogram.predictIntervals(0.8);
       normalIntervals = eNormal.predictIntervals(0.8);
       histogramCovered = 0;
       normalCovered = 0;
       for (int i = 0; i < 1000; i++) {
         double val = r.nextGaussian() * 1.5 + 0.5;
-        for (int k = 0; k < histogramIntervals.length; k++) {
-          if (val >= histogramIntervals[k][0] && val <= histogramIntervals[k][1]) {
+        for (double[] histogramInterval : histogramIntervals) {
+          if (val >= histogramInterval[0] && val <= histogramInterval[1]) {
             histogramCovered++;
             break;
           }
         }
-        for (int k = 0; k < normalIntervals.length; k++) {
-          if (val >= normalIntervals[k][0] && val <= normalIntervals[k][1]) {
+        for (double[] normalInterval : normalIntervals) {
+          if (val >= normalInterval[0] && val <= normalInterval[1]) {
             normalCovered++;
             break;
           }
         }
       }
-      System.out.println("Coverage at 0.8 level for histogram intervals: " + histogramCovered / 1000);
-      System.out.println("Coverage at 0.8 level for normal intervals: " + normalCovered / 1000);
+      System.out.println("Coverage at 0.8 level for histogram intervals: "
+        + histogramCovered / 1000);
+      System.out.println("Coverage at 0.8 level for normal intervals: "
+        + normalCovered / 1000);
     }
   }
 }

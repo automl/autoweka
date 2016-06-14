@@ -22,7 +22,6 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Instances;
 import weka.filters.AbstractFilterTest;
 import weka.filters.Filter;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -31,7 +30,8 @@ import junit.framework.TestSuite;
  * java weka.filters.unsupervised.attribute.NumericToBinaryTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 8034 $
+ * @author Christopher Beckham (cjb60 at students dot waikato dot ac dot nz)
+ * @version $Revision: 11520 $
  */
 public class NumericToBinaryTest extends AbstractFilterTest {
   
@@ -67,6 +67,53 @@ public class NumericToBinaryTest extends AbstractFilterTest {
         }
       }
     }
+  }
+  
+  /**
+   * Make sure that the filter binarizes the index we specify.
+   */
+  public void testSpecificIndex() {
+	  int att1 = m_Instances.attribute("NumericAtt1").index();
+	  int att2 = m_Instances.attribute("NumericAtt2").index();  
+	  // Set the attribute index to point to NumericAtt1, so we expect that only this
+	  // attribute will be binarized.
+	  ((NumericToBinary)m_Filter).setAttributeIndices( String.valueOf(att1+1) );
+	  Instances result = useFilter();
+	  assertTrue("NumericAtt1 should be nominal", result.attribute(att1).isNominal());
+	  assertTrue("NumericAtt2 should be numeric", result.attribute(att2).isNumeric());  
+	  
+  }
+  
+  /**
+   * Make sure the filter binarizes the index we specify + invert
+   */
+  public void testInvertSelection() {
+	  int att1 = m_Instances.attribute("NumericAtt1").index();
+	  int att2 = m_Instances.attribute("NumericAtt2").index(); 
+	  // Set the attribute index to point to NumericAtt1, but invert the selection, so that
+	  // it will try to apply the filter to *every other* attribute. Of course, because this
+	  // only applies to numeric attributes, the filter should only change NumericAtt2
+	  ((NumericToBinary)m_Filter).setAttributeIndices( String.valueOf(att2+1) );
+	  ((NumericToBinary)m_Filter).setInvertSelection(true);
+	  Instances result = useFilter();
+	  assertTrue("NumericAtt1 should be nominal", result.attribute(att1).isNominal());
+	  assertTrue("NumericAtt2 should be numeric", result.attribute(att2).isNumeric());
+  }
+  
+  /**
+   * Make sure the filter binarizes the appropriate attributes in the range
+   * we specify
+   */
+  public void testRange() {
+	  int att1 = m_Instances.attribute("NumericAtt1").index();
+	  int att2 = m_Instances.attribute("NumericAtt2").index(); 
+	  // Use the string expression "first-last" for the attribute index. This should
+	  // change both numeric attributes.
+	  ((NumericToBinary)m_Filter).setAttributeIndices("first-last");
+	  ((NumericToBinary)m_Filter).setInvertSelection(false);
+	  Instances result = useFilter();
+	  assertTrue("NumericAtt1 should be nominal", result.attribute(att1).isNominal());
+	  assertTrue("NumericAtt2 should be nominal", result.attribute(att2).isNominal());	
   }
 
 

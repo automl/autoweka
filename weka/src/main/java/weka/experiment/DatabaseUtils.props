@@ -1,12 +1,12 @@
 # General information on database access can be found here:
 # http://weka.wikispaces.com/Databases
 #
-# Version: $Revision: 5837 $
+# Version: $Revision: 11885 $
 
 # The comma-separated list of jdbc drivers to use
 #jdbcDriver=RmiJdbc.RJDriver,jdbc.idbDriver
 #jdbcDriver=jdbc.idbDriver
-jdbcDriver=RmiJdbc.RJDriver,jdbc.idbDriver,org.gjt.mm.mysql.Driver,com.mckoi.JDBCDriver,org.hsqldb.jdbcDriver
+#jdbcDriver=RmiJdbc.RJDriver,jdbc.idbDriver,org.gjt.mm.mysql.Driver,com.mckoi.JDBCDriver,org.hsqldb.jdbcDriver
 #jdbcDriver=org.gjt.mm.mysql.Driver
 
 # The url to the experiment database
@@ -27,6 +27,7 @@ jdbcURL=jdbc:idb=experiments.prp
 # date, getDate() = 8;        --> date
 # text, getString() = 9;      --> string
 # time, getTime() = 10;       --> date
+# timestamp, getTime() = 11;  --> date
 # the original conversion: <column type>=<conversion>
 #char=0
 #varchar=0
@@ -46,7 +47,7 @@ jdbcURL=jdbc:idb=experiments.prp
 #double=2
 #date=8
 #time=10
-#timestamp=8
+#timestamp=11
 #mysql-conversion
 CHAR=0
 TEXT=0
@@ -70,7 +71,7 @@ LONG=6
 REAL=7
 DATE=8
 TIME=10
-TIMESTAMP=8 
+TIMESTAMP=11
 
 #mappings for table creation
 CREATE_STRING=TEXT

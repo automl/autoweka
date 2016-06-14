@@ -15,41 +15,77 @@
 
 /*
  *    ClassifierPanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2013 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.explorer;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Random;
-import java.util.Vector;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
+import weka.classifiers.CostMatrix;
+import weka.classifiers.Evaluation;
+import weka.classifiers.Sourcable;
+import weka.classifiers.evaluation.CostCurve;
+import weka.classifiers.evaluation.MarginCurve;
+import weka.classifiers.evaluation.Prediction;
+import weka.classifiers.evaluation.ThresholdCurve;
+import weka.classifiers.evaluation.output.prediction.AbstractOutput;
+import weka.classifiers.evaluation.output.prediction.Null;
+import weka.classifiers.pmml.consumer.PMMLClassifier;
+import weka.classifiers.rules.ZeroR;
+import weka.core.Attribute;
+import weka.core.BatchPredictor;
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.Defaults;
+import weka.core.Drawable;
+import weka.core.Environment;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.SerializedObject;
+import weka.core.Settings;
+import weka.core.Utils;
+import weka.core.Version;
+import weka.core.converters.ArffLoader;
+import weka.core.converters.ConverterUtils.DataSource;
+import weka.core.converters.IncrementalConverter;
+import weka.core.converters.Loader;
+import weka.core.pmml.PMMLFactory;
+import weka.core.pmml.PMMLModel;
+import weka.gui.AbstractPerspective;
+import weka.gui.CostMatrixEditor;
+import weka.gui.EvaluationMetricSelectionDialog;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.Logger;
+import weka.gui.Perspective;
+import weka.gui.PerspectiveInfo;
+import weka.gui.PropertyDialog;
+import weka.gui.PropertyPanel;
+import weka.gui.ResultHistoryPanel;
+import weka.gui.SaveBuffer;
+import weka.gui.SetInstancesPanel;
+import weka.gui.SysErrLog;
+import weka.gui.TaskLogger;
+import weka.gui.beans.CostBenefitAnalysis;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
+import weka.gui.explorer.Explorer.ExplorerPanel;
+import weka.gui.explorer.Explorer.LogHandler;
+import weka.gui.graphvisualizer.BIFFormatException;
+import weka.gui.graphvisualizer.GraphVisualizer;
+import weka.gui.treevisualizer.PlaceNode2;
+import weka.gui.treevisualizer.TreeVisualizer;
+import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.ThresholdVisualizePanel;
+import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.plugins.ErrorVisualizePlugin;
+import weka.gui.visualize.plugins.GraphVisualizePlugin;
+import weka.gui.visualize.plugins.TreeVisualizePlugin;
+import weka.gui.visualize.plugins.VisualizePlugin;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -75,64 +111,38 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
-
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Classifier;
-import weka.classifiers.CostMatrix;
-import weka.classifiers.Evaluation;
-import weka.classifiers.Sourcable;
-import weka.classifiers.evaluation.CostCurve;
-import weka.classifiers.evaluation.MarginCurve;
-import weka.classifiers.evaluation.ThresholdCurve;
-import weka.classifiers.evaluation.output.prediction.AbstractOutput;
-import weka.classifiers.evaluation.output.prediction.Null;
-import weka.classifiers.pmml.consumer.PMMLClassifier;
-import weka.core.Attribute;
-import weka.core.BatchPredictor;
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.Drawable;
-import weka.core.Environment;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.core.Version;
-import weka.core.converters.ConverterUtils.DataSource;
-import weka.core.converters.IncrementalConverter;
-import weka.core.converters.Loader;
-import weka.core.pmml.PMMLFactory;
-import weka.core.pmml.PMMLModel;
-import weka.gui.CostMatrixEditor;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.Logger;
-import weka.gui.PropertyDialog;
-import weka.gui.PropertyPanel;
-import weka.gui.ResultHistoryPanel;
-import weka.gui.SaveBuffer;
-import weka.gui.SetInstancesPanel;
-import weka.gui.SysErrLog;
-import weka.gui.TaskLogger;
-import weka.gui.beans.CostBenefitAnalysis;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
-import weka.gui.explorer.Explorer.ExplorerPanel;
-import weka.gui.explorer.Explorer.LogHandler;
-import weka.gui.graphvisualizer.BIFFormatException;
-import weka.gui.graphvisualizer.GraphVisualizer;
-import weka.gui.treevisualizer.PlaceNode2;
-import weka.gui.treevisualizer.TreeVisualizer;
-import weka.gui.visualize.PlotData2D;
-import weka.gui.visualize.ThresholdVisualizePanel;
-import weka.gui.visualize.VisualizePanel;
-import weka.gui.visualize.plugins.ErrorVisualizePlugin;
-import weka.gui.visualize.plugins.GraphVisualizePlugin;
-import weka.gui.visualize.plugins.TreeVisualizePlugin;
-import weka.gui.visualize.plugins.VisualizePlugin;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
+import java.util.Vector;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * This panel allows the user to select and configure a classifier, set the
@@ -145,10 +155,13 @@ import weka.gui.visualize.plugins.VisualizePlugin;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 9057 $
+ * @version $Revision: 12720 $
  */
-public class ClassifierPanel extends JPanel implements
-    CapabilitiesFilterChangeListener, ExplorerPanel, LogHandler {
+@PerspectiveInfo(ID = "weka.gui.explorer.classifierpanel", title = "Classify",
+  toolTipText = "Classify instances",
+  iconPath = "weka/gui/weka_icon_new_small.png")
+public class ClassifierPanel extends AbstractPerspective implements
+  CapabilitiesFilterChangeListener, ExplorerPanel, LogHandler {
 
   /** for serialization. */
   static final long serialVersionUID = 6959973704963624003L;
@@ -199,37 +212,44 @@ public class ClassifierPanel extends JPanel implements
    * Check to save the predictions in the results list for visualizing later on.
    */
   protected JCheckBox m_StorePredictionsBut = new JCheckBox(
-      "Store predictions for visualization");
+    "Store predictions for visualization");
+
+  /**
+   * Check to have the point size in error plots proportional to the prediction
+   * margin (classification only)
+   */
+  protected JCheckBox m_errorPlotPointSizeProportionalToMargin = new JCheckBox(
+    "Error plot point size proportional to margin");
 
   /** Check to output the model built from the training data. */
   protected JCheckBox m_OutputModelBut = new JCheckBox("Output model");
 
   /** Check to output true/false positives, precision/recall for each class. */
   protected JCheckBox m_OutputPerClassBut = new JCheckBox(
-      "Output per-class stats");
+    "Output per-class stats");
 
   /** Check to output a confusion matrix. */
   protected JCheckBox m_OutputConfusionBut = new JCheckBox(
-      "Output confusion matrix");
+    "Output confusion matrix");
 
   /** Check to output entropy statistics. */
   protected JCheckBox m_OutputEntropyBut = new JCheckBox(
-      "Output entropy evaluation measures");
+    "Output entropy evaluation measures");
 
   /** Lets the user configure the ClassificationOutput. */
-  protected GenericObjectEditor m_ClassificationOutputEditor = new GenericObjectEditor(
-      true);
+  protected GenericObjectEditor m_ClassificationOutputEditor =
+    new GenericObjectEditor(true);
 
   /** ClassificationOutput configuration. */
   protected PropertyPanel m_ClassificationOutputPanel = new PropertyPanel(
-      m_ClassificationOutputEditor);
+    m_ClassificationOutputEditor);
 
   /** the range of attributes to output. */
   protected Range m_OutputAdditionalAttributesRange = null;
 
   /** Check to evaluate w.r.t a cost matrix. */
   protected JCheckBox m_EvalWRTCostsBut = new JCheckBox(
-      "Cost-sensitive evaluation");
+    "Cost-sensitive evaluation");
 
   /** for the cost matrix. */
   protected JButton m_SetCostsBut = new JButton("Set...");
@@ -274,11 +294,11 @@ public class ClassifierPanel extends JPanel implements
 
   /** the label for the random seed textfield. */
   protected JLabel m_RandomLab = new JLabel("Random seed for XVal / % Split",
-      SwingConstants.RIGHT);
+    SwingConstants.RIGHT);
 
   /** Whether randomization is turned off to preserve order. */
   protected JCheckBox m_PreserveOrderBut = new JCheckBox(
-      "Preserve order for % Split");
+    "Preserve order for % Split");
 
   /**
    * Whether to output the source code (only for classifiers importing
@@ -297,7 +317,7 @@ public class ClassifierPanel extends JPanel implements
 
   /** Stop the class combo from taking up to much space. */
   private final Dimension COMBO_SIZE = new Dimension(150,
-      m_StartBut.getPreferredSize().height);
+    m_StartBut.getPreferredSize().height);
 
   /** The cost matrix editor for evaluation costs. */
   protected CostMatrixEditor m_CostMatrixEditor = new CostMatrixEditor();
@@ -319,14 +339,24 @@ public class ClassifierPanel extends JPanel implements
 
   /** Filter to ensure only model files are selected. */
   protected FileFilter m_ModelFilter = new ExtensionFileFilter(
-      MODEL_FILE_EXTENSION, "Model object files");
+    MODEL_FILE_EXTENSION, "Model object files");
 
   protected FileFilter m_PMMLModelFilter = new ExtensionFileFilter(
-      PMML_FILE_EXTENSION, "PMML model files");
+    PMML_FILE_EXTENSION, "PMML model files");
 
   /** The file chooser for selecting model files. */
   protected JFileChooser m_FileChooser = new JFileChooser(new File(
-      System.getProperty("user.dir")));
+    System.getProperty("user.dir")));
+
+  /** The user's list of selected evaluation metrics */
+  protected List<String> m_selectedEvalMetrics = Evaluation
+    .getAllEvaluationMetricNames();
+
+  /**
+   * Whether start-up settings have been applied (i.e. initial classifier to
+   * use)
+   */
+  protected boolean m_initialSettingsSet;
 
   /* Register the property editors we need */
   static {
@@ -337,6 +367,8 @@ public class ClassifierPanel extends JPanel implements
    * Creates the classifier panel.
    */
   public ClassifierPanel() {
+    m_selectedEvalMetrics.remove("Coverage");
+    m_selectedEvalMetrics.remove("Region size");
 
     // Connect / configure the components
     m_OutText.setEditable(false);
@@ -350,8 +382,10 @@ public class ClassifierPanel extends JPanel implements
         }
       }
     });
-    m_History.setBorder(BorderFactory
-        .createTitledBorder("Result list (right-click for options)"));
+    JPanel historyHolder = new JPanel(new BorderLayout());
+    historyHolder.setBorder(BorderFactory
+      .createTitledBorder("Result list (right-click for options)"));
+    historyHolder.add(m_History, BorderLayout.CENTER);
     m_ClassifierEditor.setClassType(Classifier.class);
     m_ClassifierEditor.setValue(ExplorerDefaults.getClassifier());
     m_ClassifierEditor.addPropertyChangeListener(new PropertyChangeListener() {
@@ -363,12 +397,12 @@ public class ClassifierPanel extends JPanel implements
         Classifier classifier = (Classifier) m_ClassifierEditor.getValue();
         Capabilities currentSchemeCapabilities = null;
         if (classifier != null && currentFilter != null
-            && (classifier instanceof CapabilitiesHandler)) {
-          currentSchemeCapabilities = ((CapabilitiesHandler) classifier)
-              .getCapabilities();
+          && (classifier instanceof CapabilitiesHandler)) {
+          currentSchemeCapabilities =
+            ((CapabilitiesHandler) classifier).getCapabilities();
 
           if (!currentSchemeCapabilities.supportsMaybe(currentFilter)
-              && !currentSchemeCapabilities.supports(currentFilter)) {
+            && !currentSchemeCapabilities.supports(currentFilter)) {
             m_StartBut.setEnabled(false);
           }
         }
@@ -378,32 +412,36 @@ public class ClassifierPanel extends JPanel implements
 
     m_ClassCombo.setToolTipText("Select the attribute to use as the class");
     m_TrainBut.setToolTipText("Test on the same set that the classifier"
-        + " is trained on");
+      + " is trained on");
     m_CVBut.setToolTipText("Perform a n-fold cross-validation");
     m_PercentBut.setToolTipText("Train on a percentage of the data and"
-        + " test on the remainder");
+      + " test on the remainder");
     m_TestSplitBut.setToolTipText("Test on a user-specified dataset");
     m_StartBut.setToolTipText("Starts the classification");
     m_StopBut.setToolTipText("Stops a running classification");
     m_StorePredictionsBut
-        .setToolTipText("Store predictions in the result list for later "
-            + "visualization");
+      .setToolTipText("Store predictions in the result list for later "
+        + "visualization");
+    m_errorPlotPointSizeProportionalToMargin
+      .setToolTipText("In classifier errors plots the point size will be "
+        + "set proportional to the absolute value of the "
+        + "prediction margin (affects classification only)");
     m_OutputModelBut
-        .setToolTipText("Output the model obtained from the full training set");
+      .setToolTipText("Output the model obtained from the full training set");
     m_OutputPerClassBut.setToolTipText("Output precision/recall & true/false"
-        + " positives for each class");
+      + " positives for each class");
     m_OutputConfusionBut
-        .setToolTipText("Output the matrix displaying class confusions");
+      .setToolTipText("Output the matrix displaying class confusions");
     m_OutputEntropyBut
-        .setToolTipText("Output entropy-based evaluation measures");
+      .setToolTipText("Output entropy-based evaluation measures");
     m_EvalWRTCostsBut
-        .setToolTipText("Evaluate errors with respect to a cost matrix");
+      .setToolTipText("Evaluate errors with respect to a cost matrix");
     m_RandomLab.setToolTipText("The seed value for randomization");
     m_RandomSeedText.setToolTipText(m_RandomLab.getToolTipText());
     m_PreserveOrderBut
-        .setToolTipText("Preserves the order in a percentage split");
+      .setToolTipText("Preserves the order in a percentage split");
     m_OutputSourceCode
-        .setToolTipText("Whether to output the built classifier as Java source code");
+      .setToolTipText("Whether to output the built classifier as Java source code");
     m_SourceCodeClass.setToolTipText("The classname of the built classifier");
 
     m_FileChooser.addChoosableFileFilter(m_PMMLModelFilter);
@@ -415,19 +453,19 @@ public class ClassifierPanel extends JPanel implements
     m_ClassificationOutputEditor.setValue(new Null());
 
     m_StorePredictionsBut.setSelected(ExplorerDefaults
-        .getClassifierStorePredictionsForVis());
+      .getClassifierStorePredictionsForVis());
     m_OutputModelBut.setSelected(ExplorerDefaults.getClassifierOutputModel());
     m_OutputPerClassBut.setSelected(ExplorerDefaults
-        .getClassifierOutputPerClassStats());
+      .getClassifierOutputPerClassStats());
     m_OutputConfusionBut.setSelected(ExplorerDefaults
-        .getClassifierOutputConfusionMatrix());
+      .getClassifierOutputConfusionMatrix());
     m_EvalWRTCostsBut.setSelected(ExplorerDefaults
-        .getClassifierCostSensitiveEval());
+      .getClassifierCostSensitiveEval());
     m_OutputEntropyBut.setSelected(ExplorerDefaults
-        .getClassifierOutputEntropyEvalMeasures());
+      .getClassifierOutputEntropyEvalMeasures());
     m_RandomSeedText.setText("" + ExplorerDefaults.getClassifierRandomSeed());
     m_PreserveOrderBut.setSelected(ExplorerDefaults
-        .getClassifierPreserveOrder());
+      .getClassifierPreserveOrder());
     m_OutputSourceCode.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -435,7 +473,7 @@ public class ClassifierPanel extends JPanel implements
       }
     });
     m_OutputSourceCode.setSelected(ExplorerDefaults
-        .getClassifierOutputSourceCode());
+      .getClassifierOutputSourceCode());
     m_SourceCodeClass.setText(ExplorerDefaults.getClassifierSourceCodeClass());
     m_SourceCodeClass.setEnabled(m_OutputSourceCode.isSelected());
     m_ClassCombo.setEnabled(false);
@@ -483,14 +521,17 @@ public class ClassifierPanel extends JPanel implements
       public void actionPerformed(ActionEvent e) {
         m_SetCostsBut.setEnabled(false);
         if (m_SetCostsFrame == null) {
-          if (PropertyDialog.getParentDialog(ClassifierPanel.this) != null)
-            m_SetCostsFrame = new PropertyDialog(PropertyDialog
+          if (PropertyDialog.getParentDialog(ClassifierPanel.this) != null) {
+            m_SetCostsFrame =
+              new PropertyDialog(PropertyDialog
                 .getParentDialog(ClassifierPanel.this), m_CostMatrixEditor,
                 100, 100);
-          else
-            m_SetCostsFrame = new PropertyDialog(PropertyDialog
+          } else {
+            m_SetCostsFrame =
+              new PropertyDialog(PropertyDialog
                 .getParentFrame(ClassifierPanel.this), m_CostMatrixEditor, 100,
                 100);
+          }
           m_SetCostsFrame.setTitle("Cost Matrix Editor");
           // pd.setSize(250,150);
           m_SetCostsFrame.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -498,7 +539,7 @@ public class ClassifierPanel extends JPanel implements
             public void windowClosing(java.awt.event.WindowEvent p) {
               m_SetCostsBut.setEnabled(m_EvalWRTCostsBut.isSelected());
               if ((m_SetCostsFrame != null)
-                  && (!m_EvalWRTCostsBut.isSelected())) {
+                && (!m_EvalWRTCostsBut.isSelected())) {
                 m_SetCostsFrame.setVisible(false);
               }
             }
@@ -510,8 +551,9 @@ public class ClassifierPanel extends JPanel implements
         int classIndex = m_ClassCombo.getSelectedIndex();
         int numClasses = m_Instances.attribute(classIndex).numValues();
         if (numClasses != ((CostMatrix) m_CostMatrixEditor.getValue())
-            .numColumns())
+          .numColumns()) {
           m_CostMatrixEditor.setValue(new CostMatrix(numClasses));
+        }
 
         m_SetCostsFrame.setVisible(true);
       }
@@ -522,7 +564,13 @@ public class ClassifierPanel extends JPanel implements
     m_StartBut.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        startClassifier();
+        boolean proceed = true;
+        if (Explorer.m_Memory.memoryIsLow()) {
+          proceed = Explorer.m_Memory.showMemoryIsLow();
+        }
+        if (proceed) {
+          startClassifier();
+        }
       }
     });
     m_StopBut.addActionListener(new ActionListener() {
@@ -551,7 +599,7 @@ public class ClassifierPanel extends JPanel implements
       @Override
       public void mouseClicked(MouseEvent e) {
         if (((e.getModifiers() & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK)
-            || e.isAltDown()) {
+          || e.isAltDown()) {
           int index = m_History.getList().locationToIndex(e.getPoint());
           if (index != -1) {
             String name = m_History.getNameAtIndex(index);
@@ -569,12 +617,13 @@ public class ClassifierPanel extends JPanel implements
         m_MoreOptions.setEnabled(false);
         JPanel moreOptionsPanel = new JPanel();
         moreOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
-        moreOptionsPanel.setLayout(new GridLayout(10, 1));
+        moreOptionsPanel.setLayout(new GridLayout(0, 1));
         moreOptionsPanel.add(m_OutputModelBut);
         moreOptionsPanel.add(m_OutputPerClassBut);
         moreOptionsPanel.add(m_OutputEntropyBut);
         moreOptionsPanel.add(m_OutputConfusionBut);
         moreOptionsPanel.add(m_StorePredictionsBut);
+        moreOptionsPanel.add(m_errorPlotPointSizeProportionalToMargin);
         JPanel classOutPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         classOutPanel.add(new JLabel("Output predictions"));
         classOutPanel.add(m_ClassificationOutputPanel);
@@ -591,7 +640,7 @@ public class ClassifierPanel extends JPanel implements
         JPanel sourcePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         m_OutputSourceCode.setEnabled(m_ClassifierEditor.getValue() instanceof Sourcable);
         m_SourceCodeClass.setEnabled(m_OutputSourceCode.isEnabled()
-            && m_OutputSourceCode.isSelected());
+          && m_OutputSourceCode.isSelected());
         sourcePanel.add(m_OutputSourceCode);
         sourcePanel.add(m_SourceCodeClass);
         moreOptionsPanel.add(sourcePanel);
@@ -608,8 +657,8 @@ public class ClassifierPanel extends JPanel implements
         all.add(moreOptionsPanel, BorderLayout.CENTER);
         all.add(okP, BorderLayout.SOUTH);
 
-        final JDialog jd = new JDialog(PropertyDialog
-            .getParentFrame(ClassifierPanel.this),
+        final JDialog jd =
+          new JDialog(PropertyDialog.getParentFrame(ClassifierPanel.this),
             "Classifier evaluation options");
         jd.getContentPane().setLayout(new BorderLayout());
         jd.getContentPane().add(all, BorderLayout.CENTER);
@@ -631,8 +680,33 @@ public class ClassifierPanel extends JPanel implements
 
         // panel height is only available now
         m_ClassificationOutputPanel.setPreferredSize(new Dimension(300,
-            m_ClassificationOutputPanel.getHeight()));
+          m_ClassificationOutputPanel.getHeight()));
         jd.pack();
+
+        // final List<AbstractEvaluationMetric> pluginMetrics =
+        // AbstractEvaluationMetric
+        // .getPluginMetrics();
+
+        final JButton editEvalMetrics = new JButton("Evaluation metrics...");
+        JPanel evalP = new JPanel();
+        evalP.setLayout(new BorderLayout());
+        evalP.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        evalP.add(editEvalMetrics, BorderLayout.CENTER);
+        editEvalMetrics
+          .setToolTipText("Enable/disable output of specific evaluation metrics");
+        moreOptionsPanel.add(evalP);
+
+        editEvalMetrics.addActionListener(new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            EvaluationMetricSelectionDialog esd =
+              new EvaluationMetricSelectionDialog(jd, m_selectedEvalMetrics);
+            esd.setLocation(m_MoreOptions.getLocationOnScreen());
+            esd.pack();
+            esd.setVisible(true);
+            m_selectedEvalMetrics = esd.getSelectedEvalMetrics();
+          }
+        });
 
         jd.setLocation(m_MoreOptions.getLocationOnScreen());
         jd.setVisible(true);
@@ -642,8 +716,8 @@ public class ClassifierPanel extends JPanel implements
     // Layout the GUI
     JPanel p1 = new JPanel();
     p1.setBorder(BorderFactory.createCompoundBorder(
-        BorderFactory.createTitledBorder("Classifier"),
-        BorderFactory.createEmptyBorder(0, 5, 5, 5)));
+      BorderFactory.createTitledBorder("Classifier"),
+      BorderFactory.createEmptyBorder(0, 5, 5, 5)));
     p1.setLayout(new BorderLayout());
     p1.add(m_CEPanel, BorderLayout.NORTH);
 
@@ -651,8 +725,8 @@ public class ClassifierPanel extends JPanel implements
     GridBagLayout gbL = new GridBagLayout();
     p2.setLayout(gbL);
     p2.setBorder(BorderFactory.createCompoundBorder(
-        BorderFactory.createTitledBorder("Test options"),
-        BorderFactory.createEmptyBorder(0, 5, 5, 5)));
+      BorderFactory.createTitledBorder("Test options"),
+      BorderFactory.createEmptyBorder(0, 5, 5, 5)));
     GridBagConstraints gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.WEST;
     gbC.gridy = 0;
@@ -742,15 +816,17 @@ public class ClassifierPanel extends JPanel implements
     p2.add(m_MoreOptions);
 
     // Any launcher plugins?
-    Vector pluginsVector = GenericObjectEditor
+    Vector<String> pluginsVector =
+      GenericObjectEditor
         .getClassnames(ClassifierPanelLaunchHandlerPlugin.class.getName());
     JButton pluginBut = null;
     if (pluginsVector.size() == 1) {
       try {
         // Display as a single button
-        String className = (String) pluginsVector.elementAt(0);
-        final ClassifierPanelLaunchHandlerPlugin plugin = (ClassifierPanelLaunchHandlerPlugin) Class
-            .forName(className).newInstance();
+        String className = pluginsVector.elementAt(0);
+        final ClassifierPanelLaunchHandlerPlugin plugin =
+          (ClassifierPanelLaunchHandlerPlugin) Class.forName(className)
+            .newInstance();
         if (plugin != null) {
           plugin.setClassifierPanel(this);
           pluginBut = new JButton(plugin.getLaunchCommand());
@@ -770,18 +846,19 @@ public class ClassifierPanel extends JPanel implements
       final java.awt.PopupMenu pluginPopup = new java.awt.PopupMenu();
 
       for (int i = 0; i < pluginsVector.size(); i++) {
-        String className = (String) (pluginsVector.elementAt(i));
+        String className = (pluginsVector.elementAt(i));
         try {
-          final ClassifierPanelLaunchHandlerPlugin plugin = (ClassifierPanelLaunchHandlerPlugin) Class
-              .forName(className).newInstance();
+          final ClassifierPanelLaunchHandlerPlugin plugin =
+            (ClassifierPanelLaunchHandlerPlugin) Class.forName(className)
+              .newInstance();
 
           if (plugin == null) {
             continue;
           }
           okPluginCount++;
           plugin.setClassifierPanel(this);
-          java.awt.MenuItem popI = new java.awt.MenuItem(
-              plugin.getLaunchCommand());
+          java.awt.MenuItem popI =
+            new java.awt.MenuItem(plugin.getLaunchCommand());
           popI.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -872,8 +949,8 @@ public class ClassifierPanel extends JPanel implements
     gbC.gridy = 2;
     gbC.gridx = 0;
     gbC.weightx = 0;
-    gbL.setConstraints(m_History, gbC);
-    mondo.add(m_History);
+    gbL.setConstraints(historyHolder, gbC);
+    mondo.add(historyHolder);
     gbC = new GridBagConstraints();
     gbC.fill = GridBagConstraints.BOTH;
     gbC.gridy = 0;
@@ -926,16 +1003,17 @@ public class ClassifierPanel extends JPanel implements
 
     String[] attribNames = new String[m_Instances.numAttributes()];
     for (int i = 0; i < attribNames.length; i++) {
-      String type = "(" + Attribute.typeToStringShort(m_Instances.attribute(i))
-          + ") ";
+      String type =
+        "(" + Attribute.typeToStringShort(m_Instances.attribute(i)) + ") ";
       attribNames[i] = type + m_Instances.attribute(i).name();
     }
     m_ClassCombo.setModel(new DefaultComboBoxModel(attribNames));
     if (attribNames.length > 0) {
-      if (inst.classIndex() == -1)
+      if (inst.classIndex() == -1) {
         m_ClassCombo.setSelectedIndex(attribNames.length - 1);
-      else
+      } else {
         m_ClassCombo.setSelectedIndex(inst.classIndex());
+      }
       m_ClassCombo.setEnabled(true);
       m_StartBut.setEnabled(m_RunThread == null);
       m_StopBut.setEnabled(m_RunThread != null);
@@ -954,7 +1032,21 @@ public class ClassifierPanel extends JPanel implements
   protected void setTestSet() {
 
     if (m_SetTestFrame == null) {
-      final SetInstancesPanel sp = new SetInstancesPanel(true, true);
+      PreprocessPanel preprocessPanel = null;
+      if (m_Explorer != null) {
+        preprocessPanel = m_Explorer.getPreprocessPanel();
+      } else if (getMainApplication() != null) {
+        Perspective p =
+          getMainApplication().getPerspectiveManager().getPerspective(
+            PreprocessPanel.PreprocessDefaults.ID);
+        preprocessPanel = (PreprocessPanel) p;
+      } else {
+        throw new IllegalStateException("We don't have access to a "
+          + "PreprocessPanel!");
+      }
+
+      final SetInstancesPanel sp =
+        new SetInstancesPanel(true, true, preprocessPanel.m_FileChooser);
 
       if (m_TestLoader != null) {
         try {
@@ -991,20 +1083,22 @@ public class ClassifierPanel extends JPanel implements
    * @param title the title to print
    */
   protected void printPredictionsHeader(StringBuffer outBuff,
-      AbstractOutput classificationOutput, String title) {
-    if (classificationOutput.generatesOutput())
+    AbstractOutput classificationOutput, String title) {
+    if (classificationOutput.generatesOutput()) {
       outBuff.append("=== Predictions on " + title + " ===\n\n");
+    }
     classificationOutput.printHeader();
   }
 
   protected static Evaluation setupEval(Evaluation eval, Classifier classifier,
-      Instances inst, CostMatrix costMatrix,
-      ClassifierErrorsPlotInstances plotInstances,
-      AbstractOutput classificationOutput, boolean onlySetPriors)
-      throws Exception {
+    Instances inst, CostMatrix costMatrix,
+    ClassifierErrorsPlotInstances plotInstances,
+    AbstractOutput classificationOutput, boolean onlySetPriors)
+    throws Exception {
 
     if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
-      Instances mappedClassifierHeader = ((weka.classifiers.misc.InputMappedClassifier) classifier)
+      Instances mappedClassifierHeader =
+        ((weka.classifiers.misc.InputMappedClassifier) classifier)
           .getModelHeader(new Instances(inst, 0));
 
       if (classificationOutput != null) {
@@ -1013,8 +1107,8 @@ public class ClassifierPanel extends JPanel implements
 
       if (!onlySetPriors) {
         if (costMatrix != null) {
-          eval = new Evaluation(new Instances(mappedClassifierHeader, 0),
-              costMatrix);
+          eval =
+            new Evaluation(new Instances(mappedClassifierHeader, 0), costMatrix);
         } else {
           eval = new Evaluation(new Instances(mappedClassifierHeader, 0));
         }
@@ -1026,10 +1120,12 @@ public class ClassifierPanel extends JPanel implements
         // the structure expected by the mapped classifier - this is only
         // to ensure that the structure and priors computed by
         // evaluation object is correct with respect to the mapped classifier
-        Instances mappedClassifierDataset = ((weka.classifiers.misc.InputMappedClassifier) classifier)
+        Instances mappedClassifierDataset =
+          ((weka.classifiers.misc.InputMappedClassifier) classifier)
             .getModelHeader(new Instances(mappedClassifierHeader, 0));
         for (int zz = 0; zz < inst.numInstances(); zz++) {
-          Instance mapped = ((weka.classifiers.misc.InputMappedClassifier) classifier)
+          Instance mapped =
+            ((weka.classifiers.misc.InputMappedClassifier) classifier)
               .constructMappedInstance(inst.instance(zz));
           mappedClassifierDataset.add(mapped);
         }
@@ -1106,6 +1202,13 @@ public class ClassifierPanel extends JPanel implements
 
           try {
             if (m_TestLoader != null && m_TestLoader.getStructure() != null) {
+              if (m_ClassifierEditor.getValue() instanceof BatchPredictor
+                && ((BatchPredictor) m_ClassifierEditor.getValue())
+                  .implementsMoreEfficientBatchPrediction()
+                && m_TestLoader instanceof ArffLoader) {
+                // we're not really streaming test instances in this case...
+                ((ArffLoader) m_TestLoader).setRetainStringVals(true);
+              }
               m_TestLoader.reset();
               source = new DataSource(m_TestLoader);
               userTestStructure = source.getStructure();
@@ -1115,8 +1218,8 @@ public class ClassifierPanel extends JPanel implements
             ex.printStackTrace();
           }
           if (m_EvalWRTCostsBut.isSelected()) {
-            costMatrix = new CostMatrix(
-                (CostMatrix) m_CostMatrixEditor.getValue());
+            costMatrix =
+              new CostMatrix((CostMatrix) m_CostMatrixEditor.getValue());
           }
           boolean outputModel = m_OutputModelBut.isSelected();
           boolean outputConfusion = m_OutputConfusionBut.isSelected();
@@ -1124,8 +1227,8 @@ public class ClassifierPanel extends JPanel implements
           boolean outputSummary = true;
           boolean outputEntropy = m_OutputEntropyBut.isSelected();
           boolean saveVis = m_StorePredictionsBut.isSelected();
-          boolean outputPredictionsText = (m_ClassificationOutputEditor
-              .getValue().getClass() != Null.class);
+          boolean outputPredictionsText =
+            (m_ClassificationOutputEditor.getValue().getClass() != Null.class);
 
           String grph = null;
 
@@ -1145,15 +1248,15 @@ public class ClassifierPanel extends JPanel implements
           StringBuffer outBuff = new StringBuffer();
           AbstractOutput classificationOutput = null;
           if (outputPredictionsText) {
-            classificationOutput = (AbstractOutput) m_ClassificationOutputEditor
-                .getValue();
+            classificationOutput =
+              (AbstractOutput) m_ClassificationOutputEditor.getValue();
             Instances header = new Instances(inst, 0);
             header.setClassIndex(classIndex);
             classificationOutput.setHeader(header);
             classificationOutput.setBuffer(outBuff);
           }
-          String name = (new SimpleDateFormat("HH:mm:ss - "))
-              .format(new Date());
+          String name =
+            (new SimpleDateFormat("HH:mm:ss - ")).format(new Date());
           String cname = "";
           String cmd = "";
           Evaluation eval = null;
@@ -1183,18 +1286,19 @@ public class ClassifierPanel extends JPanel implements
                 if (!inst.equalHeaders(userTestStructure)) {
                   boolean wrapClassifier = false;
                   if (!Utils
-                      .getDontShowDialog("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier")) {
-                    JCheckBox dontShow = new JCheckBox(
-                        "Do not show this message again");
+                    .getDontShowDialog("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier")) {
+                    JCheckBox dontShow =
+                      new JCheckBox("Do not show this message again");
                     Object[] stuff = new Object[2];
-                    stuff[0] = "Train and test set are not compatible.\n"
+                    stuff[0] =
+                      "Train and test set are not compatible.\n"
                         + "Would you like to automatically wrap the classifier in\n"
                         + "an \"InputMappedClassifier\" before proceeding?.\n";
                     stuff[1] = dontShow;
 
-                    int result = JOptionPane.showConfirmDialog(
-                        ClassifierPanel.this, stuff, "ClassifierPanel",
-                        JOptionPane.YES_OPTION);
+                    int result =
+                      JOptionPane.showConfirmDialog(ClassifierPanel.this,
+                        stuff, "ClassifierPanel", JOptionPane.YES_OPTION);
 
                     if (result == JOptionPane.YES_OPTION) {
                       wrapClassifier = true;
@@ -1203,14 +1307,15 @@ public class ClassifierPanel extends JPanel implements
                     if (dontShow.isSelected()) {
                       String response = (wrapClassifier) ? "yes" : "no";
                       Utils
-                          .setDontShowDialogResponse(
-                              "weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier",
-                              response);
+                        .setDontShowDialogResponse(
+                          "weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier",
+                          response);
                     }
 
                   } else {
                     // What did the user say - do they want to autowrap or not?
-                    String response = Utils
+                    String response =
+                      Utils
                         .getDontShowDialogResponse("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier");
                     if (response != null && response.equalsIgnoreCase("yes")) {
                       wrapClassifier = true;
@@ -1218,7 +1323,8 @@ public class ClassifierPanel extends JPanel implements
                   }
 
                   if (wrapClassifier) {
-                    weka.classifiers.misc.InputMappedClassifier temp = new weka.classifiers.misc.InputMappedClassifier();
+                    weka.classifiers.misc.InputMappedClassifier temp =
+                      new weka.classifiers.misc.InputMappedClassifier();
 
                     // pass on the known test structure so that we get the
                     // correct mapping report from the toString() method
@@ -1228,8 +1334,8 @@ public class ClassifierPanel extends JPanel implements
                     classifier = temp;
                   } else {
                     throw new Exception(
-                        "Train and test set are not compatible\n"
-                            + inst.equalHeadersMsg(userTestStructure));
+                      "Train and test set are not compatible\n"
+                        + inst.equalHeadersMsg(userTestStructure));
                   }
                 }
               }
@@ -1245,10 +1351,12 @@ public class ClassifierPanel extends JPanel implements
               name += cname;
             }
             cmd = classifier.getClass().getName();
-            if (classifier instanceof OptionHandler)
-              cmd += " "
+            if (classifier instanceof OptionHandler) {
+              cmd +=
+                " "
                   + Utils
-                      .joinOptions(((OptionHandler) classifier).getOptions());
+                    .joinOptions(((OptionHandler) classifier).getOptions());
+            }
 
             // set up the structure of the plottable instances for
             // visualization
@@ -1257,6 +1365,9 @@ public class ClassifierPanel extends JPanel implements
             plotInstances.setClassifier(classifier);
             plotInstances.setClassIndex(inst.classIndex());
             plotInstances.setSaveForVisualization(saveVis);
+            plotInstances
+              .setPointSizeProportionalToMargin(m_errorPlotPointSizeProportionalToMargin
+                .isSelected());
 
             // Output some header information
             m_Log.logMessage("Started " + cname);
@@ -1277,7 +1388,7 @@ public class ClassifierPanel extends JPanel implements
             if (inst.numAttributes() < 100) {
               for (int i = 0; i < inst.numAttributes(); i++) {
                 outBuff.append("              " + inst.attribute(i).name()
-                    + '\n');
+                  + '\n');
               }
             } else {
               outBuff.append("              [list of attributes omitted]\n");
@@ -1295,17 +1406,18 @@ public class ClassifierPanel extends JPanel implements
               outBuff.append("split " + percent + "% train, remainder test\n");
               break;
             case 4: // Test on user split
-              if (source.isIncremental())
+              if (source.isIncremental()) {
                 outBuff.append("user supplied test set: "
-                    + " size unknown (reading incrementally)\n");
-              else
+                  + " size unknown (reading incrementally)\n");
+              } else {
                 outBuff.append("user supplied test set: "
-                    + source.getDataSet().numInstances() + " instances\n");
+                  + source.getDataSet().numInstances() + " instances\n");
+              }
               break;
             }
             if (costMatrix != null) {
               outBuff.append("Evaluation cost matrix:\n")
-                  .append(costMatrix.toString()).append("\n");
+                .append(costMatrix.toString()).append("\n");
             }
             outBuff.append("\n");
             m_History.addResult(name, outBuff);
@@ -1322,11 +1434,11 @@ public class ClassifierPanel extends JPanel implements
 
             if (outputModel) {
               outBuff
-                  .append("=== Classifier model (full training set) ===\n\n");
+                .append("=== Classifier model (full training set) ===\n\n");
               outBuff.append(classifier.toString() + "\n");
               outBuff.append("\nTime taken to build model: "
-                  + Utils.doubleToString(trainTimeElapsed / 1000.0, 2)
-                  + " seconds\n\n");
+                + Utils.doubleToString(trainTimeElapsed / 1000.0, 2)
+                + " seconds\n\n");
               m_History.updateResult(name);
               if (classifier instanceof Drawable) {
                 grph = null;
@@ -1346,26 +1458,35 @@ public class ClassifierPanel extends JPanel implements
               eval = new Evaluation(inst, costMatrix);
 
               // make adjustments if the classifier is an InputMappedClassifier
-              eval = setupEval(eval, classifier, inst, costMatrix,
-                  plotInstances, classificationOutput, false);
+              eval =
+                setupEval(eval, classifier, inst, costMatrix, plotInstances,
+                  classificationOutput, false);
+              eval.setMetricsToDisplay(m_selectedEvalMetrics);
 
               // plotInstances.setEvaluation(eval);
               plotInstances.setUp();
 
               if (outputPredictionsText) {
                 printPredictionsHeader(outBuff, classificationOutput,
-                    "training set");
+                  "training set");
               }
 
               testTimeStart = System.currentTimeMillis();
-              if (classifier instanceof BatchPredictor) {
-                double[][] predictions = ((BatchPredictor) classifier)
-                    .distributionsForInstances(inst);
+              if (classifier instanceof BatchPredictor
+                && ((BatchPredictor) classifier)
+                  .implementsMoreEfficientBatchPrediction()) {
+                Instances toPred = new Instances(inst);
+                for (int i = 0; i < toPred.numInstances(); i++) {
+                  toPred.instance(i).setClassMissing();
+                }
+                double[][] predictions =
+                  ((BatchPredictor) classifier)
+                    .distributionsForInstances(toPred);
                 plotInstances.process(inst, predictions, eval);
                 if (outputPredictionsText) {
                   for (int jj = 0; jj < inst.numInstances(); jj++) {
                     classificationOutput.printClassification(predictions[jj],
-                        inst.instance(jj), jj);
+                      inst.instance(jj), jj);
                   }
                 }
               } else {
@@ -1374,20 +1495,21 @@ public class ClassifierPanel extends JPanel implements
 
                   if (outputPredictionsText) {
                     classificationOutput.printClassification(classifier,
-                        inst.instance(jj), jj);
+                      inst.instance(jj), jj);
                   }
                   if ((jj % 100) == 0) {
                     m_Log
-                        .statusMessage("Evaluating on training data. Processed "
-                            + jj + " instances...");
+                      .statusMessage("Evaluating on training data. Processed "
+                        + jj + " instances...");
                   }
                 }
               }
               testTimeElapsed = System.currentTimeMillis() - testTimeStart;
-              if (outputPredictionsText)
+              if (outputPredictionsText) {
                 classificationOutput.printFooter();
+              }
               if (outputPredictionsText
-                  && classificationOutput.generatesOutput()) {
+                && classificationOutput.generatesOutput()) {
                 outBuff.append("\n");
               }
               outBuff.append("=== Evaluation on training set ===\n");
@@ -1412,51 +1534,62 @@ public class ClassifierPanel extends JPanel implements
               eval = new Evaluation(inst, costMatrix);
 
               // make adjustments if the classifier is an InputMappedClassifier
-              eval = setupEval(eval, classifier, inst, costMatrix,
-                  plotInstances, classificationOutput, false);
+              eval =
+                setupEval(eval, classifier, inst, costMatrix, plotInstances,
+                  classificationOutput, false);
+              eval.setMetricsToDisplay(m_selectedEvalMetrics);
 
               // plotInstances.setEvaluation(eval);
               plotInstances.setUp();
 
               if (outputPredictionsText) {
                 printPredictionsHeader(outBuff, classificationOutput,
-                    "test data");
+                  "test data");
               }
 
               // Make some splits and do a CV
               for (int fold = 0; fold < numFolds; fold++) {
                 m_Log.statusMessage("Creating splits for fold " + (fold + 1)
-                    + "...");
+                  + "...");
                 Instances train = inst.trainCV(numFolds, fold, random);
 
                 // make adjustments if the classifier is an
                 // InputMappedClassifier
-                eval = setupEval(eval, classifier, train, costMatrix,
-                    plotInstances, classificationOutput, true);
+                eval =
+                  setupEval(eval, classifier, train, costMatrix, plotInstances,
+                    classificationOutput, true);
+                eval.setMetricsToDisplay(m_selectedEvalMetrics);
 
                 // eval.setPriors(train);
                 m_Log.statusMessage("Building model for fold " + (fold + 1)
-                    + "...");
+                  + "...");
                 Classifier current = null;
                 try {
                   current = AbstractClassifier.makeCopy(template);
                 } catch (Exception ex) {
                   m_Log.logMessage("Problem copying classifier: "
-                      + ex.getMessage());
+                    + ex.getMessage());
                 }
                 current.buildClassifier(train);
                 Instances test = inst.testCV(numFolds, fold);
                 m_Log.statusMessage("Evaluating model for fold " + (fold + 1)
-                    + "...");
+                  + "...");
 
-                if (classifier instanceof BatchPredictor) {
-                  double[][] predictions = ((BatchPredictor) classifier)
-                      .distributionsForInstances(test);
+                if (classifier instanceof BatchPredictor
+                  && ((BatchPredictor) classifier)
+                    .implementsMoreEfficientBatchPrediction()) {
+                  Instances toPred = new Instances(test);
+                  for (int i = 0; i < toPred.numInstances(); i++) {
+                    toPred.instance(i).setClassMissing();
+                  }
+                  double[][] predictions =
+                    ((BatchPredictor) current)
+                      .distributionsForInstances(toPred);
                   plotInstances.process(test, predictions, eval);
                   if (outputPredictionsText) {
                     for (int jj = 0; jj < test.numInstances(); jj++) {
                       classificationOutput.printClassification(predictions[jj],
-                          test.instance(jj), jj);
+                        test.instance(jj), jj);
                     }
                   }
                 } else {
@@ -1464,13 +1597,14 @@ public class ClassifierPanel extends JPanel implements
                     plotInstances.process(test.instance(jj), current, eval);
                     if (outputPredictionsText) {
                       classificationOutput.printClassification(current,
-                          test.instance(jj), jj);
+                        test.instance(jj), jj);
                     }
                   }
                 }
               }
-              if (outputPredictionsText)
+              if (outputPredictionsText) {
                 classificationOutput.printFooter();
+              }
               if (outputPredictionsText) {
                 outBuff.append("\n");
               }
@@ -1492,26 +1626,28 @@ public class ClassifierPanel extends JPanel implements
                 }
                 inst.randomize(new Random(rnd));
               }
-              int trainSize = (int) Math.round(inst.numInstances() * percent
-                  / 100);
+              int trainSize =
+                (int) Math.round(inst.numInstances() * percent / 100);
               int testSize = inst.numInstances() - trainSize;
               Instances train = new Instances(inst, 0, trainSize);
               Instances test = new Instances(inst, trainSize, testSize);
               m_Log.statusMessage("Building model on training split ("
-                  + trainSize + " instances)...");
+                + trainSize + " instances)...");
               Classifier current = null;
               try {
                 current = AbstractClassifier.makeCopy(template);
               } catch (Exception ex) {
                 m_Log.logMessage("Problem copying classifier: "
-                    + ex.getMessage());
+                  + ex.getMessage());
               }
               current.buildClassifier(train);
               eval = new Evaluation(train, costMatrix);
 
               // make adjustments if the classifier is an InputMappedClassifier
-              eval = setupEval(eval, classifier, train, costMatrix,
-                  plotInstances, classificationOutput, false);
+              eval =
+                setupEval(eval, classifier, train, costMatrix, plotInstances,
+                  classificationOutput, false);
+              eval.setMetricsToDisplay(m_selectedEvalMetrics);
 
               // plotInstances.setEvaluation(eval);
               plotInstances.setUp();
@@ -1519,18 +1655,25 @@ public class ClassifierPanel extends JPanel implements
 
               if (outputPredictionsText) {
                 printPredictionsHeader(outBuff, classificationOutput,
-                    "test split");
+                  "test split");
               }
 
               testTimeStart = System.currentTimeMillis();
-              if (classifier instanceof BatchPredictor) {
-                double[][] predictions = ((BatchPredictor) classifier)
-                    .distributionsForInstances(test);
+              if (classifier instanceof BatchPredictor
+                && ((BatchPredictor) classifier)
+                  .implementsMoreEfficientBatchPrediction()) {
+                Instances toPred = new Instances(test);
+                for (int i = 0; i < toPred.numInstances(); i++) {
+                  toPred.instance(i).setClassMissing();
+                }
+
+                double[][] predictions =
+                  ((BatchPredictor) current).distributionsForInstances(toPred);
                 plotInstances.process(test, predictions, eval);
                 if (outputPredictionsText) {
                   for (int jj = 0; jj < test.numInstances(); jj++) {
                     classificationOutput.printClassification(predictions[jj],
-                        test.instance(jj), jj);
+                      test.instance(jj), jj);
                   }
                 }
               } else {
@@ -1538,17 +1681,18 @@ public class ClassifierPanel extends JPanel implements
                   plotInstances.process(test.instance(jj), current, eval);
                   if (outputPredictionsText) {
                     classificationOutput.printClassification(current,
-                        test.instance(jj), jj);
+                      test.instance(jj), jj);
                   }
                   if ((jj % 100) == 0) {
                     m_Log.statusMessage("Evaluating on test split. Processed "
-                        + jj + " instances...");
+                      + jj + " instances...");
                   }
                 }
               }
               testTimeElapsed = System.currentTimeMillis() - testTimeStart;
-              if (outputPredictionsText)
+              if (outputPredictionsText) {
                 classificationOutput.printFooter();
+              }
               if (outputPredictionsText) {
                 outBuff.append("\n");
               }
@@ -1559,29 +1703,33 @@ public class ClassifierPanel extends JPanel implements
               m_Log.statusMessage("Evaluating on test data...");
               eval = new Evaluation(inst, costMatrix);
               // make adjustments if the classifier is an InputMappedClassifier
-              eval = setupEval(eval, classifier, inst, costMatrix,
-                  plotInstances, classificationOutput, false);
+              eval =
+                setupEval(eval, classifier, inst, costMatrix, plotInstances,
+                  classificationOutput, false);
+              eval.setMetricsToDisplay(m_selectedEvalMetrics);
 
               // plotInstances.setEvaluation(eval);
               plotInstances.setUp();
 
               if (outputPredictionsText) {
                 printPredictionsHeader(outBuff, classificationOutput,
-                    "test set");
+                  "test set");
               }
 
               Instance instance;
               int jj = 0;
               Instances batchInst = null;
               int batchSize = 100;
-              if (classifier instanceof BatchPredictor) {
+              if (classifier instanceof BatchPredictor
+                && ((BatchPredictor) classifier)
+                  .implementsMoreEfficientBatchPrediction()) {
                 batchInst = new Instances(userTestStructure, 0);
-                String batchSizeS = ((BatchPredictor) classifier)
-                    .getBatchSize();
+                String batchSizeS =
+                  ((BatchPredictor) classifier).getBatchSize();
                 if (batchSizeS != null && batchSizeS.length() > 0) {
                   try {
-                    batchSizeS = Environment.getSystemWide().substitute(
-                        batchSizeS);
+                    batchSizeS =
+                      Environment.getSystemWide().substitute(batchSizeS);
                   } catch (Exception ex) {
                   }
 
@@ -1596,56 +1744,72 @@ public class ClassifierPanel extends JPanel implements
               while (source.hasMoreElements(userTestStructure)) {
                 instance = source.nextElement(userTestStructure);
 
-                if (classifier instanceof BatchPredictor) {
+                if (classifier instanceof BatchPredictor
+                  && ((BatchPredictor) classifier)
+                    .implementsMoreEfficientBatchPrediction()) {
                   batchInst.add(instance);
                   if (batchInst.numInstances() == batchSize) {
-                    double[][] predictions = ((BatchPredictor) classifier)
-                        .distributionsForInstances(batchInst);
+                    Instances toPred = new Instances(batchInst);
+                    for (int i = 0; i < toPred.numInstances(); i++) {
+                      toPred.instance(i).setClassMissing();
+                    }
+                    double[][] predictions =
+                      ((BatchPredictor) classifier)
+                        .distributionsForInstances(toPred);
                     plotInstances.process(batchInst, predictions, eval);
 
                     if (outputPredictionsText) {
                       for (int kk = 0; kk < batchInst.numInstances(); kk++) {
                         classificationOutput.printClassification(
-                            predictions[kk], batchInst.instance(kk), kk);
+                          predictions[kk], batchInst.instance(kk), kk);
                       }
                     }
                     jj += batchInst.numInstances();
                     m_Log.statusMessage("Evaluating on test data. Processed "
-                        + jj + " instances...");
+                      + jj + " instances...");
                     batchInst.delete();
                   }
                 } else {
                   plotInstances.process(instance, classifier, eval);
                   if (outputPredictionsText) {
                     classificationOutput.printClassification(classifier,
-                        instance, jj);
+                      instance, jj);
                   }
                   if ((++jj % 100) == 0) {
                     m_Log.statusMessage("Evaluating on test data. Processed "
-                        + jj + " instances...");
+                      + jj + " instances...");
                   }
                 }
               }
 
               if (classifier instanceof BatchPredictor
-                  && batchInst.numInstances() > 0) {
+                && ((BatchPredictor) classifier)
+                  .implementsMoreEfficientBatchPrediction()
+                && batchInst.numInstances() > 0) {
                 // finish the last batch
 
-                double[][] predictions = ((BatchPredictor) classifier)
-                    .distributionsForInstances(batchInst);
+                Instances toPred = new Instances(batchInst);
+                for (int i = 0; i < toPred.numInstances(); i++) {
+                  toPred.instance(i).setClassMissing();
+                }
+
+                double[][] predictions =
+                  ((BatchPredictor) classifier)
+                    .distributionsForInstances(toPred);
                 plotInstances.process(batchInst, predictions, eval);
 
                 if (outputPredictionsText) {
                   for (int kk = 0; kk < batchInst.numInstances(); kk++) {
                     classificationOutput.printClassification(predictions[kk],
-                        batchInst.instance(kk), kk);
+                      batchInst.instance(kk), kk);
                   }
                 }
               }
               testTimeElapsed = System.currentTimeMillis() - testTimeStart;
 
-              if (outputPredictionsText)
+              if (outputPredictionsText) {
                 classificationOutput.printFooter();
+              }
               if (outputPredictionsText) {
                 outBuff.append("\n");
               }
@@ -1666,8 +1830,8 @@ public class ClassifierPanel extends JPanel implements
                 mode = "supplied test set";
               }
               outBuff.append("\nTime taken to test model on " + mode + ": "
-                  + Utils.doubleToString(testTimeElapsed / 1000.0, 2)
-                  + " seconds\n\n");
+                + Utils.doubleToString(testTimeElapsed / 1000.0, 2)
+                + " seconds\n\n");
             }
 
             if (outputSummary) {
@@ -1686,10 +1850,10 @@ public class ClassifierPanel extends JPanel implements
             }
 
             if ((fullClassifier instanceof Sourcable)
-                && m_OutputSourceCode.isSelected()) {
+              && m_OutputSourceCode.isSelected()) {
               outBuff.append("=== Source code ===\n\n");
               outBuff.append(Evaluation.wekaStaticWrapper(
-                  ((Sourcable) fullClassifier), m_SourceCodeClass.getText()));
+                ((Sourcable) fullClassifier), m_SourceCodeClass.getText()));
             }
 
             m_History.updateResult(name);
@@ -1699,47 +1863,52 @@ public class ClassifierPanel extends JPanel implements
             ex.printStackTrace();
             m_Log.logMessage(ex.getMessage());
             JOptionPane.showMessageDialog(ClassifierPanel.this,
-                "Problem evaluating classifier:\n" + ex.getMessage(),
-                "Evaluate classifier", JOptionPane.ERROR_MESSAGE);
+              "Problem evaluating classifier:\n" + ex.getMessage(),
+              "Evaluate classifier", JOptionPane.ERROR_MESSAGE);
             m_Log.statusMessage("Problem evaluating classifier");
           } finally {
             try {
               if (!saveVis && outputModel) {
-                FastVector vv = new FastVector();
-                vv.addElement(fullClassifier);
+                ArrayList<Object> vv = new ArrayList<Object>();
+                vv.add(fullClassifier);
                 Instances trainHeader = new Instances(m_Instances, 0);
                 trainHeader.setClassIndex(classIndex);
-                vv.addElement(trainHeader);
+                vv.add(trainHeader);
                 if (grph != null) {
-                  vv.addElement(grph);
+                  vv.add(grph);
                 }
                 m_History.addObject(name, vv);
               } else if (saveVis && plotInstances != null
-                  && plotInstances.getPlotInstances().numInstances() > 0) {
+                && plotInstances.canPlot(false)) {
                 m_CurrentVis = new VisualizePanel();
+                if (getMainApplication() != null) {
+                  Settings settings = getMainApplication().getApplicationSettings();
+                  m_CurrentVis.applySettings(settings,
+                    weka.gui.explorer.VisualizePanel.ScatterDefaults.ID);
+                }
                 m_CurrentVis.setName(name + " (" + inst.relationName() + ")");
                 m_CurrentVis.setLog(m_Log);
                 m_CurrentVis.addPlot(plotInstances.getPlotData(cname));
                 // m_CurrentVis.setColourIndex(plotInstances.getPlotInstances().classIndex()+1);
                 m_CurrentVis.setColourIndex(plotInstances.getPlotInstances()
-                    .classIndex());
+                  .classIndex());
                 plotInstances.cleanUp();
 
-                FastVector vv = new FastVector();
+                ArrayList<Object> vv = new ArrayList<Object>();
                 if (outputModel) {
-                  vv.addElement(fullClassifier);
+                  vv.add(fullClassifier);
                   Instances trainHeader = new Instances(m_Instances, 0);
                   trainHeader.setClassIndex(classIndex);
-                  vv.addElement(trainHeader);
+                  vv.add(trainHeader);
                   if (grph != null) {
-                    vv.addElement(grph);
+                    vv.add(grph);
                   }
                 }
-                vv.addElement(m_CurrentVis);
+                vv.add(m_CurrentVis);
 
                 if ((eval != null) && (eval.predictions() != null)) {
-                  vv.addElement(eval.predictions());
-                  vv.addElement(inst.classAttribute());
+                  vv.add(eval.predictions());
+                  vv.add(inst.classAttribute());
                 }
                 m_History.addObject(name, vv);
               }
@@ -1776,6 +1945,7 @@ public class ClassifierPanel extends JPanel implements
    * @param x the x coordinate for popping up the menu
    * @param y the y coordinate for popping up the menu
    */
+  @SuppressWarnings("unchecked")
   protected void visualize(String name, int x, int y) {
     final String selectedName = name;
     JPopupMenu resultListMenu = new JPopupMenu();
@@ -1843,21 +2013,21 @@ public class ClassifierPanel extends JPanel implements
     });
     resultListMenu.add(loadModel);
 
-    FastVector o = null;
+    ArrayList<Object> o = null;
     if (selectedName != null) {
-      o = (FastVector) m_History.getNamedObject(selectedName);
+      o = (ArrayList<Object>) m_History.getNamedObject(selectedName);
     }
 
     VisualizePanel temp_vp = null;
     String temp_grph = null;
-    FastVector temp_preds = null;
+    ArrayList<Prediction> temp_preds = null;
     Attribute temp_classAtt = null;
     Classifier temp_classifier = null;
     Instances temp_trainHeader = null;
 
     if (o != null) {
       for (int i = 0; i < o.size(); i++) {
-        Object temp = o.elementAt(i);
+        Object temp = o.get(i);
         if (temp instanceof Classifier) {
           temp_classifier = (Classifier) temp;
         } else if (temp instanceof Instances) { // training header
@@ -1866,8 +2036,8 @@ public class ClassifierPanel extends JPanel implements
           temp_vp = (VisualizePanel) temp;
         } else if (temp instanceof String) { // graphable output
           temp_grph = (String) temp;
-        } else if (temp instanceof FastVector) { // predictions
-          temp_preds = (FastVector) temp;
+        } else if (temp instanceof ArrayList<?>) { // predictions
+          temp_preds = (ArrayList<Prediction>) temp;
         } else if (temp instanceof Attribute) { // class attribute
           temp_classAtt = (Attribute) temp;
         }
@@ -1876,7 +2046,7 @@ public class ClassifierPanel extends JPanel implements
 
     final VisualizePanel vp = temp_vp;
     final String grph = temp_grph;
-    final FastVector preds = temp_preds;
+    final ArrayList<Prediction> preds = temp_preds;
     final Attribute classAtt = temp_classAtt;
     final Classifier classifier = temp_classifier;
     final Instances trainHeader = temp_trainHeader;
@@ -1894,8 +2064,8 @@ public class ClassifierPanel extends JPanel implements
     }
     resultListMenu.add(saveModel);
 
-    JMenuItem reEvaluate = new JMenuItem(
-        "Re-evaluate model on current test set");
+    JMenuItem reEvaluate =
+      new JMenuItem("Re-evaluate model on current test set");
     if (classifier != null && m_TestLoader != null) {
       reEvaluate.addActionListener(new ActionListener() {
         @Override
@@ -1908,8 +2078,8 @@ public class ClassifierPanel extends JPanel implements
     }
     resultListMenu.add(reEvaluate);
 
-    JMenuItem reApplyConfig = new JMenuItem(
-        "Re-apply this model's configuration");
+    JMenuItem reApplyConfig =
+      new JMenuItem("Re-apply this model's configuration");
     if (classifier != null) {
       reApplyConfig.addActionListener(new ActionListener() {
         @Override
@@ -1952,10 +2122,11 @@ public class ClassifierPanel extends JPanel implements
           @Override
           public void actionPerformed(ActionEvent e) {
             String title;
-            if (vp != null)
+            if (vp != null) {
               title = vp.getName();
-            else
+            } else {
               title = selectedName;
+            }
             visualizeTree(grph, title);
           }
         });
@@ -1973,8 +2144,9 @@ public class ClassifierPanel extends JPanel implements
             th.start();
           }
         });
-      } else
+      } else {
         visGrph.setEnabled(false);
+      }
     } else {
       visGrph.setEnabled(false);
     }
@@ -1989,6 +2161,11 @@ public class ClassifierPanel extends JPanel implements
             MarginCurve tc = new MarginCurve();
             Instances result = tc.getCurve(preds);
             VisualizePanel vmc = new VisualizePanel();
+            if (getMainApplication() != null) {
+              Settings settings = getMainApplication().getApplicationSettings();
+              m_CurrentVis.applySettings(settings,
+                weka.gui.explorer.VisualizePanel.ScatterDefaults.ID);
+            }
             vmc.setName(result.relationName());
             vmc.setLog(m_Log);
             PlotData2D tempd = new PlotData2D(result);
@@ -2020,18 +2197,19 @@ public class ClassifierPanel extends JPanel implements
               // VisualizePanel vmc = new VisualizePanel();
               ThresholdVisualizePanel vmc = new ThresholdVisualizePanel();
               vmc.setROCString("(Area under ROC = "
-                  + Utils.doubleToString(ThresholdCurve.getROCArea(result), 4)
-                  + ")");
+                + Utils.doubleToString(ThresholdCurve.getROCArea(result), 4)
+                + ")");
               vmc.setLog(m_Log);
               vmc.setName(result.relationName() + ". (Class value "
-                  + classAtt.value(classValue) + ")");
+                + classAtt.value(classValue) + ")");
               PlotData2D tempd = new PlotData2D(result);
               tempd.setPlotName(result.relationName());
               tempd.addInstanceNumberAttribute();
               // specify which points are connected
               boolean[] cp = new boolean[result.numInstances()];
-              for (int n = 1; n < cp.length; n++)
+              for (int n = 1; n < cp.length; n++) {
                 cp[n] = true;
+              }
               tempd.setConnectPoints(cp);
               // add plot
               vmc.addPlot(tempd);
@@ -2064,11 +2242,11 @@ public class ClassifierPanel extends JPanel implements
               // class value as index 0 (if necessary).
               Attribute classAttToUse = classAtt;
               if (classValue != 0) {
-                FastVector newNames = new FastVector();
-                newNames.addElement(classAtt.value(classValue));
+                ArrayList<String> newNames = new ArrayList<String>();
+                newNames.add(classAtt.value(classValue));
                 for (int k = 0; k < classAtt.numValues(); k++) {
                   if (k != classValue) {
-                    newNames.addElement(classAtt.value(k));
+                    newNames.add(classAtt.value(k));
                   }
                 }
                 classAttToUse = new Attribute(classAtt.name(), newNames);
@@ -2081,16 +2259,17 @@ public class ClassifierPanel extends JPanel implements
               tempd.m_alwaysDisplayPointsOfThisSize = 10;
               // specify which points are connected
               boolean[] cp = new boolean[result.numInstances()];
-              for (int n = 1; n < cp.length; n++)
+              for (int n = 1; n < cp.length; n++) {
                 cp[n] = true;
+              }
               tempd.setConnectPoints(cp);
 
               String windowTitle = "";
               if (classifier != null) {
                 String cname = classifier.getClass().getName();
                 if (cname.startsWith("weka.classifiers.")) {
-                  windowTitle = ""
-                      + cname.substring("weka.classifiers.".length()) + " ";
+                  windowTitle =
+                    "" + cname.substring("weka.classifiers.".length()) + " ";
                 }
               }
               windowTitle += " (class = " + classAttToUse.value(0) + ")";
@@ -2122,9 +2301,14 @@ public class ClassifierPanel extends JPanel implements
               CostCurve cc = new CostCurve();
               Instances result = cc.getCurve(preds, classValue);
               VisualizePanel vmc = new VisualizePanel();
+              if (getMainApplication() != null) {
+                Settings settings = getMainApplication().getApplicationSettings();
+                m_CurrentVis.applySettings(settings,
+                  weka.gui.explorer.VisualizePanel.ScatterDefaults.ID);
+              }
               vmc.setLog(m_Log);
               vmc.setName(result.relationName() + ". (Class value "
-                  + classAtt.value(classValue) + ")");
+                + classAtt.value(classValue) + ")");
               PlotData2D tempd = new PlotData2D(result);
               tempd.m_displayAllPoints = true;
               tempd.setPlotName(result.relationName());
@@ -2153,18 +2337,19 @@ public class ClassifierPanel extends JPanel implements
     boolean availablePlugins = false;
 
     // predictions
-    Vector pluginsVector = GenericObjectEditor
-        .getClassnames(VisualizePlugin.class.getName());
+    Vector<String> pluginsVector =
+      GenericObjectEditor.getClassnames(VisualizePlugin.class.getName());
     for (int i = 0; i < pluginsVector.size(); i++) {
-      String className = (String) (pluginsVector.elementAt(i));
+      String className = (pluginsVector.elementAt(i));
       try {
-        VisualizePlugin plugin = (VisualizePlugin) Class.forName(className)
-            .newInstance();
-        if (plugin == null)
+        VisualizePlugin plugin =
+          (VisualizePlugin) Class.forName(className).newInstance();
+        if (plugin == null) {
           continue;
+        }
         availablePlugins = true;
         JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(preds, classAtt);
-        Version version = new Version();
+        new Version();
         if (pluginMenuItem != null) {
           /*
            * if (version.compareTo(plugin.getMinVersion()) < 0)
@@ -2181,19 +2366,20 @@ public class ClassifierPanel extends JPanel implements
     }
 
     // errros
-    pluginsVector = GenericObjectEditor
-        .getClassnames(ErrorVisualizePlugin.class.getName());
+    pluginsVector =
+      GenericObjectEditor.getClassnames(ErrorVisualizePlugin.class.getName());
     for (int i = 0; i < pluginsVector.size(); i++) {
-      String className = (String) (pluginsVector.elementAt(i));
+      String className = (pluginsVector.elementAt(i));
       try {
-        ErrorVisualizePlugin plugin = (ErrorVisualizePlugin) Class.forName(
-            className).newInstance();
-        if (plugin == null)
+        ErrorVisualizePlugin plugin =
+          (ErrorVisualizePlugin) Class.forName(className).newInstance();
+        if (plugin == null) {
           continue;
+        }
         availablePlugins = true;
-        JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(vp
-            .getInstances());
-        Version version = new Version();
+        JMenuItem pluginMenuItem =
+          plugin.getVisualizeMenuItem(vp.getInstances());
+        new Version();
         if (pluginMenuItem != null) {
           /*
            * if (version.compareTo(plugin.getMinVersion()) < 0)
@@ -2213,19 +2399,21 @@ public class ClassifierPanel extends JPanel implements
     if (grph != null) {
       // trees
       if (((Drawable) temp_classifier).graphType() == Drawable.TREE) {
-        pluginsVector = GenericObjectEditor
+        pluginsVector =
+          GenericObjectEditor
             .getClassnames(TreeVisualizePlugin.class.getName());
         for (int i = 0; i < pluginsVector.size(); i++) {
-          String className = (String) (pluginsVector.elementAt(i));
+          String className = (pluginsVector.elementAt(i));
           try {
-            TreeVisualizePlugin plugin = (TreeVisualizePlugin) Class.forName(
-                className).newInstance();
-            if (plugin == null)
+            TreeVisualizePlugin plugin =
+              (TreeVisualizePlugin) Class.forName(className).newInstance();
+            if (plugin == null) {
               continue;
+            }
             availablePlugins = true;
-            JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(grph,
-                selectedName);
-            Version version = new Version();
+            JMenuItem pluginMenuItem =
+              plugin.getVisualizeMenuItem(grph, selectedName);
+            new Version();
             if (pluginMenuItem != null) {
               /*
                * if (version.compareTo(plugin.getMinVersion()) < 0)
@@ -2244,19 +2432,21 @@ public class ClassifierPanel extends JPanel implements
       }
       // graphs
       else {
-        pluginsVector = GenericObjectEditor
-            .getClassnames(GraphVisualizePlugin.class.getName());
+        pluginsVector =
+          GenericObjectEditor.getClassnames(GraphVisualizePlugin.class
+            .getName());
         for (int i = 0; i < pluginsVector.size(); i++) {
-          String className = (String) (pluginsVector.elementAt(i));
+          String className = (pluginsVector.elementAt(i));
           try {
-            GraphVisualizePlugin plugin = (GraphVisualizePlugin) Class.forName(
-                className).newInstance();
-            if (plugin == null)
+            GraphVisualizePlugin plugin =
+              (GraphVisualizePlugin) Class.forName(className).newInstance();
+            if (plugin == null) {
               continue;
+            }
             availablePlugins = true;
-            JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(grph,
-                selectedName);
-            Version version = new Version();
+            JMenuItem pluginMenuItem =
+              plugin.getVisualizeMenuItem(grph, selectedName);
+            new Version();
             if (pluginMenuItem != null) {
               /*
                * if (version.compareTo(plugin.getMinVersion()) < 0)
@@ -2275,8 +2465,9 @@ public class ClassifierPanel extends JPanel implements
       }
     }
 
-    if (availablePlugins)
+    if (availablePlugins) {
       resultListMenu.add(visPlugins);
+    }
 
     resultListMenu.show(m_History.getList(), x, y);
   }
@@ -2289,8 +2480,8 @@ public class ClassifierPanel extends JPanel implements
    * @param treeName the title to assign to the display
    */
   protected void visualizeTree(String dottyString, String treeName) {
-    final javax.swing.JFrame jf = new javax.swing.JFrame(
-        "Weka Classifier Tree Visualizer: " + treeName);
+    final javax.swing.JFrame jf =
+      new javax.swing.JFrame("Weka Classifier Tree Visualizer: " + treeName);
     jf.setSize(500, 400);
     jf.getContentPane().setLayout(new BorderLayout());
     TreeVisualizer tv = new TreeVisualizer(null, dottyString, new PlaceNode2());
@@ -2314,8 +2505,8 @@ public class ClassifierPanel extends JPanel implements
    * @param graphName the name of the graph
    */
   protected void visualizeBayesNet(String XMLBIF, String graphName) {
-    final javax.swing.JFrame jf = new javax.swing.JFrame(
-        "Weka Classifier Graph Visualizer: " + graphName);
+    final javax.swing.JFrame jf =
+      new javax.swing.JFrame("Weka Classifier Graph Visualizer: " + graphName);
     jf.setSize(500, 400);
     jf.getContentPane().setLayout(new BorderLayout());
     GraphVisualizer gv = new GraphVisualizer();
@@ -2344,7 +2535,7 @@ public class ClassifierPanel extends JPanel implements
    * @param cb the CostBenefitAnalysis panel to pop up
    */
   protected void visualizeCostBenefitAnalysis(CostBenefitAnalysis cb,
-      String classifierAndRelationName) {
+    String classifierAndRelationName) {
     if (cb != null) {
       String windowTitle = "Weka Classifier: Cost/Benefit Analysis ";
       if (classifierAndRelationName != null) {
@@ -2376,8 +2567,8 @@ public class ClassifierPanel extends JPanel implements
 
     if (sp != null) {
       String plotName = sp.getName();
-      final javax.swing.JFrame jf = new javax.swing.JFrame(
-          "Weka Classifier Visualize: " + plotName);
+      final javax.swing.JFrame jf =
+        new javax.swing.JFrame("Weka Classifier Visualize: " + plotName);
       jf.setSize(600, 400);
       jf.getContentPane().setLayout(new BorderLayout());
 
@@ -2410,6 +2601,7 @@ public class ClassifierPanel extends JPanel implements
   /**
    * Stops the currently running classifier (if any).
    */
+  @SuppressWarnings("deprecation")
   protected void stopClassifier() {
 
     if (m_RunThread != null) {
@@ -2428,17 +2620,19 @@ public class ClassifierPanel extends JPanel implements
    * @param trainHeader the header of the training instances
    */
   protected void saveClassifier(String name, Classifier classifier,
-      Instances trainHeader) {
+    Instances trainHeader) {
 
     File sFile = null;
     boolean saveOK = true;
 
+    m_FileChooser.removeChoosableFileFilter(m_PMMLModelFilter);
+    m_FileChooser.setFileFilter(m_ModelFilter);
     int returnVal = m_FileChooser.showSaveDialog(this);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       sFile = m_FileChooser.getSelectedFile();
       if (!sFile.getName().toLowerCase().endsWith(MODEL_FILE_EXTENSION)) {
-        sFile = new File(sFile.getParent(), sFile.getName()
-            + MODEL_FILE_EXTENSION);
+        sFile =
+          new File(sFile.getParent(), sFile.getName() + MODEL_FILE_EXTENSION);
       }
       m_Log.statusMessage("Saving model to file...");
 
@@ -2450,19 +2644,21 @@ public class ClassifierPanel extends JPanel implements
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(os);
         objectOutputStream.writeObject(classifier);
         trainHeader = trainHeader.stringFreeStructure();
-        if (trainHeader != null)
+        if (trainHeader != null) {
           objectOutputStream.writeObject(trainHeader);
+        }
         objectOutputStream.flush();
         objectOutputStream.close();
       } catch (Exception e) {
 
         JOptionPane.showMessageDialog(null, e, "Save Failed",
-            JOptionPane.ERROR_MESSAGE);
+          JOptionPane.ERROR_MESSAGE);
         saveOK = false;
       }
-      if (saveOK)
+      if (saveOK) {
         m_Log.logMessage("Saved model (" + name + ") to file '"
-            + sFile.getName() + "'");
+          + sFile.getName() + "'");
+      }
       m_Log.statusMessage("OK");
     }
   }
@@ -2472,6 +2668,8 @@ public class ClassifierPanel extends JPanel implements
    */
   protected void loadClassifier() {
 
+    m_FileChooser.addChoosableFileFilter(m_PMMLModelFilter);
+    m_FileChooser.setFileFilter(m_ModelFilter);
     int returnVal = m_FileChooser.showOpenDialog(this);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       File selected = m_FileChooser.getSelectedFile();
@@ -2492,7 +2690,7 @@ public class ClassifierPanel extends JPanel implements
              */
           } else {
             throw new Exception(
-                "PMML model is not a classification/regression model!");
+              "PMML model is not a classification/regression model!");
           }
         } else {
           if (selected.getName().endsWith(".gz")) {
@@ -2509,7 +2707,7 @@ public class ClassifierPanel extends JPanel implements
       } catch (Exception e) {
 
         JOptionPane.showMessageDialog(null, e, "Load Failed",
-            JOptionPane.ERROR_MESSAGE);
+          JOptionPane.ERROR_MESSAGE);
       }
 
       m_Log.statusMessage("OK");
@@ -2518,8 +2716,9 @@ public class ClassifierPanel extends JPanel implements
         m_Log.logMessage("Loaded model from file '" + selected.getName() + "'");
         String name = (new SimpleDateFormat("HH:mm:ss - ")).format(new Date());
         String cname = classifier.getClass().getName();
-        if (cname.startsWith("weka.classifiers."))
+        if (cname.startsWith("weka.classifiers.")) {
           cname = cname.substring("weka.classifiers.".length());
+        }
         name += cname + " from file '" + selected.getName() + "'";
         StringBuffer outBuff = new StringBuffer();
 
@@ -2537,7 +2736,7 @@ public class ClassifierPanel extends JPanel implements
           if (trainHeader.numAttributes() < 100) {
             for (int i = 0; i < trainHeader.numAttributes(); i++) {
               outBuff.append("              " + trainHeader.attribute(i).name()
-                  + '\n');
+                + '\n');
             }
           } else {
             outBuff.append("              [list of attributes omitted]\n");
@@ -2551,10 +2750,11 @@ public class ClassifierPanel extends JPanel implements
 
         m_History.addResult(name, outBuff);
         m_History.setSingle(name);
-        FastVector vv = new FastVector();
-        vv.addElement(classifier);
-        if (trainHeader != null)
-          vv.addElement(trainHeader);
+        ArrayList<Object> vv = new ArrayList<Object>();
+        vv.add(classifier);
+        if (trainHeader != null) {
+          vv.add(trainHeader);
+        }
         // allow visualization of graphable classifiers
         String grph = null;
         if (classifier instanceof Drawable) {
@@ -2563,8 +2763,9 @@ public class ClassifierPanel extends JPanel implements
           } catch (Exception ex) {
           }
         }
-        if (grph != null)
-          vv.addElement(grph);
+        if (grph != null) {
+          vv.add(grph);
+        }
 
         m_History.addObject(name, vv);
       }
@@ -2580,7 +2781,7 @@ public class ClassifierPanel extends JPanel implements
    * @param trainHeader the header of the training set
    */
   protected void reevaluateModel(final String name,
-      final Classifier classifier, final Instances trainHeader) {
+    final Classifier classifier, final Instances trainHeader) {
 
     if (m_RunThread == null) {
       synchronized (this) {
@@ -2601,24 +2802,31 @@ public class ClassifierPanel extends JPanel implements
 
           CostMatrix costMatrix = null;
           if (m_EvalWRTCostsBut.isSelected()) {
-            costMatrix = new CostMatrix(
-                (CostMatrix) m_CostMatrixEditor.getValue());
+            costMatrix =
+              new CostMatrix((CostMatrix) m_CostMatrixEditor.getValue());
           }
           boolean outputConfusion = m_OutputConfusionBut.isSelected();
           boolean outputPerClass = m_OutputPerClassBut.isSelected();
           boolean outputSummary = true;
           boolean outputEntropy = m_OutputEntropyBut.isSelected();
           boolean saveVis = m_StorePredictionsBut.isSelected();
-          boolean outputPredictionsText = (m_ClassificationOutputEditor
-              .getValue().getClass() != Null.class);
+          boolean outputPredictionsText =
+            (m_ClassificationOutputEditor.getValue().getClass() != Null.class);
           String grph = null;
           Evaluation eval = null;
 
           try {
 
-            boolean incrementalLoader = (m_TestLoader instanceof IncrementalConverter);
+            boolean incrementalLoader =
+              (m_TestLoader instanceof IncrementalConverter);
             if (m_TestLoader != null && m_TestLoader.getStructure() != null) {
               m_TestLoader.reset();
+              if (classifierToUse instanceof BatchPredictor
+                && ((BatchPredictor) classifierToUse)
+                  .implementsMoreEfficientBatchPrediction()
+                && m_TestLoader instanceof ArffLoader) {
+                ((ArffLoader) m_TestLoader).setRetainStringVals(true);
+              }
               source = new DataSource(m_TestLoader);
               userTestStructure = source.getStructure();
               userTestStructure.setClassIndex(m_TestClassIndex);
@@ -2628,35 +2836,24 @@ public class ClassifierPanel extends JPanel implements
               throw new Exception("No user test set has been specified");
             }
             if (trainHeader != null) {
-              boolean compatibilityProblem = false;
-              if (trainHeader.classIndex() > userTestStructure.numAttributes() - 1) {
-                compatibilityProblem = true;
-                // throw new Exception("Train and test set are not compatible");
-              }
-              userTestStructure.setClassIndex(trainHeader.classIndex());
               if (!trainHeader.equalHeaders(userTestStructure)) {
-                compatibilityProblem = true;
-                // throw new
-                // Exception("Train and test set are not compatible:\n" +
-                // trainHeader.equalHeadersMsg(userTestStructure));
-
-                if (compatibilityProblem
-                    && !(classifierToUse instanceof weka.classifiers.misc.InputMappedClassifier)) {
+                if (!(classifierToUse instanceof weka.classifiers.misc.InputMappedClassifier)) {
 
                   boolean wrapClassifier = false;
                   if (!Utils
-                      .getDontShowDialog("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier")) {
-                    JCheckBox dontShow = new JCheckBox(
-                        "Do not show this message again");
+                    .getDontShowDialog("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier")) {
+                    JCheckBox dontShow =
+                      new JCheckBox("Do not show this message again");
                     Object[] stuff = new Object[2];
-                    stuff[0] = "Data used to train model and test set are not compatible.\n"
+                    stuff[0] =
+                      "Data used to train model and test set are not compatible.\n"
                         + "Would you like to automatically wrap the classifier in\n"
                         + "an \"InputMappedClassifier\" before proceeding?.\n";
                     stuff[1] = dontShow;
 
-                    int result = JOptionPane.showConfirmDialog(
-                        ClassifierPanel.this, stuff, "ClassifierPanel",
-                        JOptionPane.YES_OPTION);
+                    int result =
+                      JOptionPane.showConfirmDialog(ClassifierPanel.this,
+                        stuff, "ClassifierPanel", JOptionPane.YES_OPTION);
 
                     if (result == JOptionPane.YES_OPTION) {
                       wrapClassifier = true;
@@ -2665,14 +2862,15 @@ public class ClassifierPanel extends JPanel implements
                     if (dontShow.isSelected()) {
                       String response = (wrapClassifier) ? "yes" : "no";
                       Utils
-                          .setDontShowDialogResponse(
-                              "weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier",
-                              response);
+                        .setDontShowDialogResponse(
+                          "weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier",
+                          response);
                     }
 
                   } else {
                     // What did the user say - do they want to autowrap or not?
-                    String response = Utils
+                    String response =
+                      Utils
                         .getDontShowDialogResponse("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier");
                     if (response != null && response.equalsIgnoreCase("yes")) {
                       wrapClassifier = true;
@@ -2680,35 +2878,38 @@ public class ClassifierPanel extends JPanel implements
                   }
 
                   if (wrapClassifier) {
-                    weka.classifiers.misc.InputMappedClassifier temp = new weka.classifiers.misc.InputMappedClassifier();
+                    weka.classifiers.misc.InputMappedClassifier temp =
+                      new weka.classifiers.misc.InputMappedClassifier();
 
                     temp.setClassifier(classifierToUse);
                     temp.setModelHeader(trainHeader);
+                    temp.setTestStructure(userTestStructure);
                     classifierToUse = temp;
                   } else {
                     throw new Exception(
-                        "Train and test set are not compatible\n"
-                            + trainHeader.equalHeadersMsg(userTestStructure));
+                      "Train and test set are not compatible\n"
+                        + trainHeader.equalHeadersMsg(userTestStructure));
                   }
                 }
               }
             } else {
               if (classifierToUse instanceof PMMLClassifier) {
                 // set the class based on information in the mining schema
-                Instances miningSchemaStructure = ((PMMLClassifier) classifierToUse)
-                    .getMiningSchema().getMiningSchemaAsInstances();
-                String className = miningSchemaStructure.classAttribute()
-                    .name();
+                Instances miningSchemaStructure =
+                  ((PMMLClassifier) classifierToUse).getMiningSchema()
+                    .getMiningSchemaAsInstances();
+                String className =
+                  miningSchemaStructure.classAttribute().name();
                 Attribute classMatch = userTestStructure.attribute(className);
                 if (classMatch == null) {
                   throw new Exception(
-                      "Can't find a match for the PMML target field "
-                          + className + " in the " + "test instances!");
+                    "Can't find a match for the PMML target field " + className
+                      + " in the " + "test instances!");
                 }
                 userTestStructure.setClass(classMatch);
               } else {
                 userTestStructure.setClassIndex(userTestStructure
-                    .numAttributes() - 1);
+                  .numAttributes() - 1);
               }
             }
             if (m_Log instanceof TaskLogger) {
@@ -2716,79 +2917,151 @@ public class ClassifierPanel extends JPanel implements
             }
             m_Log.statusMessage("Evaluating on test data...");
             m_Log.logMessage("Re-evaluating classifier (" + name
-                + ") on test set");
+              + ") on test set");
             eval = new Evaluation(userTestStructure, costMatrix);
+            eval.setMetricsToDisplay(m_selectedEvalMetrics);
 
             // set up the structure of the plottable instances for
             // visualization if selected
-            if (saveVis) {
-              plotInstances = new ClassifierErrorsPlotInstances();
-              plotInstances.setInstances(userTestStructure);
-              plotInstances.setClassifier(classifierToUse);
-              plotInstances.setClassIndex(userTestStructure.classIndex());
-              plotInstances.setEvaluation(eval);
-              plotInstances.setUp();
-            }
+            // if (saveVis) {
+            plotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
+            plotInstances.setInstances(trainHeader != null ? trainHeader : userTestStructure);
+            plotInstances.setClassifier(classifierToUse);
+            plotInstances.setClassIndex(trainHeader != null ? trainHeader.classIndex() : userTestStructure.classIndex());
+            plotInstances.setSaveForVisualization(saveVis);
+            plotInstances.setEvaluation(eval);
 
             outBuff.append("\n=== Re-evaluation on test set ===\n\n");
             outBuff.append("User supplied test set\n");
             outBuff.append("Relation:     " + userTestStructure.relationName()
-                + '\n');
-            if (incrementalLoader)
+              + '\n');
+            if (incrementalLoader) {
               outBuff
-                  .append("Instances:     unknown (yet). Reading incrementally\n");
-            else
+                .append("Instances:     unknown (yet). Reading incrementally\n");
+            } else {
               outBuff.append("Instances:    "
-                  + source.getDataSet().numInstances() + "\n");
+                + source.getDataSet().numInstances() + "\n");
+            }
             outBuff.append("Attributes:   " + userTestStructure.numAttributes()
-                + "\n\n");
+              + "\n\n");
             if (trainHeader == null
-                && !(classifierToUse instanceof weka.classifiers.pmml.consumer.PMMLClassifier)) {
+              && !(classifierToUse instanceof weka.classifiers.pmml.consumer.PMMLClassifier)) {
               outBuff
-                  .append("NOTE - if test set is not compatible then results are "
-                      + "unpredictable\n\n");
+                .append("NOTE - if test set is not compatible then results are "
+                  + "unpredictable\n\n");
             }
 
             AbstractOutput classificationOutput = null;
             if (outputPredictionsText) {
-              classificationOutput = (AbstractOutput) m_ClassificationOutputEditor
-                  .getValue();
+              classificationOutput =
+                (AbstractOutput) m_ClassificationOutputEditor.getValue();
               classificationOutput.setHeader(userTestStructure);
               classificationOutput.setBuffer(outBuff);
-              /*
-               * classificationOutput.setAttributes("");
-               * classificationOutput.setOutputDistribution(false);
-               */
-              // classificationOutput.printHeader();
             }
 
             // make adjustments if the classifier is an InputMappedClassifier
-            eval = setupEval(eval, classifierToUse, userTestStructure,
-                costMatrix, plotInstances, classificationOutput, false);
+            eval =
+              setupEval(eval, classifierToUse, trainHeader != null ? trainHeader : userTestStructure, costMatrix,
+                plotInstances, classificationOutput, false);
             eval.useNoPriors();
+            plotInstances.setUp();
 
             if (outputPredictionsText) {
               printPredictionsHeader(outBuff, classificationOutput,
-                  "user test set");
+                "user test set");
             }
 
+            int batchSize = 100;
+            Instances batchInst = null;
+            if (classifierToUse instanceof BatchPredictor
+              && ((BatchPredictor) classifierToUse)
+                .implementsMoreEfficientBatchPrediction()) {
+              batchInst = new Instances(userTestStructure, 0);
+              String batchSizeS =
+                ((BatchPredictor) classifierToUse).getBatchSize();
+              if (batchSizeS != null && batchSizeS.length() > 0) {
+                try {
+                  batchSizeS =
+                    Environment.getSystemWide().substitute(batchSizeS);
+                } catch (Exception ex) {
+                }
+                try {
+                  batchSize = Integer.parseInt(batchSizeS);
+                } catch (NumberFormatException e) {
+                  // just go with the default
+                }
+              }
+            }
             Instance instance;
             int jj = 0;
             while (source.hasMoreElements(userTestStructure)) {
               instance = source.nextElement(userTestStructure);
-              plotInstances.process(instance, classifierToUse, eval);
-              if (outputPredictionsText) {
-                classificationOutput.printClassification(classifierToUse,
+
+              if (classifierToUse instanceof BatchPredictor
+                && ((BatchPredictor) classifierToUse)
+                  .implementsMoreEfficientBatchPrediction()) {
+                batchInst.add(instance);
+                if (batchInst.numInstances() == batchSize) {
+                  Instances toPred = new Instances(batchInst);
+                  for (int i = 0; i < toPred.numInstances(); i++) {
+                    toPred.instance(i).setClassMissing();
+                  }
+                  double[][] predictions =
+                    ((BatchPredictor) classifierToUse)
+                      .distributionsForInstances(toPred);
+                  plotInstances.process(batchInst, predictions, eval);
+
+                  if (outputPredictionsText) {
+                    for (int kk = 0; kk < batchInst.numInstances(); kk++) {
+                      classificationOutput.printClassification(predictions[kk],
+                        batchInst.instance(kk), kk);
+                    }
+                  }
+                  jj += batchInst.numInstances();
+                  m_Log.statusMessage("Evaluating on test data. Processed "
+                    + jj + " instances...");
+                  batchInst.delete();
+                }
+              } else {
+                plotInstances.process(instance, classifierToUse, eval);
+                if (outputPredictionsText) {
+                  classificationOutput.printClassification(classifierToUse,
                     instance, jj);
+                }
               }
               if ((++jj % 100) == 0) {
                 m_Log.statusMessage("Evaluating on test data. Processed " + jj
-                    + " instances...");
+                  + " instances...");
               }
             }
 
-            if (outputPredictionsText)
+            if (classifierToUse instanceof BatchPredictor
+              && ((BatchPredictor) classifierToUse)
+                .implementsMoreEfficientBatchPrediction()
+              && batchInst.numInstances() > 0) {
+              // finish the last batch
+
+              Instances toPred = new Instances(batchInst);
+              for (int i = 0; i < toPred.numInstances(); i++) {
+                toPred.instance(i).setClassMissing();
+              }
+
+              double[][] predictions =
+                ((BatchPredictor) classifierToUse)
+                  .distributionsForInstances(toPred);
+              plotInstances.process(batchInst, predictions, eval);
+
+              if (outputPredictionsText) {
+                for (int kk = 0; kk < batchInst.numInstances(); kk++) {
+                  classificationOutput.printClassification(predictions[kk],
+                    batchInst.instance(kk), kk);
+                }
+              }
+            }
+
+            if (outputPredictionsText) {
               classificationOutput.printFooter();
+            }
             if (outputPredictionsText && classificationOutput.generatesOutput()) {
               outBuff.append("\n");
             }
@@ -2819,8 +3092,8 @@ public class ClassifierPanel extends JPanel implements
             ex.printStackTrace();
             m_Log.logMessage(ex.getMessage());
             JOptionPane.showMessageDialog(ClassifierPanel.this,
-                "Problem evaluating classifier:\n" + ex.getMessage(),
-                "Evaluate classifier", JOptionPane.ERROR_MESSAGE);
+              "Problem evaluating classifier:\n" + ex.getMessage(),
+              "Evaluate classifier", JOptionPane.ERROR_MESSAGE);
             m_Log.statusMessage("Problem evaluating classifier");
           } finally {
             try {
@@ -2833,15 +3106,21 @@ public class ClassifierPanel extends JPanel implements
               }
 
               if (plotInstances != null
-                  && plotInstances.getPlotInstances().numInstances() > 0) {
+                && plotInstances.getPlotInstances() != null
+                && plotInstances.getPlotInstances().numInstances() > 0) {
                 m_CurrentVis = new VisualizePanel();
+                if (getMainApplication() != null) {
+                  Settings settings = getMainApplication().getApplicationSettings();
+                  m_CurrentVis.applySettings(settings,
+                    weka.gui.explorer.VisualizePanel.ScatterDefaults.ID);
+                }
                 m_CurrentVis.setName(name + " ("
-                    + userTestStructure.relationName() + ")");
+                  + userTestStructure.relationName() + ")");
                 m_CurrentVis.setLog(m_Log);
                 m_CurrentVis.addPlot(plotInstances.getPlotData(name));
                 // m_CurrentVis.setColourIndex(plotInstances.getPlotInstances().classIndex()+1);
                 m_CurrentVis.setColourIndex(plotInstances.getPlotInstances()
-                    .classIndex());
+                  .classIndex());
                 plotInstances.cleanUp();
 
                 if (classifierToUse instanceof Drawable) {
@@ -2852,24 +3131,26 @@ public class ClassifierPanel extends JPanel implements
                 }
 
                 if (saveVis) {
-                  FastVector vv = new FastVector();
-                  vv.addElement(classifier);
-                  if (trainHeader != null)
-                    vv.addElement(trainHeader);
-                  vv.addElement(m_CurrentVis);
+                  ArrayList<Object> vv = new ArrayList<Object>();
+                  vv.add(classifier);
+                  if (trainHeader != null) {
+                    vv.add(trainHeader);
+                  }
+                  vv.add(m_CurrentVis);
                   if (grph != null) {
-                    vv.addElement(grph);
+                    vv.add(grph);
                   }
                   if ((eval != null) && (eval.predictions() != null)) {
-                    vv.addElement(eval.predictions());
-                    vv.addElement(userTestStructure.classAttribute());
+                    vv.add(eval.predictions());
+                    vv.add(userTestStructure.classAttribute());
                   }
                   m_History.addObject(name, vv);
                 } else {
-                  FastVector vv = new FastVector();
-                  vv.addElement(classifierToUse);
-                  if (trainHeader != null)
-                    vv.addElement(trainHeader);
+                  ArrayList<Object> vv = new ArrayList<Object>();
+                  vv.add(classifierToUse);
+                  if (trainHeader != null) {
+                    vv.add(trainHeader);
+                  }
                   m_History.addObject(name, vv);
                 }
               }
@@ -2913,10 +3194,11 @@ public class ClassifierPanel extends JPanel implements
       return;
     }
 
-    if (!ExplorerDefaults.getInitGenericObjectEditorFilter())
+    if (!ExplorerDefaults.getInitGenericObjectEditorFilter()) {
       tempInst = new Instances(m_Instances, 0);
-    else
+    } else {
       tempInst = new Instances(m_Instances);
+    }
     tempInst.setClassIndex(m_ClassCombo.getSelectedIndex());
 
     try {
@@ -2934,12 +3216,12 @@ public class ClassifierPanel extends JPanel implements
     Classifier classifier = (Classifier) m_ClassifierEditor.getValue();
     Capabilities currentSchemeCapabilities = null;
     if (classifier != null && currentFilter != null
-        && (classifier instanceof CapabilitiesHandler)) {
-      currentSchemeCapabilities = ((CapabilitiesHandler) classifier)
-          .getCapabilities();
+      && (classifier instanceof CapabilitiesHandler)) {
+      currentSchemeCapabilities =
+        ((CapabilitiesHandler) classifier).getCapabilities();
 
       if (!currentSchemeCapabilities.supportsMaybe(currentFilter)
-          && !currentSchemeCapabilities.supports(currentFilter)) {
+        && !currentSchemeCapabilities.supports(currentFilter)) {
         m_StartBut.setEnabled(false);
       }
     }
@@ -2952,10 +3234,11 @@ public class ClassifierPanel extends JPanel implements
    */
   @Override
   public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
-    if (e.getFilter() == null)
+    if (e.getFilter() == null) {
       updateCapabilitiesFilter(null);
-    else
+    } else {
       updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
+    }
   }
 
   /**
@@ -2999,6 +3282,279 @@ public class ClassifierPanel extends JPanel implements
     return "Classify instances";
   }
 
+  @Override
+  public boolean requiresLog() {
+    return true;
+  }
+
+  @Override
+  public boolean acceptsInstances() {
+    return true;
+  }
+
+  @Override
+  public Defaults getDefaultSettings() {
+    return new ClassifierPanelDefaults();
+  }
+
+  @Override
+  public boolean okToBeActive() {
+    return m_Instances != null;
+  }
+
+  @Override
+  public void setActive(boolean active) {
+    super.setActive(active);
+    if (m_isActive) {
+      // make sure initial settings get applied
+      settingsChanged();
+    }
+  }
+
+  @Override
+  public void settingsChanged() {
+    if (getMainApplication() != null) {
+      if (!m_initialSettingsSet) {
+        Object initialC =
+          getMainApplication().getApplicationSettings().getSetting(
+            getPerspectiveID(), ClassifierPanelDefaults.CLASSIFIER_KEY,
+            ClassifierPanelDefaults.CLASSIFIER, Environment.getSystemWide());
+        m_ClassifierEditor.setValue(initialC);
+
+        TestMode initialTestMode =
+          getMainApplication().getApplicationSettings().getSetting(
+            getPerspectiveID(), ClassifierPanelDefaults.TEST_MODE_KEY,
+            ClassifierPanelDefaults.TEST_MODE, Environment.getSystemWide());
+
+        m_CVBut.setSelected(initialTestMode == TestMode.CROSS_VALIDATION);
+        m_PercentBut.setSelected(initialTestMode == TestMode.PERCENTAGE_SPLIT);
+        m_TrainBut.setSelected(initialTestMode == TestMode.USE_TRAINING_SET);
+        m_TestSplitBut
+          .setSelected(initialTestMode == TestMode.SEPARATE_TEST_SET);
+        m_CVText.setEnabled(m_CVBut.isSelected());
+        m_PercentText.setEnabled(m_PercentBut.isSelected());
+        m_CVText.setText(""
+          + getMainApplication().getApplicationSettings().getSetting(
+            getPerspectiveID(),
+            ClassifierPanelDefaults.CROSS_VALIDATION_FOLDS_KEY,
+            ClassifierPanelDefaults.CROSS_VALIDATION_FOLDS,
+            Environment.getSystemWide()));
+        m_PercentText.setText(""
+          + getMainApplication().getApplicationSettings().getSetting(
+            getPerspectiveID(), ClassifierPanelDefaults.PERCENTAGE_SPLIT_KEY,
+            ClassifierPanelDefaults.PERCENTAGE_SPLIT,
+            Environment.getSystemWide()));
+
+        // TODO these widgets will disapear, as the "More options" dialog will
+        // not be necessary
+        m_OutputModelBut.setSelected(getMainApplication()
+          .getApplicationSettings().getSetting(getPerspectiveID(),
+            ClassifierPanelDefaults.OUTPUT_MODEL_KEY,
+            ClassifierPanelDefaults.OUTPUT_MODEL, Environment.getSystemWide()));
+        m_OutputPerClassBut.setSelected(getMainApplication()
+          .getApplicationSettings().getSetting(getPerspectiveID(),
+            ClassifierPanelDefaults.OUTPUT_PER_CLASS_STATS_KEY,
+            ClassifierPanelDefaults.OUTPUT_PER_CLASS_STATS,
+            Environment.getSystemWide()));
+        m_OutputEntropyBut.setSelected(getMainApplication()
+          .getApplicationSettings().getSetting(getPerspectiveID(),
+            ClassifierPanelDefaults.OUTPUT_ENTROPY_EVAL_METRICS_KEY,
+            ClassifierPanelDefaults.OUTPUT_ENTROPY_EVAL_METRICS,
+            Environment.getSystemWide()));
+        m_OutputConfusionBut.setSelected(getMainApplication()
+          .getApplicationSettings().getSetting(getPerspectiveID(),
+            ClassifierPanelDefaults.OUTPUT_CONFUSION_MATRIX_KEY,
+            ClassifierPanelDefaults.OUTPUT_CONFUSION_MATRIX,
+            Environment.getSystemWide()));
+        m_StorePredictionsBut.setSelected(getMainApplication()
+          .getApplicationSettings().getSetting(getPerspectiveID(),
+            ClassifierPanelDefaults.STORE_PREDICTIONS_FOR_VIS_KEY,
+            ClassifierPanelDefaults.STORE_PREDICTIONS_FOR_VIS,
+            Environment.getSystemWide()));
+        m_errorPlotPointSizeProportionalToMargin
+          .setSelected(getMainApplication().getApplicationSettings()
+            .getSetting(getPerspectiveID(),
+              ClassifierPanelDefaults.ERROR_PLOT_POINT_SIZE_PROP_TO_MARGIN_KEY,
+              ClassifierPanelDefaults.ERROR_PLOT_POINT_SIZE_PROP_TO_MARGIN,
+              Environment.getSystemWide()));
+        m_RandomSeedText.setText(""
+          + getMainApplication().getApplicationSettings().getSetting(
+            getPerspectiveID(), ClassifierPanelDefaults.RANDOM_SEED_KEY,
+            ClassifierPanelDefaults.RANDOM_SEED, Environment.getSystemWide()));
+      }
+      m_initialSettingsSet = true;
+
+      Font outputFont =
+        getMainApplication().getApplicationSettings().getSetting(
+          getPerspectiveID(), ClassifierPanelDefaults.OUTPUT_FONT_KEY,
+          ClassifierPanelDefaults.OUTPUT_FONT, Environment.getSystemWide());
+      m_OutText.setFont(outputFont);
+      m_History.setFont(outputFont);
+      Color textColor =
+        getMainApplication().getApplicationSettings().getSetting(
+          getPerspectiveID(), ClassifierPanelDefaults.OUTPUT_TEXT_COLOR_KEY,
+          ClassifierPanelDefaults.OUTPUT_TEXT_COLOR,
+          Environment.getSystemWide());
+      m_OutText.setForeground(textColor);
+      m_History.setForeground(textColor);
+      Color outputBackgroundColor =
+        getMainApplication().getApplicationSettings().getSetting(
+          getPerspectiveID(),
+          ClassifierPanelDefaults.OUTPUT_BACKGROUND_COLOR_KEY,
+          ClassifierPanelDefaults.OUTPUT_BACKGROUND_COLOR,
+          Environment.getSystemWide());
+      m_OutText.setBackground(outputBackgroundColor);
+      m_History.setBackground(outputBackgroundColor);
+    }
+  }
+
+  public static enum TestMode {
+    CROSS_VALIDATION, PERCENTAGE_SPLIT, USE_TRAINING_SET, SEPARATE_TEST_SET;
+  }
+
+  /**
+   * Default settings for the classifier panel
+   */
+  protected static final class ClassifierPanelDefaults extends Defaults {
+    public static final String ID = "weka.gui.explorer.classifierpanel";
+
+    protected static final Settings.SettingKey CLASSIFIER_KEY =
+      new Settings.SettingKey(ID + ".initialClassifier", "Initial classifier",
+        "On startup, set this classifier as the default one");
+    protected static final Classifier CLASSIFIER = new ZeroR();
+
+    protected static final Settings.SettingKey TEST_MODE_KEY =
+      new Settings.SettingKey(ID + ".initialTestMode", "Default test mode", "");
+    protected static final TestMode TEST_MODE = TestMode.CROSS_VALIDATION;
+
+    protected static final Settings.SettingKey CROSS_VALIDATION_FOLDS_KEY =
+      new Settings.SettingKey(ID + ".crossValidationFolds",
+        "Default cross validation folds", "");
+    protected static final int CROSS_VALIDATION_FOLDS = 10;
+
+    protected static final Settings.SettingKey PERCENTAGE_SPLIT_KEY =
+      new Settings.SettingKey(ID + ".percentageSplit",
+        "Default percentage split", "");
+    protected static final int PERCENTAGE_SPLIT = 66;
+
+    protected static final Settings.SettingKey OUTPUT_MODEL_KEY =
+      new Settings.SettingKey(ID + ".outputModel", "Output model obtained from"
+        + " the full training set", "");
+    protected static final boolean OUTPUT_MODEL = true;
+
+    protected static final Settings.SettingKey OUTPUT_PER_CLASS_STATS_KEY =
+      new Settings.SettingKey(ID + ".outputPerClassStats",
+        "Output per-class statistics", "");
+    protected static final boolean OUTPUT_PER_CLASS_STATS = true;
+
+    protected static final Settings.SettingKey OUTPUT_ENTROPY_EVAL_METRICS_KEY =
+      new Settings.SettingKey(ID + ".outputEntropyMetrics", "Output entropy "
+        + "evaluation metrics", "");
+    protected static final boolean OUTPUT_ENTROPY_EVAL_METRICS = false;
+
+    protected static final Settings.SettingKey OUTPUT_CONFUSION_MATRIX_KEY =
+      new Settings.SettingKey(ID + ".outputConfusionMatrix",
+        "Output confusion " + "matrix", "");
+    protected static final boolean OUTPUT_CONFUSION_MATRIX = true;
+
+    protected static final Settings.SettingKey STORE_PREDICTIONS_FOR_VIS_KEY =
+      new Settings.SettingKey(ID + ".storePredsForVis", "Store predictions for"
+        + " visualization", "");
+    protected static final boolean STORE_PREDICTIONS_FOR_VIS = true;
+
+    /*
+     * protected static final Settings.SettingKey OUTPUT_PREDICTIONS_KEY = new
+     * Settings.SettingKey(ID + ".outputPredictions", "Output predictions", "");
+     * protected static final boolean OUTPUT_PREDICTIONS = false;
+     */
+
+    protected static final Settings.SettingKey PREDICTION_FORMATTER_KEY =
+      new Settings.SettingKey(ID + ".predictionFormatter",
+        "Prediction formatter", "");
+    protected static final AbstractOutput PREDICTION_FORMATTER = new Null();
+
+    protected static final Settings.SettingKey ERROR_PLOT_POINT_SIZE_PROP_TO_MARGIN_KEY =
+      new Settings.SettingKey(
+        ID + ".errorPlotPointSizePropToMargin",
+        "Error plot point size proportional to margin",
+        "In classifier error plots the point size will be set proportional to "
+          + "the absolute value of the prediction margin (affects classification "
+          + "only)");
+    protected static final boolean ERROR_PLOT_POINT_SIZE_PROP_TO_MARGIN = false;
+
+    protected static final Settings.SettingKey COST_SENSITIVE_EVALUATION_KEY =
+      new Settings.SettingKey(ID + ".costSensitiveEval",
+        "Cost sensitive evaluation",
+        "Evaluate errors with respect to a cost matrix");
+    protected static final boolean COST_SENSITIVE_EVALUATION = false;
+
+    protected static final Settings.SettingKey COST_MATRIX_KEY =
+      new Settings.SettingKey(ID + ".costMatrix",
+        "Cost matrix for cost sensitive " + "evaluation", "");
+    protected static final CostMatrix COST_MATRIX = new CostMatrix(1);
+
+    protected static final Settings.SettingKey RANDOM_SEED_KEY =
+      new Settings.SettingKey(ID + ".randomSeed",
+        "Random seed for XVal / % Split", "The seed for randomization");
+    protected static final int RANDOM_SEED = 1;
+
+    protected static final Settings.SettingKey PRESERVE_ORDER_FOR_PERCENT_SPLIT_KEY =
+      new Settings.SettingKey(ID + ".preserveOrder",
+        "Preserve order for % Split",
+        "Preserves the order in a percentage split");
+    protected static final boolean PRESERVE_ORDER_FOR_PERCENT_SPLIT = false;
+
+    protected static final Settings.SettingKey SOURCE_CODE_CLASS_NAME_KEY =
+      new Settings.SettingKey(ID + ".sourceCodeClassName", "Source code class "
+        + "name", "Default classname of a Sourcable classifier");
+    protected static final String SOURCE_CODE_CLASS_NAME = "WekaClassifier";
+
+    protected static final Settings.SettingKey OUTPUT_FONT_KEY =
+      new Settings.SettingKey(ID + ".outputFont", "Font for text output",
+        "Font to " + "use in the output area");
+    protected static final Font OUTPUT_FONT = new Font("Monospaced",
+      Font.PLAIN, 12);
+
+    protected static final Settings.SettingKey OUTPUT_TEXT_COLOR_KEY =
+      new Settings.SettingKey(ID + ".outputFontColor", "Output text color",
+        "Color " + "of output text");
+    protected static final Color OUTPUT_TEXT_COLOR = Color.black;
+
+    protected static final Settings.SettingKey OUTPUT_BACKGROUND_COLOR_KEY =
+      new Settings.SettingKey(ID + ".outputBackgroundColor",
+        "Output background color", "Output background color");
+    protected static final Color OUTPUT_BACKGROUND_COLOR = Color.white;
+    private static final long serialVersionUID = 7109938811150596359L;
+
+    public ClassifierPanelDefaults() {
+      super(ID);
+
+      m_defaults.put(CLASSIFIER_KEY, CLASSIFIER);
+      m_defaults.put(TEST_MODE_KEY, TEST_MODE);
+      m_defaults.put(CROSS_VALIDATION_FOLDS_KEY, CROSS_VALIDATION_FOLDS);
+      m_defaults.put(PERCENTAGE_SPLIT_KEY, PERCENTAGE_SPLIT);
+      m_defaults.put(OUTPUT_MODEL_KEY, OUTPUT_MODEL);
+      m_defaults.put(OUTPUT_PER_CLASS_STATS_KEY, OUTPUT_PER_CLASS_STATS);
+      m_defaults.put(OUTPUT_ENTROPY_EVAL_METRICS_KEY,
+        OUTPUT_ENTROPY_EVAL_METRICS);
+      m_defaults.put(OUTPUT_CONFUSION_MATRIX_KEY, OUTPUT_CONFUSION_MATRIX);
+      m_defaults.put(STORE_PREDICTIONS_FOR_VIS_KEY, STORE_PREDICTIONS_FOR_VIS);
+      // m_defaults.put(OUTPUT_PREDICTIONS_KEY, OUTPUT_PREDICTIONS);
+      m_defaults.put(PREDICTION_FORMATTER_KEY, PREDICTION_FORMATTER);
+      m_defaults.put(ERROR_PLOT_POINT_SIZE_PROP_TO_MARGIN_KEY,
+        ERROR_PLOT_POINT_SIZE_PROP_TO_MARGIN);
+      m_defaults.put(COST_SENSITIVE_EVALUATION_KEY, COST_SENSITIVE_EVALUATION);
+      m_defaults.put(COST_MATRIX_KEY, COST_MATRIX);
+      m_defaults.put(RANDOM_SEED_KEY, RANDOM_SEED);
+      m_defaults.put(PRESERVE_ORDER_FOR_PERCENT_SPLIT_KEY,
+        PRESERVE_ORDER_FOR_PERCENT_SPLIT);
+      m_defaults.put(SOURCE_CODE_CLASS_NAME_KEY, SOURCE_CODE_CLASS_NAME);
+      m_defaults.put(OUTPUT_FONT_KEY, OUTPUT_FONT);
+      m_defaults.put(OUTPUT_TEXT_COLOR_KEY, OUTPUT_TEXT_COLOR);
+      m_defaults.put(OUTPUT_BACKGROUND_COLOR_KEY, OUTPUT_BACKGROUND_COLOR);
+    }
+  }
+
   /**
    * Tests out the classifier panel from the command line.
    * 
@@ -3007,8 +3563,8 @@ public class ClassifierPanel extends JPanel implements
   public static void main(String[] args) {
 
     try {
-      final javax.swing.JFrame jf = new javax.swing.JFrame(
-          "Weka Explorer: Classifier");
+      final javax.swing.JFrame jf =
+        new javax.swing.JFrame("Weka Explorer: Classifier");
       jf.getContentPane().setLayout(new BorderLayout());
       final ClassifierPanel sp = new ClassifierPanel();
       jf.getContentPane().add(sp, BorderLayout.CENTER);
@@ -3027,8 +3583,8 @@ public class ClassifierPanel extends JPanel implements
       jf.setVisible(true);
       if (args.length == 1) {
         System.err.println("Loading instances from " + args[0]);
-        java.io.Reader r = new java.io.BufferedReader(new java.io.FileReader(
-            args[0]));
+        java.io.Reader r =
+          new java.io.BufferedReader(new java.io.FileReader(args[0]));
         Instances i = new Instances(r);
         sp.setInstances(i);
       }

@@ -25,6 +25,8 @@ public class SMACTrajectoryParser extends TrajectoryParser
     //private Pattern mTrajPattern = Pattern.compile("([\\-\\.\\d]+),\\s*([\\-\\.\\d]+),\\s*[\\-\\.\\d]+,\\s*[\\-\\.\\d]+,\\s*[\\-\\.\\d]+,\\s*(.*)");
     private Pattern mRunsAndResultFileNamePattern = Pattern.compile("runs_and_results-it(\\d+).csv");
 
+    public SMACTrajectoryParser(){ super(); };//To help with the unit tests, don't remove.
+
     public Trajectory parseTrajectory(Experiment experiment, File folder, String seed)
     {
         //Load up the conditional params
@@ -66,12 +68,8 @@ public class SMACTrajectoryParser extends TrajectoryParser
                     score = Float.parseFloat(matcher.group(2));
 
                     log.debug("Time: {}, score: {}", time, score);
-                    if(score < currentBest)
-                    {
-                        currentBest = score;
-                        argString = filterArgString(params, matcher.group(3));
-                        traj.addPoint(new Trajectory.Point(time, score, argString));
-                    }
+                    argString = filterArgString(params, matcher.group(3));
+                    traj.addPoint(new Trajectory.Point(time, score, argString));
                 }
                 else
                 {
@@ -132,7 +130,7 @@ public class SMACTrajectoryParser extends TrajectoryParser
                         log.error(e.getMessage(), e);
                     }
                 }
-                traj.setEvaluationCounts(numEvals, numMemOut, numTimeOut); 
+                traj.setEvaluationCounts(numEvals, numMemOut, numTimeOut);
             }
             else
             {
@@ -170,4 +168,3 @@ public class SMACTrajectoryParser extends TrajectoryParser
         return autoweka.Util.argMapToString(params.filterParams(argMap));
     }
 }
-

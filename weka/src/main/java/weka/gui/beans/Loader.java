@@ -44,23 +44,21 @@ import weka.core.Utils;
 import weka.core.converters.ArffLoader;
 import weka.core.converters.DatabaseLoader;
 import weka.core.converters.FileSourcedConverter;
+import weka.core.converters.Loader.StructureNotReadyException;
 import weka.gui.Logger;
 
 /**
  * Loads data sets using weka.core.converter classes
  * 
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 9219 $
+ * @version $Revision: 10221 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
  */
-public class Loader extends AbstractDataSource implements Startable, /*
-                                                                      * UserRequestAcceptor
-                                                                      * ,
-                                                                      */
-WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
-    StructureProducer {
+public class Loader extends AbstractDataSource implements Startable,
+  WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
+  StructureProducer {
 
   /** for serialization */
   private static final long serialVersionUID = 1993738191961163027L;
@@ -130,10 +128,11 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
       m_DP = dp;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void run() {
       String stm = getCustomName() + "$" + hashCode() + 99
-          + "| - overall flow throughput -|";
+        + "| - overall flow throughput -|";
       try {
         m_visual.setAnimated();
         // m_visual.setText("Loading...");
@@ -158,7 +157,7 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
         String msg = statusMessagePrefix();
         if (m_Loader instanceof FileSourcedConverter) {
           msg += "Loading "
-              + ((FileSourcedConverter) m_Loader).retrieveFile().getName();
+            + ((FileSourcedConverter) m_Loader).retrieveFile().getName();
         } else {
           msg += "Loading...";
         }
@@ -170,7 +169,7 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
           m_throughput = new StreamThroughput(statusMessagePrefix());
 
           m_flowThroughput = new StreamThroughput(stm, "Starting flow...",
-              m_log);
+            m_log);
 
           m_state = INCREMENTAL_LOADING;
           // boolean start = true;
@@ -187,7 +186,7 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
             structure = m_Loader.getStructure();
             if (structure.checkForStringAttributes()) {
               structureCopy = (Instances) (new SerializedObject(structure)
-                  .getObject());
+                .getObject());
               stringAttsPresent = true;
             }
             currentStructure = structure;
@@ -196,9 +195,9 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
           } catch (IOException e) {
             if (m_log != null) {
               m_log.statusMessage(statusMessagePrefix()
-                  + "ERROR (See log for details");
+                + "ERROR (See log for details");
               m_log.logMessage("[Loader] " + statusMessagePrefix() + " "
-                  + e.getMessage());
+                + e.getMessage());
             }
             e.printStackTrace();
           }
@@ -207,9 +206,9 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
           } catch (IOException e) {
             if (m_log != null) {
               m_log.statusMessage(statusMessagePrefix()
-                  + "ERROR (See log for details");
+                + "ERROR (See log for details");
               m_log.logMessage("[Loader] " + statusMessagePrefix() + " "
-                  + e.getMessage());
+                + e.getMessage());
             }
             e.printStackTrace();
           }
@@ -269,7 +268,7 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
           m_visual.setStatic();
           if (m_log != null) {
             m_log.logMessage("[Loader] " + statusMessagePrefix() + " loaded "
-                + m_dataSet.relationName());
+              + m_dataSet.relationName());
           }
           // m_visual.setText(m_dataSet.relationName());
           notifyDataSetLoaded(new DataSetEvent(m_DP, m_dataSet));
@@ -277,16 +276,16 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
       } catch (Exception ex) {
         if (m_log != null) {
           m_log.statusMessage(statusMessagePrefix()
-              + "ERROR (See log for details");
+            + "ERROR (See log for details");
           m_log.logMessage("[Loader] " + statusMessagePrefix() + " "
-              + ex.getMessage());
+            + ex.getMessage());
         }
         ex.printStackTrace();
       } finally {
         if (Thread.currentThread().isInterrupted()) {
           if (m_log != null) {
             m_log.logMessage("[Loader] " + statusMessagePrefix()
-                + " loading interrupted!");
+              + " loading interrupted!");
           }
         }
         m_ioThread = null;
@@ -386,14 +385,14 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
     m_Loader = loader;
     String loaderName = loader.getClass().toString();
     loaderName = loaderName.substring(loaderName.lastIndexOf('.') + 1,
-        loaderName.length());
+      loaderName.length());
     if (loadImages) {
       if (m_Loader instanceof Visible) {
         m_visual = ((Visible) m_Loader).getVisual();
       } else {
 
         if (!m_visual.loadIcons(BeanVisual.ICON_PATH + loaderName + ".gif",
-            BeanVisual.ICON_PATH + loaderName + "_animated.gif")) {
+          BeanVisual.ICON_PATH + loaderName + "_animated.gif")) {
           useDefaultVisual();
         }
       }
@@ -427,25 +426,33 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
       // If incremental then specify whether this FORMAT_AVAILABLE
       // event is actually the start of stream processing or just
       // due to a file/source change
-      System.err.println("Here - " + notificationOnly[0]);
       m_ie.m_formatNotificationOnly = notificationOnly[0];
     } else {
       m_ie.m_formatNotificationOnly = false;
     }
 
-    m_Loader.reset();
+    try {
+      m_Loader.reset();
 
-    // Set environment variables
-    if (m_Loader instanceof EnvironmentHandler && m_env != null) {
-      try {
-        ((EnvironmentHandler) m_Loader).setEnvironment(m_env);
-      } catch (Exception ex) {
+      // Set environment variables
+      if (m_Loader instanceof EnvironmentHandler && m_env != null) {
+        try {
+          ((EnvironmentHandler) m_Loader).setEnvironment(m_env);
+        } catch (Exception ex) {
+        }
+      }
+      m_dataFormat = m_Loader.getStructure();
+      System.out
+        .println("[Loader] Notifying listeners of instance structure avail.");
+      notifyStructureAvailable(m_dataFormat);
+    } catch (StructureNotReadyException e) {
+      if (m_log != null) {
+        m_log.statusMessage(statusMessagePrefix() + "WARNING: "
+          + e.getMessage());
+        m_log.logMessage("[Loader] " + statusMessagePrefix() + " "
+          + e.getMessage());
       }
     }
-    m_dataFormat = m_Loader.getStructure();
-    System.out
-        .println("[Loader] Notifying listeners of instance structure avail.");
-    notifyStructureAvailable(m_dataFormat);
   }
 
   /**
@@ -505,7 +512,7 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
 
     if (!(algorithm instanceof weka.core.converters.Loader)) {
       throw new IllegalArgumentException(algorithm.getClass() + " : incorrect "
-          + "type of algorithm (Loader)");
+        + "type of algorithm (Loader)");
     }
     setLoader((weka.core.converters.Loader) algorithm);
   }
@@ -540,15 +547,16 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
    * 
    * @param e a <code>DataSetEvent</code> value
    */
+  @SuppressWarnings("unchecked")
   protected void notifyDataSetLoaded(DataSetEvent e) {
-    Vector l;
+    Vector<DataSourceListener> l;
     synchronized (this) {
-      l = (Vector) m_listeners.clone();
+      l = (Vector<DataSourceListener>) m_listeners.clone();
     }
 
     if (l.size() > 0) {
       for (int i = 0; i < l.size(); i++) {
-        ((DataSourceListener) l.elementAt(i)).acceptDataSet(e);
+        l.elementAt(i).acceptDataSet(e);
       }
       m_dataSet = null;
     }
@@ -559,15 +567,16 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
    * 
    * @param e an <code>InstanceEvent</code> value
    */
+  @SuppressWarnings("unchecked")
   protected void notifyInstanceLoaded(InstanceEvent e) {
-    Vector l;
+    Vector<InstanceListener> l;
     synchronized (this) {
-      l = (Vector) m_listeners.clone();
+      l = (Vector<InstanceListener>) m_listeners.clone();
     }
 
     if (l.size() > 0) {
       for (int i = 0; i < l.size(); i++) {
-        ((InstanceListener) l.elementAt(i)).acceptInstance(e);
+        l.elementAt(i).acceptInstance(e);
       }
       m_dataSet = null;
     }
@@ -644,7 +653,7 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
     if (m_ioThread == null) {
       if (m_Loader instanceof FileSourcedConverter) {
         String temp = ((FileSourcedConverter) m_Loader).retrieveFile()
-            .getPath();
+          .getPath();
         Environment env = (m_env == null) ? Environment.getSystemWide() : m_env;
         try {
           temp = env.substitute(temp);
@@ -655,10 +664,10 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
         // forward slashes are platform independent for resources read from the
         // classpath
         String tempFixedPathSepForResource = temp.replace(File.separatorChar,
-            '/');
+          '/');
         if (!tempF.isFile()
-            && this.getClass().getClassLoader()
-                .getResource(tempFixedPathSepForResource) == null) {
+          && this.getClass().getClassLoader()
+            .getResource(tempFixedPathSepForResource) == null) {
           ok = false;
         }
       }
@@ -740,7 +749,7 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
     // pass on any current instance format
     try {
       if ((m_Loader instanceof DatabaseLoader && m_dbSet && m_dataFormat == null)
-          || (!(m_Loader instanceof DatabaseLoader) && m_dataFormat == null)) {
+        || (!(m_Loader instanceof DatabaseLoader) && m_dataFormat == null)) {
         m_dataFormat = m_Loader.getStructure();
         m_dbSet = false;
       }
@@ -771,7 +780,7 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
     m_instanceEventTargets++;
     try {
       if ((m_Loader instanceof DatabaseLoader && m_dbSet && m_dataFormat == null)
-          || (!(m_Loader instanceof DatabaseLoader) && m_dataFormat == null)) {
+        || (!(m_Loader instanceof DatabaseLoader) && m_dataFormat == null)) {
         m_dataFormat = m_Loader.getStructure();
         m_dbSet = false;
       }
@@ -938,17 +947,17 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
 
   private String statusMessagePrefix() {
     return getCustomName()
-        + "$"
-        + hashCode()
-        + "|"
-        + ((m_Loader instanceof OptionHandler) ? Utils
-            .joinOptions(((OptionHandler) m_Loader).getOptions()) + "|" : "");
+      + "$"
+      + hashCode()
+      + "|"
+      + ((m_Loader instanceof OptionHandler) ? Utils
+        .joinOptions(((OptionHandler) m_Loader).getOptions()) + "|" : "");
   }
 
   // Custom de-serialization in order to set default
   // environment variables on de-serialization
   private void readObject(ObjectInputStream aStream) throws IOException,
-      ClassNotFoundException {
+    ClassNotFoundException {
     aStream.defaultReadObject();
 
     // set a default environment to use

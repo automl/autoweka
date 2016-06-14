@@ -6,7 +6,7 @@
 # url:     http://www.sqlite.org/
 # jdbc:    http://www.zentus.com/sqlitejdbc/
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 5837 $
+# version: $Revision: 11885 $
 
 # JDBC driver (comma-separated list)
 jdbcDriver=org.sqlite.JDBC
@@ -26,6 +26,7 @@ jdbcURL=jdbc:sqlite:/path/to/database.db
 # date, getDate() = 8;        --> date
 # text, getString() = 9;      --> string
 # time, getTime() = 10;       --> date
+# timestamp, getTime() = 11;  --> date
 
 # other options
 CREATE_DOUBLE=DOUBLE

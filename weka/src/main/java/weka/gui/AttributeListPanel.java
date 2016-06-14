@@ -34,15 +34,14 @@ import javax.swing.table.TableColumnModel;
 import weka.core.Instances;
 
 /**
- * Creates a panel that displays the attributes contained in a set of
- * instances, letting the user select a single attribute for inspection.
- *
+ * Creates a panel that displays the attributes contained in a set of instances,
+ * letting the user select a single attribute for inspection.
+ * 
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10216 $
  */
-public class AttributeListPanel
-  extends JPanel {
+public class AttributeListPanel extends JPanel {
 
   /** for serialization */
   private static final long serialVersionUID = -2030706987910400362L;
@@ -50,18 +49,17 @@ public class AttributeListPanel
   /**
    * A table model that looks at the names of attributes.
    */
-  class AttributeTableModel
-    extends AbstractTableModel {
+  class AttributeTableModel extends AbstractTableModel {
 
     /** for serialization */
     private static final long serialVersionUID = -7345701953670327707L;
 
     /** The instances who's attribute structure we are reporting */
     protected Instances m_Instances;
-    
+
     /**
      * Creates the tablemodel with the given set of instances.
-     *
+     * 
      * @param instances the initial set of Instances
      */
     public AttributeTableModel(Instances instances) {
@@ -71,88 +69,94 @@ public class AttributeListPanel
 
     /**
      * Sets the tablemodel to look at a new set of instances.
-     *
+     * 
      * @param instances the new set of Instances.
      */
     public void setInstances(Instances instances) {
 
       m_Instances = instances;
     }
-    
+
     /**
      * Gets the number of attributes.
-     *
+     * 
      * @return the number of attributes.
      */
+    @Override
     public int getRowCount() {
-      
+
       return m_Instances.numAttributes();
     }
-    
+
     /**
      * Gets the number of columns: 2
-     *
+     * 
      * @return 2
      */
+    @Override
     public int getColumnCount() {
-      
+
       return 2;
     }
-    
+
     /**
      * Gets a table cell
-     *
+     * 
      * @param row the row index
      * @param column the column index
      * @return the value at row, column
      */
+    @Override
     public Object getValueAt(int row, int column) {
-      
+
       switch (column) {
       case 0:
-	return new Integer(row + 1);
+        return new Integer(row + 1);
       case 1:
-	return m_Instances.attribute(row).name();
+        return m_Instances.attribute(row).name();
       default:
-	return null;
+        return null;
       }
     }
-    
+
     /**
      * Gets the name for a column.
-     *
+     * 
      * @param column the column index.
      * @return the name of the column.
      */
+    @Override
     public String getColumnName(int column) {
-      
+
       switch (column) {
       case 0:
-	return new String("No.");
+        return new String("No.");
       case 1:
-	return new String("Name");
+        return new String("Name");
       default:
-	return null;
+        return null;
       }
     }
-    
+
     /**
      * Gets the class of elements in a column.
-     *
+     * 
      * @param col the column index.
      * @return the class of elements in the column.
      */
-    public Class getColumnClass(int col) {
+    @Override
+    public Class<?> getColumnClass(int col) {
       return getValueAt(0, col).getClass();
     }
 
     /**
      * Returns false
-     *
+     * 
      * @param row ignored
      * @param col ignored
      * @return false
      */
+    @Override
     public boolean isCellEditable(int row, int col) {
 
       return false;
@@ -164,14 +168,14 @@ public class AttributeListPanel
 
   /** The table model containing attribute names */
   protected AttributeTableModel m_Model;
-  
+
   /**
    * Creates the attribute selection panel with no initial instances.
    */
   public AttributeListPanel() {
 
     m_Table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    m_Table.setColumnSelectionAllowed(false); 
+    m_Table.setColumnSelectionAllowed(false);
     m_Table.setPreferredScrollableViewportSize(new Dimension(250, 150));
 
     setLayout(new BorderLayout());
@@ -180,7 +184,7 @@ public class AttributeListPanel
 
   /**
    * Sets the instances who's attribute names will be displayed.
-   *
+   * 
    * @param newInstances the new set of instances
    */
   public void setInstances(Instances newInstances) {
@@ -198,40 +202,41 @@ public class AttributeListPanel
     m_Table.revalidate();
     m_Table.repaint();
   }
-  
+
   /**
    * Gets the selection model used by the table.
-   *
+   * 
    * @return a value of type 'ListSelectionModel'
    */
   public ListSelectionModel getSelectionModel() {
 
     return m_Table.getSelectionModel();
   }
-  
+
   /**
    * Tests the attribute list panel from the command line.
-   *
+   * 
    * @param args must contain the name of an arff file to load.
    */
   public static void main(String[] args) {
 
     try {
       if (args.length == 0) {
-	throw new Exception("supply the name of an arff file");
+        throw new Exception("supply the name of an arff file");
       }
       Instances i = new Instances(new java.io.BufferedReader(
-				  new java.io.FileReader(args[0])));
+        new java.io.FileReader(args[0])));
       AttributeListPanel asp = new AttributeListPanel();
-      final javax.swing.JFrame jf =
-	new javax.swing.JFrame("Attribute List Panel");
+      final javax.swing.JFrame jf = new javax.swing.JFrame(
+        "Attribute List Panel");
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(asp, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
-	public void windowClosing(java.awt.event.WindowEvent e) {
-	  jf.dispose();
-	  System.exit(0);
-	}
+        @Override
+        public void windowClosing(java.awt.event.WindowEvent e) {
+          jf.dispose();
+          System.exit(0);
+        }
       });
       jf.pack();
       jf.setVisible(true);
@@ -241,5 +246,5 @@ public class AttributeListPanel
       System.err.println(ex.getMessage());
     }
   }
-  
+
 } // AttributeListPanel

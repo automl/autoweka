@@ -21,6 +21,7 @@
 
 package weka.clusterers;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -37,68 +38,78 @@ import weka.estimators.DiscreteEstimator;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 /**
- <!-- globalinfo-start -->
- * Class for wrapping a Clusterer to make it return a distribution and density. Fits normal distributions and discrete distributions within each cluster produced by the wrapped clusterer. Supports the NumberOfClustersRequestable interface only if the wrapped Clusterer does.
+ * <!-- globalinfo-start --> Class for wrapping a Clusterer to make it return a
+ * distribution and density. Fits normal distributions and discrete
+ * distributions within each cluster produced by the wrapped clusterer. Supports
+ * the NumberOfClustersRequestable interface only if the wrapped Clusterer does.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -M &lt;num&gt;
+ * <!-- options-start --> Valid options are:
+ * <p/>
+ * 
+ * <pre>
+ * -M &lt;num&gt;
  *  minimum allowable standard deviation for normal density computation 
- *  (default 1e-6)</pre>
+ *  (default 1e-6)
+ * </pre>
  * 
- * <pre> -W &lt;clusterer name&gt;
+ * <pre>
+ * -W &lt;clusterer name&gt;
  *  Clusterer to wrap.
- *  (default weka.clusterers.SimpleKMeans)</pre>
+ *  (default weka.clusterers.SimpleKMeans)
+ * </pre>
  * 
- * <pre> 
+ * <pre>
  * Options specific to clusterer weka.clusterers.SimpleKMeans:
  * </pre>
  * 
- * <pre> -N &lt;num&gt;
+ * <pre>
+ * -N &lt;num&gt;
  *  number of clusters.
- *  (default 2).</pre>
+ *  (default 2).
+ * </pre>
  * 
- * <pre> -V
+ * <pre>
+ * -V
  *  Display std. deviations for centroids.
  * </pre>
  * 
- * <pre> -M
+ * <pre>
+ * -M
  *  Replace missing values with mean/mode.
  * </pre>
  * 
- * <pre> -S &lt;num&gt;
+ * <pre>
+ * -S &lt;num&gt;
  *  Random number seed.
- *  (default 10)</pre>
+ *  (default 10)
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * Options after "--" are passed on to the base clusterer.
- *
+ * 
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10203 $
  */
-public class MakeDensityBasedClusterer 
-  extends AbstractDensityBasedClusterer
-  implements NumberOfClustersRequestable, 
-	     OptionHandler, 
-	     WeightedInstancesHandler {
+public class MakeDensityBasedClusterer extends AbstractDensityBasedClusterer
+  implements NumberOfClustersRequestable, OptionHandler,
+  WeightedInstancesHandler {
 
   /** for serialization */
   static final long serialVersionUID = -5643302427972186631L;
-  
+
   /** holds training instances header information */
   private Instances m_theInstances;
   /** prior probabilities for the fitted clusters */
-  private double [] m_priors;
+  private double[] m_priors;
   /** normal distributions fitted to each numeric attribute in each cluster */
-  private double [][][] m_modelNormal;
+  private double[][][] m_modelNormal;
   /** discrete distributions fitted to each discrete attribute in each cluster */
-  private DiscreteEstimator [][] m_model;
+  private DiscreteEstimator[][] m_model;
   /** default minimum standard deviation */
   private double m_minStdDev = 1e-6;
   /** The clusterer being wrapped */
@@ -109,29 +120,29 @@ public class MakeDensityBasedClusterer
   /**
    * Default constructor.
    * 
-   */  
+   */
   public MakeDensityBasedClusterer() {
     super();
   }
-   
+
   /**
    * Contructs a MakeDensityBasedClusterer wrapping a given Clusterer.
    * 
    * @param toWrap the clusterer to wrap around
-   */    
+   */
   public MakeDensityBasedClusterer(Clusterer toWrap) {
 
     setClusterer(toWrap);
   }
-  
+
   /**
    * Returns a string describing classifier
-   * @return a description suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description suitable for displaying in the explorer/experimenter
+   *         gui
    */
   public String globalInfo() {
-    return 
-        "Class for wrapping a Clusterer to make it return a distribution "
+    return "Class for wrapping a Clusterer to make it return a distribution "
       + "and density. Fits normal distributions and discrete distributions "
       + "within each cluster produced by the wrapped clusterer. Supports the "
       + "NumberOfClustersRequestable interface only if the wrapped Clusterer "
@@ -141,7 +152,7 @@ public class MakeDensityBasedClusterer
   /**
    * String describing default clusterer.
    * 
-   * @return 		the default clusterer classname
+   * @return the default clusterer classname
    */
   protected String defaultClustererString() {
     return SimpleKMeans.class.getName();
@@ -149,30 +160,32 @@ public class MakeDensityBasedClusterer
 
   /**
    * Set the number of clusters to generate.
-   *
+   * 
    * @param n the number of clusters to generate
-   * @throws Exception if the wrapped clusterer has not been set, or if
-   * the wrapped clusterer does not implement this facility.
+   * @throws Exception if the wrapped clusterer has not been set, or if the
+   *           wrapped clusterer does not implement this facility.
    */
+  @Override
   public void setNumClusters(int n) throws Exception {
     if (m_wrappedClusterer == null) {
       throw new Exception("Can't set the number of clusters to generate - "
-			  +"no clusterer has been set yet.");
+        + "no clusterer has been set yet.");
     }
     if (!(m_wrappedClusterer instanceof NumberOfClustersRequestable)) {
       throw new Exception("Can't set the number of clusters to generate - "
-			  +"wrapped clusterer does not support this facility.");
+        + "wrapped clusterer does not support this facility.");
     }
 
-    ((NumberOfClustersRequestable)m_wrappedClusterer).setNumClusters(n);
+    ((NumberOfClustersRequestable) m_wrappedClusterer).setNumClusters(n);
   }
 
   /**
    * Returns default capabilities of the clusterer (i.e., of the wrapper
    * clusterer).
-   *
-   * @return      the capabilities of this clusterer
+   * 
+   * @return the capabilities of this clusterer
    */
+  @Override
   public Capabilities getCapabilities() {
     if (m_wrappedClusterer != null) {
       return m_wrappedClusterer.getCapabilities();
@@ -180,16 +193,17 @@ public class MakeDensityBasedClusterer
     Capabilities result = super.getCapabilities();
     result.disableAll();
     result.enable(Capability.NO_CLASS);
-    
+
     return result;
   }
-  
+
   /**
    * Builds a clusterer for a set of instances.
-   *
+   * 
    * @param data the instances to train the clusterer with
    * @throws Exception if the clusterer hasn't been set or something goes wrong
-   */  
+   */
+  @Override
   public void buildClusterer(Instances data) throws Exception {
     // can clusterer handle the data?
     getCapabilities().testWithFail(data);
@@ -203,86 +217,87 @@ public class MakeDensityBasedClusterer
       throw new Exception("No clusterer has been set");
     }
     m_wrappedClusterer.buildClusterer(data);
-    m_model = 
-       new DiscreteEstimator[m_wrappedClusterer.numberOfClusters()][data.numAttributes()];
-    m_modelNormal = 
-      new double[m_wrappedClusterer.numberOfClusters()][data.numAttributes()][2];
-    double[][] weights =  new double[m_wrappedClusterer.numberOfClusters()][data.numAttributes()];
-    m_priors = new double[m_wrappedClusterer.numberOfClusters()]; 
-     for (int i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {
-       m_priors[i] = 1.0; // laplace correction
-       for (int j = 0; j < data.numAttributes(); j++) {
-	 if (data.attribute(j).isNominal()) {
-	   m_model[i][j] = new DiscreteEstimator(data.attribute(j).numValues(),
-						 true);
-	 }
-       }
-     }
-     
-     Instance inst = null;
+    m_model = new DiscreteEstimator[m_wrappedClusterer.numberOfClusters()][data
+      .numAttributes()];
+    m_modelNormal = new double[m_wrappedClusterer.numberOfClusters()][data
+      .numAttributes()][2];
+    double[][] weights = new double[m_wrappedClusterer.numberOfClusters()][data
+      .numAttributes()];
+    m_priors = new double[m_wrappedClusterer.numberOfClusters()];
+    for (int i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {
+      m_priors[i] = 1.0; // laplace correction
+      for (int j = 0; j < data.numAttributes(); j++) {
+        if (data.attribute(j).isNominal()) {
+          m_model[i][j] = new DiscreteEstimator(data.attribute(j).numValues(),
+            true);
+        }
+      }
+    }
 
-     // Compute mean, etc.
-     int[] clusterIndex = new int[data.numInstances()];
-     for (int i = 0; i < data.numInstances(); i++) {
-       inst = data.instance(i);
-       int cluster = m_wrappedClusterer.clusterInstance(inst);
-       m_priors[cluster] += inst.weight();
-       for (int j = 0; j < data.numAttributes(); j++) {
-	 if (!inst.isMissing(j)) {
-	   if (data.attribute(j).isNominal()) {
-	     m_model[cluster][j].addValue(inst.value(j),inst.weight());
-	   } else {
-	     m_modelNormal[cluster][j][0] += inst.weight() * inst.value(j);
-	     weights[cluster][j] += inst.weight();
-	   }
-	 }
-       }
-       clusterIndex[i] = cluster;
-     }
+    Instance inst = null;
 
-     for (int j = 0; j < data.numAttributes(); j++) {
-       if (data.attribute(j).isNumeric()) {
-	 for (int i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {	   
-	   if (weights[i][j] > 0) {
-	     m_modelNormal[i][j][0] /= weights[i][j];
-	   }
-	 }
-       }
-     }
+    // Compute mean, etc.
+    int[] clusterIndex = new int[data.numInstances()];
+    for (int i = 0; i < data.numInstances(); i++) {
+      inst = data.instance(i);
+      int cluster = m_wrappedClusterer.clusterInstance(inst);
+      m_priors[cluster] += inst.weight();
+      for (int j = 0; j < data.numAttributes(); j++) {
+        if (!inst.isMissing(j)) {
+          if (data.attribute(j).isNominal()) {
+            m_model[cluster][j].addValue(inst.value(j), inst.weight());
+          } else {
+            m_modelNormal[cluster][j][0] += inst.weight() * inst.value(j);
+            weights[cluster][j] += inst.weight();
+          }
+        }
+      }
+      clusterIndex[i] = cluster;
+    }
 
-     // Compute standard deviations
-     for (int i = 0; i < data.numInstances(); i++) {
-       inst = data.instance(i);
-       for (int j = 0; j < data.numAttributes(); j++) {
-	 if (!inst.isMissing(j)) {
-	   if (data.attribute(j).isNumeric()) {
-	     double diff = m_modelNormal[clusterIndex[i]][j][0] - inst.value(j);
-	     m_modelNormal[clusterIndex[i]][j][1] += inst.weight() * diff * diff;
-	   }
-	 }
-       }
-     }
+    for (int j = 0; j < data.numAttributes(); j++) {
+      if (data.attribute(j).isNumeric()) {
+        for (int i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {
+          if (weights[i][j] > 0) {
+            m_modelNormal[i][j][0] /= weights[i][j];
+          }
+        }
+      }
+    }
 
-     for (int j = 0; j < data.numAttributes(); j++) {
-       if (data.attribute(j).isNumeric()) {
-	 for (int i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {	   
-	   if (weights[i][j] > 0) {
-	     m_modelNormal[i][j][1] = 
-	       Math.sqrt(m_modelNormal[i][j][1] / weights[i][j]);
-	   } else if (weights[i][j] <= 0) {
-	     m_modelNormal[i][j][1] = Double.MAX_VALUE;
-	   }
-	   if (m_modelNormal[i][j][1] <= m_minStdDev) {
-	     m_modelNormal[i][j][1] = data.attributeStats(j).numericStats.stdDev;
-	     if (m_modelNormal[i][j][1] <= m_minStdDev) {
-	       m_modelNormal[i][j][1] = m_minStdDev;
-	     }
-	   }
-	 }
-       }
-     }
-     
-     Utils.normalize(m_priors);
+    // Compute standard deviations
+    for (int i = 0; i < data.numInstances(); i++) {
+      inst = data.instance(i);
+      for (int j = 0; j < data.numAttributes(); j++) {
+        if (!inst.isMissing(j)) {
+          if (data.attribute(j).isNumeric()) {
+            double diff = m_modelNormal[clusterIndex[i]][j][0] - inst.value(j);
+            m_modelNormal[clusterIndex[i]][j][1] += inst.weight() * diff * diff;
+          }
+        }
+      }
+    }
+
+    for (int j = 0; j < data.numAttributes(); j++) {
+      if (data.attribute(j).isNumeric()) {
+        for (int i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {
+          if (weights[i][j] > 0) {
+            m_modelNormal[i][j][1] = Math.sqrt(m_modelNormal[i][j][1]
+              / weights[i][j]);
+          } else if (weights[i][j] <= 0) {
+            m_modelNormal[i][j][1] = Double.MAX_VALUE;
+          }
+          if (m_modelNormal[i][j][1] <= m_minStdDev) {
+            m_modelNormal[i][j][1] = data.attributeStats(j).numericStats.stdDev;
+            if (m_modelNormal[i][j][1] <= m_minStdDev) {
+              m_modelNormal[i][j][1] = m_minStdDev;
+            }
+          }
+        }
+      }
+    }
+
+    Utils.normalize(m_priors);
   }
 
   /**
@@ -290,47 +305,49 @@ public class MakeDensityBasedClusterer
    * 
    * @return the cluster priors
    */
+  @Override
   public double[] clusterPriors() {
 
     double[] n = new double[m_priors.length];
-  
+
     System.arraycopy(m_priors, 0, n, 0, n.length);
     return n;
   }
 
   /**
-   * Computes the log of the conditional density (per cluster) for a given instance.
+   * Computes the log of the conditional density (per cluster) for a given
+   * instance.
    * 
    * @param inst the instance to compute the density for
    * @return an array containing the estimated densities
-   * @throws Exception if the density could not be computed
-   * successfully
+   * @throws Exception if the density could not be computed successfully
    */
-  public double[] logDensityPerClusterForInstance(Instance inst) throws Exception {
+  @Override
+  public double[] logDensityPerClusterForInstance(Instance inst)
+    throws Exception {
 
     int i, j;
     double logprob;
     double[] wghts = new double[m_wrappedClusterer.numberOfClusters()];
-    
+
     m_replaceMissing.input(inst);
     inst = m_replaceMissing.output();
 
     for (i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {
       logprob = 0;
       for (j = 0; j < inst.numAttributes(); j++) {
-	if (!inst.isMissing(j)) {
-	  if (inst.attribute(j).isNominal()) {
-	    logprob += Math.log(m_model[i][j].getProbability(inst.value(j)));
-	  } else { // numeric attribute
-	    logprob += logNormalDens(inst.value(j), 
-				     m_modelNormal[i][j][0], 
-				     m_modelNormal[i][j][1]);
-	  }
-	}
+        if (!inst.isMissing(j)) {
+          if (inst.attribute(j).isNominal()) {
+            logprob += Math.log(m_model[i][j].getProbability(inst.value(j)));
+          } else { // numeric attribute
+            logprob += logNormalDens(inst.value(j), m_modelNormal[i][j][0],
+              m_modelNormal[i][j][1]);
+          }
+        }
       }
       wghts[i] = logprob;
     }
-    return  wghts;
+    return wghts;
   }
 
   /** Constant for normal distribution. */
@@ -338,24 +355,27 @@ public class MakeDensityBasedClusterer
 
   /**
    * Density function of normal distribution.
+   * 
    * @param x input value
    * @param mean mean of distribution
    * @param stdDev standard deviation of distribution
    * @return the density
    */
-  private double logNormalDens (double x, double mean, double stdDev) {
+  private double logNormalDens(double x, double mean, double stdDev) {
 
     double diff = x - mean;
-    
-    return - (diff * diff / (2 * stdDev * stdDev))  - m_normConst - Math.log(stdDev);
+
+    return -(diff * diff / (2 * stdDev * stdDev)) - m_normConst
+      - Math.log(stdDev);
   }
-  
+
   /**
    * Returns the number of clusters.
-   *
+   * 
    * @return the number of clusters generated for a training dataset.
    * @throws Exception if number of clusters could not be returned successfully
    */
+  @Override
   public int numberOfClusters() throws Exception {
 
     return m_wrappedClusterer.numberOfClusters();
@@ -363,49 +383,48 @@ public class MakeDensityBasedClusterer
 
   /**
    * Returns a description of the clusterer.
-   *
+   * 
    * @return a string containing a description of the clusterer
    */
+  @Override
   public String toString() {
     if (m_priors == null) {
       return "No clusterer built yet!";
     }
 
     StringBuffer text = new StringBuffer();
-    text.append("MakeDensityBasedClusterer: \n\nWrapped clusterer: " 
-		+ m_wrappedClusterer.toString());
+    text.append("MakeDensityBasedClusterer: \n\nWrapped clusterer: "
+      + m_wrappedClusterer.toString());
 
     text.append("\nFitted estimators (with ML estimates of variance):\n");
-    
+
     for (int j = 0; j < m_priors.length; j++) {
-      text.append("\nCluster: " + j + " Prior probability: " 
-		  + Utils.doubleToString(m_priors[j], 4) + "\n\n");
-      
+      text.append("\nCluster: " + j + " Prior probability: "
+        + Utils.doubleToString(m_priors[j], 4) + "\n\n");
+
       for (int i = 0; i < m_model[0].length; i++) {
         text.append("Attribute: " + m_theInstances.attribute(i).name() + "\n");
-	
+
         if (m_theInstances.attribute(i).isNominal()) {
           if (m_model[j][i] != null) {
             text.append(m_model[j][i].toString());
           }
-        }
-        else {
-          text.append("Normal Distribution. Mean = " 
-		      + Utils.doubleToString(m_modelNormal[j][i][0], 4) 
-		      + " StdDev = " 
-		      + Utils.doubleToString(m_modelNormal[j][i][1], 4) 
-		      + "\n");
+        } else {
+          text.append("Normal Distribution. Mean = "
+            + Utils.doubleToString(m_modelNormal[j][i][0], 4) + " StdDev = "
+            + Utils.doubleToString(m_modelNormal[j][i][1], 4) + "\n");
         }
       }
     }
 
-    return  text.toString();
+    return text.toString();
   }
-  
+
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String clustererTipText() {
     return "the clusterer to wrap";
@@ -413,7 +432,7 @@ public class MakeDensityBasedClusterer
 
   /**
    * Sets the clusterer to wrap.
-   *
+   * 
    * @param toWrap the clusterer
    */
   public void setClusterer(Clusterer toWrap) {
@@ -423,29 +442,30 @@ public class MakeDensityBasedClusterer
 
   /**
    * Gets the clusterer being wrapped.
-   *
+   * 
    * @return the clusterer
    */
   public Clusterer getClusterer() {
 
     return m_wrappedClusterer;
   }
-  
+
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String minStdDevTipText() {
     return "set minimum allowable standard deviation";
   }
 
   /**
-   * Set the minimum value for standard deviation when calculating
-   * normal density. Reducing this value can help prevent arithmetic
-   * overflow resulting from multiplying large densities (arising from small
-   * standard deviations) when there are many singleton or near singleton
-   * values.
+   * Set the minimum value for standard deviation when calculating normal
+   * density. Reducing this value can help prevent arithmetic overflow resulting
+   * from multiplying large densities (arising from small standard deviations)
+   * when there are many singleton or near singleton values.
+   * 
    * @param m minimum value for standard deviation
    */
   public void setMinStdDev(double m) {
@@ -454,6 +474,7 @@ public class MakeDensityBasedClusterer
 
   /**
    * Get the minimum allowable standard deviation.
+   * 
    * @return the minumum allowable standard deviation
    */
   public double getMinStdDev() {
@@ -462,139 +483,153 @@ public class MakeDensityBasedClusterer
 
   /**
    * Returns an enumeration describing the available options..
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
-    Vector result = new Vector();
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> result = new Vector<Option>();
 
     result.addElement(new Option(
-	"\tminimum allowable standard deviation for normal density computation "
-	+"\n\t(default 1e-6)"
-	,"M",1,"-M <num>"));
-	
-    result.addElement(new Option(
-	"\tClusterer to wrap.\n"
-	+ "\t(default " + defaultClustererString() + ")",
-	"W", 1,"-W <clusterer name>"));
+      "\tminimum allowable standard deviation for normal density computation "
+        + "\n\t(default 1e-6)", "M", 1, "-M <num>"));
 
-    if ((m_wrappedClusterer != null) &&
-	(m_wrappedClusterer instanceof OptionHandler)) {
-      result.addElement(new Option(
-	  "",
-	  "", 0, "\nOptions specific to clusterer "
-	  + m_wrappedClusterer.getClass().getName() + ":"));
-      Enumeration enu = ((OptionHandler)m_wrappedClusterer).listOptions();
-      while (enu.hasMoreElements()) {
-	result.addElement(enu.nextElement());
-      }
+    result.addElement(new Option("\tClusterer to wrap.\n" + "\t(default "
+      + defaultClustererString() + ")", "W", 1, "-W <clusterer name>"));
+
+    result.addAll(Collections.list(super.listOptions()));
+
+    if ((m_wrappedClusterer != null)
+      && (m_wrappedClusterer instanceof OptionHandler)) {
+      result.addElement(new Option("", "", 0,
+        "\nOptions specific to clusterer "
+          + m_wrappedClusterer.getClass().getName() + ":"));
+      result.addAll(Collections.list(((OptionHandler) m_wrappedClusterer)
+        .listOptions()));
     }
-    
+
     return result.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <pre> -M &lt;num&gt;
+   * <!-- options-start --> Valid options are:
+   * <p/>
+   * 
+   * <pre>
+   * -M &lt;num&gt;
    *  minimum allowable standard deviation for normal density computation 
-   *  (default 1e-6)</pre>
+   *  (default 1e-6)
+   * </pre>
    * 
-   * <pre> -W &lt;clusterer name&gt;
+   * <pre>
+   * -W &lt;clusterer name&gt;
    *  Clusterer to wrap.
-   *  (default weka.clusterers.SimpleKMeans)</pre>
+   *  (default weka.clusterers.SimpleKMeans)
+   * </pre>
    * 
-   * <pre> 
+   * <pre>
    * Options specific to clusterer weka.clusterers.SimpleKMeans:
    * </pre>
    * 
-   * <pre> -N &lt;num&gt;
+   * <pre>
+   * -N &lt;num&gt;
    *  number of clusters.
-   *  (default 2).</pre>
+   *  (default 2).
+   * </pre>
    * 
-   * <pre> -V
+   * <pre>
+   * -V
    *  Display std. deviations for centroids.
    * </pre>
    * 
-   * <pre> -M
+   * <pre>
+   * -M
    *  Replace missing values with mean/mode.
    * </pre>
    * 
-   * <pre> -S &lt;num&gt;
+   * <pre>
+   * -S &lt;num&gt;
    *  Random number seed.
-   *  (default 10)</pre>
+   *  (default 10)
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
 
     String optionString = Utils.getOption('M', options);
-    if (optionString.length() != 0)
+    if (optionString.length() != 0) {
       setMinStdDev((new Double(optionString)).doubleValue());
-    else
+    } else {
       setMinStdDev(1e-6);
-     
+    }
+
     String wString = Utils.getOption('W', options);
-    if (wString.length() == 0)
+    if (wString.length() == 0) {
       wString = defaultClustererString();
-    setClusterer(AbstractClusterer.forName(wString, Utils.partitionOptions(options)));
+    }
+    setClusterer(AbstractClusterer.forName(wString,
+      Utils.partitionOptions(options)));
+
+    super.setOptions(options);
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of the clusterer.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions()
    */
+  @Override
   public String[] getOptions() {
 
-    String [] clustererOptions = new String [0];
-    if ((m_wrappedClusterer != null) &&
-	(m_wrappedClusterer instanceof OptionHandler)) {
-      clustererOptions = ((OptionHandler)m_wrappedClusterer).getOptions();
-    }
-    String [] options = new String [clustererOptions.length + 5];
-    int current = 0;
+    Vector<String> options = new Vector<String>();
 
-    options[current++] = "-M";
-    options[current++] = ""+getMinStdDev();
+    options.add("-M");
+    options.add("" + getMinStdDev());
 
     if (getClusterer() != null) {
-      options[current++] = "-W";
-      options[current++] = getClusterer().getClass().getName();
+      options.add("-W");
+      options.add(getClusterer().getClass().getName());
+      if (m_wrappedClusterer instanceof OptionHandler) {
+        String[] clustererOptions = ((OptionHandler) m_wrappedClusterer)
+          .getOptions();
+        if (clustererOptions.length > 0) {
+          options.add("--");
+          Collections.addAll(options, clustererOptions);
+        }
+      }
     }
-    options[current++] = "--";
 
-    System.arraycopy(clustererOptions, 0, options, current, 
-		     clustererOptions.length);
-    current += clustererOptions.length;
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    Collections.addAll(options, super.getOptions());
+
+    return options.toArray(new String[0]);
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10203 $");
   }
 
   /**
    * Main method for testing this class.
-   *
+   * 
    * @param argv the options
    */
-  public static void main(String [] argv) {
+  public static void main(String[] argv) {
     runClusterer(new MakeDensityBasedClusterer(), argv);
   }
 }
-

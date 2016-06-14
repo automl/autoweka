@@ -55,29 +55,27 @@ import weka.gui.Logger;
 
 /**
  * This class is a factory class for reading/writing PMML models
- *
+ * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 8034 $
+ * @version $Revision: 10203 $
  */
 public class PMMLFactory {
 
   /** for serialization */
-  
+
   protected enum ModelType {
-    UNKNOWN_MODEL ("unknown"),
-    REGRESSION_MODEL ("Regression"),
-    GENERAL_REGRESSION_MODEL ("GeneralRegression"),
-    NEURAL_NETWORK_MODEL ("NeuralNetwork"),
-    TREE_MODEL ("TreeModel"),
-    RULESET_MODEL("RuleSetModel"),
-    SVM_MODEL ("SupportVectorMachineModel");
-    
+    UNKNOWN_MODEL("unknown"), REGRESSION_MODEL("Regression"), GENERAL_REGRESSION_MODEL(
+      "GeneralRegression"), NEURAL_NETWORK_MODEL("NeuralNetwork"), TREE_MODEL(
+      "TreeModel"), RULESET_MODEL("RuleSetModel"), SVM_MODEL(
+      "SupportVectorMachineModel");
+
     private final String m_stringVal;
-    
+
     ModelType(String name) {
       m_stringVal = name;
     }
-    
+
+    @Override
     public String toString() {
       return m_stringVal;
     }
@@ -85,7 +83,7 @@ public class PMMLFactory {
 
   /**
    * Read and return a PMML model.
-   *
+   * 
    * @param filename the name of the file to read from
    * @return a PMML model
    * @throws Exception if there is a problem while reading the file
@@ -93,10 +91,10 @@ public class PMMLFactory {
   public static PMMLModel getPMMLModel(String filename) throws Exception {
     return getPMMLModel(filename, null);
   }
-  
+
   /**
    * Read and return a PMML model.
-   *
+   * 
    * @param file a <code>File</code> to read from
    * @return a PMML model
    * @throws Exception if there is a problem while reading the file
@@ -104,10 +102,10 @@ public class PMMLFactory {
   public static PMMLModel getPMMLModel(File file) throws Exception {
     return getPMMLModel(file, null);
   }
-  
+
   /**
    * Read and return a PMML model.
-   *
+   * 
    * @param stream the <code>InputStream</code> to read from
    * @return a PMML model
    * @throws Exception if there is a problem while reading from the stream
@@ -115,22 +113,23 @@ public class PMMLFactory {
   public static PMMLModel getPMMLModel(InputStream stream) throws Exception {
     return getPMMLModel(stream, null);
   }
-  
+
   /**
    * Read and return a PMML model.
-   *
+   * 
    * @param filename the name of the file to read from
    * @param log the logging object to use (or null if none is to be used)
    * @return a PMML model
    * @throws Exception if there is a problem while reading the file
    */
-  public static PMMLModel getPMMLModel(String filename, Logger log) throws Exception {
+  public static PMMLModel getPMMLModel(String filename, Logger log)
+    throws Exception {
     return getPMMLModel(new File(filename), log);
   }
 
   /**
    * Read and return a PMML model.
-   *
+   * 
    * @param file a <code>File</code> to read from
    * @param log the logging object to use (or null if none is to be used)
    * @return a PMML model
@@ -139,39 +138,43 @@ public class PMMLFactory {
   public static PMMLModel getPMMLModel(File file, Logger log) throws Exception {
     return getPMMLModel(new BufferedInputStream(new FileInputStream(file)), log);
   }
-  
+
   private static boolean isPMML(Document doc) {
     NodeList tempL = doc.getElementsByTagName("PMML");
     if (tempL.getLength() == 0) {
       return false;
     }
-    
+
     return true;
   }
 
   /**
    * Read and return a PMML model.
-   *
+   * 
    * @param stream the <code>InputStream</code> to read from
    * @param log the logging object to use (or null if none is to be used)
    * @return a PMML model
    * @throws Exception if there is a problem while reading from the stream
    */
-  public static PMMLModel getPMMLModel(InputStream stream, Logger log) throws Exception {
+  public static PMMLModel getPMMLModel(InputStream stream, Logger log)
+    throws Exception {
     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
     DocumentBuilder db = dbf.newDocumentBuilder();
     Document doc = db.parse(stream);
     stream.close();
     doc.getDocumentElement().normalize();
     if (!isPMML(doc)) {
-      throw new IllegalArgumentException("[PMMLFactory] Source is not a PMML file!!");
+      throw new IllegalArgumentException(
+        "[PMMLFactory] Source is not a PMML file!!");
     }
-    
-    //    System.out.println("Root element " + doc.getDocumentElement().getNodeName());
+
+    // System.out.println("Root element " +
+    // doc.getDocumentElement().getNodeName());
 
     Instances dataDictionary = getDataDictionaryAsInstances(doc);
-    TransformationDictionary transDict = getTransformationDictionary(doc, dataDictionary);
-    
+    TransformationDictionary transDict = getTransformationDictionary(doc,
+      dataDictionary);
+
     ModelType modelType = getModelType(doc);
     if (modelType == ModelType.UNKNOWN_MODEL) {
       throw new Exception("Unsupported PMML model type");
@@ -180,71 +183,74 @@ public class PMMLFactory {
 
     // Construct mining schema and meta data
     MiningSchema ms = new MiningSchema(model, dataDictionary, transDict);
-    
-    //System.out.println(ms);
-    //System.exit(1);
-    //    Instances miningSchema = getMiningSchemaAsInstances(model, dataDictionary);
-    PMMLModel theModel = getModelInstance(doc, modelType, model, dataDictionary, ms);
+
+    // System.out.println(ms);
+    // System.exit(1);
+    // Instances miningSchema = getMiningSchemaAsInstances(model,
+    // dataDictionary);
+    PMMLModel theModel = getModelInstance(doc, modelType, model,
+      dataDictionary, ms);
     if (log != null) {
       theModel.setLog(log);
     }
     return theModel;
   }
-  
+
   /**
    * Get the transformation dictionary (if there is one).
    * 
    * @param doc the Document containing the PMML model
    * @param dataDictionary the data dictionary as an Instances object
    * @return the transformation dictionary or null if there is none defined in
-   * the Document
+   *         the Document
    * @throws Exception if there is a problem getting the transformation
-   * dictionary
+   *           dictionary
    */
-  protected static TransformationDictionary getTransformationDictionary(Document doc, 
-      Instances dataDictionary) throws Exception {
+  protected static TransformationDictionary getTransformationDictionary(
+    Document doc, Instances dataDictionary) throws Exception {
     TransformationDictionary transDict = null;
-    
+
     NodeList transL = doc.getElementsByTagName("TransformationDictionary");
     // should be of size 0 or 1
     if (transL.getLength() > 0) {
       Node transNode = transL.item(0);
       if (transNode.getNodeType() == Node.ELEMENT_NODE) {
-        transDict = new TransformationDictionary((Element)transNode, dataDictionary);
+        transDict = new TransformationDictionary((Element) transNode,
+          dataDictionary);
       }
     }
-    
+
     return transDict;
   }
-  
 
   /**
    * Serialize a <code>PMMLModel</code> object that encapsulates a PMML model
-   *
+   * 
    * @param model the <code>PMMLModel</code> to serialize
    * @param filename the name of the file to save to
    * @throws Exception if something goes wrong during serialization
    */
-  public static void serializePMMLModel(PMMLModel model, String filename) 
+  public static void serializePMMLModel(PMMLModel model, String filename)
     throws Exception {
     serializePMMLModel(model, new File(filename));
   }
 
   /**
    * Serialize a <code>PMMLModel</code> object that encapsulates a PMML model
-   *
+   * 
    * @param model the <code>PMMLModel</code> to serialize
    * @param file the <code>File</code> to save to
    * @throws Exception if something goes wrong during serialization
    */
   public static void serializePMMLModel(PMMLModel model, File file)
     throws Exception {
-    serializePMMLModel(model, new BufferedOutputStream(new FileOutputStream(file)));
+    serializePMMLModel(model, new BufferedOutputStream(new FileOutputStream(
+      file)));
   }
 
   /**
    * Serialize a <code>PMMLModel</code> object that encapsulates a PMML model
-   *
+   * 
    * @param model the <code>PMMLModel</code> to serialize
    * @param stream the <code>OutputStream</code> to serialize to
    * @throws Exception if something goes wrong during serialization
@@ -261,29 +267,28 @@ public class PMMLFactory {
 
   /**
    * Get an instance of a PMMLModel from the supplied Document
-   *
+   * 
    * @param doc the Document holding the pmml
    * @param modelType the type of model
    * @param model the Element encapsulating the model part of the Document
    * @param dataDictionary the data dictionary as an Instances object
    * @param miningSchema the mining schema
    * @return a PMMLModel object
-   * @throws Exception if there is a problem constructing the model or
-   * if the model type is not supported
+   * @throws Exception if there is a problem constructing the model or if the
+   *           model type is not supported
    */
-  protected static PMMLModel getModelInstance(Document doc, 
-                                              ModelType modelType, Element model,
-                                              Instances dataDictionary,
-                                              MiningSchema miningSchema) throws Exception {
+  protected static PMMLModel getModelInstance(Document doc,
+    ModelType modelType, Element model, Instances dataDictionary,
+    MiningSchema miningSchema) throws Exception {
     PMMLModel pmmlM = null;
     switch (modelType) {
     case REGRESSION_MODEL:
       pmmlM = new Regression(model, dataDictionary, miningSchema);
-      //System.out.println(pmmlM);
+      // System.out.println(pmmlM);
       break;
     case GENERAL_REGRESSION_MODEL:
       pmmlM = new GeneralRegression(model, dataDictionary, miningSchema);
-      //System.out.println(pmmlM);
+      // System.out.println(pmmlM);
       break;
     case NEURAL_NETWORK_MODEL:
       pmmlM = new NeuralNetwork(model, dataDictionary, miningSchema);
@@ -307,7 +312,7 @@ public class PMMLFactory {
 
   /**
    * Get the type of model
-   *
+   * 
    * @param doc the Document encapsulating the pmml
    * @return the type of model
    */
@@ -321,22 +326,22 @@ public class PMMLFactory {
     if (temp.getLength() > 0) {
       return ModelType.GENERAL_REGRESSION_MODEL;
     }
-    
+
     temp = doc.getElementsByTagName("NeuralNetwork");
     if (temp.getLength() > 0) {
       return ModelType.NEURAL_NETWORK_MODEL;
     }
-    
+
     temp = doc.getElementsByTagName("TreeModel");
     if (temp.getLength() > 0) {
       return ModelType.TREE_MODEL;
     }
-    
+
     temp = doc.getElementsByTagName("RuleSetModel");
     if (temp.getLength() > 0) {
       return ModelType.RULESET_MODEL;
     }
-    
+
     temp = doc.getElementsByTagName("SupportVectorMachineModel");
     if (temp.getLength() > 0) {
       return ModelType.SVM_MODEL;
@@ -347,12 +352,12 @@ public class PMMLFactory {
 
   /**
    * Get the Element that contains the pmml model
-   *
+   * 
    * @param doc the Document encapsulating the pmml
    * @param modelType the type of model
    * @throws Exception if the model type is unsupported/unknown
    */
-  protected static Element getModelElement(Document doc, ModelType modelType) 
+  protected static Element getModelElement(Document doc, ModelType modelType)
     throws Exception {
     NodeList temp = null;
     Element model = null;
@@ -382,7 +387,7 @@ public class PMMLFactory {
     if (temp != null && temp.getLength() > 0) {
       Node modelNode = temp.item(0);
       if (modelNode.getNodeType() == Node.ELEMENT_NODE) {
-        model = (Element)modelNode;
+        model = (Element) modelNode;
       }
     }
 
@@ -391,16 +396,16 @@ public class PMMLFactory {
 
   /**
    * Get the mining schema as an Instances object
-   *
+   * 
    * @param model the Element containing the pmml model
    * @param dataDictionary the data dictionary as an Instances object
    * @return the mining schema as an Instances object
    * @throws Exception if something goes wrong during reading the mining schema
    * @deprecated Use the MiningSchema class instead
    */
+  @Deprecated
   protected static Instances getMiningSchemaAsInstances(Element model,
-                                                        Instances dataDictionary) 
-    throws Exception {
+    Instances dataDictionary) throws Exception {
     ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
     NodeList fieldList = model.getElementsByTagName("MiningField");
     int classIndex = -1;
@@ -408,7 +413,7 @@ public class PMMLFactory {
     for (int i = 0; i < fieldList.getLength(); i++) {
       Node miningField = fieldList.item(i);
       if (miningField.getNodeType() == Node.ELEMENT_NODE) {
-        Element miningFieldEl = (Element)miningField;
+        Element miningFieldEl = (Element) miningField;
         String name = miningFieldEl.getAttribute("name");
         String usage = miningFieldEl.getAttribute("usageType");
         // TO-DO: also missing value replacement etc.
@@ -416,7 +421,8 @@ public class PMMLFactory {
         // find this attribute in the dataDictionary
         Attribute miningAtt = dataDictionary.attribute(name);
         if (miningAtt != null) {
-          if (usage.length() == 0 || usage.equals("active") || usage.equals("predicted")) {
+          if (usage.length() == 0 || usage.equals("active")
+            || usage.equals("predicted")) {
             attInfo.add(miningAtt);
             addedCount++;
           }
@@ -424,31 +430,30 @@ public class PMMLFactory {
             classIndex = addedCount - 1;
           }
         } else {
-          throw new Exception("Can't find mining field: " + name 
-                              + " in the data dictionary.");
+          throw new Exception("Can't find mining field: " + name
+            + " in the data dictionary.");
         }
       }
     }
-    
+
     Instances insts = new Instances("miningSchema", attInfo, 0);
-    //    System.out.println(insts);
+    // System.out.println(insts);
     if (classIndex != -1) {
       insts.setClassIndex(classIndex);
     }
-
 
     return insts;
   }
 
   /**
    * Get the data dictionary as an Instances object
-   *
+   * 
    * @param doc the Document encapsulating the pmml
    * @return the data dictionary as an Instances object
-   * @throws Exception if there are fields that are not continuous, 
-   * ordinal or categorical in the data dictionary
+   * @throws Exception if there are fields that are not continuous, ordinal or
+   *           categorical in the data dictionary
    */
-  protected static Instances getDataDictionaryAsInstances(Document doc) 
+  protected static Instances getDataDictionaryAsInstances(Document doc)
     throws Exception {
 
     // TO-DO: definition of missing values (see below)
@@ -458,7 +463,7 @@ public class PMMLFactory {
     for (int i = 0; i < dataDictionary.getLength(); i++) {
       Node dataField = dataDictionary.item(i);
       if (dataField.getNodeType() == Node.ELEMENT_NODE) {
-        Element dataFieldEl = (Element)dataField;
+        Element dataFieldEl = (Element) dataField;
         String name = dataFieldEl.getAttribute("name");
         String type = dataFieldEl.getAttribute("optype");
         Attribute tempAtt = null;
@@ -468,10 +473,11 @@ public class PMMLFactory {
           } else if (type.equals("categorical") || type.equals("ordinal")) {
             NodeList valueList = dataFieldEl.getElementsByTagName("Value");
             if (valueList == null || valueList.getLength() == 0) {
-              // assume that categorical values will be revealed in the actual model.
+              // assume that categorical values will be revealed in the actual
+              // model.
               // Create a string attribute for now
               ArrayList<String> nullV = null;
-              tempAtt = new Attribute(name, (ArrayList<String>)nullV);
+              tempAtt = new Attribute(name, nullV);
             } else {
               // add the values (if defined as "valid")
               ArrayList<String> valueVector = new ArrayList<String>();
@@ -479,20 +485,24 @@ public class PMMLFactory {
                 Node val = valueList.item(j);
                 if (val.getNodeType() == Node.ELEMENT_NODE) {
                   // property is optional (default value is "valid")
-                  String property = ((Element)val).getAttribute("property");
-                  if (property == null || property.length() == 0 || property.equals("valid")) {
-                    String value = ((Element)val).getAttribute("value");
+                  String property = ((Element) val).getAttribute("property");
+                  if (property == null || property.length() == 0
+                    || property.equals("valid")) {
+                    String value = ((Element) val).getAttribute("value");
                     valueVector.add(value);
                   } else {
-                    // Just ignore invalid or missing value definitions for now...
-                    // TO-DO: implement Value meta data with missing/invalid value defs.
+                    // Just ignore invalid or missing value definitions for
+                    // now...
+                    // TO-DO: implement Value meta data with missing/invalid
+                    // value defs.
                   }
                 }
               }
               tempAtt = new Attribute(name, valueVector);
             }
           } else {
-            throw new Exception("[PMMLFactory] can't handle " + type + "attributes.");
+            throw new Exception("[PMMLFactory] can't handle " + type
+              + "attributes.");
           }
           attInfo.add(tempAtt);
         }
@@ -505,50 +515,60 @@ public class PMMLFactory {
 
     // create the Instances structure
     Instances insts = new Instances("dataDictionary", attInfo, 0);
-    //    System.out.println(insts);
+    // System.out.println(insts);
 
     return insts;
   }
 
-  public static String applyClassifier(PMMLModel model, Instances test) throws Exception {
+  public static String applyClassifier(PMMLModel model, Instances test)
+    throws Exception {
     StringBuffer buff = new StringBuffer();
     if (!(model instanceof PMMLClassifier)) {
       throw new Exception("PMML model is not a classifier!");
     }
 
     double[] preds = null;
-    PMMLClassifier classifier = (PMMLClassifier)model;
+    PMMLClassifier classifier = (PMMLClassifier) model;
     for (int i = 0; i < test.numInstances(); i++) {
       buff.append("Actual: ");
       Instance temp = test.instance(i);
       if (temp.classAttribute().isNumeric()) {
         buff.append(temp.value(temp.classIndex()) + " ");
       } else {
-        buff.append(temp.classAttribute().value((int)temp.value(temp.classIndex())) + " ");
+        buff.append(temp.classAttribute().value(
+          (int) temp.value(temp.classIndex()))
+          + " ");
       }
       preds = classifier.distributionForInstance(temp);
       buff.append(" Predicted: ");
-      for (int j = 0; j < preds.length; j++) {
-        buff.append("" + preds[j] + " ");
+      for (double pred : preds) {
+        buff.append("" + pred + " ");
       }
       buff.append("\n");
     }
     return buff.toString();
   }
-  
+
   private static class PMMLClassifierRunner extends AbstractClassifier {
+
+    /** ID added to avoid warning */
+    private static final long serialVersionUID = -3742334356788083347L;
+
+    @Override
     public double[] distributionForInstance(Instance test) throws Exception {
       throw new Exception("Don't call this method!!");
     }
-    
+
+    @Override
     public void buildClassifier(Instances instances) throws Exception {
       throw new Exception("Don't call this method!!");
     }
-    
+
+    @Override
     public String getRevision() {
-      return weka.core.RevisionUtils.extract("$Revision: 8034 $");
+      return weka.core.RevisionUtils.extract("$Revision: 10203 $");
     }
-    
+
     public void evaluatePMMLClassifier(String[] options) {
       runClassifier(this, options);
     }
@@ -560,35 +580,31 @@ public class PMMLFactory {
       for (int i = 0; i < args.length; i++) {
         optionsTmp[i] = args[i];
       }
-      String pmmlFile = Utils.getOption('l', optionsTmp); 
+      String pmmlFile = Utils.getOption('l', optionsTmp);
       if (pmmlFile.length() == 0) {
-        throw new Exception("[PMMLFactory] must specify a PMML file using the -l option.");
+        throw new Exception(
+          "[PMMLFactory] must specify a PMML file using the -l option.");
       }
       // see if it is supported before going any further
       getPMMLModel(pmmlFile, null);
-      
+
       PMMLClassifierRunner pcr = new PMMLClassifierRunner();
       pcr.evaluatePMMLClassifier(args);
 
-      
-      /*PMMLModel model = getPMMLModel(args[0], null);
-      System.out.println(model);
-      if (args.length == 2) {
-        // load an arff file
-        Instances testData = new Instances(new java.io.BufferedReader(new java.io.FileReader(args[1])));
-        Instances miningSchemaI = model.getMiningSchema().getFieldsAsInstances();
-        if (miningSchemaI.classIndex() >= 0) {
-          String className = miningSchemaI.classAttribute().name();
-          for (int i = 0; i < testData.numAttributes(); i++) {
-            if (testData.attribute(i).name().equals(className)) {
-              testData.setClassIndex(i);
-              System.out.println("Found class " + className + " in test data.");
-              break;
-            }
-          }
-        }
-        System.out.println(applyClassifier(model, testData));
-      }*/
+      /*
+       * PMMLModel model = getPMMLModel(args[0], null);
+       * System.out.println(model); if (args.length == 2) { // load an arff file
+       * Instances testData = new Instances(new java.io.BufferedReader(new
+       * java.io.FileReader(args[1]))); Instances miningSchemaI =
+       * model.getMiningSchema().getFieldsAsInstances(); if
+       * (miningSchemaI.classIndex() >= 0) { String className =
+       * miningSchemaI.classAttribute().name(); for (int i = 0; i <
+       * testData.numAttributes(); i++) { if
+       * (testData.attribute(i).name().equals(className)) {
+       * testData.setClassIndex(i); System.out.println("Found class " +
+       * className + " in test data."); break; } } }
+       * System.out.println(applyClassifier(model, testData)); }
+       */
     } catch (Exception ex) {
       ex.printStackTrace();
     }

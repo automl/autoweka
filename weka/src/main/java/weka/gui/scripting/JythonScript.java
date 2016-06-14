@@ -29,31 +29,30 @@ import weka.core.scripting.Jython;
 import weka.gui.ExtensionFileFilter;
 
 /**
- * Represents a <a href="http://www.jython.org/" target="_blank">Jython</a> script.
+ * Represents a <a href="http://www.jython.org/" target="_blank">Jython</a>
+ * script.
  * 
- * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @author fracpete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 10222 $
  */
-public class JythonScript
-  extends Script {
-  
+public class JythonScript extends Script {
+
   /** for serialization. */
   private static final long serialVersionUID = 3469648507172973169L;
 
   /**
    * Executes a Jython script in a thread.
    * 
-   * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 8034 $
+   * @author fracpete (fracpete at waikato dot ac dot nz)
+   * @version $Revision: 10222 $
    */
-  public static class JythonThread
-    extends ScriptThread {
-    
+  public static class JythonThread extends ScriptThread {
+
     /**
      * Initializes the thread.
      * 
-     * @param owner	the owning script
-     * @param args	the commandline arguments
+     * @param owner the owning script
+     * @param args the commandline arguments
      */
     public JythonThread(Script owner, String[] args) {
       super(owner, args);
@@ -62,80 +61,87 @@ public class JythonScript
     /**
      * Performs the actual run.
      */
+    @Override
     protected void doRun() {
-      Jython	jython;
-      Class[]	classes;
-      Object[]	params;
-      String	argv;
-      String	arg;
-      int	i;
-      
-      classes = new Class[]{String.class};
-      params  = new Object[]{m_Owner.getFilename().getPath()};
-      argv    = "sys.argv = ['" + Utils.backQuoteChars(m_Owner.getFilename().getPath()) + "'";
+      Jython jython;
+      Class<?>[] classes;
+      Object[] params;
+      String argv;
+      String arg;
+      int i;
+
+      classes = new Class[] { String.class };
+      params = new Object[] { m_Owner.getFilename().getPath() };
+      argv = "sys.argv = ['"
+        + Utils.backQuoteChars(m_Owner.getFilename().getPath()) + "'";
       for (i = 0; i < getArgs().length; i++) {
-	arg   = Utils.backQuoteChars(getArgs()[i]);
-	argv += ", '" + arg + "'";
+        arg = Utils.backQuoteChars(getArgs()[i]);
+        argv += ", '" + arg + "'";
       }
-      argv   += "]";
-      
-      jython  = new Jython();
-      
+      argv += "]";
+
+      jython = new Jython();
+
       // set commandline parameters
-      jython.invoke("exec", new Class[]{String.class}, new Object[]{"import sys"});
-      jython.invoke("exec", new Class[]{String.class}, new Object[]{argv});
-      
+      jython.invoke("exec", new Class[] { String.class },
+        new Object[] { "import sys" });
+      jython
+        .invoke("exec", new Class[] { String.class }, new Object[] { argv });
+
       jython.invoke("execfile", classes, params);
     }
   }
-  
+
   /**
    * Initializes the script.
    */
   public JythonScript() {
     super();
   }
-  
+
   /**
    * Initializes the script.
    * 
-   * @param doc		the document to use as basis
+   * @param doc the document to use as basis
    */
   public JythonScript(Document doc) {
     super(doc);
   }
-  
+
   /**
    * Initializes the script. Automatically loads the specified file, if not
    * null.
    * 
-   * @param doc		the document to use as basis
-   * @param file	the file to load (if not null)
+   * @param doc the document to use as basis
+   * @param file the file to load (if not null)
    */
   public JythonScript(Document doc, File file) {
     super(doc, file);
   }
-  
+
   /**
    * Returns the extension filters for this type of script.
    * 
-   * @return		the filters
+   * @return the filters
    */
+  @Override
   public ExtensionFileFilter[] getFilters() {
-    ExtensionFileFilter[]	result;
-    
+    ExtensionFileFilter[] result;
+
     result = new ExtensionFileFilter[1];
-    result[0] = new ExtensionFileFilter(getDefaultExtension(), "Jython script (*" + getDefaultExtension() + ")");
-    
+    result[0] = new ExtensionFileFilter(getDefaultExtension(),
+      "Jython script (*" + getDefaultExtension() + ")");
+
     return result;
   }
-  
+
   /**
-   * Returns the default extension. Gets automatically added to files if
-   * their name doesn't end with this.
+   * Returns the default extension. Gets automatically added to files if their
+   * name doesn't end with this.
    * 
-   * @return		the default extension (incl. the dot)
+   * @return the default extension (incl. the dot)
    */
+  @Override
   public String getDefaultExtension() {
     return ".py";
   }
@@ -143,42 +149,47 @@ public class JythonScript
   /**
    * Returns whether scripts can be executed, i.e., Jython is present.
    * 
-   * @return		true if scripts can be executed
+   * @return true if scripts can be executed
    */
+  @Override
   protected boolean canExecuteScripts() {
     return Jython.isPresent();
   }
-  
+
   /**
    * Performs pre-execution checks.
    * <p/>
-   * This method checks whether Jython is available (throws an exception if not).
+   * This method checks whether Jython is available (throws an exception if
+   * not).
    * 
-   * @param args	optional commandline arguments
-   * @throws Exception	if checks fail
+   * @param args optional commandline arguments
+   * @throws Exception if checks fail
    */
+  @Override
   protected void preCheck(String[] args) throws Exception {
     super.preCheck(args);
-    
-    if (!Jython.isPresent())
+
+    if (!Jython.isPresent()) {
       throw new Exception("Jython classes are not present in CLASSPATH!");
+    }
   }
 
   /**
    * Returns a new thread to execute.
    * 
-   * @param args	optional commandline arguments
-   * @return		the new thread object
+   * @param args optional commandline arguments
+   * @return the new thread object
    */
+  @Override
   public ScriptThread newThread(String[] args) {
     return new JythonThread(this, args);
   }
-  
+
   /**
    * Runs the script from commandline. Use "-h" to list all options.
    * 
-   * @param args	the commandline arguments
-   * @throws Exception	if execution fails
+   * @param args the commandline arguments
+   * @throws Exception if execution fails
    */
   public static void main(String[] args) throws Exception {
     runScript(new JythonScript(), args);

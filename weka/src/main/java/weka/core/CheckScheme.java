@@ -21,6 +21,7 @@
 
 package weka.core;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.StringTokenizer;
@@ -31,7 +32,7 @@ import java.util.Vector;
  * also used for JUnit tests.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 11247 $
  * @see TestInstances
  */
 public abstract class CheckScheme
@@ -58,7 +59,7 @@ public abstract class CheckScheme
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 8034 $");
+      return RevisionUtils.extract("$Revision: 11247 $");
     }
   }
   
@@ -101,12 +102,10 @@ public abstract class CheckScheme
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
     Vector<Option> result = new Vector<Option>();
     
-    Enumeration en = super.listOptions();
-    while (en.hasMoreElements())
-      result.addElement((Option)en.nextElement());
+    result.addAll(Collections.list(super.listOptions()));
     
     result.addElement(new Option(
         "\tThe number of instances in the datasets (default 20).",
@@ -593,7 +592,7 @@ public abstract class CheckScheme
       for (int j = 0; j < data.numAttributes(); j++) {
         if (((j == classIndex) && classMissing) ||
             ((j != classIndex) && predictorMissing)) {
-          if (Math.abs(random.nextInt()) % 100 < level)
+          if (random.nextInt(100) < level)
             current.setMissing(j);
         }
       }

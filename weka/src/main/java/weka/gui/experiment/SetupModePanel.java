@@ -21,24 +21,22 @@
 
 package weka.gui.experiment;
 
+import weka.experiment.Experiment;
+
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
-
-import javax.swing.ButtonGroup;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-
-import weka.experiment.Experiment;
 
 /** 
  * This panel switches between simple and advanced experiment setup panels.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 12016 $
  */
 public class SetupModePanel
   extends JPanel {
@@ -46,102 +44,104 @@ public class SetupModePanel
   /** for serialization */
   private static final long serialVersionUID = -3758035565520727822L;
 
-  /** The button for choosing simple setup mode */
-  protected JRadioButton m_SimpleSetupRBut = 
-    new JRadioButton("Simple");
+  /** the available panels. */
+  protected AbstractSetupPanel[] m_Panels = AbstractSetupPanel.getPanels();
 
-  /** The button for choosing advanced setup mode */
-  protected JRadioButton m_AdvancedSetupRBut = 
-    new JRadioButton("Advanced");  
+  /** the combobox with all available setup panels. */
+  protected JComboBox m_ComboBoxPanels;
 
   /** The simple setup panel */
-  protected SimpleSetupPanel m_simplePanel = new SimpleSetupPanel();
+  protected AbstractSetupPanel m_defaultPanel = null;
 
   /** The advanced setup panel */
-  protected SetupPanel m_advancedPanel = new SetupPanel();
+  protected AbstractSetupPanel m_advancedPanel = null;
+
+  /** the current panel. */
+  protected AbstractSetupPanel m_CurrentPanel;
 
   /**
    * Creates the setup panel with no initial experiment.
    */
   public SetupModePanel() {
 
-    m_simplePanel.setModePanel(this);
+    // no panels discovered?
+    if (m_Panels.length == 0) {
+      System.err.println("No experimenter setup panels discovered? Using fallback (simple, advanced).");
+      m_Panels = new AbstractSetupPanel[]{
+	new SetupPanel(),
+	new SimpleSetupPanel()
+      };
+    }
 
-    m_SimpleSetupRBut.setMnemonic('S');
-    m_SimpleSetupRBut.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  switchToSimple(null);
-	}
-      });
+    for (AbstractSetupPanel panel: m_Panels) {
+      if (panel.getClass().getName().equals(ExperimenterDefaults.getSetupPanel()))
+	m_defaultPanel = panel;
+      if (panel instanceof SetupPanel)
+	m_advancedPanel = panel;
+      panel.setModePanel(this);
+    }
 
-    m_AdvancedSetupRBut.setMnemonic('A');
-    m_AdvancedSetupRBut.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  switchToAdvanced(null);
-	}
-      });
+    // fallback on simple setup panel
+    if (m_defaultPanel == null) {
+      for (AbstractSetupPanel panel: m_Panels) {
+	if (panel instanceof SimpleSetupPanel)
+	  m_defaultPanel = panel;
+      }
+    }
 
-    ButtonGroup modeBG = new ButtonGroup();
-    modeBG.add(m_SimpleSetupRBut);
-    modeBG.add(m_AdvancedSetupRBut);
-    m_SimpleSetupRBut.setSelected(true);
+    m_CurrentPanel = m_defaultPanel;
 
-    JPanel modeButtons = new JPanel();
-    modeButtons.setLayout(new GridLayout(1,0));
-    modeButtons.add(m_SimpleSetupRBut);
-    modeButtons.add(m_AdvancedSetupRBut);
+    m_ComboBoxPanels = new JComboBox(m_Panels);
+    m_ComboBoxPanels.setSelectedItem(m_defaultPanel);
+    m_ComboBoxPanels.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+	if (m_ComboBoxPanels.getSelectedIndex() == -1)
+	  return;
+	AbstractSetupPanel panel = (AbstractSetupPanel) m_ComboBoxPanels.getSelectedItem();
+	switchTo(panel, null);
+      }
+    });
 
     JPanel switchPanel = new JPanel();
-    switchPanel.setLayout(new GridLayout(1,0));
-    switchPanel.add(new JLabel("Experiment Configuration Mode:"));
-    switchPanel.add(modeButtons);
+    switchPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+    switchPanel.add(new JLabel("Experiment Configuration Mode"));
+    switchPanel.add(m_ComboBoxPanels);
 
     setLayout(new BorderLayout());
     add(switchPanel, BorderLayout.NORTH);
-    add(m_simplePanel, BorderLayout.CENTER);
+    add(m_defaultPanel, BorderLayout.CENTER);
   }
 
   /**
-   * Switches to the advanced setup mode.
+   * Switches to the advanced panel.
    *
    * @param exp the experiment to configure
    */
   public void switchToAdvanced(Experiment exp) {
- 
-    if (exp == null) {
-      exp = m_simplePanel.getExperiment();
-    }
-    if (exp != null) {
-      m_AdvancedSetupRBut.setSelected(true);
-      m_advancedPanel.setExperiment(exp);
-    }
-    remove(m_simplePanel);
-    m_simplePanel.removeNotesFrame();
-    add(m_advancedPanel, BorderLayout.CENTER);
-    validate();
-    repaint();
+    switchTo(m_advancedPanel, exp);
   }
-  
+
   /**
-   * Switches to the simple setup mode only if allowed to.
+   * Switches to the specified panel.
    *
+   * @param panel the panel to switch to
    * @param exp the experiment to configure
    */
-  public void switchToSimple(Experiment exp) {
-    
-    if (exp == null) {
-      exp = m_advancedPanel.getExperiment();
-    }
-    if (exp != null && !m_simplePanel.setExperiment(exp)) {
-      m_AdvancedSetupRBut.setSelected(true);
-      switchToAdvanced(exp);
-    } else {
-      remove(m_advancedPanel);
-      m_advancedPanel.removeNotesFrame();
-      add(m_simplePanel, BorderLayout.CENTER);
-      validate();
-      repaint();
-    }
+  public void switchTo(AbstractSetupPanel panel, Experiment exp) {
+    if (exp == null)
+      exp = m_CurrentPanel.getExperiment();
+
+    remove(m_CurrentPanel);
+    m_CurrentPanel.cleanUpAfterSwitch();
+
+    if (exp != null)
+      panel.setExperiment(exp);
+    add(panel, BorderLayout.CENTER);
+    validate();
+    repaint();
+
+    m_CurrentPanel = panel;
   }
 
   /**
@@ -150,9 +150,22 @@ public class SetupModePanel
    * @param l a value of type 'PropertyChangeListener'
    */
   public void addPropertyChangeListener(PropertyChangeListener l) {
+    if (m_Panels != null) {
+      for (AbstractSetupPanel panel : m_Panels)
+        panel.addPropertyChangeListener(l);
+    }
+  }
 
-    m_simplePanel.addPropertyChangeListener(l);
-    m_advancedPanel.addPropertyChangeListener(l);
+  /**
+   * Removes a PropertyChangeListener who will be notified of value changes.
+   *
+   * @param l a value of type 'PropertyChangeListener'
+   */
+  public void removePropertyChangeListener(PropertyChangeListener l) {
+    if (m_Panels != null) {
+      for (AbstractSetupPanel panel : m_Panels)
+        panel.removePropertyChangeListener(l);
+    }
   }
 
   /**
@@ -161,8 +174,6 @@ public class SetupModePanel
    * @return the currently configured experiment.
    */
   public Experiment getExperiment() {
-
-    if (m_SimpleSetupRBut.isSelected()) return m_simplePanel.getExperiment();
-    else return m_advancedPanel.getExperiment();
+    return m_CurrentPanel.getExperiment();
   }
 }

@@ -21,13 +21,13 @@
 
 package weka.datagenerators.classifiers.classification;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -40,19 +40,27 @@ import weka.core.Utils;
 import weka.datagenerators.ClassificationGenerator;
 
 /**
- <!-- globalinfo-start -->
- * This generator produces data for a display with 7 LEDs. The original output consists of 10 concepts and 7 boolean attributes. Here, in addition to the 7 necessary boolean attributes, 17 other, irrelevant boolean attributes with random values are added to make it harder. By default 10 percent of noise are added to the data.<br/>
+ * <!-- globalinfo-start --> This generator produces data for a display with 7
+ * LEDs. The original output consists of 10 concepts and 7 boolean attributes.
+ * Here, in addition to the 7 necessary boolean attributes, 17 other, irrelevant
+ * boolean attributes with random values are added to make it harder. By default
+ * 10 percent of noise are added to the data.<br/>
  * <br/>
  * More information can be found here:<br/>
- * L. Breiman J.H. Friedman R.A. Olshen, C.J. Stone (1984). Classification and Regression Trees. Belmont, California. URL http://www.ics.uci.edu/~mlearn/databases/led-display-creator/.
+ * L. Breiman J.H. Friedman R.A. Olshen, C.J. Stone (1984). Classification and
+ * Regression Trees. Belmont, California. URL
+ * http://www.ics.uci.edu/~mlearn/databases/led-display-creator/.
  * <p/>
- <!-- globalinfo-end -->
- *
- * Link: <br/>
- * <a href="http://www.ics.uci.edu/~mlearn/databases/led-display-creator/">http://www.ics.uci.edu/~mlearn/databases/led-display-creator/</a> <p/>
+ * <!-- globalinfo-end -->
  * 
- <!-- technical-bibtex-start -->
- * BibTeX:
+ * Link: <br/>
+ * <a
+ * href="http://www.ics.uci.edu/~mlearn/databases/led-display-creator/">http:/
+ * /www.ics.uci.edu/~mlearn/databases/led-display-creator/</a>
+ * <p/>
+ * 
+ * <!-- technical-bibtex-start --> BibTeX:
+ * 
  * <pre>
  * &#64;inbook{Olshen1984,
  *    address = {Belmont, California},
@@ -66,57 +74,69 @@ import weka.datagenerators.ClassificationGenerator;
  * }
  * </pre>
  * <p/>
- <!-- technical-bibtex-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- technical-bibtex-end -->
  * 
- * <pre> -h
- *  Prints this help.</pre>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -o &lt;file&gt;
+ * <pre>
+ * -h
+ *  Prints this help.
+ * </pre>
+ * 
+ * <pre>
+ * -o &lt;file&gt;
  *  The name of the output file, otherwise the generated data is
- *  printed to stdout.</pre>
+ *  printed to stdout.
+ * </pre>
  * 
- * <pre> -r &lt;name&gt;
- *  The name of the relation.</pre>
+ * <pre>
+ * -r &lt;name&gt;
+ *  The name of the relation.
+ * </pre>
  * 
- * <pre> -d
- *  Whether to print debug informations.</pre>
+ * <pre>
+ * -d
+ *  Whether to print debug informations.
+ * </pre>
  * 
- * <pre> -S
- *  The seed for random function (default 1)</pre>
+ * <pre>
+ * -S
+ *  The seed for random function (default 1)
+ * </pre>
  * 
- * <pre> -n &lt;num&gt;
- *  The number of examples to generate (default 100)</pre>
+ * <pre>
+ * -n &lt;num&gt;
+ *  The number of examples to generate (default 100)
+ * </pre>
  * 
- * <pre> -N &lt;num&gt;
- *  The noise percentage. (default 10.0)</pre>
+ * <pre>
+ * -N &lt;num&gt;
+ *  The noise percentage. (default 10.0)
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author Richard Kirkby (rkirkby at cs dot waikato dot ac dot nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10203 $
  */
 
-public class LED24
-  extends ClassificationGenerator
-  implements TechnicalInformationHandler {
-  
+public class LED24 extends ClassificationGenerator implements
+  TechnicalInformationHandler {
+
   /** for serialization */
-  static final long serialVersionUID = -7880209100415868737L;  
-  
+  static final long serialVersionUID = -7880209100415868737L;
+
   /** the noise rate */
   protected double m_NoisePercent;
-  
+
   /** the 7-bit LEDs */
   protected static final int m_originalInstances[][] = {
-    { 1, 1, 1, 0, 1, 1, 1 }, { 0, 0, 1, 0, 0, 1, 0 },
-    { 1, 0, 1, 1, 1, 0, 1 }, { 1, 0, 1, 1, 0, 1, 1 },
-    { 0, 1, 1, 1, 0, 1, 0 }, { 1, 1, 0, 1, 0, 1, 1 },
-    { 1, 1, 0, 1, 1, 1, 1 }, { 1, 0, 1, 0, 0, 1, 0 },
-    { 1, 1, 1, 1, 1, 1, 1 }, { 1, 1, 1, 1, 0, 1, 1 } };
+    { 1, 1, 1, 0, 1, 1, 1 }, { 0, 0, 1, 0, 0, 1, 0 }, { 1, 0, 1, 1, 1, 0, 1 },
+    { 1, 0, 1, 1, 0, 1, 1 }, { 0, 1, 1, 1, 0, 1, 0 }, { 1, 1, 0, 1, 0, 1, 1 },
+    { 1, 1, 0, 1, 1, 1, 1 }, { 1, 0, 1, 0, 0, 1, 0 }, { 1, 1, 1, 1, 1, 1, 1 },
+    { 1, 1, 1, 1, 0, 1, 1 } };
 
   /** used for generating the output, i.e., the additional noise attributes */
   protected int m_numIrrelevantAttributes = 17;
@@ -132,125 +152,145 @@ public class LED24
 
   /**
    * Returns a string describing this data generator.
-   *
-   * @return a description of the data generator suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the data generator suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-         "This generator produces data for a display with 7 LEDs. The original "
-       + "output consists of 10 concepts and 7 boolean attributes. Here, in "
-       + "addition to the 7 necessary boolean attributes, 17 other, irrelevant "
-       + "boolean attributes with random values are added to make it harder. "
-       + "By default 10 percent of noise are added to the data.\n"
-       + "\n"
-       + "More information can be found here:\n"
-       + getTechnicalInformation().toString();
+    return "This generator produces data for a display with 7 LEDs. The original "
+      + "output consists of 10 concepts and 7 boolean attributes. Here, in "
+      + "addition to the 7 necessary boolean attributes, 17 other, irrelevant "
+      + "boolean attributes with random values are added to make it harder. "
+      + "By default 10 percent of noise are added to the data.\n"
+      + "\n"
+      + "More information can be found here:\n"
+      + getTechnicalInformation().toString();
   }
 
   /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
+   * Returns an instance of a TechnicalInformation object, containing detailed
+   * information about the technical background of this class, e.g., paper
+   * reference or book this class is based on.
    * 
    * @return the technical information about this class
    */
+  @Override
   public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
+    TechnicalInformation result;
+
     result = new TechnicalInformation(Type.INBOOK);
-    result.setValue(Field.AUTHOR, "L. Breiman J.H. Friedman R.A. Olshen and C.J. Stone");
+    result.setValue(Field.AUTHOR,
+      "L. Breiman J.H. Friedman R.A. Olshen and C.J. Stone");
     result.setValue(Field.YEAR, "1984");
     result.setValue(Field.TITLE, "Classification and Regression Trees");
     result.setValue(Field.PUBLISHER, "Wadsworth International Group");
     result.setValue(Field.ADDRESS, "Belmont, California");
     result.setValue(Field.PAGES, "43-49");
     result.setValue(Field.ISBN, "0412048418");
-    result.setValue(Field.URL, "http://www.ics.uci.edu/~mlearn/databases/led-display-creator/");
-    
+    result.setValue(Field.URL,
+      "http://www.ics.uci.edu/~mlearn/databases/led-display-creator/");
+
     return result;
   }
 
- /**
+  /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options
    */
-  public Enumeration listOptions() {
-    Vector result = enumToVector(super.listOptions());
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> result = enumToVector(super.listOptions());
 
-    result.add(new Option(
-              "\tThe noise percentage. (default " 
-              + defaultNoisePercent() + ")",
-              "N", 1, "-N <num>"));
+    result.add(new Option("\tThe noise percentage. (default "
+      + defaultNoisePercent() + ")", "N", 1, "-N <num>"));
 
     return result.elements();
   }
 
   /**
-   * Parses a list of options for this object. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a list of options for this object.
+   * <p/>
    * 
-   * <pre> -h
-   *  Prints this help.</pre>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -o &lt;file&gt;
+   * <pre>
+   * -h
+   *  Prints this help.
+   * </pre>
+   * 
+   * <pre>
+   * -o &lt;file&gt;
    *  The name of the output file, otherwise the generated data is
-   *  printed to stdout.</pre>
+   *  printed to stdout.
+   * </pre>
    * 
-   * <pre> -r &lt;name&gt;
-   *  The name of the relation.</pre>
+   * <pre>
+   * -r &lt;name&gt;
+   *  The name of the relation.
+   * </pre>
    * 
-   * <pre> -d
-   *  Whether to print debug informations.</pre>
+   * <pre>
+   * -d
+   *  Whether to print debug informations.
+   * </pre>
    * 
-   * <pre> -S
-   *  The seed for random function (default 1)</pre>
+   * <pre>
+   * -S
+   *  The seed for random function (default 1)
+   * </pre>
    * 
-   * <pre> -n &lt;num&gt;
-   *  The number of examples to generate (default 100)</pre>
+   * <pre>
+   * -n &lt;num&gt;
+   *  The number of examples to generate (default 100)
+   * </pre>
    * 
-   * <pre> -N &lt;num&gt;
-   *  The noise percentage. (default 10.0)</pre>
+   * <pre>
+   * -N &lt;num&gt;
+   *  The noise percentage. (default 10.0)
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    String        tmpStr;
+    String tmpStr;
 
     super.setOptions(options);
 
     tmpStr = Utils.getOption('N', options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setNoisePercent(Double.parseDouble(tmpStr));
-    else
+    } else {
       setNoisePercent(defaultNoisePercent());
+    }
   }
 
   /**
    * Gets the current settings of the datagenerator.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
+  @Override
   public String[] getOptions() {
-    Vector        result;
-    String[]      options;
-    int           i;
-    
-    result  = new Vector();
+    Vector<String> result;
+    String[] options;
+    int i;
+
+    result = new Vector<String>();
     options = super.getOptions();
-    for (i = 0; i < options.length; i++)
+    for (i = 0; i < options.length; i++) {
       result.add(options[i]);
-    
+    }
+
     result.add("-N");
     result.add("" + getNoisePercent());
-    
-    return (String[]) result.toArray(new String[result.size()]);
+
+    return result.toArray(new String[result.size()]);
   }
 
   /**
@@ -261,65 +301,67 @@ public class LED24
   protected double defaultNoisePercent() {
     return 10;
   }
-  
+
   /**
    * Gets the noise percentage.
-   *
+   * 
    * @return the noise percentage.
    */
-  public double getNoisePercent() { 
-    return m_NoisePercent; 
+  public double getNoisePercent() {
+    return m_NoisePercent;
   }
-  
+
   /**
    * Sets the noise percentage.
-   *
+   * 
    * @param value the noise percentage.
    */
-  public void setNoisePercent(double value) { 
-    if ( (value >= 0.0) && (value <= 100.0) )
+  public void setNoisePercent(double value) {
+    if ((value >= 0.0) && (value <= 100.0)) {
       m_NoisePercent = value;
-    else
+    } else {
       throw new IllegalArgumentException(
-          "Noise percent must be in [0,100] (provided: " + value + ")!");
-  }  
-  
+        "Noise percent must be in [0,100] (provided: " + value + ")!");
+    }
+  }
+
   /**
    * Returns the tip text for this property
    * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String noisePercentTipText() {
     return "The noise percent: 0 <= perc <= 100.";
   }
 
   /**
-   * Return if single mode is set for the given data generator
-   * mode depends on option setting and or generator type.
+   * Return if single mode is set for the given data generator mode depends on
+   * option setting and or generator type.
    * 
    * @return single mode flag
    * @throws Exception if mode is not set yet
    */
+  @Override
   public boolean getSingleModeFlag() throws Exception {
     return true;
   }
 
   /**
-   * Initializes the format for the dataset produced. 
-   * Must be called before the generateExample or generateExamples
-   * methods are used.
-   * Re-initializes the random number generator with the given seed.
-   *
-   * @return the format for the dataset 
+   * Initializes the format for the dataset produced. Must be called before the
+   * generateExample or generateExamples methods are used. Re-initializes the
+   * random number generator with the given seed.
+   * 
+   * @return the format for the dataset
    * @throws Exception if the generating of the format failed
-   * @see  #getSeed()
+   * @see #getSeed()
    */
+  @Override
   public Instances defineDataFormat() throws Exception {
-    FastVector      atts;
-    FastVector      attValues;
-    int             i;
-    int             n;
+    ArrayList<Attribute> atts;
+    ArrayList<String> attValues;
+    int i;
+    int n;
 
     m_Random = new Random(getSeed());
 
@@ -327,63 +369,69 @@ public class LED24
     setNumExamplesAct(getNumExamples());
 
     // set up attributes
-    atts = new FastVector();
-    
+    atts = new ArrayList<Attribute>();
+
     for (n = 1; n <= 24; n++) {
-      attValues = new FastVector();
-      for (i = 0; i < 2; i++)
-        attValues.addElement("" + i);
-      atts.addElement(new Attribute("att" + n, attValues));
+      attValues = new ArrayList<String>();
+      for (i = 0; i < 2; i++) {
+        attValues.add("" + i);
+      }
+      atts.add(new Attribute("att" + n, attValues));
     }
-    
-    attValues = new FastVector();
-    for (i = 0; i < 10; i++)
-      attValues.addElement("" + i);
-    atts.addElement(new Attribute("class", attValues));
-    
+
+    attValues = new ArrayList<String>();
+    for (i = 0; i < 10; i++) {
+      attValues.add("" + i);
+    }
+    atts.add(new Attribute("class", attValues));
+
     // dataset
     m_DatasetFormat = new Instances(getRelationNameToUse(), atts, 0);
-    
+
     return m_DatasetFormat;
   }
 
   /**
-   * Generates one example of the dataset. 
-   *
+   * Generates one example of the dataset.
+   * 
    * @return the generated example
    * @throws Exception if the format of the dataset is not yet defined
-   * @throws Exception if the generator only works with generateExamples
-   * which means in non single mode
+   * @throws Exception if the generator only works with generateExamples which
+   *           means in non single mode
    */
+  @Override
   public Instance generateExample() throws Exception {
-    Instance      result;
-    double[]      atts;
-    int           i;
-    int           selected;
-    Random        random;
+    Instance result;
+    double[] atts;
+    int i;
+    int selected;
+    Random random;
 
     result = null;
     random = getRandom();
 
-    if (m_DatasetFormat == null)
+    if (m_DatasetFormat == null) {
       throw new Exception("Dataset format not defined.");
-
-    atts     = new double[m_DatasetFormat.numAttributes()];
-    selected = random.nextInt(10);
-    for (i = 0; i < 7; i++) {
-      if ((1 + (random.nextInt(100))) <= getNoisePercent())
-        atts[i] = m_originalInstances[selected][i] == 0 ? 1 : 0;
-      else
-        atts[i] = m_originalInstances[selected][i];
     }
 
-    for (i = 0; i < m_numIrrelevantAttributes; i++)
+    atts = new double[m_DatasetFormat.numAttributes()];
+    selected = random.nextInt(10);
+    for (i = 0; i < 7; i++) {
+      if ((1 + (random.nextInt(100))) <= getNoisePercent()) {
+        atts[i] = m_originalInstances[selected][i] == 0 ? 1 : 0;
+      } else {
+        atts[i] = m_originalInstances[selected][i];
+      }
+    }
+
+    for (i = 0; i < m_numIrrelevantAttributes; i++) {
       atts[i + 7] = random.nextInt(2);
+    }
 
     atts[atts.length - 1] = selected;
 
     // create instance
-    result  = new DenseInstance(1.0, atts);
+    result = new DenseInstance(1.0, atts);
     result.setDataset(m_DatasetFormat);
 
     return result;
@@ -392,62 +440,66 @@ public class LED24
   /**
    * Generates all examples of the dataset. Re-initializes the random number
    * generator with the given seed, before generating instances.
-   *
+   * 
    * @return the generated dataset
    * @throws Exception if the format of the dataset is not yet defined
-   * @throws Exception if the generator only works with generateExample,
-   * which means in single mode
-   * @see   #getSeed()
+   * @throws Exception if the generator only works with generateExample, which
+   *           means in single mode
+   * @see #getSeed()
    */
+  @Override
   public Instances generateExamples() throws Exception {
-    Instances       result;
-    int             i;
+    Instances result;
+    int i;
 
-    result   = new Instances(m_DatasetFormat, 0);
+    result = new Instances(m_DatasetFormat, 0);
     m_Random = new Random(getSeed());
 
-    for (i = 0; i < getNumExamplesAct(); i++)
+    for (i = 0; i < getNumExamplesAct(); i++) {
       result.add(generateExample());
-    
+    }
+
     return result;
   }
 
   /**
-   * Generates a comment string that documentates the data generator.
-   * By default this string is added at the beginning of the produced output
-   * as ARFF file type, next after the options.
+   * Generates a comment string that documentates the data generator. By default
+   * this string is added at the beginning of the produced output as ARFF file
+   * type, next after the options.
    * 
    * @return string contains info about the generated rules
    */
-  public String generateStart () {
+  @Override
+  public String generateStart() {
     return "";
   }
 
   /**
-   * Generates a comment string that documentats the data generator.
-   * By default this string is added at the end of theproduces output
-   * as ARFF file type.
+   * Generates a comment string that documentats the data generator. By default
+   * this string is added at the end of theproduces output as ARFF file type.
    * 
    * @return string contains info about the generated rules
    * @throws Exception if the generating of the documentaion fails
    */
+  @Override
   public String generateFinished() throws Exception {
     return "";
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10203 $");
   }
 
   /**
    * Main method for executing this class.
-   *
-   * @param args should contain arguments for the data producer: 
+   * 
+   * @param args should contain arguments for the data producer:
    */
   public static void main(String[] args) {
     runDataGenerator(new LED24(), args);

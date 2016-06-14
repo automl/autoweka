@@ -21,6 +21,7 @@
 
 package weka.classifiers.meta;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -65,7 +66,7 @@ import weka.core.Utils;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10141 $
  */
 public class MultiScheme 
   extends RandomizableMultipleClassifiersCombiner {
@@ -103,19 +104,17 @@ public class MultiScheme
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(1);
+    Vector<Option> newVector = new Vector<Option>(1);
     newVector.addElement(new Option(
 	      "\tUse cross validation for model selection using the\n"
 	      + "\tgiven number of folds. (default 0, is to\n"
 	      + "\tuse training error)",
 	      "X", 1, "-X <number of folds>"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
-    }
+    newVector.addAll(Collections.list(super.listOptions()));
+    
     return newVector.elements();
   }
 
@@ -462,7 +461,7 @@ public class MultiScheme
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10141 $");
   }
 
   /**

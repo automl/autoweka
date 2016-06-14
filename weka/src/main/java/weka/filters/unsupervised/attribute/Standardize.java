@@ -49,7 +49,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 8034 $
+ * @version $Revision: 12037 $
  */
 public class Standardize 
   extends PotentialClassIgnorer 
@@ -257,7 +257,7 @@ public class Standardize
       inst = new DenseInstance(instance.weight(), vals);
     }
     inst.setDataset(instance.dataset());
-    push(inst);
+    push(inst, false); // No need to copy
   }
   
   /**
@@ -356,7 +356,7 @@ public class Standardize
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

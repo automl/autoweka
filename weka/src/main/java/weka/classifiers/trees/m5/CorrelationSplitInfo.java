@@ -31,26 +31,17 @@ import weka.experiment.PairedStats;
 
 /**
  * Finds split points using correlation.
- *
+ * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10169 $
  */
-public final class CorrelationSplitInfo
-  implements Cloneable, Serializable, SplitEvaluate, RevisionHandler {
+public final class CorrelationSplitInfo implements Cloneable, Serializable,
+  SplitEvaluate, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 4212734895125452770L;
 
-  /**
-   * the first instance
-   */
-  private int    m_first;
-
-  /**
-   * the last instance
-   */
-  private int    m_last;
-  private int    m_position;
+  private int m_position;
 
   /**
    * the maximum impurity reduction
@@ -60,7 +51,7 @@ public final class CorrelationSplitInfo
   /**
    * the attribute being tested
    */
-  private int    m_splitAttr;
+  private int m_splitAttr;
 
   /**
    * the best value on which to split
@@ -70,11 +61,11 @@ public final class CorrelationSplitInfo
   /**
    * the number of instances
    */
-  private int    m_number;
+  private int m_number;
 
   /**
    * Constructs an object which contains the split information
-   *
+   * 
    * @param low the index of the first instance
    * @param high the index of the last instance
    * @param attr an attribute
@@ -86,74 +77,71 @@ public final class CorrelationSplitInfo
   /**
    * Makes a copy of this CorrelationSplitInfo object
    */
+  @Override
   public final SplitEvaluate copy() throws Exception {
     CorrelationSplitInfo s = (CorrelationSplitInfo) this.clone();
 
     return s;
-  } 
+  }
 
   /**
    * Resets the object of split information
-   *
+   * 
    * @param low the index of the first instance
    * @param high the index of the last instance
    * @param attr the attribute
    */
   public final void initialize(int low, int high, int attr) {
     m_number = high - low + 1;
-    m_first = low;
-    m_last = high;
     m_position = -1;
     m_maxImpurity = -Double.MAX_VALUE;
     m_splitAttr = attr;
     m_splitValue = 0.0;
-  } 
+  }
 
   /**
    * Finds the best splitting point for an attribute in the instances
-   *
+   * 
    * @param attr the splitting attribute
    * @param inst the instances
    * @exception Exception if something goes wrong
    */
+  @Override
   public final void attrSplit(int attr, Instances inst) throws Exception {
-    int		i;
-    int		len;
-    int		part;
-    int		low = 0;
-    int		high = inst.numInstances() - 1;
+    int i;
+    int len;
+    int low = 0;
+    int high = inst.numInstances() - 1;
     PairedStats full = new PairedStats(0.01);
     PairedStats leftSubset = new PairedStats(0.01);
     PairedStats rightSubset = new PairedStats(0.01);
-    int		classIndex = inst.classIndex();
-    double      leftCorr, rightCorr;
-    double      leftVar, rightVar, allVar;
-    double      order = 2.0;
+    int classIndex = inst.classIndex();
+    double leftCorr, rightCorr;
+    double leftVar, rightVar, allVar;
+    double order = 2.0;
 
     initialize(low, high, attr);
 
     if (m_number < 4) {
       return;
-    } 
+    }
 
     len = ((high - low + 1) < 5) ? 1 : (high - low + 1) / 5;
     m_position = low;
-    part = low + len - 1;
-
     // prime the subsets
     for (i = low; i < len; i++) {
-      full.add(inst.instance(i).value(attr), 
-	       inst.instance(i).value(classIndex));
-      leftSubset.add(inst.instance(i).value(attr), 
-		     inst.instance(i).value(classIndex));
-    } 
+      full
+        .add(inst.instance(i).value(attr), inst.instance(i).value(classIndex));
+      leftSubset.add(inst.instance(i).value(attr),
+        inst.instance(i).value(classIndex));
+    }
 
     for (i = len; i < inst.numInstances(); i++) {
-      full.add(inst.instance(i).value(attr), 
-	       inst.instance(i).value(classIndex));
-      rightSubset.add(inst.instance(i).value(attr), 
-		      inst.instance(i).value(classIndex));
-    } 
+      full
+        .add(inst.instance(i).value(attr), inst.instance(i).value(classIndex));
+      rightSubset.add(inst.instance(i).value(attr),
+        inst.instance(i).value(classIndex));
+    }
 
     full.calculateDerived();
 
@@ -162,91 +150,93 @@ public final class CorrelationSplitInfo
     allVar = Math.pow(allVar, (1.0 / order));
 
     for (i = low + len; i < high - len - 1; i++) {
-      rightSubset.subtract(inst.instance(i).value(attr), 
-			   inst.instance(i).value(classIndex));
-      leftSubset.add(inst.instance(i).value(attr), 
-		     inst.instance(i).value(classIndex));
+      rightSubset.subtract(inst.instance(i).value(attr), inst.instance(i)
+        .value(classIndex));
+      leftSubset.add(inst.instance(i).value(attr),
+        inst.instance(i).value(classIndex));
 
-      if (!Utils.eq(inst.instance(i + 1).value(attr), 
-		    inst.instance(i).value(attr))) {
-	leftSubset.calculateDerived();
-	rightSubset.calculateDerived();
+      if (!Utils.eq(inst.instance(i + 1).value(attr),
+        inst.instance(i).value(attr))) {
+        leftSubset.calculateDerived();
+        rightSubset.calculateDerived();
 
-	leftCorr = Math.abs(leftSubset.correlation);
-	rightCorr = Math.abs(rightSubset.correlation);
-	leftVar = (leftSubset.yStats.stdDev * leftSubset.yStats.stdDev);
-	leftVar = Math.abs(leftVar);
-	leftVar = Math.pow(leftVar, (1.0 / order));
-	rightVar = (rightSubset.yStats.stdDev * rightSubset.yStats.stdDev);
-	rightVar = Math.abs(rightVar);
-	rightVar = Math.pow(rightVar, (1.0 / order));
+        leftCorr = Math.abs(leftSubset.correlation);
+        rightCorr = Math.abs(rightSubset.correlation);
+        leftVar = (leftSubset.yStats.stdDev * leftSubset.yStats.stdDev);
+        leftVar = Math.abs(leftVar);
+        leftVar = Math.pow(leftVar, (1.0 / order));
+        rightVar = (rightSubset.yStats.stdDev * rightSubset.yStats.stdDev);
+        rightVar = Math.abs(rightVar);
+        rightVar = Math.pow(rightVar, (1.0 / order));
 
-	double score = allVar - ((leftSubset.count / full.count) * leftVar) 
-		       - ((rightSubset.count / full.count) * rightVar);
+        double score = allVar - ((leftSubset.count / full.count) * leftVar)
+          - ((rightSubset.count / full.count) * rightVar);
 
-	// score /= allVar;
-	leftCorr = (leftSubset.count / full.count) * leftCorr;
-	rightCorr = (rightSubset.count / full.count) * rightCorr;
+        // score /= allVar;
+        leftCorr = (leftSubset.count / full.count) * leftCorr;
+        rightCorr = (rightSubset.count / full.count) * rightCorr;
 
-	double c_score = (leftCorr + rightCorr) - Math.abs(full.correlation);
-
-	// c_score += score;
-	if (!Utils.eq(score, 0.0)) {
-	  if (score > m_maxImpurity) {
-	    m_maxImpurity = score;
-	    m_splitValue = 
-	      (inst.instance(i).value(attr) + inst.instance(i + 1)
-	      .value(attr)) * 0.5;
-	    m_position = i;
-	  } 
-	} 
-      } 
-    } 
-  } 
+        // c_score += score;
+        if (!Utils.eq(score, 0.0)) {
+          if (score > m_maxImpurity) {
+            m_maxImpurity = score;
+            m_splitValue = (inst.instance(i).value(attr) + inst.instance(i + 1)
+              .value(attr)) * 0.5;
+            m_position = i;
+          }
+        }
+      }
+    }
+  }
 
   /**
    * Returns the impurity of this split
-   *
+   * 
    * @return the impurity of this split
    */
+  @Override
   public double maxImpurity() {
     return m_maxImpurity;
-  } 
+  }
 
   /**
    * Returns the attribute used in this split
-   *
+   * 
    * @return the attribute used in this split
    */
+  @Override
   public int splitAttr() {
     return m_splitAttr;
-  } 
+  }
 
   /**
-   * Returns the position of the split in the sorted values. -1 indicates that
-   * a split could not be found.
-   *
+   * Returns the position of the split in the sorted values. -1 indicates that a
+   * split could not be found.
+   * 
    * @return an <code>int</code> value
    */
+  @Override
   public int position() {
     return m_position;
-  } 
+  }
 
   /**
    * Returns the split value
-   *
+   * 
    * @return the split value
    */
+  @Override
   public double splitValue() {
     return m_splitValue;
-  } 
-  
+  }
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10169 $");
   }
 }

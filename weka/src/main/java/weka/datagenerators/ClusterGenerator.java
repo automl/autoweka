@@ -21,6 +21,7 @@
 
 package weka.datagenerators;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -28,29 +29,29 @@ import weka.core.Option;
 import weka.core.Range;
 import weka.core.Utils;
 
-/** 
- * Abstract class for cluster data generators. <p/>
- *
+/**
+ * Abstract class for cluster data generators.
+ * <p/>
+ * 
  * Example usage as the main of a datagenerator called RandomGenerator:
+ * 
  * <pre>
  * public static void main(String[] args) {
  *   try {
  *     DataGenerator.makeData(new RandomGenerator(), args);
- *   } 
- *   catch (Exception e) {
+ *   } catch (Exception e) {
  *     e.printStackTrace();
  *     System.err.println(e.getMessage());
  *   }
  * }
  * </pre>
  * <p/>
- *
+ * 
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 12478 $
  */
-public abstract class ClusterGenerator 
-  extends DataGenerator {
+public abstract class ClusterGenerator extends DataGenerator {
 
   /** for serialization */
   private static final long serialVersionUID = 6131722618472046365L;
@@ -58,117 +59,115 @@ public abstract class ClusterGenerator
   /** Number of attribute the dataset should have */
   protected int m_NumAttributes;
 
-  /** class flag  */
+  /** class flag */
   protected boolean m_ClassFlag = false;
 
   /** Stores which columns are boolean (default numeric) */
   protected Range m_booleanCols;
 
-  /** Stores which columns are nominal (default numeric)  */
+  /** Stores which columns are nominal (default numeric) */
   protected Range m_nominalCols;
 
   /**
-   * initializes the generator 
+   * initializes the generator
    */
   public ClusterGenerator() {
     super();
 
     setNumAttributes(defaultNumAttributes());
   }
-  
+
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
-    Vector result = enumToVector(super.listOptions());
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> result = enumToVector(super.listOptions());
+
+    result.addElement(new Option("\tThe number of attributes (default "
+      + defaultNumAttributes() + ").", "a", 1, "-a <num>"));
 
     result.addElement(new Option(
-          "\tThe number of attributes (default " 
-          + defaultNumAttributes() + ").",
-          "a", 1, "-a <num>"));
+      "\tClass Flag, if set, the cluster is listed in extra attribute.", "c",
+      0, "-c"));
 
-    result.addElement(new Option(
-        "\tClass Flag, if set, the cluster is listed in extra attribute.",
-        "c", 0, "-c"));
-    
-    result.addElement(new Option(
-        "\tThe indices for boolean attributes.",
-        "b", 1, "-b <range>"));
-    
-    result.addElement(new Option(
-        "\tThe indices for nominal attributes.",
-        "m", 1, "-m <range>"));
-    
+    result.addElement(new Option("\tThe indices for boolean attributes.", "b",
+      1, "-b <range>"));
+
+    result.addElement(new Option("\tThe indices for nominal attributes.", "m",
+      1, "-m <range>"));
+
     return result.elements();
   }
 
   /**
    * Sets the options.
-   *
-   * @param options the options 
+   * 
+   * @param options the options
    * @throws Exception if invalid option
    */
-  public void setOptions(String[] options) throws Exception { 
-    String        tmpStr;
-   
+  @Override
+  public void setOptions(String[] options) throws Exception {
+    String tmpStr;
+
     super.setOptions(options);
 
     tmpStr = Utils.getOption('a', options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setNumAttributes(Integer.parseInt(tmpStr));
-    else
+    } else {
       setNumAttributes(defaultNumAttributes());
+    }
 
     setClassFlag(Utils.getFlag('c', options));
 
     tmpStr = Utils.getOption('b', options);
     setBooleanIndices(tmpStr);
-    m_booleanCols.setUpper(getNumAttributes());
+    m_booleanCols.setUpper(getNumAttributes() - 1);
 
     tmpStr = Utils.getOption('m', options);
     setNominalIndices(tmpStr);
-    m_nominalCols.setUpper(getNumAttributes());
+    m_nominalCols.setUpper(getNumAttributes() - 1);
 
     // check indices
     tmpStr = checkIndices();
-    if (tmpStr.length() > 0)
+    if (tmpStr.length() > 0) {
       throw new IllegalArgumentException(tmpStr);
+    }
   }
-  
+
   /**
    * Gets the current settings of the classifier.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
+  @Override
   public String[] getOptions() {
-    Vector        result;
-    String[]      options;
-    int           i;
-    
-    result  = new Vector();
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
-    
+
+    Vector<String> result = new Vector<String>();
+
+    Collections.addAll(result, super.getOptions());
+
     result.add("-a");
     result.add("" + getNumAttributes());
 
-    if (getClassFlag())
+    if (getClassFlag()) {
       result.add("-c");
-    
+    }
+
     if (!getBooleanCols().toString().equalsIgnoreCase("empty")) {
       result.add("-b");
-      result.add("" + getBooleanCols());
+      result.add("" + getBooleanCols().getRanges());
     }
-    
+
     if (!getNominalCols().toString().equalsIgnoreCase("empty")) {
       result.add("-m");
-      result.add("" + getNominalCols());
+      result.add("" + getNominalCols().getRanges());
     }
-    
-    return (String[]) result.toArray(new String[result.size()]);
+
+    return result.toArray(new String[result.size()]);
   }
 
   /**
@@ -182,6 +181,7 @@ public abstract class ClusterGenerator
 
   /**
    * Sets the number of attributes the dataset should have.
+   * 
    * @param numAttributes the new number of attributes
    */
   public void setNumAttributes(int numAttributes) {
@@ -192,56 +192,60 @@ public abstract class ClusterGenerator
 
   /**
    * Gets the number of attributes that should be produced.
+   * 
    * @return the number of attributes that should be produced
    */
-  public int getNumAttributes() { 
-    return m_NumAttributes; 
+  public int getNumAttributes() {
+    return m_NumAttributes;
   }
-  
+
   /**
    * Returns the tip text for this property
    * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String numAttributesTipText() {
     return "The number of attributes the generated data will contain.";
   }
 
   /**
-   * Sets the class flag, if class flag is set, 
-   * the cluster is listed as class atrribute in an extra attribute.
+   * Sets the class flag, if class flag is set, the cluster is listed as class
+   * atrribute in an extra attribute.
+   * 
    * @param classFlag the new class flag
    */
-  public void setClassFlag(boolean classFlag) { 
-    m_ClassFlag = classFlag; 
+  public void setClassFlag(boolean classFlag) {
+    m_ClassFlag = classFlag;
   }
 
   /**
    * Gets the class flag.
-   * @return the class flag 
+   * 
+   * @return the class flag
    */
   public boolean getClassFlag() {
-    return m_ClassFlag; 
+    return m_ClassFlag;
   }
-  
+
   /**
    * Returns the tip text for this property
    * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String classFlagTipText() {
     return "If set to TRUE, lists the cluster as an extra attribute.";
   }
 
   /**
-   * Sets which attributes are boolean 
-   * @param rangeList a string representing the list of attributes. Since
-   * the string will typically come from a user, attributes are indexed from
-   * 1. <br/>
-   * eg: first-3,5,6-last
-   * @throws IllegalArgumentException if an invalid range list is supplied 
+   * Sets which attributes are boolean
+   * 
+   * @param rangeList a string representing the list of attributes. Since the
+   *          string will typically come from a user, attributes are indexed
+   *          from 1. <br/>
+   *          eg: first-3,5,6-last
+   * @throws IllegalArgumentException if an invalid range list is supplied
    */
   public void setBooleanIndices(String rangeList) {
     m_booleanCols.setRanges(rangeList);
@@ -249,6 +253,7 @@ public abstract class ClusterGenerator
 
   /**
    * Sets which attributes are boolean.
+   * 
    * @param value the range to use
    */
   public void setBooleanCols(Range value) {
@@ -261,17 +266,18 @@ public abstract class ClusterGenerator
    * @return the range of boolean attributes
    */
   public Range getBooleanCols() {
-    if (m_booleanCols == null)
+    if (m_booleanCols == null) {
       m_booleanCols = new Range();
+    }
 
     return m_booleanCols;
   }
-  
+
   /**
    * Returns the tip text for this property
    * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String booleanColsTipText() {
     return "The range of attributes that are generated as boolean ones.";
@@ -279,11 +285,12 @@ public abstract class ClusterGenerator
 
   /**
    * Sets which attributes are nominal
-   * @param rangeList a string representing the list of attributes. Since
-   * the string will typically come from a user, attributes are indexed from
-   * 1. <br/>
-   * eg: first-3,5,6-last
-   * @throws IllegalArgumentException if an invalid range list is supplied 
+   * 
+   * @param rangeList a string representing the list of attributes. Since the
+   *          string will typically come from a user, attributes are indexed
+   *          from 1. <br/>
+   *          eg: first-3,5,6-last
+   * @throws IllegalArgumentException if an invalid range list is supplied
    */
   public void setNominalIndices(String rangeList) {
     m_nominalCols.setRanges(rangeList);
@@ -291,6 +298,7 @@ public abstract class ClusterGenerator
 
   /**
    * Sets which attributes are nominal.
+   * 
    * @param value the range to use
    */
   public void setNominalCols(Range value) {
@@ -303,17 +311,18 @@ public abstract class ClusterGenerator
    * @return the range of nominal attributes
    */
   public Range getNominalCols() {
-    if (m_nominalCols == null)
+    if (m_nominalCols == null) {
       m_nominalCols = new Range();
+    }
 
     return m_nominalCols;
   }
-  
+
   /**
    * Returns the tip text for this property
    * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String nominalColsTipText() {
     return "The range of attributes to generate as nominal ones.";
@@ -325,15 +334,12 @@ public abstract class ClusterGenerator
    * @return empty string if no problem, otherwise error message
    */
   protected String checkIndices() {
-    for (int i = 1; i < getNumAttributes() + 1; i++) {
-      m_booleanCols.isInRange(i);
+    for (int i = 0; i < getNumAttributes(); i++) {
       if (m_booleanCols.isInRange(i) && m_nominalCols.isInRange(i)) {
-	return   "Error in attribute type: Attribute " 
-               + i + " is set boolean and nominal.";
+        return "Error in attribute type: Attribute " + i
+          + " is set boolean and nominal.";
       }
-    } 
+    }
     return "";
   }
 }
-
-

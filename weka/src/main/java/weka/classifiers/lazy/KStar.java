@@ -21,6 +21,7 @@
 
 package weka.classifiers.lazy;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -90,7 +91,7 @@ import weka.core.Utils;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz) - Java port
- * @version $Revision: 8034 $
+ * @version $Revision: 10141 $
  */
 public class KStar 
   extends AbstractClassifier
@@ -216,8 +217,7 @@ public class KStar
    * @throws Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
-    String debug = "(KStar.buildClassifier) ";
-
+    
     // can classifier handle the data?
     getCapabilities().testWithFail(instances);
 
@@ -238,8 +238,7 @@ public class KStar
    * @throws Exception if instance could not be incorporated successfully
    */
   public void updateClassifier(Instance instance) throws Exception {
-    String debug = "(KStar.updateClassifier) ";
-
+    
     if (m_Train.equalHeaders(instance.dataset()) == false)
       throw new Exception("Incompatible instance types\n" + m_Train.equalHeadersMsg(instance.dataset()));
     if ( instance.classIsMissing() )
@@ -258,7 +257,6 @@ public class KStar
    */
   public double [] distributionForInstance(Instance instance) throws Exception {
 
-    String debug = "(KStar.distributionForInstance) ";
     double transProb = 0.0, temp = 0.0;
     double [] classProbability = new double[m_NumClasses];
     double [] predictedValue = new double[1];
@@ -283,7 +281,7 @@ public class KStar
     }
     // init done.
     Instance trainInstance;
-    Enumeration enu = m_Train.enumerateInstances();
+    Enumeration<Instance> enu = m_Train.enumerateInstances();
     while ( enu.hasMoreElements() ) {
       trainInstance = (Instance)enu.nextElement();
       transProb = instanceTransformationProbability(instance, trainInstance);      
@@ -324,7 +322,6 @@ public class KStar
    */
   private double instanceTransformationProbability(Instance first, 
 						   Instance second) {
-    String debug = "(KStar.instanceTransformationProbability) ";
     double transProb = 1.0;
     int numMissAttr = 0;
     for (int i = 0; i < m_NumAttributes; i++) {
@@ -359,7 +356,7 @@ public class KStar
    * @return the value of the transformation probability.
    */
   private double attrTransProb(Instance first, Instance second, int col) {
-    String debug = "(KStar.attrTransProb)";
+    
     double transProb = 0.0;
     KStarNominalAttribute ksNominalAttr;
     KStarNumericAttribute ksNumericAttr;
@@ -424,9 +421,9 @@ public class KStar
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector optVector = new Vector( 3 );
+    Vector<Option> optVector = new Vector<Option>( 3 );
     optVector.addElement(new Option(
 	      "\tManual blend setting (default 20%)\n",
 	      "B", 1, "-B <num>"));
@@ -437,6 +434,9 @@ public class KStar
 	      "\tSpecify the missing value treatment mode (default a)\n"
 	      +"\tValid options are: a(verage), d(elete), m(axdiff), n(ormal)\n",
 	      "M", 1,"-M <char>"));
+    
+    optVector.addAll(Collections.list(super.listOptions()));
+    
     return optVector.elements();
   }
    
@@ -529,7 +529,7 @@ public class KStar
    * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-    String debug = "(KStar.setOptions)";
+    
     String blendStr = Utils.getOption('B', options);
     if (blendStr.length() != 0) {
       setGlobalBlend(Integer.parseInt(blendStr));
@@ -556,6 +556,9 @@ public class KStar
 	setMissingMode(new SelectedTag(M_AVERAGE, TAGS_MISSING));
       }
     }
+    
+    super.setOptions(options);
+    
     Utils.checkForRemainingOptions(options);
   }
 
@@ -567,32 +570,32 @@ public class KStar
    */
   public String [] getOptions() {
     // -B <num> -E -M <char>
-    String [] options = new String [ 5 ];
-    int itr = 0;
-    options[itr++] = "-B";
-    options[itr++] = "" + m_GlobalBlend;
+    Vector<String> options = new Vector<String>();
+    
+    options.add("-B");
+    options.add("" + m_GlobalBlend);
 
     if (getEntropicAutoBlend()) {
-      options[itr++] = "-E";
+        options.add("-E");
     }
 
-    options[itr++] = "-M";
+    options.add("-M");
     if (m_MissingMode == M_AVERAGE) {
-      options[itr++] = "" + "a";
+        options.add("" + "a");
     }
     else if (m_MissingMode == M_DELETE) {
-      options[itr++] = "" + "d";
+        options.add("" + "d");
     }
     else if (m_MissingMode == M_MAXDIFF) {
-      options[itr++] = "" + "m";
+        options.add("" + "m");
     }
     else if (m_MissingMode == M_NORMAL) {
-      options[itr++] = "" + "n";
+        options.add("" + "n");
     }
-    while (itr < options.length) {
-      options[itr++] = "";
-    }
-    return options;
+    
+    Collections.addAll(options, super.getOptions());
+    
+    return options.toArray(new String[0]);
   }
 
   /**
@@ -650,7 +653,7 @@ public class KStar
    * Generates a set of random versions of the class colomn.
    */
   private void generateRandomClassColomns() {
-    String debug = "(KStar.generateRandomClassColomns)";
+    
     Random generator = new Random(42);
     //    Random generator = new Random();
     m_RandClassCols = new int [NUM_RAND_COLS+1][];
@@ -670,7 +673,7 @@ public class KStar
    * @return an array of class values
    */
   private int [] classValues() {
-    String debug = "(KStar.classValues)";
+    
     int [] classval = new int[m_NumInstances];
     for (int i=0; i < m_NumInstances; i++) {
       try {
@@ -690,7 +693,7 @@ public class KStar
    * @return a copy of the array with its elements randomly redistributed.
    */
   private int [] randomize(int [] array, Random generator) {
-    String debug = "(KStar.randomize)";
+    
     int index;
     int temp;
     int [] newArray = new int[array.length];
@@ -710,7 +713,7 @@ public class KStar
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10141 $");
   }
 
 } // class end

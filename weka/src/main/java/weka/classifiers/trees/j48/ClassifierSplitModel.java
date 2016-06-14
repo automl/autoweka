@@ -33,7 +33,7 @@ import weka.core.Utils;
  * recursively to split the data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 11245 $
  */
 public abstract class ClassifierSplitModel
   implements Cloneable, Serializable, RevisionHandler {
@@ -242,31 +242,42 @@ public abstract class ClassifierSplitModel
   public final Instances [] split(Instances data) 
        throws Exception { 
 
-    Instances [] instances = new Instances [m_numSubsets];
-    double [] weights;
-    double newWeight;
-    Instance instance;
-    int subset, i, j;
-
-    for (j=0;j<m_numSubsets;j++)
-      instances[j] = new Instances((Instances)data,
-					    data.numInstances());
-    for (i = 0; i < data.numInstances(); i++) {
-      instance = ((Instances) data).instance(i);
-      weights = weights(instance);
-      subset = whichSubset(instance);
-      if (subset > -1)
-	instances[subset].add(instance);
-      else
-	for (j = 0; j < m_numSubsets; j++)
-	  if (Utils.gr(weights[j],0)) {
-	    newWeight = weights[j]*instance.weight();
-	    instances[j].add(instance);
-	    instances[j].lastInstance().setWeight(newWeight);
-	  }
+    // Find size and constitution of subsets
+    int[] subsetSize = new int[m_numSubsets];
+    for (Instance instance : data) {
+      int subset = whichSubset(instance);
+      if (subset > -1) {
+        subsetSize[subset]++;
+      } else {
+        double[] weights = weights(instance);
+        for (int j = 0; j < m_numSubsets; j++) {
+          if (Utils.gr(weights[j], 0)) {
+            subsetSize[j]++;
+          }
+        }
+      }
     }
-    for (j = 0; j < m_numSubsets; j++)
-      instances[j].compactify();
+    
+    // Create subsets
+    Instances [] instances = new Instances [m_numSubsets];
+    for (int j = 0; j < m_numSubsets; j++) {
+      instances[j] = new Instances(data, subsetSize[j]);
+    }
+    for (Instance instance : data) {
+      int subset = whichSubset(instance);
+      if (subset > -1) {
+	instances[subset].add(instance);
+      } else {
+        double[] weights = weights(instance);
+        for (int j = 0; j < m_numSubsets; j++) {
+	  if (Utils.gr(weights[j], 0)) {
+	    instances[j].add(instance);
+	    instances[j].lastInstance().
+	      setWeight(weights[j] * instance.weight());
+	  }
+	}
+      }
+    }
     
     return instances;
   }

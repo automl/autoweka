@@ -31,11 +31,10 @@ import java.io.Writer;
 import java.util.Properties;
 
 /**
- * <code>Regression</code> provides support for performing regression
- * testing.
- *
+ * <code>Regression</code> provides support for performing regression testing.
+ * 
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 8034 $
+ * @version $Revision: 10160 $
  */
 public class Regression {
 
@@ -43,8 +42,8 @@ public class Regression {
   private static final String FILE_EXTENSION = ".ref";
 
   /**
-   * The name of the system property that can be used to override the
-   * location of the reference root.
+   * The name of the system property that can be used to override the location
+   * of the reference root.
    */
   private static final String ROOT_PROPERTY = "weka.test.Regression.root";
 
@@ -55,16 +54,16 @@ public class Regression {
   private static File ROOT;
 
   /** Stores the output to be compared against the reference. */
-  private StringBuffer m_Output;
+  private final StringBuffer m_Output;
 
   /** The file where the reference output is (or will be) located */
-  private File m_RefFile;
+  private final File m_RefFile;
 
   /**
-   * Returns a <code>File</code> corresponding to the root of the
-   * reference tree.
-   *
-   * @return a <code>File</code> giving the root of the reference tree. 
+   * Returns a <code>File</code> corresponding to the root of the reference
+   * tree.
+   * 
+   * @return a <code>File</code> giving the root of the reference tree.
    */
   public static File getRoot() {
 
@@ -82,16 +81,16 @@ public class Regression {
 
   /**
    * Creates a new <code>Regression</code> instance for the supplied class.
-   *
-   * @param theClass a <code>Class</code> value. The name of the class is
-   * used to determine the reference file to compare output with.
+   * 
+   * @param theClass a <code>Class</code> value. The name of the class is used
+   *          to determine the reference file to compare output with.
    */
-  public Regression(Class theClass) {
+  public Regression(Class<?> theClass) {
 
     if (theClass == null) {
       throw new NullPointerException();
     }
-    String relative = theClass.getName().replace('.', File.separatorChar) 
+    String relative = theClass.getName().replace('.', File.separatorChar)
       + FILE_EXTENSION;
     m_RefFile = new File(getRoot(), relative);
     m_Output = new StringBuffer();
@@ -100,7 +99,7 @@ public class Regression {
   /**
    * Adds some output to the current regression output. The accumulated output
    * will provide the material for the regression comparison.
-   *
+   * 
    * @param output a <code>String</code> that forms part of the regression test.
    */
   public void println(String output) {
@@ -111,13 +110,13 @@ public class Regression {
   /**
    * Returns the difference between the current output and the reference
    * version.
-   *
+   * 
    * @return a <code>String</code> value illustrating the differences. If this
-   * string is empty, there are no differences. If null is returned, there was
-   * no reference output found, and the current output has been written as the
-   * reference.
-   * @exception IOException if an error occurs during reading or writing of
-   * the reference file.
+   *         string is empty, there are no differences. If null is returned,
+   *         there was no reference output found, and the current output has
+   *         been written as the reference.
+   * @exception IOException if an error occurs during reading or writing of the
+   *              reference file.
    */
   public String diff() throws IOException {
 
@@ -132,14 +131,14 @@ public class Regression {
   }
 
   /**
-   * Returns the difference between two strings, Will be the empty string
-   * if there are no difference.
-   *
+   * Returns the difference between two strings, Will be the empty string if
+   * there are no difference.
+   * 
    * @param reference a <code>String</code> value
    * @param current a <code>String</code> value
-   * @return a <code>String</code> value describing the differences between 
-   * the two input strings. This will be the empty string if there are no
-   * differences.
+   * @return a <code>String</code> value describing the differences between the
+   *         two input strings. This will be the empty string if there are no
+   *         differences.
    */
   protected String diff(String reference, String current) {
 
@@ -147,13 +146,11 @@ public class Regression {
       return "";
     } else {
       // Should do something more cunning here, like try to isolate the
-      // actual differences. We could also try calling unix diff utility 
+      // actual differences. We could also try calling unix diff utility
       // if it exists.
       StringBuffer diff = new StringBuffer();
       diff.append("+++ Reference: ").append(m_RefFile).append(" +++\n")
-        .append(reference)
-        .append("+++ Current +++\n")
-        .append(current)
+        .append(reference).append("+++ Current +++\n").append(current)
         .append("+++\n");
       return diff.toString();
     }
@@ -161,7 +158,7 @@ public class Regression {
 
   /**
    * Reads the reference output from a file and returns it as a String
-   *
+   * 
    * @return a <code>String</code> value containing the reference output
    * @exception IOException if an error occurs.
    */
@@ -169,20 +166,20 @@ public class Regression {
 
     Reader r = new BufferedReader(new FileReader(m_RefFile));
     StringBuffer ref = new StringBuffer();
-    char [] buf = new char[5];
-    for(int read = r.read(buf); read > 0; read = r.read(buf)) {
+    char[] buf = new char[5];
+    for (int read = r.read(buf); read > 0; read = r.read(buf)) {
       ref.append(new String(buf, 0, read));
     }
     r.close();
-    return ref.toString();    
+    return ref.toString();
   }
-  
+
   /**
    * Writes the current output as the new reference. Normally this method is
    * called automatically if diff() is called with no existing reference
-   * version. You may wish to call it explicitly if you know you want to 
-   * create the reference version.
-   *
+   * version. You may wish to call it explicitly if you know you want to create
+   * the reference version.
+   * 
    * @exception IOException if an error occurs.
    */
   public void writeAsReference() throws IOException {
@@ -198,11 +195,11 @@ public class Regression {
 
   /**
    * Tests Regression from the command line
-   *
-   * @param args a <code>String</code> array containing values to
-   * send to println().
+   * 
+   * @param args a <code>String</code> array containing values to send to
+   *          println().
    */
-  public static void main(String []args) {
+  public static void main(String[] args) {
 
     try {
       if (args.length == 0) {
@@ -212,8 +209,8 @@ public class Regression {
       props.setProperty(ROOT_PROPERTY, props.getProperty("java.io.tmpdir"));
 
       Regression reg = new Regression(Regression.class);
-      for (int i = 0; i < args.length; i++) {
-        reg.println(args[i]);
+      for (String arg : args) {
+        reg.println(arg);
       }
       String diff = reg.diff();
       if (diff == null) {

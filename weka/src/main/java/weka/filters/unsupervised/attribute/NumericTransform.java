@@ -41,44 +41,51 @@ import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
-/** 
- <!-- globalinfo-start -->
- * Transforms numeric attributes using a given transformation method.
+/**
+ * <!-- globalinfo-start --> Transforms numeric attributes using a given
+ * transformation method.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -R &lt;index1,index2-index4,...&gt;
+ * <pre>
+ * -R &lt;index1,index2-index4,...&gt;
  *  Specify list of columns to transform. First and last are
  *  valid indexes (default none). Non-numeric columns are 
- *  skipped.</pre>
+ *  skipped.
+ * </pre>
  * 
- * <pre> -V
- *  Invert matching sense.</pre>
+ * <pre>
+ * -V
+ *  Invert matching sense.
+ * </pre>
  * 
- * <pre> -C &lt;string&gt;
+ * <pre>
+ * -C &lt;string&gt;
  *  Sets the class containing transformation method.
- *  (default java.lang.Math)</pre>
+ *  (default java.lang.Math)
+ * </pre>
  * 
- * <pre> -M &lt;string&gt;
- *  Sets the method. (default abs)</pre>
+ * <pre>
+ * -M &lt;string&gt;
+ *  Sets the method. (default abs)
+ * </pre>
  * 
- <!-- options-end -->
- *
- * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 8034 $
+ * <!-- options-end -->
+ * 
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @version $Revision: 12037 $
  */
-public class NumericTransform 
-  extends Filter
-  implements UnsupervisedFilter, StreamableFilter, OptionHandler {
-  
+public class NumericTransform extends Filter implements UnsupervisedFilter,
+  StreamableFilter, OptionHandler {
+
   /** for serialization */
   static final long serialVersionUID = -8561413333351366934L;
 
   /** Stores which columns to transform. */
-  private Range m_Cols = new Range();
+  private final Range m_Cols = new Range();
 
   /** Class containing transformation method. */
   private String m_Class;
@@ -88,9 +95,9 @@ public class NumericTransform
 
   /**
    * Returns a string describing this filter
-   *
-   * @return a description of the filter suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the filter suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
 
@@ -98,8 +105,8 @@ public class NumericTransform
   }
 
   /**
-   * Default constructor -- sets the default transform method
-   * to java.lang.Math.abs().
+   * Default constructor -- sets the default transform method to
+   * java.lang.Math.abs().
    */
   public NumericTransform() {
 
@@ -107,12 +114,13 @@ public class NumericTransform
     m_Method = "abs";
   }
 
-  /** 
+  /**
    * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
+   * 
+   * @return the capabilities of this object
+   * @see Capabilities
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
     result.disableAll();
@@ -120,27 +128,26 @@ public class NumericTransform
     // attributes
     result.enableAllAttributes();
     result.enable(Capability.MISSING_VALUES);
-    
+
     // class
     result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
     result.enable(Capability.NO_CLASS);
-    
+
     return result;
   }
 
   /**
    * Sets the format of the input instances.
-   *
-   * @param instanceInfo an Instances object containing the input 
-   * instance structure (any instances contained in the object are 
-   * ignored - only the structure is required).
+   * 
+   * @param instanceInfo an Instances object containing the input instance
+   *          structure (any instances contained in the object are ignored -
+   *          only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the input format can't be set 
-   * successfully
+   * @throws Exception if the input format can't be set successfully
    */
-  public boolean setInputFormat(Instances instanceInfo) 
-       throws Exception {
+  @Override
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     if (m_Class == null) {
       throw new IllegalStateException("No class has been set.");
@@ -155,16 +162,16 @@ public class NumericTransform
   }
 
   /**
-   * Input an instance for filtering. The instance is processed
-   * and made available for output immediately.
-   *
+   * Input an instance for filtering. The instance is processed and made
+   * available for output immediately.
+   * 
    * @param instance the input instance
-   * @return true if the filtered instance may now be
-   * collected with output().
+   * @return true if the filtered instance may now be collected with output().
    * @throws IllegalStateException if no input format has been set.
-   * @throws InvocationTargetException if there is a problem applying
-   * the configured transform method.
+   * @throws InvocationTargetException if there is a problem applying the
+   *           configured transform method.
    */
+  @Override
   public boolean input(Instance instance) throws Exception {
 
     if (getInputFormat() == null) {
@@ -175,27 +182,27 @@ public class NumericTransform
       m_NewBatch = false;
     }
 
-    Method m = (Class.forName(m_Class)).getMethod(m_Method, new Class[] {Double.TYPE});
+    Method m = (Class.forName(m_Class)).getMethod(m_Method,
+      new Class[] { Double.TYPE });
 
-    double []vals = new double[instance.numAttributes()];
-    Double []params = new Double[1];
+    double[] vals = new double[instance.numAttributes()];
+    Double[] params = new Double[1];
     Double newVal;
-    for(int i = 0; i < instance.numAttributes(); i++) {
+    for (int i = 0; i < instance.numAttributes(); i++) {
       if (instance.isMissing(i)) {
-	vals[i] = Utils.missingValue();
+        vals[i] = Utils.missingValue();
       } else {
-	if (m_Cols.isInRange(i) &&
-	    instance.attribute(i).isNumeric()) {
-	  params[0] = new Double(instance.value(i));
-	  newVal = (Double) m.invoke(null, (Object[])params);
-	  if (newVal.isNaN() || newVal.isInfinite()) {
-	    vals[i] = Utils.missingValue();
-	  } else {
-	    vals[i] = newVal.doubleValue(); 
-	  }
-	} else {
-	  vals[i] = instance.value(i);
-	}
+        if (m_Cols.isInRange(i) && instance.attribute(i).isNumeric()) {
+          params[0] = new Double(instance.value(i));
+          newVal = (Double) m.invoke(null, (Object[]) params);
+          if (newVal.isNaN() || newVal.isInfinite()) {
+            vals[i] = Utils.missingValue();
+          } else {
+            vals[i] = newVal.doubleValue();
+          }
+        } else {
+          vals[i] = instance.value(i);
+        }
       }
     }
     Instance inst = null;
@@ -205,70 +212,75 @@ public class NumericTransform
       inst = new DenseInstance(instance.weight(), vals);
     }
     inst.setDataset(instance.dataset());
-    push(inst);
+    push(inst, false); // No need to copy
     return true;
   }
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  @Override
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(4);
-
-    newVector.addElement(new Option(
-              "\tSpecify list of columns to transform. First and last are\n"
-	      + "\tvalid indexes (default none). Non-numeric columns are \n"
-	      + "\tskipped.",
-              "R", 1, "-R <index1,index2-index4,...>"));
+    Vector<Option> newVector = new Vector<Option>(4);
 
     newVector.addElement(new Option(
-	      "\tInvert matching sense.",
-              "V", 0, "-V"));
+      "\tSpecify list of columns to transform. First and last are\n"
+        + "\tvalid indexes (default none). Non-numeric columns are \n"
+        + "\tskipped.", "R", 1, "-R <index1,index2-index4,...>"));
+
+    newVector.addElement(new Option("\tInvert matching sense.", "V", 0, "-V"));
 
     newVector.addElement(new Option(
-              "\tSets the class containing transformation method.\n"+
-              "\t(default java.lang.Math)",
-              "C", 1, "-C <string>"));
+      "\tSets the class containing transformation method.\n"
+        + "\t(default java.lang.Math)", "C", 1, "-C <string>"));
 
-    newVector.addElement(new Option(
-              "\tSets the method. (default abs)",
-              "M", 1, "-M <string>"));
+    newVector.addElement(new Option("\tSets the method. (default abs)", "M", 1,
+      "-M <string>"));
 
     return newVector.elements();
   }
 
-
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -R &lt;index1,index2-index4,...&gt;
+   * <pre>
+   * -R &lt;index1,index2-index4,...&gt;
    *  Specify list of columns to transform. First and last are
    *  valid indexes (default none). Non-numeric columns are 
-   *  skipped.</pre>
+   *  skipped.
+   * </pre>
    * 
-   * <pre> -V
-   *  Invert matching sense.</pre>
+   * <pre>
+   * -V
+   *  Invert matching sense.
+   * </pre>
    * 
-   * <pre> -C &lt;string&gt;
+   * <pre>
+   * -C &lt;string&gt;
    *  Sets the class containing transformation method.
-   *  (default java.lang.Math)</pre>
+   *  (default java.lang.Math)
+   * </pre>
    * 
-   * <pre> -M &lt;string&gt;
-   *  Sets the method. (default abs)</pre>
+   * <pre>
+   * -M &lt;string&gt;
+   *  Sets the method. (default abs)
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    
+
     setAttributeIndices(Utils.getOption('R', options));
     setInvertSelection(Utils.getFlag('V', options));
     String classString = Utils.getOption('C', options);
@@ -283,42 +295,44 @@ public class NumericTransform
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
     }
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of the filter.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
+  @Override
+  public String[] getOptions() {
 
-    String [] options = new String [7];
-    int current = 0;
+    Vector<String> options = new Vector<String>();
 
     if (getInvertSelection()) {
-      options[current++] = "-V";
+      options.add("-V");
     }
     if (!getAttributeIndices().equals("")) {
-      options[current++] = "-R"; options[current++] = getAttributeIndices();
+      options.add("-R");
+      options.add(getAttributeIndices());
     }
     if (m_Class != null) {
-      options[current++] = "-C"; options[current++] = getClassName();
+      options.add("-C");
+      options.add(getClassName());
     }
     if (m_Method != null) {
-      options[current++] = "-M"; options[current++] = getMethodName();
+      options.add("-M");
+      options.add(getMethodName());
     }
 
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    return options.toArray(new String[0]);
   }
 
   /**
    * Returns the tip text for this property
-   *
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String classNameTipText() {
     return "Name of the class containing the method used for the transformation.";
@@ -326,38 +340,38 @@ public class NumericTransform
 
   /**
    * Get the class containing the transformation method.
-   *
+   * 
    * @return string describing the class
    */
   public String getClassName() {
 
     return m_Class;
   }
- 
+
   /**
    * Sets the class containing the transformation method.
-   *
+   * 
    * @param name the name of the class
    * @throws ClassNotFoundException if class can't be found
    */
   public void setClassName(String name) throws ClassNotFoundException {
-  
+
     m_Class = name;
   }
 
   /**
    * Returns the tip text for this property
-   *
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String methodNameTipText() {
     return "Name of the method used for the transformation.";
   }
- 
+
   /**
    * Get the transformation method.
-   *
+   * 
    * @return string describing the transformation method.
    */
   public String getMethodName() {
@@ -367,7 +381,7 @@ public class NumericTransform
 
   /**
    * Set the transformation method.
-   *
+   * 
    * @param name the name of the method
    * @throws NoSuchMethodException if method can't be found in class
    */
@@ -378,9 +392,9 @@ public class NumericTransform
 
   /**
    * Returns the tip text for this property
-   *
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String invertSelectionTipText() {
     return "Whether to process the inverse of the given attribute ranges.";
@@ -388,7 +402,7 @@ public class NumericTransform
 
   /**
    * Get whether the supplied columns are to be transformed or not
-   *
+   * 
    * @return true if the supplied columns will be kept
    */
   public boolean getInvertSelection() {
@@ -397,8 +411,8 @@ public class NumericTransform
   }
 
   /**
-   * Set whether selected columns should be transformed or not. 
-   *
+   * Set whether selected columns should be transformed or not.
+   * 
    * @param invert the new invert setting
    */
   public void setInvertSelection(boolean invert) {
@@ -408,9 +422,9 @@ public class NumericTransform
 
   /**
    * Returns the tip text for this property
-   *
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String attributeIndicesTipText() {
     return "Specify range of attributes to act on."
@@ -421,7 +435,7 @@ public class NumericTransform
 
   /**
    * Get the current range selection
-   *
+   * 
    * @return a string containing a comma separated list of ranges
    */
   public String getAttributeIndices() {
@@ -430,12 +444,12 @@ public class NumericTransform
   }
 
   /**
-   * Set which attributes are to be transformed (or kept if invert is true). 
-   *
-   * @param rangeList a string representing the list of attributes. Since
-   * the string will typically come from a user, attributes are indexed from
-   * 1. <br> eg: 
-   * first-3,5,6-last
+   * Set which attributes are to be transformed (or kept if invert is true).
+   * 
+   * @param rangeList a string representing the list of attributes. Since the
+   *          string will typically come from a user, attributes are indexed
+   *          from 1. <br>
+   *          eg: first-3,5,6-last
    * @throws InvalidArgumentException if an invalid range list is supplied
    */
 
@@ -446,32 +460,33 @@ public class NumericTransform
 
   /**
    * Set which attributes are to be transformed (or kept if invert is true)
-   *
+   * 
    * @param attributes an array containing indexes of attributes to select.
-   * Since the array will typically come from a program, attributes are indexed
-   * from 0.
+   *          Since the array will typically come from a program, attributes are
+   *          indexed from 0.
    * @throws InvalidArgumentException if an invalid set of ranges is supplied
    */
-  public void setAttributeIndicesArray(int [] attributes) {
+  public void setAttributeIndicesArray(int[] attributes) {
 
     setAttributeIndices(Range.indicesToRangeList(attributes));
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**
    * Main method for testing this class.
-   *
+   * 
    * @param argv should contain arguments to the filter: use -h for help
    */
-  public static void main(String [] argv) {
+  public static void main(String[] argv) {
     runFilter(new NumericTransform(), argv);
   }
 }

@@ -9,7 +9,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 9151 $
+   $Revision: 12695 $
   ===========================================================================
 -->
 
@@ -67,6 +67,10 @@
      <include name="**/${build}/testcases"/>
    </dirset>
    <fileset dir="${packages_external}">
+     <include name="**/lib/*.jar"/>
+     <include name="**/lib/*.zip"/>
+   </fileset>
+   <fileset dir="${packages_internal}">
      <include name="**/lib/*.jar"/>
      <include name="**/lib/*.zip"/>
    </fileset>
@@ -316,6 +320,39 @@
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="isolationForest"/>
     </antcall>
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="multiLayerPerceptrons"/>
+    </antcall>
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="supervisedAttributeScaling"/>
+    </antcall>
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="kernelLogisticRegression"/>
+    </antcall>
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="discriminantAnalysis"/>
+    </antcall>
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="extraTrees"/>
+    </antcall>
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="alternatingModelTrees"/>
+    </antcall>
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="timeSeriesFilters"/>
+    </antcall>
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="wekaPython"/>
+    </antcall>
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="percentageErrorMetrics"/>
+    </antcall>
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="niftiLoader"/>
+    </antcall>
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="iterativeAbsoluteErrorRegression"/>
+    </antcall>
   </target>
 
   <target name="compile_tests_external"  description="Compile tests for a named external package (run with -DpackageName=package name)">
@@ -500,10 +537,7 @@
 
     <antcall target="${packageCommand}_external">
       <param name="packageName" value="associationRulesVisualizer"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="scatterPlot3D"/>
+      <param name="cp" value="../scatterPlot3D/lib/*"/>
     </antcall>
 
     <antcall target="${packageCommand}_external">
@@ -530,6 +564,11 @@
     <antcall target="${packageCommand}_external">
       <param name="packageName" value="cascadeKMeans"/>
     </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="DilcaDistance"/>
+      <param name="cp" value="../fastCorrBasedFS/build/classes"/>
+    </antcall>
   </target>
 
   <target name="apply_all" depends="compile" description="Apply command to all packages. Use -DpackageCommand=[make|compile|compile_tests|clean]"> 
@@ -550,8 +589,9 @@
       destdir="${build}/classes"
       optimize="${optimization}"
       debug="${debug}"
+      includeantruntime="false"
       deprecation="${deprecation}"
-      source="1.6" target="1.6">
+      source="1.7" target="1.7">
 
       <classpath refid="project.class.path" /> 
     </javac>
@@ -566,9 +606,11 @@
          <include name="weka/**/*.txt"/>
          <include name="weka/**/*.xml"/>
          <include name="weka/**/*.kfml"/>
+         <include name="weka/**/*.kf"/>
          <include name="weka/**/*.arff"/>
          <include name="weka/**/DatabaseUtils.props.*"/>
          <include name="weka/gui/beans/README*"/>
+         <include name="weka/gui/knowledgeflow/README*"/>
          <include name="**/*.cup"/>
          <include name="**/*.flex"/>
          <include name="**/*.jflex"/>
@@ -583,7 +625,27 @@
         <include name="java_cup/runtime/**/*"/>
       </patternset>
     </unzip>
-    <unzip src="${lib}/packageManager.jar" dest="${build}/classes">
+    <unzip src="${lib}/bounce.jar" dest="${build}/classes">
+      <patternset>
+        <include name="org/**/*"/>
+      </patternset>
+    </unzip>
+    <unzip src="${lib}/commons-compress-1.10.jar" dest="${build}/classes">
+      <patternset>
+        <include name="org/**/*"/>
+      </patternset>
+    </unzip>
+    <unzip src="${lib}/mtj.jar" dest="${build}/classes">
+      <patternset>
+        <include name="no/uib/**/*"/>
+      </patternset>
+    </unzip>
+    <unzip src="${lib}/core.jar" dest="${build}/classes">
+      <patternset>
+        <include name="com/**/*"/>
+      </patternset>
+    </unzip>
+    <unzip src="${lib}/arpack_combined_all.jar" dest="${build}/classes">
       <patternset>
         <include name="org/**/*"/>
       </patternset>
@@ -601,7 +663,7 @@
              packagenames="weka.*, org.*"
              Author="yes" 
              Public="yes" 
-             maxmemory="256m"/>
+             maxmemory="500m"/>
     
     <!-- insert the links to our homepage and documentation.html -->
     <replace dir="${doc}" 
@@ -639,8 +701,9 @@
             destdir="${build}/testcases"
             optimize="${optimization}"
             debug="${debug}"
+            includeantruntime="false"
             deprecation="${deprecation}"
-            source="1.5" target="1.5">
+            source="1.7" target="1.7">
        <classpath refid="project.class.path" /> 
      </javac>
      <copy todir="${build}/testcases" >
@@ -681,20 +744,39 @@
 
   <!-- Run the test cases for the core and all packages via junit's testrunner class.
    This is a faster, simpler option than running the junit task -->
-  <target name="run_tests_all" depends="compile_tests" 
+
+  <target name="run_tests_all" depends="compile_tests"
    description="Execute unit tests (fast)">
+    <antcall target="apply_all_internal">
+      <param name="packageCommand" value="clean"/>
+    </antcall>
+    <antcall target="apply_all_external">
+      <param name="packageCommand" value="clean"/>
+    </antcall>
+    <antcall target="apply_all_internal">
+      <param name="packageCommand" value="compile"/>
+    </antcall>
+    <antcall target="apply_all_internal">
+      <param name="packageCommand" value="compile_tests"/>
+    </antcall>
+    <antcall target="apply_all_external">
+      <param name="packageCommand" value="compile"/>
+    </antcall>
+    <antcall target="apply_all_external">
+      <param name="packageCommand" value="compile_tests"/>
+    </antcall>
 <!--    <echo message="pacakge classpath ${pack.cp}"/> -->
-     <java fork="yes" dir="."
-      classname="junit.textui.TestRunner"
-      taskname="junit" failonerror="${run_tests_fail}">
-	 <arg value="weka.AllTests"/>
-         <classpath refid="package.class.path" /> 
-       <jvmarg value="-server"/>
+    <java fork="yes" dir="."
+          classname="junit.textui.TestRunner"
+          taskname="junit" failonerror="${run_tests_fail}">
+      <arg value="weka.AllTests"/>
+      <classpath refid="package.class.path" />
+      <jvmarg value="-server"/>
+      <!--       <jvmarg value="-Xint"/> -->
+      <jvmarg value="-Djava.awt.headless=${headless}"/> 
+      <jvmarg value="-Dweka.test.Regression.root=${regression_tests_root}"/>
        <jvmarg value="-Duser.timezone=Pacific/Auckland"/>
-<!--       <jvmarg value="-Xint"/> -->
-         <jvmarg value="-Djava.awt.headless=${headless}"/> 
-         <jvmarg value="-Dweka.test.Regression.root=${regression_tests_root}"/>
-     </java>
+    </java>
   </target>
 
 
@@ -712,7 +794,6 @@
   <!-- Put everything in ${build}/classes into the weka.jar file -->
   <target name="exejar" depends="compile, init_dist"
    description="Create an executable jar file in ./dist">
-    <copy todir="${build}/classes/weka/gui" file="resources/MacArffOpenFilesHandler.class"/>
     <jar jarfile="${dist}/weka.jar" 
       basedir="${build}/classes">
      <manifest>
@@ -871,7 +952,7 @@
                 shortname="Weka"
                 arguments=""
                 workingdirectory="/Users"
-                jvmversion="1.6+">
+                jvmversion="1.7+">
       <javaproperty name="java.library.path" value="$APP_PACKAGE/Contents/Resources"/>
       <jarfileset dir="weka-${release}/weka-${release}">
         <include name="weka.jar"/>
@@ -901,7 +982,7 @@
 <!-- New subversion stuff -->
  <target name="svnCheckout" description="Checkout from subversion. Run with -Dsvn_username=username -Dsvn_password=password -Dweka_branch=&lt;branch name (e.g. trunk, branches/book2ndEd-branch)&gt;.">
     <property name="source-root" value="."/>
-    <property name="repository.URL" value="https://svn.scms.waikato.ac.nz/svn/weka"/>
+    <property name="repository.URL" value="https://svn.cms.waikato.ac.nz/svn/weka"/>
     <java classname="org.tmatesoft.svn.cli.SVN"
        dir="${source-root}/" fork="true">
       <arg value="co"/>
@@ -942,7 +1023,7 @@
 
    <target name="changelog"
     description="Create a changelog file for a release of Weka. Run with -Dsvn_username=username -Dsvn_password=password -Drelease=&lt;number of release (eg. 3-4-1)&gt;, -Ddate_range=&lt;date range for changes (eg. {2008-07-16}:{2008-09-29})&gt;, -Dweka_branch=&lt;branch name (e.g. trunk, branches/book2ndEd-branch)&gt;.">
-    <property name="repository.URL" value="https://svn.scms.waikato.ac.nz/svn/weka"/>
+    <property name="repository.URL" value="https://svn.cms.waikato.ac.nz/svn/weka"/>
     <!-- Core weka -->
     <java classname="org.tmatesoft.svn.cli.SVN" fork="true"
           output="../wekadocs/changelogs/CHANGELOG-${release}">
@@ -963,7 +1044,7 @@
 
    <target name="packages_changelog"
     description="Create a changelog file for the team-supported packages Weka (development branch only). Run with -Dsvn_username=username -Dsvn_password=password -Drelease=&lt;number of release (eg. 3-4-1)&gt;, -Ddate_range=&lt;date range for changes (eg. {2008-07-16}:{2008-09-29})&gt;.">
-    <property name="repository.URL" value="https://svn.scms.waikato.ac.nz/svn/weka"/>
+    <property name="repository.URL" value="https://svn.cms.waikato.ac.nz/svn/weka"/>
     <java classname="org.tmatesoft.svn.cli.SVN" fork="true"
           output="../wekadocs/changelogs/CHANGELOG_PACKAGES-${release}">
       <arg value="log"/>
@@ -1024,12 +1105,12 @@
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
     <delete dir="${reports}"/>
+    <delete dir="${doc}"/>
   </target>
 
   <target name="superclean" depends="clean"
-   description="Clean plus removes source trees! and doc directories">
+   description="Clean plus removes source trees!">
   <!-- WARNING, this deletes the source and doc directories -->
     <delete dir="${src}"/>
-    <delete dir="${doc}"/>
   </target>
 </project>

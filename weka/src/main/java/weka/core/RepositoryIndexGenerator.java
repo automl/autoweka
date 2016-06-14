@@ -47,13 +47,18 @@ import java.util.zip.ZipOutputStream;
  * <br>
  * 
  * <code>java weka.core.RepositoryIndexGenerator <path to repository></code>
+ * <br><br>
+ * A file called "forcedRefreshCount.txt" can be used to force a cache-refresh
+ * for all internet connected users. Just increment the number in this file by
+ * 1 (or create the file with an initial value of 1 if it doesn't exist yet).
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 8989 $
+ * @version $Revision: 12051 $
  */
 public class RepositoryIndexGenerator {
 
-  public static String HEADER = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n"
+  public static String HEADER =
+    "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n"
       + "<html>\n<head>\n<title>Waikato Environment for Knowledge Analysis (WEKA)</title>\n"
       + "<!-- CSS Stylesheet -->\n<style>body\n{\nbackground: #ededed;\ncolor: #666666;\n"
       + "font: 14px Tahoma, Helvetica, sans-serif;;\nmargin: 5px 10px 5px 10px;\npadding: 0px;\n"
@@ -61,8 +66,10 @@ public class RepositoryIndexGenerator {
 
   public static String BIRD_IMAGE1 = "<img src=\"Title-Bird-Header.gif\">\n";
   public static String BIRD_IMAGE2 = "<img src=\"../Title-Bird-Header.gif\">\n";
-  public static String PENTAHO_IMAGE1 = "<img src=\"pentaho_logo_rgb_sm.png\">\n\n";
-  public static String PENTAHO_IMAGE2 = "<img src=\"../pentaho_logo_rgb_sm.png\">\n\n";
+  public static String PENTAHO_IMAGE1 =
+    "<img src=\"pentaho_logo_rgb_sm.png\">\n\n";
+  public static String PENTAHO_IMAGE2 =
+    "<img src=\"../pentaho_logo_rgb_sm.png\">\n\n";
 
   private static int[] parseVersion(String version) {
     int major = 0;
@@ -153,18 +160,18 @@ public class RepositoryIndexGenerator {
   }
 
   private static String[] processPackage(File packageDirectory)
-      throws Exception {
+    throws Exception {
     System.err.println("Processing " + packageDirectory);
     File[] contents = packageDirectory.listFiles();
     File latest = null;
     ArrayList<File> propsFiles = new ArrayList<File>();
     StringBuffer versionsTextBuffer = new StringBuffer();
 
-    for (int i = 0; i < contents.length; i++) {
-      if (contents[i].isFile() && contents[i].getName().endsWith(".props")) {
-        propsFiles.add(contents[i]);
-        if (contents[i].getName().equals("Latest.props")) {
-          latest = contents[i];
+    for (File content : contents) {
+      if (content.isFile() && content.getName().endsWith(".props")) {
+        propsFiles.add(content);
+        if (content.getName().equals("Latest.props")) {
+          latest = content;
         } /*
            * else { String versionNumber = contents[i].getName().substring(0,
            * contents[i].getName().indexOf(".props"));
@@ -177,10 +184,10 @@ public class RepositoryIndexGenerator {
     Arrays.sort(sortedPropsFiles, new Comparator<File>() {
       @Override
       public int compare(File first, File second) {
-        String firstV = first.getName().substring(0,
-            first.getName().indexOf(".props"));
-        String secondV = second.getName().substring(0,
-            second.getName().indexOf(".props"));
+        String firstV =
+          first.getName().substring(0, first.getName().indexOf(".props"));
+        String secondV =
+          second.getName().substring(0, second.getName().indexOf(".props"));
         if (firstV.equalsIgnoreCase("Latest")) {
           return -1;
         } else if (secondV.equalsIgnoreCase("Latest")) {
@@ -217,15 +224,15 @@ public class RepositoryIndexGenerator {
     indexBuff.append("\n<table>\n");
     if (URL != null && URL.length() > 0) {
       indexBuff.append("<tr><td valign=top>" + "URL"
-          + ":</td><td width=50></td>");
+        + ":</td><td width=50></td>");
       URL = "<a href=\"" + URL + "\">" + URL + "</a>";
       indexBuff.append("<td>" + URL + "</td></tr>\n");
     }
     indexBuff.append("<tr><td valign=top>" + "Author"
-        + ":</td><td width=50></td>");
+      + ":</td><td width=50></td>");
     indexBuff.append("<td>" + author + "</td></tr>\n");
     indexBuff.append("<tr><td valign=top>" + "Maintainer"
-        + ":</td><td width=50></td>");
+      + ":</td><td width=50></td>");
     indexBuff.append("<td>" + maintainer + "</td></tr>\n");
     indexBuff.append("</table>\n<p>\n");
 
@@ -235,7 +242,8 @@ public class RepositoryIndexGenerator {
     indexBuff.append("<p>All available versions:<br>\n");
     for (int i = 0; i < sortedPropsFiles.length; i++) {
       if (i > 0) {
-        String versionNumber = sortedPropsFiles[i].getName().substring(0,
+        String versionNumber =
+          sortedPropsFiles[i].getName().substring(0,
             sortedPropsFiles[i].getName().indexOf(".props"));
         versionsTextBuffer.append(versionNumber + "\n");
         System.err.println(versionNumber);
@@ -243,17 +251,17 @@ public class RepositoryIndexGenerator {
       String name = sortedPropsFiles[i].getName();
       name = name.substring(0, name.indexOf(".props"));
       indexBuff.append("<a href=\"" + name + ".html" + "\">" + name
-          + "</a><br>\n");
+        + "</a><br>\n");
 
       StringBuffer version = new StringBuffer();
       version.append(HEADER + "\n\n");
       // version.append(HEADER + BIRD_IMAGE2);
       // version.append(PENTAHO_IMAGE2);
       version.append("<table summary=\"Package " + packageName
-          + " summary\">\n");
+        + " summary\">\n");
       Properties versionProps = new Properties();
       versionProps
-          .load(new BufferedReader(new FileReader(sortedPropsFiles[i])));
+        .load(new BufferedReader(new FileReader(sortedPropsFiles[i])));
 
       Set<Object> keys = versionProps.keySet();
       String[] sortedKeys = keys.toArray(new String[0]);
@@ -263,15 +271,15 @@ public class RepositoryIndexGenerator {
       for (String key : sortedKeys) {
         // String key = (String)keyI.next();
         if (key.equalsIgnoreCase("PackageName")
-            || key.equalsIgnoreCase("Title") ||
-            /* key.equalsIgnoreCase("Description") || */
-            key.equalsIgnoreCase("DoNotLoadIfFileNotPresentMessage")
-            || key.equalsIgnoreCase("DoNotLoadIfClassNotPresentMessage")
-            || key.equalsIgnoreCase("DoNotLoadIfEnvVarNotSetMessage")) {
+          || key.equalsIgnoreCase("Title") ||
+          /* key.equalsIgnoreCase("Description") || */
+          key.equalsIgnoreCase("DoNotLoadIfFileNotPresentMessage")
+          || key.equalsIgnoreCase("DoNotLoadIfClassNotPresentMessage")
+          || key.equalsIgnoreCase("DoNotLoadIfEnvVarNotSetMessage")) {
 
         } else {
           version.append("<tr><td valign=top>" + key
-              + ":</td><td width=50></td>");
+            + ":</td><td width=50></td>");
           String propValue = versionProps.getProperty(key);
 
           if (!key.equalsIgnoreCase("Description")) {
@@ -295,26 +303,26 @@ public class RepositoryIndexGenerator {
       }
 
       version.append("</table>\n</body>\n</html>\n");
-      String versionHTMLFileName = packageDirectory.getAbsolutePath()
-          + File.separator + name + ".html";
-      BufferedWriter br = new BufferedWriter(
-          new FileWriter(versionHTMLFileName));
+      String versionHTMLFileName =
+        packageDirectory.getAbsolutePath() + File.separator + name + ".html";
+      BufferedWriter br =
+        new BufferedWriter(new FileWriter(versionHTMLFileName));
       br.write(version.toString());
       br.flush();
       br.close();
     }
 
     indexBuff.append("</body>\n</html>\n");
-    String packageIndexName = packageDirectory.getAbsolutePath()
-        + File.separator + "index.html";
+    String packageIndexName =
+      packageDirectory.getAbsolutePath() + File.separator + "index.html";
     BufferedWriter br = new BufferedWriter(new FileWriter(packageIndexName));
     br.write(indexBuff.toString());
     br.flush();
     br.close();
 
     // write the versions file to the directory
-    String packageVersionsName = packageDirectory.getAbsolutePath()
-        + File.separator + "versions.txt";
+    String packageVersionsName =
+      packageDirectory.getAbsolutePath() + File.separator + "versions.txt";
     br = new BufferedWriter(new FileWriter(packageVersionsName));
     br.write(versionsTextBuffer.toString());
     br.flush();
@@ -329,7 +337,7 @@ public class RepositoryIndexGenerator {
   }
 
   private static void writeMainIndex(Map<String, String[]> packages,
-      File repositoryHome) throws Exception {
+    File repositoryHome) throws Exception {
     StringBuffer indexBuf = new StringBuffer();
     StringBuffer packageList = new StringBuffer();
 
@@ -345,27 +353,27 @@ public class RepositoryIndexGenerator {
                      * +
                      */
     "<p><b>IMPORTANT: make sure there are no old versions of Weka (<3.7.2) in "
-        + "your CLASSPATH before starting Weka</b>\n\n");
+      + "your CLASSPATH before starting Weka</b>\n\n");
 
     indexBuf.append("<h3>Installation of Packages</h3>\n");
     indexBuf
-        .append("A GUI package manager is available from the \"Tools\" menu of"
-            + " the GUIChooser<br><br><code>java -jar weka.jar</code><p>\n\n");
+      .append("A GUI package manager is available from the \"Tools\" menu of"
+        + " the GUIChooser<br><br><code>java -jar weka.jar</code><p>\n\n");
 
     indexBuf.append("For a command line package manager type"
-        + ":<br><br<code>java weka.core.WekaPackageManager -h"
-        + "</code><br><br>\n");
+      + ":<br><br<code>java weka.core.WekaPackageManager -h"
+      + "</code><br><br>\n");
     indexBuf.append("<hr/>\n");
 
     indexBuf
-        .append("<h3>Running packaged algorithms from the command line</h3>"
-            + "<code>java weka.Run [algorithm name]</code><p>"
-            + "Substring matching is also supported. E.g. try:<br><br>"
-            + "<code>java weka.Run Bayes</code><hr/>");
+      .append("<h3>Running packaged algorithms from the command line</h3>"
+        + "<code>java weka.Run [algorithm name]</code><p>"
+        + "Substring matching is also supported. E.g. try:<br><br>"
+        + "<code>java weka.Run Bayes</code><hr/>");
 
     Set<String> names = packages.keySet();
     indexBuf.append("<h3>Available Packages (" + packages.keySet().size()
-        + ")</h3>\n\n");
+      + ")</h3>\n\n");
 
     indexBuf.append("<table>\n");
     Iterator<String> i = names.iterator();
@@ -375,44 +383,45 @@ public class RepositoryIndexGenerator {
       String packageTitle = info[0];
       String packageCategory = info[1];
       String latestVersion = info[2];
-      String href = "<a href=\"./" + packageName + "/index.html\">"
-          + packageName + "</a>";
+      String href =
+        "<a href=\"./" + packageName + "/index.html\">" + packageName + "</a>";
 
       indexBuf.append("<tr valign=\"top\">\n");
       indexBuf.append("<td>" + href + "</td><td width=50></td><td>"
-          + packageCategory + "</td><td width=50></td><td>" + packageTitle
-          + "</td></tr>\n");
+        + packageCategory + "</td><td width=50></td><td>" + packageTitle
+        + "</td></tr>\n");
 
       // append to the package list
       packageList.append(packageName + "\n");
       packageListPlusVersion.append(packageName).append(":")
-          .append(latestVersion).append("\n");
+        .append(latestVersion).append("\n");
     }
 
     indexBuf.append("</table>\n<hr/>\n</body></html>\n");
-    String indexName = repositoryHome.getAbsolutePath() + File.separator
-        + "index.html";
+    String indexName =
+      repositoryHome.getAbsolutePath() + File.separator + "index.html";
     BufferedWriter br = new BufferedWriter(new FileWriter(indexName));
     br.write(indexBuf.toString());
     br.flush();
     br.close();
 
-    String packageListName = repositoryHome.getAbsolutePath() + File.separator
-        + "packageList.txt";
+    String packageListName =
+      repositoryHome.getAbsolutePath() + File.separator + "packageList.txt";
     br = new BufferedWriter(new FileWriter(packageListName));
     br.write(packageList.toString());
     br.flush();
     br.close();
 
-    packageListName = repositoryHome.getAbsolutePath() + File.separator
+    packageListName =
+      repositoryHome.getAbsolutePath() + File.separator
         + "packageListWithVersion.txt";
     br = new BufferedWriter(new FileWriter(packageListName));
     br.write(packageListPlusVersion.toString());
     br.flush();
     br.close();
 
-    String numPackagesName = repositoryHome.getAbsolutePath() + File.separator
-        + "numPackages.txt";
+    String numPackagesName =
+      repositoryHome.getAbsolutePath() + File.separator + "numPackages.txt";
     br = new BufferedWriter(new FileWriter(numPackagesName));
     br.write(packages.keySet().size() + "\n");
     br.flush();
@@ -423,7 +432,7 @@ public class RepositoryIndexGenerator {
   }
 
   private static void transBytes(BufferedInputStream bi, ZipOutputStream z)
-      throws Exception {
+    throws Exception {
     int b;
     while ((b = bi.read()) != -1) {
       z.write(b);
@@ -431,7 +440,7 @@ public class RepositoryIndexGenerator {
   }
 
   protected static void writeZipEntryForPackage(File repositoryHome,
-      String packageName, ZipOutputStream zos) throws Exception {
+    String packageName, ZipOutputStream zos) throws Exception {
 
     ZipEntry packageDir = new ZipEntry(packageName + "/");
     zos.putNextEntry(packageDir);
@@ -439,14 +448,16 @@ public class RepositoryIndexGenerator {
     ZipEntry z = new ZipEntry(packageName + "/Latest.props");
     ZipEntry z2 = new ZipEntry(packageName + "/Latest.html");
 
-    FileInputStream fi = new FileInputStream(repositoryHome.getAbsolutePath()
-        + File.separator + packageName + File.separator + "Latest.props");
+    FileInputStream fi =
+      new FileInputStream(repositoryHome.getAbsolutePath() + File.separator
+        + packageName + File.separator + "Latest.props");
     BufferedInputStream bi = new BufferedInputStream(fi);
     zos.putNextEntry(z);
     transBytes(bi, zos);
     bi.close();
 
-    fi = new FileInputStream(repositoryHome.getAbsolutePath() + File.separator
+    fi =
+      new FileInputStream(repositoryHome.getAbsolutePath() + File.separator
         + packageName + File.separator + "Latest.html");
     bi = new BufferedInputStream(fi);
     zos.putNextEntry(z2);
@@ -463,7 +474,8 @@ public class RepositoryIndexGenerator {
 
     // write the index.html to the zip
     z = new ZipEntry(packageName + "/index.html");
-    fi = new FileInputStream(repositoryHome.getAbsolutePath() + File.separator
+    fi =
+      new FileInputStream(repositoryHome.getAbsolutePath() + File.separator
         + packageName + File.separator + "index.html");
     bi = new BufferedInputStream(fi);
     zos.putNextEntry(z);
@@ -471,31 +483,35 @@ public class RepositoryIndexGenerator {
     bi.close();
 
     // Now process the available versions
-    FileReader vi = new FileReader(repositoryHome.getAbsolutePath()
-        + File.separator + packageName + File.separator + "versions.txt");
+    FileReader vi =
+      new FileReader(repositoryHome.getAbsolutePath() + File.separator
+        + packageName + File.separator + "versions.txt");
     BufferedReader bvi = new BufferedReader(vi);
     String version;
     while ((version = bvi.readLine()) != null) {
       z = new ZipEntry(packageName + "/" + version + ".props");
-      fi = new FileInputStream(repositoryHome.getAbsolutePath()
-          + File.separator + packageName + File.separator + version + ".props");
+      fi =
+        new FileInputStream(repositoryHome.getAbsolutePath() + File.separator
+          + packageName + File.separator + version + ".props");
       bi = new BufferedInputStream(fi);
       zos.putNextEntry(z);
       transBytes(bi, zos);
       bi.close();
 
       z = new ZipEntry(packageName + "/" + version + ".html");
-      fi = new FileInputStream(repositoryHome.getAbsolutePath()
-          + File.separator + packageName + File.separator + version + ".html");
+      fi =
+        new FileInputStream(repositoryHome.getAbsolutePath() + File.separator
+          + packageName + File.separator + version + ".html");
       bi = new BufferedInputStream(fi);
       zos.putNextEntry(z);
       transBytes(bi, zos);
       bi.close();
     }
+    bvi.close();
   }
 
   protected static void writeRepoZipFile(File repositoryHome,
-      StringBuffer packagesList) {
+    StringBuffer packagesList) {
 
     System.out.print("Writing repo archive");
     StringReader r = new StringReader(packagesList.toString());
@@ -503,8 +519,9 @@ public class RepositoryIndexGenerator {
     String packageName;
 
     try {
-      FileOutputStream fo = new FileOutputStream(
-          repositoryHome.getAbsolutePath() + File.separator + "repo.zip");
+      FileOutputStream fo =
+        new FileOutputStream(repositoryHome.getAbsolutePath() + File.separator
+          + "repo.zip");
       ZipOutputStream zos = new ZipOutputStream(fo);
 
       while ((packageName = br.readLine()) != null) {
@@ -515,8 +532,9 @@ public class RepositoryIndexGenerator {
 
       // include the package list (legacy) in the zip
       ZipEntry z = new ZipEntry("packageList.txt");
-      FileInputStream fi = new FileInputStream(repositoryHome.getAbsolutePath()
-          + File.separator + "packageList.txt");
+      FileInputStream fi =
+        new FileInputStream(repositoryHome.getAbsolutePath() + File.separator
+          + "packageList.txt");
       BufferedInputStream bi = new BufferedInputStream(fi);
       zos.putNextEntry(z);
       transBytes(bi, zos);
@@ -524,22 +542,38 @@ public class RepositoryIndexGenerator {
 
       // include the package list with latest version numbers
       z = new ZipEntry("packageListWithVersion.txt");
-      fi = new FileInputStream(repositoryHome.getAbsolutePath()
-          + File.separator + "packageListWithVersion.txt");
+      fi =
+        new FileInputStream(repositoryHome.getAbsolutePath() + File.separator
+          + "packageListWithVersion.txt");
       bi = new BufferedInputStream(fi);
       zos.putNextEntry(z);
       transBytes(bi, zos);
       bi.close();
 
+      // include the forced refresh count file (if it exists)
+      File forced =
+        new File(repositoryHome.getAbsolutePath() + File.separator
+          + WekaPackageManager.FORCED_REFRESH_COUNT_FILE);
+      if (forced.exists()) {
+        z = new ZipEntry(WekaPackageManager.FORCED_REFRESH_COUNT_FILE);
+        fi = new FileInputStream(forced);
+        bi = new BufferedInputStream(fi);
+        zos.putNextEntry(z);
+        transBytes(bi, zos);
+        bi.close();
+      }
+
       // Include the top level images
-      FileReader fr = new FileReader(repositoryHome.getAbsolutePath()
-          + File.separator + "images.txt");
+      FileReader fr =
+        new FileReader(repositoryHome.getAbsolutePath() + File.separator
+          + "images.txt");
       br = new BufferedReader(fr);
       String imageName;
       while ((imageName = br.readLine()) != null) {
         z = new ZipEntry(imageName);
-        fi = new FileInputStream(repositoryHome.getAbsolutePath()
-            + File.separator + imageName);
+        fi =
+          new FileInputStream(repositoryHome.getAbsolutePath() + File.separator
+            + imageName);
         bi = new BufferedInputStream(fi);
         zos.putNextEntry(z);
         transBytes(bi, zos);
@@ -548,8 +582,9 @@ public class RepositoryIndexGenerator {
 
       // include the image list in the zip
       z = new ZipEntry("images.txt");
-      fi = new FileInputStream(repositoryHome.getAbsolutePath()
-          + File.separator + "images.txt");
+      fi =
+        new FileInputStream(repositoryHome.getAbsolutePath() + File.separator
+          + "images.txt");
       bi = new BufferedInputStream(fi);
       zos.putNextEntry(z);
       transBytes(bi, zos);
@@ -557,13 +592,14 @@ public class RepositoryIndexGenerator {
 
       zos.close();
 
-      File f = new File(repositoryHome.getAbsolutePath() + File.separator
-          + "repo.zip");
+      File f =
+        new File(repositoryHome.getAbsolutePath() + File.separator + "repo.zip");
       long size = f.length();
 
       // write the size of the repo (in KB) to a file
-      FileWriter fw = new FileWriter(repositoryHome.getAbsolutePath()
-          + File.separator + "repoSize.txt");
+      FileWriter fw =
+        new FileWriter(repositoryHome.getAbsolutePath() + File.separator
+          + "repoSize.txt");
       if (size > 1024) {
         size /= 1024;
       }
@@ -585,24 +621,23 @@ public class RepositoryIndexGenerator {
 
       if (args.length < 1) {
         System.err
-            .println("Usage:\n\n\tRepositoryIndexGenerator <path to repository>");
+          .println("Usage:\n\n\tRepositoryIndexGenerator <path to repository>");
         System.exit(1);
       }
 
-      StringBuffer mainIndex = new StringBuffer();
       File repositoryHome = new File(args[0]);
       TreeMap<String, String[]> packages = new TreeMap<String, String[]>();
 
       // ArrayList<File> packages = new ArrayList<File>();
       File[] contents = repositoryHome.listFiles();
 
-      for (int i = 0; i < contents.length; i++) {
-        if (contents[i].isDirectory()) {
+      for (File content : contents) {
+        if (content.isDirectory()) {
           // packages.add(contents[i]);
 
           // process this package and create its index
-          String[] packageInfo = processPackage(contents[i]);
-          packages.put(contents[i].getName(), packageInfo);
+          String[] packageInfo = processPackage(content);
+          packages.put(content.getName(), packageInfo);
         }
       }
 

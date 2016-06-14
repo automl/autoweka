@@ -19,7 +19,6 @@
  *
  */
 
-
 package weka.gui.sql;
 
 import java.awt.BorderLayout;
@@ -51,25 +50,23 @@ import weka.gui.sql.event.HistoryChangedEvent;
 import weka.gui.sql.event.HistoryChangedListener;
 
 /**
- * Enables the user to insert a database URL, plus user/password to connect
- * to this database.
- *
- * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 8034 $
+ * Enables the user to insert a database URL, plus user/password to connect to
+ * this database.
+ * 
+ * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 10222 $
  */
-public class ConnectionPanel 
-  extends JPanel 
-  implements CaretListener {
+public class ConnectionPanel extends JPanel implements CaretListener {
 
   /** for serialization. */
   static final long serialVersionUID = 3499317023969723490L;
-  
+
   /** the name of the history. */
   public final static String HISTORY_NAME = "connection";
-  
+
   /** the parent frame. */
   protected JFrame m_Parent = null;
-  
+
   /** the databae connection dialog. */
   protected DatabaseConnectionDialog m_DbDialog;
 
@@ -89,22 +86,26 @@ public class ConnectionPanel
   protected JTextField m_TextURL = new JTextField(40);
 
   /** the button for the DB-Dialog. */
-  protected JButton m_ButtonDatabase = new JButton(ComponentHelper.getImageIcon("user.png"));
+  protected JButton m_ButtonDatabase = new JButton(
+    ComponentHelper.getImageIcon("user.png"));
 
   /** the button for connecting to the database. */
-  protected JButton m_ButtonConnect = new JButton(ComponentHelper.getImageIcon("connect.png"));
+  protected JButton m_ButtonConnect = new JButton(
+    ComponentHelper.getImageIcon("connect.png"));
 
   /** the button for the history. */
-  protected JButton m_ButtonHistory = new JButton(ComponentHelper.getImageIcon("history.png"));
+  protected JButton m_ButtonHistory = new JButton(
+    ComponentHelper.getImageIcon("history.png"));
 
   /** the button for the setup. */
-  protected JButton m_ButtonSetup = new JButton(ComponentHelper.getImageIcon("properties.gif"));
+  protected JButton m_ButtonSetup = new JButton(
+    ComponentHelper.getImageIcon("properties.gif"));
 
   /** the connection listeners. */
-  protected HashSet m_ConnectionListeners;
+  protected HashSet<ConnectionListener> m_ConnectionListeners;
 
   /** the history listeners. */
-  protected HashSet m_HistoryChangedListeners;
+  protected HashSet<HistoryChangedListener> m_HistoryChangedListeners;
 
   /** for connecting to the database. */
   protected DbUtils m_DbUtils;
@@ -114,40 +115,40 @@ public class ConnectionPanel
 
   /** the file chooser for the setup files. */
   protected JFileChooser m_SetupFileChooser;
-  
+
   /**
    * initializes the panel.
    * 
-   * @param parent      the parent of this panel
+   * @param parent the parent of this panel
    */
   public ConnectionPanel(JFrame parent) {
     super();
-    
-    m_Parent                  = parent;
-    m_ConnectionListeners     = new HashSet();
-    m_HistoryChangedListeners = new HashSet();
-    m_SetupFileChooser        = new JFileChooser();
+
+    m_Parent = parent;
+    m_ConnectionListeners = new HashSet<ConnectionListener>();
+    m_HistoryChangedListeners = new HashSet<HistoryChangedListener>();
+    m_SetupFileChooser = new JFileChooser();
     m_SetupFileChooser.setDialogTitle("Switch database setup");
     m_SetupFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     m_SetupFileChooser.setMultiSelectionEnabled(false);
     m_SetupFileChooser.setAcceptAllFileFilterUsed(true);
-    ExtensionFileFilter filter = new ExtensionFileFilter(".props", "Properties file");
+    ExtensionFileFilter filter = new ExtensionFileFilter(".props",
+      "Properties file");
     m_SetupFileChooser.addChoosableFileFilter(filter);
     m_SetupFileChooser.setFileFilter(filter);
-    
+
     try {
-      m_DbUtils   = new DbUtils();
-      m_URL       = m_DbUtils.getDatabaseURL();
-      m_User      = m_DbUtils.getUsername();
-      m_Password  = m_DbUtils.getPassword();
-    }
-    catch (Exception e) {
+      m_DbUtils = new DbUtils();
+      m_URL = m_DbUtils.getDatabaseURL();
+      m_User = m_DbUtils.getUsername();
+      m_Password = m_DbUtils.getPassword();
+    } catch (Exception e) {
       e.printStackTrace();
-      m_URL      = "";
-      m_User     = "";
+      m_URL = "";
+      m_User = "";
       m_Password = "";
     }
-    
+
     createPanel();
   }
 
@@ -155,9 +156,9 @@ public class ConnectionPanel
    * builds the panel with all its components.
    */
   protected void createPanel() {
-    JPanel        panel;
-    JPanel        panel2;
-    
+    JPanel panel;
+    JPanel panel2;
+
     setLayout(new BorderLayout());
     panel2 = new JPanel(new FlowLayout());
     add(panel2, BorderLayout.WEST);
@@ -171,40 +172,44 @@ public class ConnectionPanel
     m_TextURL.setText(m_URL);
     m_TextURL.addCaretListener(this);
     panel2.add(m_TextURL);
-    
+
     // buttons
     panel = new JPanel(new FlowLayout());
     panel2.add(panel);
-    
+
     m_ButtonDatabase.setToolTipText("Set user and password");
     m_ButtonDatabase.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  showDialog();
-	}
-      });
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        showDialog();
+      }
+    });
     panel.add(m_ButtonDatabase);
-    
+
     m_ButtonConnect.setToolTipText("Connect to the database");
     m_ButtonConnect.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  connect();
-	}
-      });
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        connect();
+      }
+    });
     panel.add(m_ButtonConnect);
-    
+
     m_ButtonHistory.setToolTipText("Select a previously used connection");
     m_ButtonHistory.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  showHistory();
-	}
-      });
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        showHistory();
+      }
+    });
     panel.add(m_ButtonHistory);
 
     m_ButtonSetup.setToolTipText("Switch database setup");
     m_ButtonSetup.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  switchSetup();
-	}
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        switchSetup();
+      }
     });
     panel.add(m_ButtonSetup);
 
@@ -216,9 +221,9 @@ public class ConnectionPanel
    */
   protected void setButtons() {
     boolean isEmpty;
-    
+
     isEmpty = m_TextURL.getText().equals("");
-    
+
     m_ButtonConnect.setEnabled(!isEmpty);
     m_ButtonDatabase.setEnabled(!isEmpty);
     m_ButtonHistory.setEnabled(m_History.size() > 0);
@@ -233,7 +238,7 @@ public class ConnectionPanel
     setUser(m_DbUtils.getUsername());
     setPassword(m_DbUtils.getPassword());
   }
-  
+
   /**
    * sets the focus in a designated control.
    */
@@ -244,7 +249,7 @@ public class ConnectionPanel
   /**
    * sets the URL.
    * 
-   * @param url       the new value of the URL
+   * @param url the new value of the URL
    */
   public void setURL(String url) {
     m_URL = url;
@@ -264,7 +269,7 @@ public class ConnectionPanel
   /**
    * sets the User.
    * 
-   * @param user       the new value of the User
+   * @param user the new value of the User
    */
   public void setUser(String user) {
     m_User = user;
@@ -282,7 +287,7 @@ public class ConnectionPanel
   /**
    * sets the Password.
    * 
-   * @param pw       the new value of the Password
+   * @param pw the new value of the Password
    */
   public void setPassword(String pw) {
     m_Password = pw;
@@ -300,18 +305,20 @@ public class ConnectionPanel
   /**
    * adds the given string to the history (removes duplicates).
    * 
-   * @param s           the string to add
+   * @param s the string to add
    */
   protected void addHistory(String s) {
-    if (s.equals(""))
+    if (s.equals("")) {
       return;
-    
+    }
+
     // no duplicates!
-    if (m_History.contains(s))
+    if (m_History.contains(s)) {
       m_History.removeElement(s);
+    }
 
     m_History.add(0, s);
-    
+
     // send notification
     notifyHistoryChangedListeners();
   }
@@ -319,14 +326,15 @@ public class ConnectionPanel
   /**
    * sets the local history to the given one.
    * 
-   * @param history     the history to use
+   * @param history the history to use
    */
   public void setHistory(DefaultListModel history) {
-    int           i;
-    
+    int i;
+
     m_History.clear();
-    for (i = 0; i < history.size(); i++)
+    for (i = 0; i < history.size(); i++) {
       m_History.addElement(history.get(i));
+    }
 
     setButtons();
   }
@@ -334,7 +342,7 @@ public class ConnectionPanel
   /**
    * returns the history.
    * 
-   * @return        the current history
+   * @return the current history
    */
   public DefaultListModel getHistory() {
     return m_History;
@@ -344,7 +352,8 @@ public class ConnectionPanel
    * displays the database dialog.
    */
   protected void showDialog() {
-    m_DbDialog = new DatabaseConnectionDialog(m_Parent, getURL(), getUser(), false);
+    m_DbDialog = new DatabaseConnectionDialog(m_Parent, getURL(), getUser(),
+      false);
     m_DbDialog.setVisible(true);
     if (m_DbDialog.getReturnValue() == JOptionPane.OK_OPTION) {
       setURL(m_DbDialog.getURL());
@@ -364,8 +373,7 @@ public class ConnectionPanel
       try {
         m_DbUtils.disconnectFromDatabase();
         notifyConnectionListeners(ConnectionEvent.DISCONNECT);
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
         e.printStackTrace();
         notifyConnectionListeners(ConnectionEvent.DISCONNECT, e);
       }
@@ -380,8 +388,7 @@ public class ConnectionPanel
       notifyConnectionListeners(ConnectionEvent.CONNECT);
       // add to history
       addHistory(getUser() + "@" + getURL());
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
       notifyConnectionListeners(ConnectionEvent.CONNECT, e);
     }
@@ -393,13 +400,13 @@ public class ConnectionPanel
    * displays the query history.
    */
   public void showHistory() {
-    JList                 list;
-    ListSelectorDialog    dialog;
-    String                tmpStr;
+    JList list;
+    ListSelectorDialog dialog;
+    String tmpStr;
 
-    list   = new JList(m_History);
+    list = new JList(m_History);
     dialog = new ListSelectorDialog(m_Parent, list);
-    
+
     if (dialog.showDialog() == ListSelectorDialog.APPROVE_OPTION) {
       if (list.getSelectedValue() != null) {
         tmpStr = list.getSelectedValue().toString();
@@ -407,8 +414,7 @@ public class ConnectionPanel
           setUser(tmpStr.substring(0, tmpStr.indexOf("@")));
           setURL(tmpStr.substring(tmpStr.indexOf("@") + 1));
           showDialog();
-        }
-        else {
+        } else {
           setUser("");
           setURL(tmpStr);
         }
@@ -423,25 +429,26 @@ public class ConnectionPanel
    * parameters.
    */
   public void switchSetup() {
-    int		retVal;
-    
+    int retVal;
+
     retVal = m_SetupFileChooser.showOpenDialog(this);
-    if (retVal != JFileChooser.APPROVE_OPTION)
+    if (retVal != JFileChooser.APPROVE_OPTION) {
       return;
-    
+    }
+
     m_DbUtils.initialize(m_SetupFileChooser.getSelectedFile());
-    
-    m_URL      = m_DbUtils.getDatabaseURL();
-    m_User     = m_DbUtils.getUsername();
+
+    m_URL = m_DbUtils.getDatabaseURL();
+    m_User = m_DbUtils.getUsername();
     m_Password = m_DbUtils.getPassword();
-    
+
     m_TextURL.setText(m_URL);
   }
-  
+
   /**
    * adds the given listener to the list of listeners.
    * 
-   * @param l       the listener to add to the list
+   * @param l the listener to add to the list
    */
   public void addConnectionListener(ConnectionListener l) {
     m_ConnectionListeners.add(l);
@@ -450,7 +457,7 @@ public class ConnectionPanel
   /**
    * removes the given listener from the list of listeners.
    * 
-   * @param l       the listener to remove
+   * @param l the listener to remove
    */
   public void removeConnectionListener(ConnectionListener l) {
     m_ConnectionListeners.remove(l);
@@ -459,7 +466,7 @@ public class ConnectionPanel
   /**
    * notifies the connection listeners of the event.
    * 
-   * @param type      the type of the action, CONNECT or DISCONNECT
+   * @param type the type of the action, CONNECT or DISCONNECT
    */
   protected void notifyConnectionListeners(int type) {
     notifyConnectionListeners(type, null);
@@ -468,25 +475,24 @@ public class ConnectionPanel
   /**
    * notifies the connection listeners of the event.
    * 
-   * @param type      the type of the action, CONNECT or DISCONNECT
-   * @param ex        an optional exception that happened (indicates failure!)
+   * @param type the type of the action, CONNECT or DISCONNECT
+   * @param ex an optional exception that happened (indicates failure!)
    */
   protected void notifyConnectionListeners(int type, Exception ex) {
-    Iterator              iter;
-    ConnectionListener    l;
+    Iterator<ConnectionListener> iter;
+    ConnectionListener l;
 
     iter = m_ConnectionListeners.iterator();
     while (iter.hasNext()) {
-      l = (ConnectionListener) iter.next();
-      l.connectionChange(
-          new ConnectionEvent(this, type, m_DbUtils, ex));
+      l = iter.next();
+      l.connectionChange(new ConnectionEvent(this, type, m_DbUtils, ex));
     }
   }
 
   /**
    * adds the given listener to the list of listeners.
    * 
-   * @param l       the listener to add to the list
+   * @param l the listener to add to the list
    */
   public void addHistoryChangedListener(HistoryChangedListener l) {
     m_HistoryChangedListeners.add(l);
@@ -495,7 +501,7 @@ public class ConnectionPanel
   /**
    * removes the given listener from the list of listeners.
    * 
-   * @param l       the listener to remove
+   * @param l the listener to remove
    */
   public void removeHistoryChangedListener(HistoryChangedListener l) {
     m_HistoryChangedListeners.remove(l);
@@ -505,14 +511,13 @@ public class ConnectionPanel
    * notifies the history listeners of the event.
    */
   protected void notifyHistoryChangedListeners() {
-    Iterator                iter;
-    HistoryChangedListener  l;
+    Iterator<HistoryChangedListener> iter;
+    HistoryChangedListener l;
 
     iter = m_HistoryChangedListeners.iterator();
     while (iter.hasNext()) {
-      l = (HistoryChangedListener) iter.next();
-      l.historyChanged(
-          new HistoryChangedEvent(this, HISTORY_NAME, getHistory()));
+      l = iter.next();
+      l.historyChanged(new HistoryChangedEvent(this, HISTORY_NAME, getHistory()));
     }
   }
 
@@ -521,6 +526,7 @@ public class ConnectionPanel
    * 
    * @param event the event to process
    */
+  @Override
   public void caretUpdate(CaretEvent event) {
     setButtons();
   }

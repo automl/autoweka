@@ -30,15 +30,13 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 
 /**
- * Stores information on a property of an object: the class of the
- * object with the property; the property descriptor, and the current
- * value.
- *
+ * Stores information on a property of an object: the class of the object with
+ * the property; the property descriptor, and the current value.
+ * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10203 $
  */
-public class PropertyNode
-  implements Serializable, RevisionHandler {
+public class PropertyNode implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -8718165742572631384L;
@@ -47,30 +45,30 @@ public class PropertyNode
   public Object value;
 
   /** The class of the object with this property */
-  public Class parentClass;
+  public Class<?> parentClass;
 
   /** Other info about the property */
   public PropertyDescriptor property;
-  
+
   /**
    * Creates a mostly empty property.
-   *
+   * 
    * @param pValue a property value.
    */
   public PropertyNode(Object pValue) {
-    
+
     this(pValue, null, null);
   }
 
   /**
    * Creates a fully specified property node.
-   *
+   * 
    * @param pValue the current property value.
    * @param prop the PropertyDescriptor.
    * @param pClass the Class of the object with this property.
    */
-  public PropertyNode(Object pValue, PropertyDescriptor prop, Class pClass) {
-    
+  public PropertyNode(Object pValue, PropertyDescriptor prop, Class<?> pClass) {
+
     value = pValue;
     property = prop;
     parentClass = pClass;
@@ -78,11 +76,12 @@ public class PropertyNode
 
   /**
    * Returns a string description of this property.
-   *
+   * 
    * @return a value of type 'String'
    */
+  @Override
   public String toString() {
-    
+
     if (property == null) {
       return "Available properties";
     }
@@ -90,8 +89,7 @@ public class PropertyNode
   }
 
   /*
-   * Handle serialization ourselves since PropertyDescriptor isn't
-   * serializable
+   * Handle serialization ourselves since PropertyDescriptor isn't serializable
    */
   private void writeObject(java.io.ObjectOutputStream out) throws IOException {
 
@@ -105,36 +103,35 @@ public class PropertyNode
     out.writeObject(property.getReadMethod().getName());
     out.writeObject(property.getWriteMethod().getName());
   }
-  private void readObject(java.io.ObjectInputStream in)
-    throws IOException, ClassNotFoundException {
+
+  private void readObject(java.io.ObjectInputStream in) throws IOException,
+    ClassNotFoundException {
 
     value = in.readObject();
-    parentClass = (Class) in.readObject();
+    parentClass = (Class<?>) in.readObject();
     String name = (String) in.readObject();
     String getter = (String) in.readObject();
     String setter = (String) in.readObject();
     /*
-    System.err.println("Loading property descriptor:\n"
-		       + "\tparentClass: " + parentClass.getName()
-		       + "\tname: " + name
-		       + "\tgetter: " + getter
-		       + "\tsetter: " + setter);
-    */
+     * System.err.println("Loading property descriptor:\n" + "\tparentClass: " +
+     * parentClass.getName() + "\tname: " + name + "\tgetter: " + getter +
+     * "\tsetter: " + setter);
+     */
     try {
       property = new PropertyDescriptor(name, parentClass, getter, setter);
     } catch (IntrospectionException ex) {
       throw new ClassNotFoundException("Couldn't create property descriptor: "
-				       + parentClass.getName() + "::"
-				       + name);
+        + parentClass.getName() + "::" + name);
     }
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10203 $");
   }
 } // PropertyNode

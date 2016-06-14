@@ -47,7 +47,7 @@ import java.util.Vector;
 * </pre>
 *
 * @author   FracPete (fracpete at waikato dot ac dot nz)
-* @version  $Revision: 8034 $
+* @version  $Revision: 11247 $
 */
 
 public class Tee
@@ -70,7 +70,7 @@ public class Tee
    * initializes the object, with a default printstream.
    */
   public Tee() {
-    this(null);
+    this(System.out);
   }
 
   /**
@@ -542,6 +542,6 @@ public class Tee
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 11247 $");
   }
 }

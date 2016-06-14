@@ -42,107 +42,106 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 
 /**
- * Class for encapsulating a connection between two beans. Also
- * maintains a list of all connections
- *
+ * Class for encapsulating a connection between two beans. Also maintains a list
+ * of all connections
+ * 
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 8034 $
+ * @version $Revision: 10221 $
  */
-public class BeanConnection
-  implements Serializable {
+public class BeanConnection implements Serializable {
 
   /** for serialization */
   private static final long serialVersionUID = 8804264241791332064L;
-  
-  private static ArrayList<Vector> TABBED_CONNECTIONS =
-    new ArrayList<Vector>();
-  
- /* static {
-    Vector initial = new Vector();
-    TABBED_CONNECTIONS.add(initial);
-  } */
+
+  private static ArrayList<Vector<BeanConnection>> TABBED_CONNECTIONS = new ArrayList<Vector<BeanConnection>>();
+
+  /*
+   * static { Vector initial = new Vector(); TABBED_CONNECTIONS.add(initial); }
+   */
 
   // details for this connection
-  private BeanInstance m_source;
-  private BeanInstance m_target;
+  private final BeanInstance m_source;
+  private final BeanInstance m_target;
 
   /**
    * The name of the event for this connection
    */
-  private String m_eventName;
+  private final String m_eventName;
 
   // Should the connection be painted?
   private boolean m_hidden = false;
 
   /**
-   * Sets up just a single collection of bean connections in the first
-   * element of the list. This is useful for clients that are using
-   * XMLBeans to load beans.
+   * Sets up just a single collection of bean connections in the first element
+   * of the list. This is useful for clients that are using XMLBeans to load
+   * beans.
    */
   public static void init() {
-    //CONNECTIONS = new Vector();
-    
+    // CONNECTIONS = new Vector();
+
     // TODO remove this soon!!!
-//    TABBED_CONNECTIONS.set(0, new Vector());
+    // TABBED_CONNECTIONS.set(0, new Vector());
     TABBED_CONNECTIONS.clear();
-    TABBED_CONNECTIONS.add(new Vector());
+    TABBED_CONNECTIONS.add(new Vector<BeanConnection>());
   }
 
   /**
    * Returns the list of connections
-   *
+   * 
    * @return the list of connections
    */
-  public static Vector getConnections(Integer... tab) {
-    Vector returnV = null;
+  public static Vector<BeanConnection> getConnections(Integer... tab) {
+    Vector<BeanConnection> returnV = null;
     int index = 0;
     if (tab.length > 0) {
       index = tab[0].intValue();
     }
-    
+
     if (TABBED_CONNECTIONS.size() > 0) {
       returnV = TABBED_CONNECTIONS.get(index);
     }
-    
+
     return returnV;
   }
 
   /**
    * Describe <code>setConnections</code> method here.
-   *
+   * 
    * @param connections a <code>Vector</code> value
    */
-  public static void setConnections(Vector connections, Integer... tab) {    
+  public static void setConnections(Vector<BeanConnection> connections,
+    Integer... tab) {
     int index = 0;
     if (tab.length > 0) {
       index = tab[0].intValue();
     }
-    
+
     if (index < TABBED_CONNECTIONS.size()) {
       TABBED_CONNECTIONS.set(index, connections);
-    }    
+    }
   }
-  
+
   /**
    * Add the supplied collection of connections to the end of the list.
    * 
    * 
    * @param connections the connections to add
    */
-  public static void addConnections(Vector connections) {
+  public static void addConnections(Vector<BeanConnection> connections) {
     TABBED_CONNECTIONS.add(connections);
   }
-  
+
   /**
    * Append the supplied connections to the list for the given tab index
    * 
    * @param connections the connections to append
    * @param tab the index of the list to append to
    */
-  public static void appendConnections(Vector connections, int tab) {
+  public static void appendConnections(Vector<BeanConnection> connections,
+    int tab) {
     if (tab < TABBED_CONNECTIONS.size()) {
-      Vector cons = TABBED_CONNECTIONS.get(tab);
-      
+      Vector<BeanConnection> cons = TABBED_CONNECTIONS.get(tab);
+
       for (int i = 0; i < connections.size(); i++) {
         cons.add(connections.get(i));
       }
@@ -150,88 +149,56 @@ public class BeanConnection
   }
 
   /**
-   * Returns true if there is a link between the supplied source and
-   * target BeanInstances at an earlier index than the supplied index
-   *
+   * Returns true if there is a link between the supplied source and target
+   * BeanInstances at an earlier index than the supplied index
+   * 
    * @param source the source BeanInstance
    * @param target the target BeanInstance
    * @param index the index to compare to
    * @return true if there is already a link at an earlier index
    */
   private static boolean previousLink(BeanInstance source, BeanInstance target,
-				      int index, Integer... tab) {
+    int index, Integer... tab) {
     int tabIndex = 0;
     if (tab.length > 0) {
       tabIndex = tab[0].intValue();
     }
-    
-    Vector connections = TABBED_CONNECTIONS.get(tabIndex);
-    
+
+    Vector<BeanConnection> connections = TABBED_CONNECTIONS.get(tabIndex);
+
     for (int i = 0; i < connections.size(); i++) {
-      BeanConnection bc = (BeanConnection)connections.elementAt(i);
+      BeanConnection bc = connections.elementAt(i);
       BeanInstance compSource = bc.getSource();
       BeanInstance compTarget = bc.getTarget();
 
       if (compSource == source && compTarget == target && index < i) {
-	return true;
+        return true;
       }
     }
     return false;
   }
 
   /**
-   * A candidate BeanInstance can be an input if it is in the listToCheck
-   * and it is the source of a connection to a target that is in the
-   * listToCheck
-   */
-  private static boolean checkForSource(BeanInstance candidate,
-                                        Vector listToCheck, Integer... tab) {
-    int tabIndex = 0;
-    if (tab.length > 0) {
-      tabIndex = tab[0].intValue();
-    }
-    
-    Vector connections = TABBED_CONNECTIONS.get(tabIndex);
-    
-    for (int i = 0; i < connections.size(); i++) {
-      BeanConnection bc = (BeanConnection)connections.elementAt(i);
-      if (bc.getSource() != candidate) {
-        continue;
-      }
-
-      // check to see if target is in list
-      for (int j = 0; j < listToCheck.size(); j++) {
-        BeanInstance tempTarget = (BeanInstance)listToCheck.elementAt(j);
-        if (bc.getTarget() == tempTarget) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-  
-  /**
-   * A candidate BeanInstance can't be an input if it is the target
-   * of a connection from a source that is in the listToCheck
+   * A candidate BeanInstance can't be an input if it is the target of a
+   * connection from a source that is in the listToCheck
    */
   private static boolean checkTargetConstraint(BeanInstance candidate,
-                                               Vector listToCheck,
-                                               Integer... tab) {
+    Vector<Object> listToCheck, Integer... tab) {
     int tabIndex = 0;
     if (tab.length > 0) {
       tabIndex = tab[0].intValue();
     }
-    
-    Vector connections = TABBED_CONNECTIONS.get(tabIndex);
-    
+
+    Vector<BeanConnection> connections = TABBED_CONNECTIONS.get(tabIndex);
+
     for (int i = 0; i < connections.size(); i++) {
-      BeanConnection bc = (BeanConnection)connections.elementAt(i);
+      BeanConnection bc = connections.elementAt(i);
       if (bc.getTarget() == candidate) {
         for (int j = 0; j < listToCheck.size(); j++) {
-          BeanInstance tempSource = (BeanInstance)listToCheck.elementAt(j);
+          BeanInstance tempSource = (BeanInstance) listToCheck.elementAt(j);
           if (bc.getSource() == tempSource) {
             return false;
-          }          
+          }
         }
       }
     }
@@ -239,30 +206,31 @@ public class BeanConnection
   }
 
   /**
-   * Returns a vector of BeanConnections associated with
-   * the supplied vector of BeanInstances, i.e. all connections
-   * that exist between those BeanInstances in the subFlow.
+   * Returns a vector of BeanConnections associated with the supplied vector of
+   * BeanInstances, i.e. all connections that exist between those BeanInstances
+   * in the subFlow.
    * 
    * @param subFlow a Vector of BeanInstances
    * @return a Vector of BeanConnections
    */
-  public static Vector associatedConnections(Vector subFlow, Integer... tab) {
+  public static Vector<BeanConnection> associatedConnections(
+    Vector<Object> subFlow, Integer... tab) {
     int tabIndex = 0;
     if (tab.length > 0) {
       tabIndex = tab[0].intValue();
     }
-    
-    Vector connections = TABBED_CONNECTIONS.get(tabIndex);
-    
-    Vector associatedConnections = new Vector();
+
+    Vector<BeanConnection> connections = TABBED_CONNECTIONS.get(tabIndex);
+
+    Vector<BeanConnection> associatedConnections = new Vector<BeanConnection>();
     for (int i = 0; i < connections.size(); i++) {
-      BeanConnection bc = (BeanConnection)connections.elementAt(i);
+      BeanConnection bc = connections.elementAt(i);
       BeanInstance tempSource = bc.getSource();
       BeanInstance tempTarget = bc.getTarget();
       boolean sourceInSubFlow = false;
       boolean targetInSubFlow = false;
       for (int j = 0; j < subFlow.size(); j++) {
-        BeanInstance toCheck = (BeanInstance)subFlow.elementAt(j);
+        BeanInstance toCheck = (BeanInstance) subFlow.elementAt(j);
         if (toCheck == tempSource) {
           sourceInSubFlow = true;
         }
@@ -279,50 +247,48 @@ public class BeanConnection
   }
 
   /**
-   * Returns a vector of BeanInstances that can be considered
-   * as inputs (or the left-hand side of a sub-flow)
-   *
+   * Returns a vector of BeanInstances that can be considered as inputs (or the
+   * left-hand side of a sub-flow)
+   * 
    * @param subset the sub-flow to examine
    * @return a Vector of inputs to the sub-flow
    */
-  public static Vector inputs(Vector subset, Integer... tab) {
-    Vector result = new Vector();
+  public static Vector<Object> inputs(Vector<Object> subset, Integer... tab) {
+    Vector<Object> result = new Vector<Object>();
     for (int i = 0; i < subset.size(); i++) {
-      BeanInstance temp = (BeanInstance)subset.elementAt(i);
-      //      if (checkForSource(temp, subset)) {
-        // now check target constraint
-        if (checkTargetConstraint(temp, subset, tab)) {
-          result.add(temp);
-        }
-        //      }
+      BeanInstance temp = (BeanInstance) subset.elementAt(i);
+      // if (checkForSource(temp, subset)) {
+      // now check target constraint
+      if (checkTargetConstraint(temp, subset, tab)) {
+        result.add(temp);
+      }
+      // }
     }
     return result;
   }
 
-
   /**
-   * A candidate BeanInstance can be an output if it is in the listToCheck
-   * and it is the target of a connection from a source that is in the
-   * listToCheck
+   * A candidate BeanInstance can be an output if it is in the listToCheck and
+   * it is the target of a connection from a source that is in the listToCheck
    */
   private static boolean checkForTarget(BeanInstance candidate,
-                                        Vector listToCheck, Integer... tab) {
+    Vector<Object> listToCheck, Integer... tab) {
     int tabIndex = 0;
     if (tab.length > 0) {
       tabIndex = tab[0].intValue();
     }
-    
-    Vector connections = TABBED_CONNECTIONS.get(tabIndex);
-    
+
+    Vector<BeanConnection> connections = TABBED_CONNECTIONS.get(tabIndex);
+
     for (int i = 0; i < connections.size(); i++) {
-      BeanConnection bc = (BeanConnection)connections.elementAt(i);
+      BeanConnection bc = connections.elementAt(i);
       if (bc.getTarget() != candidate) {
         continue;
       }
-      
+
       // check to see if source is in list
       for (int j = 0; j < listToCheck.size(); j++) {
-        BeanInstance tempSource = (BeanInstance)listToCheck.elementAt(j);
+        BeanInstance tempSource = (BeanInstance) listToCheck.elementAt(j);
         if (bc.getSource() == tempSource) {
           return true;
         }
@@ -332,9 +298,9 @@ public class BeanConnection
   }
 
   private static boolean isInList(BeanInstance candidate,
-                                  Vector listToCheck) {
+    Vector<Object> listToCheck) {
     for (int i = 0; i < listToCheck.size(); i++) {
-      BeanInstance temp = (BeanInstance)listToCheck.elementAt(i);
+      BeanInstance temp = (BeanInstance) listToCheck.elementAt(i);
       if (candidate == temp) {
         return true;
       }
@@ -343,22 +309,21 @@ public class BeanConnection
   }
 
   /**
-   * A candidate BeanInstance can't be an output if it is the source
-   * of a connection only to target(s) that are in the listToCheck
+   * A candidate BeanInstance can't be an output if it is the source of a
+   * connection only to target(s) that are in the listToCheck
    */
   private static boolean checkSourceConstraint(BeanInstance candidate,
-                                               Vector listToCheck,
-                                               Integer... tab) {
+    Vector<Object> listToCheck, Integer... tab) {
     int tabIndex = 0;
     if (tab.length > 0) {
       tabIndex = tab[0].intValue();
     }
-    
-    Vector connections = TABBED_CONNECTIONS.get(tabIndex);
-    
+
+    Vector<BeanConnection> connections = TABBED_CONNECTIONS.get(tabIndex);
+
     boolean result = true;
     for (int i = 0; i < connections.size(); i++) {
-      BeanConnection bc = (BeanConnection)connections.elementAt(i);
+      BeanConnection bc = connections.elementAt(i);
       if (bc.getSource() == candidate) {
         BeanInstance cTarget = bc.getTarget();
         // is the target of this connection external to the list to check?
@@ -366,10 +331,10 @@ public class BeanConnection
           return true;
         }
         for (int j = 0; j < listToCheck.size(); j++) {
-          BeanInstance tempTarget = (BeanInstance)listToCheck.elementAt(j);
+          BeanInstance tempTarget = (BeanInstance) listToCheck.elementAt(j);
           if (bc.getTarget() == tempTarget) {
             result = false;
-          }          
+          }
         }
       }
     }
@@ -377,23 +342,23 @@ public class BeanConnection
   }
 
   /**
-   * Returns a vector of BeanInstances that can be considered
-   * as outputs (or the right-hand side of a sub-flow)
-   *
+   * Returns a vector of BeanInstances that can be considered as outputs (or the
+   * right-hand side of a sub-flow)
+   * 
    * @param subset the sub-flow to examine
    * @return a Vector of outputs of the sub-flow
    */
-  public static Vector outputs(Vector subset, Integer... tab) {
-    Vector result = new Vector();
+  public static Vector<Object> outputs(Vector<Object> subset, Integer... tab) {
+    Vector<Object> result = new Vector<Object>();
     for (int i = 0; i < subset.size(); i++) {
-      BeanInstance temp = (BeanInstance)subset.elementAt(i);
+      BeanInstance temp = (BeanInstance) subset.elementAt(i);
       if (checkForTarget(temp, subset, tab)) {
         // now check source constraint
         if (checkSourceConstraint(temp, subset, tab)) {
           // now check that this bean can actually produce some events
           try {
             BeanInfo bi = Introspector.getBeanInfo(temp.getBean().getClass());
-            EventSetDescriptor [] esd = bi.getEventSetDescriptors();
+            EventSetDescriptor[] esd = bi.getEventSetDescriptors();
             if (esd != null && esd.length > 0) {
               result.add(temp);
             }
@@ -407,91 +372,83 @@ public class BeanConnection
   }
 
   /**
-   * Renders the connections and their names on the supplied graphics
-   * context
-   *
+   * Renders the connections and their names on the supplied graphics context
+   * 
    * @param gx a <code>Graphics</code> value
    */
-  public static void paintConnections(Graphics gx, Integer... tab) {    
+  public static void paintConnections(Graphics gx, Integer... tab) {
     int tabIndex = 0;
     if (tab.length > 0) {
       tabIndex = tab[0].intValue();
     }
-    
-    Vector connections = TABBED_CONNECTIONS.get(tabIndex);
-    
+
+    Vector<BeanConnection> connections = TABBED_CONNECTIONS.get(tabIndex);
+
     for (int i = 0; i < connections.size(); i++) {
-      BeanConnection bc = (BeanConnection)connections.elementAt(i);
+      BeanConnection bc = connections.elementAt(i);
       if (!bc.isHidden()) {
         BeanInstance source = bc.getSource();
         BeanInstance target = bc.getTarget();
         EventSetDescriptor srcEsd = bc.getSourceEventSetDescriptor();
-        BeanVisual sourceVisual = (source.getBean() instanceof Visible) ?
-          ((Visible)source.getBean()).getVisual() :
-          null;
-        BeanVisual targetVisual = (target.getBean() instanceof Visible) ?
-          ((Visible)target.getBean()).getVisual() :
-          null;
+        BeanVisual sourceVisual = (source.getBean() instanceof Visible) ? ((Visible) source
+          .getBean()).getVisual() : null;
+        BeanVisual targetVisual = (target.getBean() instanceof Visible) ? ((Visible) target
+          .getBean()).getVisual() : null;
         if (sourceVisual != null && targetVisual != null) {
-          Point bestSourcePt = 
-            sourceVisual.getClosestConnectorPoint(
-                         new Point((target.getX()+(target.getWidth()/2)), 
-                                   (target.getY() + (target.getHeight() / 2))));
-          Point bestTargetPt = 
-            targetVisual.getClosestConnectorPoint(
-                         new Point((source.getX()+(source.getWidth()/2)), 
-                                   (source.getY() + (source.getHeight() / 2))));
+          Point bestSourcePt = sourceVisual.getClosestConnectorPoint(new Point(
+            (target.getX() + (target.getWidth() / 2)), (target.getY() + (target
+              .getHeight() / 2))));
+          Point bestTargetPt = targetVisual.getClosestConnectorPoint(new Point(
+            (source.getX() + (source.getWidth() / 2)), (source.getY() + (source
+              .getHeight() / 2))));
           gx.setColor(Color.red);
           boolean active = true;
           if (source.getBean() instanceof EventConstraints) {
-            if (!((EventConstraints) source.getBean()).
-                eventGeneratable(srcEsd.getName())) {
+            if (!((EventConstraints) source.getBean()).eventGeneratable(srcEsd
+              .getName())) {
               gx.setColor(Color.gray); // link not active at this time
               active = false;
             }
           }
-          gx.drawLine((int)bestSourcePt.getX(), (int)bestSourcePt.getY(),
-                      (int)bestTargetPt.getX(), (int)bestTargetPt.getY());
+          gx.drawLine((int) bestSourcePt.getX(), (int) bestSourcePt.getY(),
+            (int) bestTargetPt.getX(), (int) bestTargetPt.getY());
 
           // paint an arrow head
           double angle;
           try {
-            double a = 
-              (double)(bestSourcePt.getY() - 
-                       bestTargetPt.getY()) / 
-              (double)(bestSourcePt.getX() - bestTargetPt.getX());
+            double a = (bestSourcePt.getY() - bestTargetPt.getY())
+              / (bestSourcePt.getX() - bestTargetPt.getX());
             angle = Math.atan(a);
-          } catch(Exception ex) {
+          } catch (Exception ex) {
             angle = Math.PI / 2;
           }
-          //	Point arrowstart = new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
-          Point arrowstart = new Point(bestTargetPt.x,
-                                       bestTargetPt.y);
-          Point arrowoffset = new Point((int)(7 * Math.cos(angle)), 
-                                        (int)(7 * Math.sin(angle)));
+          // Point arrowstart = new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
+          Point arrowstart = new Point(bestTargetPt.x, bestTargetPt.y);
+          Point arrowoffset = new Point((int) (7 * Math.cos(angle)),
+            (int) (7 * Math.sin(angle)));
           Point arrowend;
           if (bestSourcePt.getX() >= bestTargetPt.getX()) {
-	  
-            arrowend = new Point(arrowstart.x + arrowoffset.x, 
-                                 arrowstart.y + arrowoffset.y);
+
+            arrowend = new Point(arrowstart.x + arrowoffset.x, arrowstart.y
+              + arrowoffset.y);
           } else {
-            arrowend = new Point(arrowstart.x - arrowoffset.x, 
-                                 arrowstart.y - arrowoffset.y);
+            arrowend = new Point(arrowstart.x - arrowoffset.x, arrowstart.y
+              - arrowoffset.y);
           }
           int xs[] = { arrowstart.x,
-                       arrowend.x + (int)(7 * Math.cos(angle + (Math.PI / 2))),
-                       arrowend.x + (int)(7 * Math.cos(angle - (Math.PI / 2)))};
+            arrowend.x + (int) (7 * Math.cos(angle + (Math.PI / 2))),
+            arrowend.x + (int) (7 * Math.cos(angle - (Math.PI / 2))) };
           int ys[] = { arrowstart.y,
-                       arrowend.y + (int)(7 * Math.sin(angle + (Math.PI / 2))),
-                       arrowend.y + (int)(7 * Math.sin(angle - (Math.PI / 2)))};
+            arrowend.y + (int) (7 * Math.sin(angle + (Math.PI / 2))),
+            arrowend.y + (int) (7 * Math.sin(angle - (Math.PI / 2))) };
           gx.fillPolygon(xs, ys, 3);
           // ----
 
           // paint the connection name
-          int midx = (int)bestSourcePt.getX();
-          midx += (int)((bestTargetPt.getX() - bestSourcePt.getX()) / 2);
-          int midy = (int)bestSourcePt.getY();
-          midy += (int)((bestTargetPt.getY() - bestSourcePt.getY()) / 2) - 2 ;
+          int midx = (int) bestSourcePt.getX();
+          midx += (int) ((bestTargetPt.getX() - bestSourcePt.getX()) / 2);
+          int midy = (int) bestSourcePt.getY();
+          midy += (int) ((bestTargetPt.getY() - bestSourcePt.getY()) / 2) - 2;
           gx.setColor((active) ? Color.blue : Color.gray);
           if (previousLink(source, target, i, tab)) {
             midy -= 15;
@@ -504,115 +461,111 @@ public class BeanConnection
 
   /**
    * Return a list of connections within some delta of a point
-   *
+   * 
    * @param pt the point at which to look for connections
    * @param delta connections have to be within this delta of the point
    * @return a list of connections
    */
-  public static Vector getClosestConnections(Point pt, int delta, Integer... tab) {
+  public static Vector<BeanConnection> getClosestConnections(Point pt,
+    int delta, Integer... tab) {
     int tabIndex = 0;
     if (tab.length > 0) {
       tabIndex = tab[0].intValue();
     }
-    
-    Vector connections = TABBED_CONNECTIONS.get(tabIndex);
-    
-    Vector closestConnections = new Vector();
-    
+
+    Vector<BeanConnection> connections = TABBED_CONNECTIONS.get(tabIndex);
+
+    Vector<BeanConnection> closestConnections = new Vector<BeanConnection>();
+
     for (int i = 0; i < connections.size(); i++) {
-      BeanConnection bc = (BeanConnection)connections.elementAt(i);
+      BeanConnection bc = connections.elementAt(i);
       BeanInstance source = bc.getSource();
       BeanInstance target = bc.getTarget();
-      EventSetDescriptor srcEsd = bc.getSourceEventSetDescriptor();
-      BeanVisual sourceVisual = (source.getBean() instanceof Visible) ?
-	((Visible)source.getBean()).getVisual() :
-	null;
-      BeanVisual targetVisual = (target.getBean() instanceof Visible) ?
-	((Visible)target.getBean()).getVisual() :
-	null;
+      bc.getSourceEventSetDescriptor();
+      BeanVisual sourceVisual = (source.getBean() instanceof Visible) ? ((Visible) source
+        .getBean()).getVisual() : null;
+      BeanVisual targetVisual = (target.getBean() instanceof Visible) ? ((Visible) target
+        .getBean()).getVisual() : null;
       if (sourceVisual != null && targetVisual != null) {
-	Point bestSourcePt = 
-	  sourceVisual.getClosestConnectorPoint(
-		       new Point((target.getX()+(target.getWidth()/2)), 
-				 (target.getY() + (target.getHeight() / 2))));
-	Point bestTargetPt = 
-	  targetVisual.getClosestConnectorPoint(
-		       new Point((source.getX()+(source.getWidth()/2)), 
-				 (source.getY() + (source.getHeight() / 2))));
+        Point bestSourcePt = sourceVisual.getClosestConnectorPoint(new Point(
+          (target.getX() + (target.getWidth() / 2)), (target.getY() + (target
+            .getHeight() / 2))));
+        Point bestTargetPt = targetVisual.getClosestConnectorPoint(new Point(
+          (source.getX() + (source.getWidth() / 2)), (source.getY() + (source
+            .getHeight() / 2))));
 
-	int minx = (int) Math.min(bestSourcePt.getX(), bestTargetPt.getX());
-	int maxx = (int) Math.max(bestSourcePt.getX(), bestTargetPt.getX());
-	int miny = (int) Math.min(bestSourcePt.getY(), bestTargetPt.getY());
-	int maxy = (int) Math.max(bestSourcePt.getY(), bestTargetPt.getY());
-	// check to see if supplied pt is inside bounding box
-	if (pt.getX() >= minx-delta && pt.getX() <= maxx+delta && 
-	    pt.getY() >= miny-delta && pt.getY() <= maxy+delta) {
-	  // now see if the point is within delta of the line
-	  // formulate ax + by + c = 0
-	  double a = bestSourcePt.getY() - bestTargetPt.getY();
-	  double b = bestTargetPt.getX() - bestSourcePt.getX();
-	  double c = (bestSourcePt.getX() * bestTargetPt.getY()) -
-	    (bestTargetPt.getX() * bestSourcePt.getY());
-	  
-	  double distance = Math.abs((a * pt.getX()) + (b * pt.getY()) + c);
-	  distance /= Math.abs(Math.sqrt((a*a) + (b*b)));
+        int minx = (int) Math.min(bestSourcePt.getX(), bestTargetPt.getX());
+        int maxx = (int) Math.max(bestSourcePt.getX(), bestTargetPt.getX());
+        int miny = (int) Math.min(bestSourcePt.getY(), bestTargetPt.getY());
+        int maxy = (int) Math.max(bestSourcePt.getY(), bestTargetPt.getY());
+        // check to see if supplied pt is inside bounding box
+        if (pt.getX() >= minx - delta && pt.getX() <= maxx + delta
+          && pt.getY() >= miny - delta && pt.getY() <= maxy + delta) {
+          // now see if the point is within delta of the line
+          // formulate ax + by + c = 0
+          double a = bestSourcePt.getY() - bestTargetPt.getY();
+          double b = bestTargetPt.getX() - bestSourcePt.getX();
+          double c = (bestSourcePt.getX() * bestTargetPt.getY())
+            - (bestTargetPt.getX() * bestSourcePt.getY());
 
-	  if (distance <= delta) {
-	    closestConnections.addElement(bc);
-	  }
-	}
+          double distance = Math.abs((a * pt.getX()) + (b * pt.getY()) + c);
+          distance /= Math.abs(Math.sqrt((a * a) + (b * b)));
+
+          if (distance <= delta) {
+            closestConnections.addElement(bc);
+          }
+        }
       }
     }
     return closestConnections;
   }
-  
+
   /**
    * Remove the list of connections at the supplied index
    * 
-   * @param tab the index of the list to remove (correspods to
-   * a tab in the Knowledge Flow UI)
+   * @param tab the index of the list to remove (correspods to a tab in the
+   *          Knowledge Flow UI)
    * 
    * @param tab the index of the list of connections to remove
    */
   public static void removeConnectionList(Integer tab) {
-    
+
     TABBED_CONNECTIONS.remove(tab.intValue());
   }
 
   /**
-   * Remove all connections for a bean. If the bean is a target for
-   * receiving events then it gets deregistered from the corresonding
-   * source bean. If the bean is a source of events then all targets 
-   * implementing BeanCommon are notified via their
-   * disconnectionNotification methods that the source (and hence the
-   * connection) is going away.
-   *
+   * Remove all connections for a bean. If the bean is a target for receiving
+   * events then it gets deregistered from the corresonding source bean. If the
+   * bean is a source of events then all targets implementing BeanCommon are
+   * notified via their disconnectionNotification methods that the source (and
+   * hence the connection) is going away.
+   * 
    * @param instance the bean to remove connections to/from
    */
   public static void removeConnections(BeanInstance instance, Integer... tab) {
-    
+
     int tabIndex = 0;
     if (tab.length > 0) {
       tabIndex = tab[0].intValue();
     }
-    
-    Vector connections = TABBED_CONNECTIONS.get(tabIndex);
-    
-    Vector instancesToRemoveFor = new Vector();
+
+    Vector<BeanConnection> connections = TABBED_CONNECTIONS.get(tabIndex);
+
+    Vector<Object> instancesToRemoveFor = new Vector<Object>();
     if (instance.getBean() instanceof MetaBean) {
-      instancesToRemoveFor = 
-        ((MetaBean)instance.getBean()).getBeansInSubFlow();
+      instancesToRemoveFor = ((MetaBean) instance.getBean())
+        .getBeansInSubFlow();
     } else {
       instancesToRemoveFor.add(instance);
     }
-    Vector removeVector = new Vector();
+    Vector<BeanConnection> removeVector = new Vector<BeanConnection>();
     for (int j = 0; j < instancesToRemoveFor.size(); j++) {
-      BeanInstance tempInstance = 
-        (BeanInstance)instancesToRemoveFor.elementAt(j);
+      BeanInstance tempInstance = (BeanInstance) instancesToRemoveFor
+        .elementAt(j);
       for (int i = 0; i < connections.size(); i++) {
         // In cases where this instance is the target, deregister it
         // as a listener for the source
-        BeanConnection bc = (BeanConnection)connections.elementAt(i);
+        BeanConnection bc = connections.elementAt(i);
         BeanInstance tempTarget = bc.getTarget();
         BeanInstance tempSource = bc.getSource();
 
@@ -622,10 +575,10 @@ public class BeanConnection
           try {
             Method deregisterMethod = tempEsd.getRemoveListenerMethod();
             Object targetBean = tempTarget.getBean();
-            Object [] args = new Object[1];
+            Object[] args = new Object[1];
             args[0] = targetBean;
             deregisterMethod.invoke(tempSource.getBean(), args);
-            //            System.err.println("Deregistering listener");
+            // System.err.println("Deregistering listener");
             removeVector.addElement(bc);
           } catch (Exception ex) {
             ex.printStackTrace();
@@ -635,116 +588,110 @@ public class BeanConnection
           if (tempTarget.getBean() instanceof BeanCommon) {
             // tell the target that the source is going away, therefore
             // this type of connection is as well
-            ((BeanCommon)tempTarget.getBean()).
-              disconnectionNotification(tempEsd.getName(),
-                                        tempSource.getBean());
+            ((BeanCommon) tempTarget.getBean()).disconnectionNotification(
+              tempEsd.getName(), tempSource.getBean());
           }
         }
       }
     }
     for (int i = 0; i < removeVector.size(); i++) {
-      //      System.err.println("removing connection");
-      connections.removeElement((BeanConnection)removeVector.elementAt(i));
+      // System.err.println("removing connection");
+      connections.removeElement(removeVector.elementAt(i));
     }
   }
 
   public static void doMetaConnection(BeanInstance source, BeanInstance target,
-                                      final EventSetDescriptor esd,
-                                      final JComponent displayComponent,
-                                      final int tab) {
+    final EventSetDescriptor esd, final JComponent displayComponent,
+    final int tab) {
 
     Object targetBean = target.getBean();
     BeanInstance realTarget = null;
     final BeanInstance realSource = source;
     if (targetBean instanceof MetaBean) {
-      Vector receivers = ((MetaBean)targetBean).getSuitableTargets(esd);
+      Vector<BeanInstance> receivers = ((MetaBean) targetBean)
+        .getSuitableTargets(esd);
       if (receivers.size() == 1) {
-        realTarget = (BeanInstance)receivers.elementAt(0);
-        BeanConnection bc = new BeanConnection(realSource, realTarget,
-                                               esd, tab);
-        //        m_target = (BeanInstance)receivers.elementAt(0);
+        realTarget = receivers.elementAt(0);
+        new BeanConnection(realSource, realTarget, esd, tab);
       } else {
         // have to do the popup thing here
         int menuItemCount = 0;
         JPopupMenu targetConnectionMenu = new JPopupMenu();
         targetConnectionMenu.insert(new JLabel("Select target",
-                                               SwingConstants.CENTER),
-                                    menuItemCount++);
+          SwingConstants.CENTER), menuItemCount++);
         for (int i = 0; i < receivers.size(); i++) {
-          final BeanInstance tempTarget = 
-            (BeanInstance)receivers.elementAt(i);
-          String tName = ""+(i+1)+": " 
-            + ((tempTarget.getBean() instanceof BeanCommon) 
-                ? ((BeanCommon)tempTarget.getBean()).getCustomName() 
-                : tempTarget.getBean().getClass().getName());
+          final BeanInstance tempTarget = receivers.elementAt(i);
+          String tName = ""
+            + (i + 1)
+            + ": "
+            + ((tempTarget.getBean() instanceof BeanCommon) ? ((BeanCommon) tempTarget
+              .getBean()).getCustomName() : tempTarget.getBean().getClass()
+              .getName());
           JMenuItem targetItem = new JMenuItem(tName);
           targetItem.addActionListener(new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                //    finalTarget.add(tempTarget);
-                BeanConnection bc = 
-                  new BeanConnection(realSource, tempTarget,
-                                     esd, tab);
-                displayComponent.repaint();
-              }
-            });
+            @Override
+            public void actionPerformed(ActionEvent e) {
+              new BeanConnection(realSource, tempTarget, esd, tab);
+              displayComponent.repaint();
+            }
+          });
           targetConnectionMenu.add(targetItem);
           menuItemCount++;
         }
         targetConnectionMenu.show(displayComponent, target.getX(),
-                                  target.getY());
-        //        m_target = (BeanInstance)finalTarget.elementAt(0);
+          target.getY());
+        // m_target = (BeanInstance)finalTarget.elementAt(0);
       }
     }
   }
 
   /**
    * Creates a new <code>BeanConnection</code> instance.
-   *
+   * 
    * @param source the source bean
    * @param target the target bean
-   * @param esd the EventSetDescriptor for the connection
-   * be displayed
+   * @param esd the EventSetDescriptor for the connection be displayed
    */
   public BeanConnection(BeanInstance source, BeanInstance target,
-			EventSetDescriptor esd, Integer... tab) {
-    
+    EventSetDescriptor esd, Integer... tab) {
+
     int tabIndex = 0;
     if (tab.length > 0) {
       tabIndex = tab[0].intValue();
     }
-    
-    Vector connections = TABBED_CONNECTIONS.get(tabIndex);
-    
+
+    Vector<BeanConnection> connections = TABBED_CONNECTIONS.get(tabIndex);
+
     m_source = source;
     m_target = target;
-    //    m_sourceEsd = sourceEsd;
+    // m_sourceEsd = sourceEsd;
     m_eventName = esd.getName();
-    //    System.err.println(m_eventName);
+    // System.err.println(m_eventName);
 
     // attempt to connect source and target beans
-    Method registrationMethod = 
-      //      m_sourceEsd.getAddListenerMethod();
-      //      getSourceEventSetDescriptor().getAddListenerMethod();
-      esd.getAddListenerMethod();
+    Method registrationMethod =
+    // m_sourceEsd.getAddListenerMethod();
+    // getSourceEventSetDescriptor().getAddListenerMethod();
+    esd.getAddListenerMethod();
     Object targetBean = m_target.getBean();
 
-    Object [] args = new Object[1];
+    Object[] args = new Object[1];
     args[0] = targetBean;
-    Class listenerClass = esd.getListenerType();
+    Class<?> listenerClass = esd.getListenerType();
     if (listenerClass.isInstance(targetBean)) {
       try {
-	registrationMethod.invoke(m_source.getBean(), args);
-	// if the target implements BeanCommon, then inform
-	// it that it has been registered as a listener with a source via
-	// the named listener interface
-	if (targetBean instanceof BeanCommon) {
-	  ((BeanCommon)targetBean).
-	    connectionNotification(esd.getName(), m_source.getBean());
-	}
-	connections.addElement(this);
+        registrationMethod.invoke(m_source.getBean(), args);
+        // if the target implements BeanCommon, then inform
+        // it that it has been registered as a listener with a source via
+        // the named listener interface
+        if (targetBean instanceof BeanCommon) {
+          ((BeanCommon) targetBean).connectionNotification(esd.getName(),
+            m_source.getBean());
+        }
+        connections.addElement(this);
       } catch (Exception ex) {
-	System.err.println("[BeanConnection] Unable to connect beans");
-	ex.printStackTrace();
+        System.err.println("[BeanConnection] Unable to connect beans");
+        ex.printStackTrace();
       }
     } else {
       System.err.println("[BeanConnection] Unable to connect beans");
@@ -753,7 +700,7 @@ public class BeanConnection
 
   /**
    * Make this connection invisible on the display
-   *
+   * 
    * @param hidden true to make the connection invisible
    */
   public void setHidden(boolean hidden) {
@@ -762,7 +709,7 @@ public class BeanConnection
 
   /**
    * Returns true if this connection is invisible
-   *
+   * 
    * @return true if connection is invisible
    */
   public boolean isHidden() {
@@ -777,27 +724,26 @@ public class BeanConnection
     if (tab.length > 0) {
       tabIndex = tab[0].intValue();
     }
-    
-    Vector connections = TABBED_CONNECTIONS.get(tabIndex);
-    
+
+    Vector<BeanConnection> connections = TABBED_CONNECTIONS.get(tabIndex);
+
     EventSetDescriptor tempEsd = getSourceEventSetDescriptor();
     // try to deregister the target as a listener for the source
     try {
       Method deregisterMethod = tempEsd.getRemoveListenerMethod();
       Object targetBean = getTarget().getBean();
-      Object [] args = new Object[1];
+      Object[] args = new Object[1];
       args[0] = targetBean;
       deregisterMethod.invoke(getSource().getBean(), args);
-      //      System.err.println("Deregistering listener");
+      // System.err.println("Deregistering listener");
     } catch (Exception ex) {
       ex.printStackTrace();
     }
 
     if (getTarget().getBean() instanceof BeanCommon) {
       // tell the target that this connection is going away
-      ((BeanCommon)getTarget().getBean()).
-	disconnectionNotification(tempEsd.getName(),
-				  getSource().getBean());
+      ((BeanCommon) getTarget().getBean()).disconnectionNotification(
+        tempEsd.getName(), getSource().getBean());
     }
 
     connections.remove(this);
@@ -805,7 +751,7 @@ public class BeanConnection
 
   /**
    * returns the source BeanInstance for this connection
-   *
+   * 
    * @return a <code>BeanInstance</code> value
    */
   public BeanInstance getSource() {
@@ -814,13 +760,13 @@ public class BeanConnection
 
   /**
    * Returns the target BeanInstance for this connection
-   *
+   * 
    * @return a <code>BeanInstance</code> value
    */
   public BeanInstance getTarget() {
     return m_target;
   }
-  
+
   /**
    * Returns the name of the event for this conncetion
    * 
@@ -831,30 +777,32 @@ public class BeanConnection
   }
 
   /**
-   * Returns the event set descriptor for the event generated by the source
-   * for this connection
-   *
+   * Returns the event set descriptor for the event generated by the source for
+   * this connection
+   * 
    * @return an <code>EventSetDescriptor</code> value
    */
   protected EventSetDescriptor getSourceEventSetDescriptor() {
-    JComponent bc = (JComponent)m_source.getBean();
-     try {
-       BeanInfo sourceInfo = Introspector.getBeanInfo(bc.getClass());
-       if (sourceInfo == null) {
-       System.err.println("[BeanConnection] Error getting bean info, source info is null.");
-       } else {
-	 EventSetDescriptor [] esds = sourceInfo.getEventSetDescriptors();
-	 for (int i = 0; i < esds.length; i++) {
-	   if (esds[i].getName().compareTo(m_eventName) == 0) {
-	     return esds[i];
-	   }
-	 }
-       }
-     } catch (Exception ex) {
-       System.err.println("[BeanConnection] Problem retrieving event set descriptor");
-     }
-     return null;
-     
-     //    return m_sourceEsd;
+    JComponent bc = (JComponent) m_source.getBean();
+    try {
+      BeanInfo sourceInfo = Introspector.getBeanInfo(bc.getClass());
+      if (sourceInfo == null) {
+        System.err
+          .println("[BeanConnection] Error getting bean info, source info is null.");
+      } else {
+        EventSetDescriptor[] esds = sourceInfo.getEventSetDescriptors();
+        for (EventSetDescriptor esd : esds) {
+          if (esd.getName().compareTo(m_eventName) == 0) {
+            return esd;
+          }
+        }
+      }
+    } catch (Exception ex) {
+      System.err
+        .println("[BeanConnection] Problem retrieving event set descriptor");
+    }
+    return null;
+
+    // return m_sourceEsd;
   }
 }

@@ -43,11 +43,14 @@ import weka.gui.PropertyDialog;
  * variables and a button for brining up a file browser. The user can enter
  * arbitrary text, select an environment variable or a combination of both. Any
  * variables are resolved (if possible) and resolved values are displayed in a
- * tip-text.
+ * tip-text.<p></p>
+ *
+ * This class is deprecated - use the version in weka.gui instead.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 9118 $
+ * @version $Revision: 12232 $
  */
+@Deprecated
 public class FileEnvironmentField extends EnvironmentField {
 
   /** For serialization */

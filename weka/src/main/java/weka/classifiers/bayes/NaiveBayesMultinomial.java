@@ -71,7 +71,7 @@ import weka.core.WeightedInstancesHandler;
  *
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 8034 $ 
+ * @version $Revision: 11301 $ 
  */
 public class NaiveBayesMultinomial 
   extends AbstractClassifier 
@@ -196,7 +196,7 @@ public class NaiveBayesMultinomial
     double[] docsPerClass = new double[m_numClasses];
     double[] wordsPerClass = new double[m_numClasses];
 	
-    java.util.Enumeration enumInsts = instances.enumerateInstances();
+    java.util.Enumeration<Instance> enumInsts = instances.enumerateInstances();
     while (enumInsts.hasMoreElements()) 
       {
 	instance = (Instance) enumInsts.nextElement();
@@ -206,7 +206,7 @@ public class NaiveBayesMultinomial
 	for(int a = 0; a<instance.numValues(); a++)
 	  if(instance.index(a) != instance.classIndex())
 	    {
-	      if(!instance.isMissing(a))
+	      if(!instance.isMissingSparse(a))
 		{
 		  numOccurences = instance.valueSparse(a) * instance.weight();
 		  if(numOccurences < 0)
@@ -371,7 +371,7 @@ public class NaiveBayesMultinomial
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 11301 $");
   }
     
   /**

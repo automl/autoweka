@@ -21,6 +21,7 @@
 
 package weka.classifiers.lazy;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -109,7 +110,7 @@ import weka.core.neighboursearch.NearestNeighbourSearch;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10141 $
  */
 public class IBk 
   extends AbstractClassifier 
@@ -384,8 +385,9 @@ public class IBk
    */
   public String crossValidateTipText() {
 
-    return "Whether hold-one-out cross-validation will be used " +
-      "to select the best k value.";
+    return "Whether hold-one-out cross-validation will be used to " +
+    		"select the best k value between 1 and the value specified as " +
+    		"the KNN parameter.";
   }
   
   /**
@@ -592,9 +594,9 @@ public class IBk
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(8);
+    Vector<Option> newVector = new Vector<Option>(7);
 
     newVector.addElement(new Option(
 	      "\tWeight neighbours by the inverse of their distance\n"+
@@ -626,6 +628,8 @@ public class IBk
           "(default: weka.core.neighboursearch.LinearNNSearch).\n",
 	      "A", 0, "-A"));
 
+    newVector.addAll(Collections.list(super.listOptions()));
+    
     return newVector.elements();
   }
 
@@ -712,6 +716,8 @@ public class IBk
     else 
       this.setNearestNeighbourSearchAlgorithm(new LinearNNSearch());
     
+    super.setOptions(options);
+    
     Utils.checkForRemainingOptions(options);
   }
 
@@ -722,30 +728,27 @@ public class IBk
    */
   public String [] getOptions() {
 
-    String [] options = new String [11];
-    int current = 0;
-    options[current++] = "-K"; options[current++] = "" + getKNN();
-    options[current++] = "-W"; options[current++] = "" + m_WindowSize;
+    Vector<String> options = new Vector<String>();
+    options.add("-K"); options.add("" + getKNN());
+    options.add("-W"); options.add("" + m_WindowSize);
     if (getCrossValidate()) {
-      options[current++] = "-X";
+        options.add("-X");
     }
     if (getMeanSquared()) {
-      options[current++] = "-E";
+        options.add("-E");
     }
     if (m_DistanceWeighting == WEIGHT_INVERSE) {
-      options[current++] = "-I";
+        options.add("-I");
     } else if (m_DistanceWeighting == WEIGHT_SIMILARITY) {
-      options[current++] = "-F";
+        options.add("-F");
     }
 
-    options[current++] = "-A";
-    options[current++] = m_NNSearch.getClass().getName()+" "+Utils.joinOptions(m_NNSearch.getOptions()); 
+    options.add("-A");
+    options.add(m_NNSearch.getClass().getName()+" "+Utils.joinOptions(m_NNSearch.getOptions())); 
     
-    while (current < options.length) {
-      options[current++] = "";
-    }
+    Collections.addAll(options, super.getOptions());
     
-    return options;
+    return options.toArray(new String[0]);
   }
 
   /**
@@ -755,10 +758,10 @@ public class IBk
    * 
    * @return an enumeration of the measure names
    */
-  public Enumeration enumerateMeasures() {
+  public Enumeration<String> enumerateMeasures() {
     if (m_CrossValidate) {
-      Enumeration enm = m_NNSearch.enumerateMeasures();
-      Vector measures = new Vector();
+      Enumeration<String> enm = m_NNSearch.enumerateMeasures();
+      Vector<String> measures = new Vector<String>();
       while (enm.hasMoreElements())
 	measures.add(enm.nextElement());
       measures.add("measureKNN");
@@ -1052,7 +1055,7 @@ public class IBk
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10141 $");
   }
   
   /**

@@ -21,6 +21,7 @@
 
 package weka.filters.unsupervised.attribute;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -32,156 +33,164 @@ import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.filters.SimpleStreamFilter;
 
-/** 
- <!-- globalinfo-start -->
- * Removes attributes based on a regular expression matched against their names.
+/**
+ * <!-- globalinfo-start --> Removes attributes based on a regular expression
+ * matched against their names.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -D
- *  Turns on output of debugging information.</pre>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -E &lt;regular expression&gt;
+ * <pre>
+ * -D
+ *  Turns on output of debugging information.
+ * </pre>
+ * 
+ * <pre>
+ * -E &lt;regular expression&gt;
  *  The regular expression to match the attribute names against.
- *  (default: ^.*id$)</pre>
+ *  (default: ^.*id$)
+ * </pre>
  * 
- * <pre> -V
+ * <pre>
+ * -V
  *  Flag for inverting the matching sense. If set, attributes are kept
  *  instead of deleted.
- *  (default: off)</pre>
+ *  (default: off)
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10394 $
  */
-public class RemoveByName
-  extends SimpleStreamFilter {
+public class RemoveByName extends SimpleStreamFilter {
 
   /** for serialization. */
   private static final long serialVersionUID = -3335106965521265631L;
 
   /** the default expression. */
   public final static String DEFAULT_EXPRESSION = "^.*id$";
-  
+
   /** the regular expression for selecting the attributes by name. */
   protected String m_Expression = DEFAULT_EXPRESSION;
-  
+
   /** whether to invert the matching sense. */
   protected boolean m_InvertSelection;
 
   /** the Remove filter used internally for removing the attributes. */
   protected Remove m_Remove;
-  
+
   /**
    * Returns a string describing this classifier.
-   *
-   * @return      a description of the classifier suitable for
-   *              displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the classifier suitable for displaying in the
+   *         explorer/experimenter gui
    */
+  @Override
   public String globalInfo() {
-    return 
-        "Removes attributes based on a regular expression matched against "
-      + "their names.";
+    return "Removes attributes based on a regular expression matched against "
+      + "their names but will not remove the class attribute.";
   }
 
   /**
    * Gets an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
-    Vector	result;
-    Enumeration	enm;
+  @Override
+  public Enumeration<Option> listOptions() {
 
-    result = new Vector();
-
-    enm = super.listOptions();
-    while (enm.hasMoreElements())
-      result.addElement(enm.nextElement());
+    Vector<Option> result = new Vector<Option>(2);
 
     result.addElement(new Option(
-	"\tThe regular expression to match the attribute names against.\n"
-	+ "\t(default: " + DEFAULT_EXPRESSION + ")",
-	"E", 1, "-E <regular expression>"));
+      "\tThe regular expression to match the attribute names against.\n"
+        + "\t(default: " + DEFAULT_EXPRESSION + ")", "E", 1,
+      "-E <regular expression>"));
 
     result.addElement(new Option(
-	"\tFlag for inverting the matching sense. If set, attributes are kept\n"
-	+ "\tinstead of deleted.\n"
-	+ "\t(default: off)",
-	"V", 0, "-V"));
+      "\tFlag for inverting the matching sense. If set, attributes are kept\n"
+        + "\tinstead of deleted.\n" + "\t(default: off)", "V", 0, "-V"));
+
+    result.addAll(Collections.list(super.listOptions()));
 
     return result.elements();
   }
 
   /**
    * returns the options of the current setup.
-   *
-   * @return      the current options
+   * 
+   * @return the current options
    */
+  @Override
   public String[] getOptions() {
-    int       		i;
-    Vector<String>	result;
-    String[]		options;
 
-    result = new Vector();
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
+    Vector<String> result = new Vector<String>();
 
     result.add("-E");
     result.add("" + getExpression());
 
-    if (getInvertSelection())
+    if (getInvertSelection()) {
       result.add("-V");
+    }
 
-    return (String[]) result.toArray(new String[result.size()]);	  
+    Collections.addAll(result, super.getOptions());
+
+    return result.toArray(new String[result.size()]);
   }
 
   /**
-   * Parses the options for this object. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses the options for this object.
+   * <p/>
    * 
-   * <pre> -D
-   *  Turns on output of debugging information.</pre>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -E &lt;regular expression&gt;
+   * <pre>
+   * -D
+   *  Turns on output of debugging information.
+   * </pre>
+   * 
+   * <pre>
+   * -E &lt;regular expression&gt;
    *  The regular expression to match the attribute names against.
-   *  (default: ^.*id$)</pre>
+   *  (default: ^.*id$)
+   * </pre>
    * 
-   * <pre> -V
+   * <pre>
+   * -V
    *  Flag for inverting the matching sense. If set, attributes are kept
    *  instead of deleted.
-   *  (default: off)</pre>
+   *  (default: off)
+   * </pre>
    * 
-   <!-- options-end -->
-   *
-   * @param options	the options to use
-   * @throws Exception	if the option setting fails
+   * <!-- options-end -->
+   * 
+   * @param options the options to use
+   * @throws Exception if the option setting fails
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    String	tmpStr;
+
+    String tmpStr = Utils.getOption("E", options);
+    if (tmpStr.length() != 0) {
+      setExpression(tmpStr);
+    } else {
+      setExpression(DEFAULT_EXPRESSION);
+    }
+
+    setInvertSelection(Utils.getFlag("V", options));
 
     super.setOptions(options);
 
-    tmpStr = Utils.getOption("E", options);
-    if (tmpStr.length() != 0)
-      setExpression(tmpStr);
-    else
-      setExpression(DEFAULT_EXPRESSION);
-
-    setInvertSelection(Utils.getFlag("V", options));
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Sets the regular expression to match the attribute names against.
-   *
-   * @param value 	the regular expression
+   * 
+   * @param value the regular expression
    */
   public void setExpression(String value) {
     m_Expression = value;
@@ -189,8 +198,8 @@ public class RemoveByName
 
   /**
    * Returns the regular expression in use.
-   *
-   * @return 		the regular expression
+   * 
+   * @return the regular expression
    */
   public String getExpression() {
     return m_Expression;
@@ -198,20 +207,20 @@ public class RemoveByName
 
   /**
    * Returns the tip text for this property.
-   *
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String expressionTipText() {
     return "The regular expression to match the attribute names against.";
   }
 
   /**
-   * Set whether selected columns should be removed or kept. If true the 
+   * Set whether selected columns should be removed or kept. If true the
    * selected columns are kept and unselected columns are deleted. If false
    * selected columns are deleted and unselected columns are kept.
-   *
-   * @param value 	the new invert setting
+   * 
+   * @param value the new invert setting
    */
   public void setInvertSelection(boolean value) {
     m_InvertSelection = value;
@@ -219,8 +228,8 @@ public class RemoveByName
 
   /**
    * Get whether the supplied columns are to be removed or kept.
-   *
-   * @return 		true if the supplied columns will be kept
+   * 
+   * @return true if the supplied columns will be kept
    */
   public boolean getInvertSelection() {
     return m_InvertSelection;
@@ -228,93 +237,101 @@ public class RemoveByName
 
   /**
    * Returns the tip text for this property.
-   *
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String invertSelectionTipText() {
     return "Determines whether action is to select or delete."
       + " If set to true, only the specified attributes will be kept;"
       + " If set to false, specified attributes will be deleted.";
   }
-  
+
   /**
-   * Determines the output format based on the input format and returns 
-   * this. In case the output format cannot be returned immediately, i.e.,
-   * immediateOutputFormat() returns false, then this method will be called
-   * from batchFinished().
-   *
-   * @param inputFormat	the input format to base the output format on
-   * @return		the output format
-   * @throws Exception	in case the determination goes wrong
+   * Determines the output format based on the input format and returns this. In
+   * case the output format cannot be returned immediately, i.e.,
+   * immediateOutputFormat() returns false, then this method will be called from
+   * batchFinished().
+   * 
+   * @param inputFormat the input format to base the output format on
+   * @return the output format
+   * @throws Exception in case the determination goes wrong
    */
-  protected Instances determineOutputFormat(Instances inputFormat) throws Exception {
-    Vector<Integer>	indices;
-    int[]		attributes;
-    int			i;
-    
+  @Override
+  protected Instances determineOutputFormat(Instances inputFormat)
+    throws Exception {
+
     // determine indices
-    indices = new Vector<Integer>();
-    for (i = 0; i < inputFormat.numAttributes(); i++) {
-      // skip class
-      if (i == inputFormat.classIndex())
-	continue;
-      if (inputFormat.attribute(i).name().matches(m_Expression))
-	indices.add(i);
+    Vector<Integer> indices = new Vector<Integer>();
+    for (int i = 0; i < inputFormat.numAttributes(); i++) {
+      // always leave class if set
+      if ((i == inputFormat.classIndex())) {
+        if (getInvertSelection()) {
+          indices.add(i);
+        }
+        continue;
+      }
+      if (inputFormat.attribute(i).name().matches(m_Expression)) {
+        indices.add(i);
+      }
     }
-    attributes = new int[indices.size()];
-    for (i = 0; i < indices.size(); i++)
+    int[] attributes = new int[indices.size()];
+    for (int i = 0; i < indices.size(); i++) {
       attributes[i] = indices.get(i);
-    
+    }
+
     m_Remove = new Remove();
     m_Remove.setAttributeIndicesArray(attributes);
     m_Remove.setInvertSelection(getInvertSelection());
     m_Remove.setInputFormat(inputFormat);
-    
+
     return m_Remove.getOutputFormat();
   }
 
-  /** 
+  /**
    * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
+   * 
+   * @return the capabilities of this object
+   * @see Capabilities
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result;
-    
+
     result = new Remove().getCapabilities();
     result.setOwner(this);
-    
+
     return result;
   }
-  
+
   /**
-   * processes the given instance (may change the provided instance) and
-   * returns the modified version.
-   *
-   * @param instance    the instance to process
-   * @return            the modified data
-   * @throws Exception  in case the processing goes wrong
+   * processes the given instance (may change the provided instance) and returns
+   * the modified version.
+   * 
+   * @param instance the instance to process
+   * @return the modified data
+   * @throws Exception in case the processing goes wrong
    */
+  @Override
   protected Instance process(Instance instance) throws Exception {
     m_Remove.input(instance);
     return m_Remove.output();
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10394 $");
   }
 
   /**
    * runs the filter with the given arguments.
-   *
-   * @param args      the commandline arguments
+   * 
+   * @param args the commandline arguments
    */
   public static void main(String[] args) {
     runFilter(new RemoveByName(), args);

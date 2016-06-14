@@ -27,18 +27,94 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 
+
 /**
- * A class to store simple statistics
- *
+ * A class to store simple statistics.<p>
+ * 
+ * Upon initialization the variables take the following values:<p>
+ * <code>
+ * {@link #count} = {@link #sum} = {@link #sumSq} = 0 <br />
+ * {@link #mean} = {@link #stdDev} = {@link #min} = {@link #max} = Double.NaN
+ * </code><p>
+ * This is called the initial state. <p>
+ * 
+ * For signaling that a Stats object has been provided with values that hint
+ * that something is either wrong with the data used or the algorithm used there
+ * is also the invalid state where the variables take the following values: <p>
+ * <code>
+ * {@link #count} = {@link #sum} = {@link #sumSq} = {@link #mean} =
+ * {@link #stdDev} = {@link #min} = {@link #max} = Double.NaN
+ * <code><p>
+ * Once a Stats object goes into the invalid state it can't change its state
+ * anymore. <p>
+ * 
+ * A Stats object assumes that only values are subtracted (by using the 
+ * {@link #subtract(double)} or {@link #subtract(double, double)} methods)
+ * that have previously been added (by using the {@link #add(double)} or 
+ * {@link #add(double, double)} methods) and the weights must be the same
+ * too.<br />
+ * Otherwise the Stats object's fields' values are implementation defined.<p>
+ * 
+ * If the implementation detects a problem then the Stats object goes into the
+ * invalid state.<p>
+ * 
+ * The fields {@link #count}, {@link #sum}, {@link #sumSq}, {@link #min} and
+ * {@link #max} are always updated whereas the field {@link #mean} and
+ * {@link #stdDev} are only guaranteed to be updated after a call to
+ * {@link #calculateDerived()}.<p>
+ * 
+ * For the fields {@link #min} and {@link #max} the following rules apply:<p>
+ * <code>
+ * min(values_added \ values_subtracted) >= {@link #min} >= min(values_added)<br>
+ * max(values_added \ values_subtracted) <= {@link #max} <= max(values_added)
+ * </code><p>
+ * Where \ is the set difference.<p>
+ * 
+ * For the field {@link #stdDev} the following rules apply:<p>
+ * <ol>
+ * <li>If count <= 1 then
+ *     {@link #stdDev}=Double.NaN.</li>
+ * <li>Otherwise {@link #stdDev} >= 0 and it should take on the value by best
+ *     effort of the implementation.</li>
+ * </ol>
+ * 
+ * For the methods {@link #add(double)}, {@link #add(double, double)},
+ * {@link #subtract(double)} and {@link #subtract(double, double)} the following
+ * rules apply:<p>
+ * 
+ * <ol>
+ * <li>if weight < 0 then {@link #subtract(double, double)} is used instead of
+ *     {@link #add(double, double)} with weight = -weight and vice versa.</li>
+ * <li>if weight = +-inf or weight = NaN then the Stats object goes into the
+ *     invalid state.</li>
+ * <li>if value = +-inf or value = NaN then the Stats object goes into the
+ *     invalid state.</li>
+ * <li>if weight = 0 then the value gets ignored.</li>
+ * <li>Otherwise the fields get updated by the implementation's best effort.</li>
+ * </ol>
+ * 
+ * For {@link #count} the following rules apply<p>
+ * 
+ * <ol>
+ * <li>If {@link #count} goes below zero then all fields are set to
+ * <code>Double.NaN</code> except the {@link #count} field which gets tracked
+ * normally.</li>
+ * <li>If {@link #count} = 0 then the Stats object goes into the initial state.
+ * </li>
+ * <li>If {@link #count} > 0 for the first time, then the Stats object goes into
+ *     initial state and gets updated with the corresponding value and weight.
+ * </li>
+ * </ol>
+ * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 11424 $
  */
 public class Stats
-  implements Serializable, RevisionHandler {
+implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -8610544539090024102L;
-  
+
   /** The number of values seen */
   public double count = 0;
 
@@ -59,9 +135,43 @@ public class Stats
 
   /** The maximum value seen, or Double.NaN if no values seen */
   public double max = Double.NaN;
-    
+
+  /** an important factor to calculate the standard deviation incrementally */
+  private double stdDevFactor = 0;
+
+  private void reset() {
+    count = 0;
+    sum = 0;
+    sumSq = 0;
+    stdDev = Double.NaN;
+    mean = Double.NaN;
+    min = Double.NaN;
+    max = Double.NaN;
+    stdDevFactor = 0;
+  }
+
+  private void negativeCount() {
+    sum = Double.NaN;
+    sumSq = Double.NaN;
+    stdDev = Double.NaN;
+    mean = Double.NaN;
+    min = Double.NaN;
+    max = Double.NaN;
+  }
+
+  private void goInvalid() {
+    count = Double.NaN;
+    negativeCount();
+  }
+
+  private boolean isInvalid() {
+    return Double.isNaN(count);
+  }
+
   /**
-   * Adds a value to the observed values
+   * Adds a value to the observed values<p>
+   * 
+   * It's equivalent to <code>add(value, 1)</code><p>
    *
    * @param value the observed value
    */
@@ -71,16 +181,60 @@ public class Stats
   }
 
   /**
-   * Adds a value that has been seen n times to the observed values
+   * Adds a weighted value to the observed values
    *
    * @param value the observed value
-   * @param n the number of times to add value
+   * @param weight the weight of the observed value
    */
-  public void add(double value, double n) {
+  public void add(double value, double weight) {
 
-    sum += value * n;
-    sumSq += value * value * n;
-    count += n;
+    // treat as subtract
+    if (weight < 0) {
+      subtract(value, -weight);
+      return;
+    }
+
+    // don't leave invalid state
+    if (isInvalid())
+      return;
+
+    // go invalid
+    if (Double.isInfinite(weight) || Double.isNaN(weight) ||
+      Double.isInfinite(value) || Double.isNaN(value)) {
+      goInvalid();
+      return;
+    }
+
+    // ignore
+    if (weight == 0)
+      return;
+
+    double newCount = count + weight;
+    if (count < 0 && (newCount > 0 || Utils.eq(newCount, 0))) {
+      reset();
+      return;
+    }
+
+    count = newCount;
+
+    if (count < 0) {
+      return;
+    }
+
+    double weightedValue = value*weight;
+    sum += weightedValue;
+    sumSq += value * weightedValue;
+    if (Double.isNaN(mean)) {
+      // For the first value the mean can suffer from loss of precision
+      // so we treat it separately and make sure the calculation stays accurate
+      mean = value;
+      stdDevFactor = 0;
+    } else {
+      double delta = weight*(value - mean);
+      mean += delta/count;
+      stdDevFactor += delta*(value - mean);
+    }
+
     if (Double.isNaN(min)) {
       min = max = value;
     } else if (value < min) {
@@ -92,7 +246,9 @@ public class Stats
 
   /**
    * Removes a value to the observed values (no checking is done
-   * that the value being removed was actually added). 
+   * that the value being removed was actually added).<p>
+   * 
+   * It's equivalent to <code>subtract(value, 1)</code><p>
    *
    * @param value the observed value
    */
@@ -101,15 +257,50 @@ public class Stats
   }
 
   /**
-   * Subtracts a value that has been seen n times from the observed values
+   * Subtracts a weighted value from the observed values
    *
    * @param value the observed value
-   * @param n the number of times to subtract value
+   * @param weight the weight of the observed value
    */
-  public void subtract(double value, double n) {
-    sum -= value * n;
-    sumSq -= value * value * n;
-    count -= n;
+  public void subtract(double value, double weight) {
+
+    // treat as add
+    if (weight < 0) {
+      add(value, -weight);
+      return;
+    }
+
+    // don't leave invalid state
+    if (isInvalid())
+      return;
+
+    // go invalid
+    if (Double.isInfinite(weight) || Double.isNaN(weight) ||
+      Double.isInfinite(value) || Double.isNaN(value)) {
+      goInvalid();
+      return;
+    }
+
+    // ignore
+    if (weight == 0)
+      return;
+
+    count -= weight;
+
+    if (Utils.eq(count, 0)) {
+      reset();
+      return;
+    } else if (count < 0) {
+      negativeCount();
+      return;
+    }
+
+    double weightedValue = value*weight;
+    sum -= weightedValue;
+    sumSq -= value * weightedValue;
+    double delta = weight*(value - mean);
+    mean -= delta/count;
+    stdDevFactor -= delta*(value - mean);
   }
 
   /**
@@ -119,24 +310,19 @@ public class Stats
    */
   public void calculateDerived() {
 
-    mean = Double.NaN;
-    stdDev = Double.NaN;
-    if (count > 0) {
-      mean = sum / count;
-      stdDev = Double.POSITIVE_INFINITY;
-      if (count > 1) {
-	stdDev = sumSq - (sum * sum) / count;
-	stdDev /= (count - 1);
-        if (stdDev < 0) {
-	  //          System.err.println("Warning: stdDev value = " + stdDev 
-	  //                             + " -- rounded to zero.");
-          stdDev = 0;
-        }
-	stdDev = Math.sqrt(stdDev);
-      }
+    if (count <= 1) {
+      stdDev = Double.NaN;
+      return;
     }
+    stdDev = stdDevFactor/(count - 1);
+    if (stdDev < 0) {
+      stdDev = 0;
+      return;
+    }
+    stdDev = Math.sqrt(stdDev);
+
   }
-    
+
   /**
    * Returns a string summarising the stats so far.
    *
@@ -144,7 +330,6 @@ public class Stats
    */
   public String toString() {
 
-    calculateDerived();
     return
       "Count   " + Utils.doubleToString(count, 8) + '\n'
       + "Min     " + Utils.doubleToString(min, 8) + '\n'
@@ -154,14 +339,14 @@ public class Stats
       + "Mean    " + Utils.doubleToString(mean, 8) + '\n'
       + "StdDev  " + Utils.doubleToString(stdDev, 8) + '\n';
   }
-  
+
   /**
    * Returns the revision string.
    * 
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 11424 $");
   }
 
   /**
@@ -175,28 +360,28 @@ public class Stats
     try {
       Stats ps = new Stats();
       java.io.LineNumberReader r = new java.io.LineNumberReader(
-				   new java.io.InputStreamReader(System.in));
+        new java.io.InputStreamReader(System.in));
       String line;
       while ((line = r.readLine()) != null) {
         line = line.trim();
         if (line.equals("") || line.startsWith("@") || line.startsWith("%")) {
           continue;
         }
-	java.util.StringTokenizer s 
-          = new java.util.StringTokenizer(line, " ,\t\n\r\f");
-	int count = 0;
-	double v1 = 0;
-	while (s.hasMoreTokens()) {
-	  double val = (new Double(s.nextToken())).doubleValue();
-	  if (count == 0) {
-	    v1 = val;
-	  } else {
+        java.util.StringTokenizer s 
+        = new java.util.StringTokenizer(line, " ,\t\n\r\f");
+        int count = 0;
+        double v1 = 0;
+        while (s.hasMoreTokens()) {
+          double val = (new Double(s.nextToken())).doubleValue();
+          if (count == 0) {
+            v1 = val;
+          } else {
             System.err.println("MSG: Too many values in line \"" 
-                               + line + "\", skipped.");
-	    break;
-	  }
-	  count++;
-	}
+              + line + "\", skipped.");
+            break;
+          }
+          count++;
+        }
         if (count == 1) {
           ps.add(v1);
         }

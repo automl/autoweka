@@ -21,13 +21,14 @@
 
 package weka.datagenerators.clusterers;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -39,88 +40,121 @@ import weka.datagenerators.ClusterDefinition;
 import weka.datagenerators.ClusterGenerator;
 
 /**
- <!-- globalinfo-start -->
- * A data generator that produces data points in hyperrectangular subspace clusters.
+ * <!-- globalinfo-start --> A data generator that produces data points in
+ * hyperrectangular subspace clusters.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -h
- *  Prints this help.</pre>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -o &lt;file&gt;
+ * <pre>
+ * -h
+ *  Prints this help.
+ * </pre>
+ * 
+ * <pre>
+ * -o &lt;file&gt;
  *  The name of the output file, otherwise the generated data is
- *  printed to stdout.</pre>
+ *  printed to stdout.
+ * </pre>
  * 
- * <pre> -r &lt;name&gt;
- *  The name of the relation.</pre>
+ * <pre>
+ * -r &lt;name&gt;
+ *  The name of the relation.
+ * </pre>
  * 
- * <pre> -d
- *  Whether to print debug informations.</pre>
+ * <pre>
+ * -d
+ *  Whether to print debug informations.
+ * </pre>
  * 
- * <pre> -S
- *  The seed for random function (default 1)</pre>
+ * <pre>
+ * -S
+ *  The seed for random function (default 1)
+ * </pre>
  * 
- * <pre> -a &lt;num&gt;
- *  The number of attributes (default 1).</pre>
+ * <pre>
+ * -a &lt;num&gt;
+ *  The number of attributes (default 1).
+ * </pre>
  * 
- * <pre> -c
- *  Class Flag, if set, the cluster is listed in extra attribute.</pre>
+ * <pre>
+ * -c
+ *  Class Flag, if set, the cluster is listed in extra attribute.
+ * </pre>
  * 
- * <pre> -b &lt;range&gt;
- *  The indices for boolean attributes.</pre>
+ * <pre>
+ * -b &lt;range&gt;
+ *  The indices for boolean attributes.
+ * </pre>
  * 
- * <pre> -m &lt;range&gt;
- *  The indices for nominal attributes.</pre>
+ * <pre>
+ * -m &lt;range&gt;
+ *  The indices for nominal attributes.
+ * </pre>
  * 
- * <pre> -P &lt;num&gt;
+ * <pre>
+ * -P &lt;num&gt;
  *  The noise rate in percent (default 0.0).
  *  Can be between 0% and 30%. (Remark: The original 
- *  algorithm only allows noise up to 10%.)</pre>
+ *  algorithm only allows noise up to 10%.)
+ * </pre>
  * 
- * <pre> -C &lt;cluster-definition&gt;
+ * <pre>
+ * -C &lt;cluster-definition&gt;
  *  A cluster definition of class 'SubspaceClusterDefinition'
  *  (definition needs to be quoted to be recognized as 
- *  a single argument).</pre>
+ *  a single argument).
+ * </pre>
  * 
- * <pre> 
+ * <pre>
  * Options specific to weka.datagenerators.clusterers.SubspaceClusterDefinition:
  * </pre>
  * 
- * <pre> -A &lt;range&gt;
- *  Generates randomly distributed instances in the cluster.</pre>
+ * <pre>
+ * -A &lt;range&gt;
+ *  Generates randomly distributed instances in the cluster.
+ * </pre>
  * 
- * <pre> -U &lt;range&gt;
- *  Generates uniformly distributed instances in the cluster.</pre>
+ * <pre>
+ * -U &lt;range&gt;
+ *  Generates uniformly distributed instances in the cluster.
+ * </pre>
  * 
- * <pre> -G &lt;range&gt;
- *  Generates gaussian distributed instances in the cluster.</pre>
+ * <pre>
+ * -G &lt;range&gt;
+ *  Generates gaussian distributed instances in the cluster.
+ * </pre>
  * 
- * <pre> -D &lt;num&gt;,&lt;num&gt;
+ * <pre>
+ * -D &lt;num&gt;,&lt;num&gt;
  *  The attribute min/max (-A and -U) or mean/stddev (-G) for
- *  the cluster.</pre>
+ *  the cluster.
+ * </pre>
  * 
- * <pre> -N &lt;num&gt;..&lt;num&gt;
- *  The range of number of instances per cluster (default 1..50).</pre>
+ * <pre>
+ * -N &lt;num&gt;..&lt;num&gt;
+ *  The range of number of instances per cluster (default 1..50).
+ * </pre>
  * 
- * <pre> -I
- *  Uses integer instead of continuous values (default continuous).</pre>
+ * <pre>
+ * -I
+ *  Uses integer instead of continuous values (default continuous).
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $ 
+ * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 12478 $
  */
-public class SubspaceCluster 
-  extends ClusterGenerator {
+public class SubspaceCluster extends ClusterGenerator {
 
   /** for serialization */
   static final long serialVersionUID = -3454999858505621128L;
-  
-  /** noise rate in percent (option P,  between 0 and 30)*/ 
+
+  /** noise rate in percent (option P, between 0 and 30) */
   protected double m_NoiseRate;
 
   /** cluster list */
@@ -129,14 +163,8 @@ public class SubspaceCluster
   /** if nominal, store number of values */
   protected int[] m_numValues;
 
-  /** store global min values */
-  protected double[] m_globalMinValue;
-
-  /** store global max values */
-  protected double[] m_globalMaxValue;
-
   /** cluster type: uniform/random */
-  public static final int UNIFORM_RANDOM = 0;  
+  public static final int UNIFORM_RANDOM = 0;
   /** cluster type: total uniform */
   public static final int TOTAL_UNIFORM = 1;
   /** cluster type: gaussian */
@@ -144,9 +172,7 @@ public class SubspaceCluster
   /** the tags for the cluster types */
   public static final Tag[] TAGS_CLUSTERTYPE = {
     new Tag(UNIFORM_RANDOM, "uniform/random"),
-    new Tag(TOTAL_UNIFORM,  "total uniform"),
-    new Tag(GAUSSIAN,       "gaussian")
-  };
+    new Tag(TOTAL_UNIFORM, "total uniform"), new Tag(GAUSSIAN, "gaussian") };
 
   /** cluster subtype: continuous */
   public static final int CONTINUOUS = 0;
@@ -154,13 +180,11 @@ public class SubspaceCluster
   public static final int INTEGER = 1;
   /** the tags for the cluster types */
   public static final Tag[] TAGS_CLUSTERSUBTYPE = {
-    new Tag(CONTINUOUS, "continuous"),
-    new Tag(INTEGER,    "integer")
-  };
+    new Tag(CONTINUOUS, "continuous"), new Tag(INTEGER, "integer") };
 
   /**
-   * initializes the generator, sets the number of clusters to 0, since user
-   * has to specify them explicitly
+   * initializes the generator, sets the number of clusters to 0, since user has
+   * to specify them explicitly
    */
   public SubspaceCluster() {
     super();
@@ -170,9 +194,9 @@ public class SubspaceCluster
 
   /**
    * Returns a string describing this data generator.
-   *
-   * @return a description of the data generator suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the data generator suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
     return "A data generator that produces data points in "
@@ -181,176 +205,199 @@ public class SubspaceCluster
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options
    */
-  public Enumeration listOptions() {
-    Vector result = enumToVector(super.listOptions());
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> result = enumToVector(super.listOptions());
 
-    result.addElement(new Option(
-          "\tThe noise rate in percent (default " 
-          + defaultNoiseRate() + ").\n"
-          + "\tCan be between 0% and 30%. (Remark: The original \n"
-          + "\talgorithm only allows noise up to 10%.)",
-          "P", 1, "-P <num>"));
+    result.addElement(new Option("\tThe noise rate in percent (default "
+      + defaultNoiseRate() + ").\n"
+      + "\tCan be between 0% and 30%. (Remark: The original \n"
+      + "\talgorithm only allows noise up to 10%.)", "P", 1, "-P <num>"));
 
-    result.addElement(new Option(
-          "\tA cluster definition of class '" 
-	  + SubspaceClusterDefinition.class.getName().replaceAll(".*\\.", "") + "'\n"
-	  + "\t(definition needs to be quoted to be recognized as \n"
-	  + "\ta single argument).",
-          "C", 1, "-C <cluster-definition>"));
+    result.addElement(new Option("\tA cluster definition of class '"
+      + SubspaceClusterDefinition.class.getName().replaceAll(".*\\.", "")
+      + "'\n" + "\t(definition needs to be quoted to be recognized as \n"
+      + "\ta single argument).", "C", 1, "-C <cluster-definition>"));
 
-    result.addElement(new Option(
-	      "", "", 0, 
-	      "\nOptions specific to " 
-	      + SubspaceClusterDefinition.class.getName() + ":"));
+    result.addElement(new Option("", "", 0, "\nOptions specific to "
+      + SubspaceClusterDefinition.class.getName() + ":"));
 
-    result.addAll(
-        enumToVector(new SubspaceClusterDefinition(this).listOptions()));
+    result.addAll(enumToVector(new SubspaceClusterDefinition(this)
+      .listOptions()));
 
     return result.elements();
   }
 
   /**
-   * Parses a list of options for this object. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a list of options for this object.
+   * <p/>
    * 
-   * <pre> -h
-   *  Prints this help.</pre>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -o &lt;file&gt;
+   * <pre>
+   * -h
+   *  Prints this help.
+   * </pre>
+   * 
+   * <pre>
+   * -o &lt;file&gt;
    *  The name of the output file, otherwise the generated data is
-   *  printed to stdout.</pre>
+   *  printed to stdout.
+   * </pre>
    * 
-   * <pre> -r &lt;name&gt;
-   *  The name of the relation.</pre>
+   * <pre>
+   * -r &lt;name&gt;
+   *  The name of the relation.
+   * </pre>
    * 
-   * <pre> -d
-   *  Whether to print debug informations.</pre>
+   * <pre>
+   * -d
+   *  Whether to print debug informations.
+   * </pre>
    * 
-   * <pre> -S
-   *  The seed for random function (default 1)</pre>
+   * <pre>
+   * -S
+   *  The seed for random function (default 1)
+   * </pre>
    * 
-   * <pre> -a &lt;num&gt;
-   *  The number of attributes (default 1).</pre>
+   * <pre>
+   * -a &lt;num&gt;
+   *  The number of attributes (default 1).
+   * </pre>
    * 
-   * <pre> -c
-   *  Class Flag, if set, the cluster is listed in extra attribute.</pre>
+   * <pre>
+   * -c
+   *  Class Flag, if set, the cluster is listed in extra attribute.
+   * </pre>
    * 
-   * <pre> -b &lt;range&gt;
-   *  The indices for boolean attributes.</pre>
+   * <pre>
+   * -b &lt;range&gt;
+   *  The indices for boolean attributes.
+   * </pre>
    * 
-   * <pre> -m &lt;range&gt;
-   *  The indices for nominal attributes.</pre>
+   * <pre>
+   * -m &lt;range&gt;
+   *  The indices for nominal attributes.
+   * </pre>
    * 
-   * <pre> -P &lt;num&gt;
+   * <pre>
+   * -P &lt;num&gt;
    *  The noise rate in percent (default 0.0).
    *  Can be between 0% and 30%. (Remark: The original 
-   *  algorithm only allows noise up to 10%.)</pre>
+   *  algorithm only allows noise up to 10%.)
+   * </pre>
    * 
-   * <pre> -C &lt;cluster-definition&gt;
+   * <pre>
+   * -C &lt;cluster-definition&gt;
    *  A cluster definition of class 'SubspaceClusterDefinition'
    *  (definition needs to be quoted to be recognized as 
-   *  a single argument).</pre>
+   *  a single argument).
+   * </pre>
    * 
-   * <pre> 
+   * <pre>
    * Options specific to weka.datagenerators.clusterers.SubspaceClusterDefinition:
    * </pre>
    * 
-   * <pre> -A &lt;range&gt;
-   *  Generates randomly distributed instances in the cluster.</pre>
+   * <pre>
+   * -A &lt;range&gt;
+   *  Generates randomly distributed instances in the cluster.
+   * </pre>
    * 
-   * <pre> -U &lt;range&gt;
-   *  Generates uniformly distributed instances in the cluster.</pre>
+   * <pre>
+   * -U &lt;range&gt;
+   *  Generates uniformly distributed instances in the cluster.
+   * </pre>
    * 
-   * <pre> -G &lt;range&gt;
-   *  Generates gaussian distributed instances in the cluster.</pre>
+   * <pre>
+   * -G &lt;range&gt;
+   *  Generates gaussian distributed instances in the cluster.
+   * </pre>
    * 
-   * <pre> -D &lt;num&gt;,&lt;num&gt;
+   * <pre>
+   * -D &lt;num&gt;,&lt;num&gt;
    *  The attribute min/max (-A and -U) or mean/stddev (-G) for
-   *  the cluster.</pre>
+   *  the cluster.
+   * </pre>
    * 
-   * <pre> -N &lt;num&gt;..&lt;num&gt;
-   *  The range of number of instances per cluster (default 1..50).</pre>
+   * <pre>
+   * -N &lt;num&gt;..&lt;num&gt;
+   *  The range of number of instances per cluster (default 1..50).
+   * </pre>
    * 
-   * <pre> -I
-   *  Uses integer instead of continuous values (default continuous).</pre>
+   * <pre>
+   * -I
+   *  Uses integer instead of continuous values (default continuous).
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    String                      tmpStr;
-    SubspaceClusterDefinition   cl;
-    Vector                      list;
-    int                         clCount;
-
+    String tmpStr;
+    SubspaceClusterDefinition cl;
+    Vector<SubspaceClusterDefinition> list;
     super.setOptions(options);
 
     m_numValues = new int[getNumAttributes()];
     // numValues might be changed by a cluster definition
     // (only relevant for nominal data)
-    for (int i = 0; i < getNumAttributes(); i++)
+    for (int i = 0; i < getNumAttributes(); i++) {
       m_numValues[i] = 1;
+    }
 
     tmpStr = Utils.getOption('P', options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setNoiseRate(Double.parseDouble(tmpStr));
-    else
+    } else {
       setNoiseRate(defaultNoiseRate());
+    }
 
     // cluster definitions
-    list = new Vector();
-    
-    clCount = 0;
+    list = new Vector<SubspaceClusterDefinition>();
+
     do {
       tmpStr = Utils.getOption('C', options);
       if (tmpStr.length() != 0) {
-        clCount++;
         cl = new SubspaceClusterDefinition(this);
         cl.setOptions(Utils.splitOptions(tmpStr));
         list.add(cl);
       }
-    }
-    while (tmpStr.length() != 0);
+    } while (tmpStr.length() != 0);
 
-    m_Clusters = (ClusterDefinition[]) 
-                    list.toArray(new ClusterDefinition[list.size()]);
+    m_Clusters = list.toArray(new ClusterDefinition[list.size()]);
     // in case no cluster definition was provided, make sure that there's at
     // least one definition present -> see getClusters()
     getClusters();
   }
 
-
   /**
    * Gets the current settings of the datagenerator.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
+  @Override
   public String[] getOptions() {
-    Vector        result;
-    String[]      options;
-    int           i;
 
-    result  = new Vector();
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
+    Vector<String> result = new Vector<String>();
 
-    result.add("-P"); 
+    Collections.addAll(result, super.getOptions());
+
+    result.add("-P");
     result.add("" + getNoiseRate());
 
-    for (i = 0; i < getClusters().length; i++)  {
+    for (int i = 0; i < getClusters().length; i++) {
       result.add("-C");
       result.add(Utils.joinOptions(getClusters()[i].getOptions()));
     }
 
-    return (String[]) result.toArray(new String[result.size()]);
+    return result.toArray(new String[result.size()]);
   }
 
   /**
@@ -359,11 +406,12 @@ public class SubspaceCluster
    * @return the current cluster definitions
    */
   protected ClusterDefinition[] getClusters() {
-    if ( (m_Clusters == null) || (m_Clusters.length == 0) ) {
-      if (m_Clusters != null)
-        System.out.println("NOTE: at least 1 cluster definition is necessary, " 
-            + "created default one.");
-      m_Clusters = new ClusterDefinition[]{new SubspaceClusterDefinition(this)};
+    if ((m_Clusters == null) || (m_Clusters.length == 0)) {
+      if (m_Clusters != null) {
+        System.out.println("NOTE: at least 1 cluster definition is necessary, "
+          + "created default one.");
+      }
+      m_Clusters = new ClusterDefinition[] { new SubspaceClusterDefinition(this) };
     }
 
     return m_Clusters;
@@ -374,25 +422,29 @@ public class SubspaceCluster
    * 
    * @return the default number of attributes
    */
+  @Override
   protected int defaultNumAttributes() {
     return 1;
   }
 
   /**
    * Sets the number of attributes the dataset should have.
+   * 
    * @param numAttributes the new number of attributes
    */
+  @Override
   public void setNumAttributes(int numAttributes) {
     super.setNumAttributes(numAttributes);
     m_numValues = new int[getNumAttributes()];
   }
-  
+
   /**
    * Returns the tip text for this property
    * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
+  @Override
   public String numAttributesTipText() {
     return "The number of attributes the generated data will contain (Note: they must be covered by the cluster definitions!)";
   }
@@ -408,17 +460,17 @@ public class SubspaceCluster
 
   /**
    * Gets the percentage of noise set.
-   *
+   * 
    * @return the percentage of noise set
    */
-  public double getNoiseRate() { 
-    return m_NoiseRate; 
+  public double getNoiseRate() {
+    return m_NoiseRate;
   }
 
   /**
    * Sets the percentage of noise set.
-   *
-   * @param newNoiseRate new percentage of noise 
+   * 
+   * @param newNoiseRate new percentage of noise
    */
   public void setNoiseRate(double newNoiseRate) {
     m_NoiseRate = newNoiseRate;
@@ -427,8 +479,8 @@ public class SubspaceCluster
   /**
    * Returns the tip text for this property
    * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String noiseRateTipText() {
     return "The noise rate to use.";
@@ -449,62 +501,71 @@ public class SubspaceCluster
    * @param value the clusters do use
    * @throws Exception if clusters are not the correct class
    */
-  public void setClusterDefinitions(ClusterDefinition[] value) 
-    throws Exception {
+  public void setClusterDefinitions(ClusterDefinition[] value) throws Exception {
 
-    String      indexStr;
-    
-    indexStr   = "";
+    String indexStr;
+
+    indexStr = "";
     m_Clusters = value;
     for (int i = 0; i < getClusters().length; i++) {
       if (!(getClusters()[i] instanceof SubspaceClusterDefinition)) {
-        if (indexStr.length() != 0)
+        if (indexStr.length() != 0) {
           indexStr += ",";
-        indexStr += "" + (i+1);
+        }
+        indexStr += "" + (i + 1);
       }
       getClusters()[i].setParent(this);
-      getClusters()[i].setOptions(getClusters()[i].getOptions()); // for initializing!
+      getClusters()[i].setOptions(getClusters()[i].getOptions()); // for
+                                                                  // initializing!
     }
 
     // any wrong classes encountered?
-    if (indexStr.length() != 0)
-      throw new Exception("These cluster definitions are not '" 
-          + SubspaceClusterDefinition.class.getName() + "': " + indexStr);
+    if (indexStr.length() != 0) {
+      throw new Exception("These cluster definitions are not '"
+        + SubspaceClusterDefinition.class.getName() + "': " + indexStr);
+    }
   }
 
   /**
    * Returns the tip text for this property
    * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String clusterDefinitionsTipText() {
     return "The clusters to use.";
   }
 
   /**
-   * Checks, whether all attributes are covered by cluster definitions and 
+   * Checks, whether all attributes are covered by cluster definitions and
    * returns TRUE in that case.
    * 
    * @return whether all attributes are covered
    */
   protected boolean checkCoverage() {
-    int         i;
-    int         n;
-    int[]       count;
-    Range       r;
-    String      attrIndex;
-    SubspaceClusterDefinition  cl;
-    
+    int i;
+    int n;
+    int[] count;
+    Range r;
+    String attrIndex;
+    SubspaceClusterDefinition cl;
+
     // check whether all the attributes are covered
     count = new int[getNumAttributes()];
     for (i = 0; i < getNumAttributes(); i++) {
+      if (m_nominalCols.isInRange(i)) {
+        count[i]++;
+      }
+      if (m_booleanCols.isInRange(i)) {
+        count[i]++;
+      }
       for (n = 0; n < getClusters().length; n++) {
         cl = (SubspaceClusterDefinition) getClusters()[n];
-        r  = new Range(cl.getAttrIndexRange());
+        r = new Range(cl.getAttrIndexRange());
         r.setUpper(getNumAttributes());
-        if (r.isInRange(i))
+        if (r.isInRange(i)) {
           count[i]++;
+        }
       }
     }
 
@@ -512,36 +573,40 @@ public class SubspaceCluster
     attrIndex = "";
     for (i = 0; i < count.length; i++) {
       if (count[i] == 0) {
-        if (attrIndex.length() != 0)
+        if (attrIndex.length() != 0) {
           attrIndex += ",";
-        attrIndex += (i+1);
+        }
+        attrIndex += (i + 1);
       }
     }
 
-    if (attrIndex.length() != 0)
+    if (attrIndex.length() != 0) {
       throw new IllegalArgumentException(
-          "The following attributes are not covered by a cluster "
+        "The following attributes are not covered by a cluster "
           + "definition: " + attrIndex + "\n");
+    }
 
     return true;
   }
 
   /**
    * Gets the single mode flag.
-   *
+   * 
    * @return true if methode generateExample can be used.
    */
-  public boolean getSingleModeFlag() { 
-    return false; 
+  @Override
+  public boolean getSingleModeFlag() {
+    return false;
   }
 
   /**
-   * Initializes the format for the dataset produced. 
-   *
+   * Initializes the format for the dataset produced.
+   * 
    * @return the output data format
-   * @throws Exception data format could not be defined 
+   * @throws Exception data format could not be defined
    */
 
+  @Override
   public Instances defineDataFormat() throws Exception {
 
     // initialize
@@ -549,51 +614,53 @@ public class SubspaceCluster
 
     checkCoverage();
 
-    Random random = new Random (getSeed());
+    Random random = new Random(getSeed());
     setRandom(random);
     Instances dataset;
-    FastVector attributes = new FastVector(3);
+    ArrayList<Attribute> attributes = new ArrayList<Attribute>(3);
     Attribute attribute;
     boolean classFlag = getClassFlag();
 
-    FastVector classValues = null;
-    if (classFlag) 
-      classValues = new FastVector(getClusters().length);     
-    FastVector boolValues = new FastVector(2);
-    boolValues.addElement("false");
-    boolValues.addElement("true");
-    FastVector nomValues = null;
+    ArrayList<String> classValues = null;
+    if (classFlag) {
+      classValues = new ArrayList<String>(getClusters().length);
+    }
+    ArrayList<String> boolValues = new ArrayList<String>(2);
+    boolValues.add("false");
+    boolValues.add("true");
+    ArrayList<String> nomValues = null;
 
     // define dataset
     for (int i = 0; i < getNumAttributes(); i++) {
       // define boolean attribute
       if (m_booleanCols.isInRange(i)) {
         attribute = new Attribute("B" + i, boolValues);
-      } 
-      else if (m_nominalCols.isInRange(i)) {
+      } else if (m_nominalCols.isInRange(i)) {
         // define nominal attribute
-        nomValues = new FastVector(m_numValues[i]);
-        for (int j = 0; j < m_numValues[i]; j++)
-          nomValues.addElement("value-" + j);
+        nomValues = new ArrayList<String>(m_numValues[i]);
+        for (int j = 0; j < m_numValues[i]; j++) {
+          nomValues.add("value-" + j);
+        }
         attribute = new Attribute("N" + i, nomValues);
-      } 
-      else {
+      } else {
         // numerical attribute
-        attribute = new Attribute("X" + i); 
+        attribute = new Attribute("X" + i);
       }
-      attributes.addElement(attribute);
+      attributes.add(attribute);
     }
 
     if (classFlag) {
-      for (int i = 0; i < getClusters().length; i++)
-        classValues.addElement("c" + i);
-      attribute = new Attribute ("class", classValues); 
-      attributes.addElement(attribute);
+      for (int i = 0; i < getClusters().length; i++) {
+        classValues.add("c" + i);
+      }
+      attribute = new Attribute("class", classValues);
+      attributes.add(attribute);
     }
 
     dataset = new Instances(getRelationNameToUse(), attributes, 0);
-    if (classFlag) 
+    if (classFlag) {
       dataset.setClassIndex(m_NumAttributes);
+    }
 
     // set dataset format of this class
     Instances format = new Instances(dataset, 0);
@@ -605,22 +672,24 @@ public class SubspaceCluster
       cl.setParent(this);
     }
 
-    return dataset; 
+    return dataset;
   }
 
   /**
    * Returns true if attribute is boolean
-   *@param index of the attribute
-   *@return true if the attribute is boolean
+   * 
+   * @param index of the attribute
+   * @return true if the attribute is boolean
    */
   public boolean isBoolean(int index) {
-    return m_booleanCols.isInRange(index); 
+    return m_booleanCols.isInRange(index);
   }
 
   /**
    * Returns true if attribute is nominal
-   *@param index of the attribute
-   *@return true if the attribute is nominal
+   * 
+   * @param index of the attribute
+   * @return true if the attribute is nominal
    */
   public boolean isNominal(int index) {
     return m_nominalCols.isInRange(index);
@@ -636,59 +705,66 @@ public class SubspaceCluster
   }
 
   /**
-   * Generate an example of the dataset. 
+   * Generate an example of the dataset.
+   * 
    * @return the instance generated
    * @throws Exception if format not defined or generating <br/>
-   * examples one by one is not possible, because voting is chosen
+   *           examples one by one is not possible, because voting is chosen
    */
 
+  @Override
   public Instance generateExample() throws Exception {
     throw new Exception("Examples cannot be generated one by one.");
   }
 
   /**
-   * Generate all examples of the dataset. 
+   * Generate all examples of the dataset.
+   * 
    * @return the instance generated
-   * @throws Exception if format not defined 
+   * @throws Exception if format not defined
    */
 
+  @Override
   public Instances generateExamples() throws Exception {
     Instances format = getDatasetFormat();
     Instance example = null;
 
-    if (format == null) 
+    if (format == null) {
       throw new Exception("Dataset format not defined.");
+    }
 
     // generate examples for one cluster after another
     for (int cNum = 0; cNum < getClusters().length; cNum++) {
-      SubspaceClusterDefinition cl  = (SubspaceClusterDefinition) getClusters()[cNum];
+      SubspaceClusterDefinition cl = (SubspaceClusterDefinition) getClusters()[cNum];
 
-      //get the number of instances to create
+      // get the number of instances to create
       int instNum = cl.getNumInstances();
 
-      //class value is c + cluster number
+      // class value is c + cluster number
       String cName = "c" + cNum;
 
       switch (cl.getClusterType().getSelectedTag().getID()) {
-        case (UNIFORM_RANDOM):
-          for (int i = 0; i < instNum; i++) {
-            // generate example
-            example = generateExample(format, getRandom(), cl, cName);
-            if (example != null)
-              format.add(example);
+      case (UNIFORM_RANDOM):
+        for (int i = 0; i < instNum; i++) {
+          // generate example
+          example = generateExample(format, getRandom(), cl, cName);
+          if (example != null) {
+            format.add(example);
           }
-          break;
-        case (TOTAL_UNIFORM):
-          // generate examples
-          if (!cl.isInteger())
-            generateUniformExamples(format, instNum, cl, cName);
-          else
-            generateUniformIntegerExamples(format, instNum, cl, cName);
-          break;
-        case (GAUSSIAN):
-          // generate examples
-          generateGaussianExamples(format, instNum, getRandom(), cl, cName);
-          break;
+        }
+        break;
+      case (TOTAL_UNIFORM):
+        // generate examples
+        if (!cl.isInteger()) {
+          generateUniformExamples(format, instNum, cl, cName);
+        } else {
+          generateUniformIntegerExamples(format, instNum, cl, cName);
+        }
+        break;
+      case (GAUSSIAN):
+        // generate examples
+        generateGaussianExamples(format, instNum, getRandom(), cl, cName);
+        break;
       }
     }
 
@@ -696,7 +772,7 @@ public class SubspaceCluster
   }
 
   /**
-   * Generate an example of the dataset. 
+   * Generate an example of the dataset.
    * 
    * @param format the dataset format
    * @param randomG the random number generator to use
@@ -704,18 +780,17 @@ public class SubspaceCluster
    * @param cName the class value
    * @return the generated instance
    */
-  private Instance generateExample(
-      Instances format, Random randomG, SubspaceClusterDefinition cl, 
-      String cName) {
+  private Instance generateExample(Instances format, Random randomG,
+    SubspaceClusterDefinition cl, String cName) {
 
     boolean makeInteger = cl.isInteger();
     int num = -1;
-    Instance example = null;
     int numAtts = m_NumAttributes;
-    if (getClassFlag()) numAtts++;
+    if (getClassFlag()) {
+      numAtts++;
+    }
 
-    example = new DenseInstance(numAtts);
-    example.setDataset(format);
+    double[] values = new double[numAtts];
     boolean[] attributes = cl.getAttributes();
     double[] minValue = cl.getMinValue();
     double[] maxValue = cl.getMaxValue();
@@ -726,100 +801,104 @@ public class SubspaceCluster
       if (attributes[i]) {
         clusterI++;
         num++;
-        // boolean  or nominal attribute
+        // boolean or nominal attribute
         if (isBoolean(i) || isNominal(i)) {
 
           if (minValue[clusterI] == maxValue[clusterI]) {
             value = minValue[clusterI];
-          } 
-          else {
-            int numValues = (int)(maxValue[clusterI] - minValue[clusterI] + 1.0);
+          } else {
+            int numValues = (int) (maxValue[clusterI] - minValue[clusterI] + 1.0);
             value = randomG.nextInt(numValues);
             value += minValue[clusterI];
           }
-        } 
-        else {
+        } else {
           // numeric attribute
-          value = randomG.nextDouble() * 
-            (maxValue[num] - minValue[num]) + minValue[num];
-          if (makeInteger)
+          value = randomG.nextDouble() * (maxValue[num] - minValue[num])
+            + minValue[num];
+          if (makeInteger) {
             value = Math.round(value);
+          }
         }
-        example.setValue(i, value);
-      } 
-      else {
-        example.setMissing(i);
+        values[i] = value;
+      } else {
+        values[i] = Utils.missingValue();
       }
     }
 
-    if (getClassFlag())
-      example.setClassValue(cName);
+    if (getClassFlag()) {
+      values[format.classIndex()] = format.classAttribute().indexOfValue(cName);
+    }
 
-    return example; 
+    DenseInstance example = new DenseInstance(1.0, values);
+    example.setDataset(format);
+
+    return example;
   }
 
   /**
-   * Generate examples for a uniform cluster dataset. 
+   * Generate examples for a uniform cluster dataset.
    * 
    * @param format the dataset format
    * @param numInstances the number of instances to generator
    * @param cl the cluster definition
    * @param cName the class value
    */
-  private void generateUniformExamples(
-      Instances format, int numInstances, SubspaceClusterDefinition cl, 
-      String cName) {
+  private void generateUniformExamples(Instances format, int numInstances,
+    SubspaceClusterDefinition cl, String cName) {
 
-    Instance example = null;
     int numAtts = m_NumAttributes;
-    if (getClassFlag()) numAtts++;
-
-    example = new DenseInstance(numAtts);
-    example.setDataset(format);
-    boolean[] attributes = cl.getAttributes();
+    if (getClassFlag()) {
+      numAtts++;
+    }
+   boolean[] attributes = cl.getAttributes();
     double[] minValue = cl.getMinValue();
     double[] maxValue = cl.getMaxValue();
     double[] diff = new double[minValue.length];
 
-    for (int i = 0; i < minValue.length; i++)
+    for (int i = 0; i < minValue.length; i++) {
       diff[i] = (maxValue[i] - minValue[i]);
+    }
 
     for (int j = 0; j < numInstances; j++) {
+      double[] values = new double[numAtts];
       int num = -1;
       for (int i = 0; i < m_NumAttributes; i++) {
         if (attributes[i]) {
           num++;
-          double value = minValue[num] + (diff[num] * (double)((double)j / (double)(numInstances - 1)));
-          example.setValue(i, value);
-        } 
-        else {
-          example.setMissing(i);
+          double value = minValue[num]
+            + (diff[num] * ((double) j / (double) (numInstances - 1)));
+          values[i] = value;
+        } else {
+          values[i] = Utils.missingValue();
         }
       }
-      if (getClassFlag())
-        example.setClassValue(cName);
+      if (getClassFlag()) {
+        values[format.classIndex()] = format.classAttribute().indexOfValue(cName);
+      }
+
+      DenseInstance example = new DenseInstance(1.0, values);
+      example.setDataset(format);
       format.add(example);
     }
   }
 
   /**
-   * Generate examples for a uniform cluster dataset. 
+   * Generate examples for a uniform cluster dataset.
    * 
    * @param format the dataset format
    * @param numInstances the number of instances to generator
    * @param cl the cluster definition
    * @param cName the class value
    */
-  private void generateUniformIntegerExamples(
-      Instances format, int numInstances, SubspaceClusterDefinition cl, 
-      String cName) {
+  private void generateUniformIntegerExamples(Instances format,
+    int numInstances, SubspaceClusterDefinition cl, String cName) {
 
-    Instance example = null;
     int numAtts = m_NumAttributes;
-    if (getClassFlag()) numAtts++;
+    if (getClassFlag()) {
+      numAtts++;
+    }
 
-    example = new DenseInstance(numAtts);
-    example.setDataset(format);
+    double[] values = new double[numAtts];
     boolean[] attributes = cl.getAttributes();
     double[] minValue = cl.getMinValue();
     double[] maxValue = cl.getMaxValue();
@@ -830,8 +909,8 @@ public class SubspaceCluster
 
     int num = 1;
     for (int i = 0; i < minValue.length; i++) {
-      minInt[i] = (int)Math.ceil(minValue[i]);
-      maxInt[i] = (int)Math.floor(maxValue[i]);
+      minInt[i] = (int) Math.ceil(minValue[i]);
+      maxInt[i] = (int) Math.floor(maxValue[i]);
       numInt[i] = (maxInt[i] - minInt[i] + 1);
       num = num * numInt[i];
     }
@@ -841,51 +920,54 @@ public class SubspaceCluster
     // initialize with smallest values combination
     for (int i = 0; i < m_NumAttributes; i++) {
       if (attributes[i]) {
-        example.setValue(i, (double)minInt[i]);
+        values[i] = minInt[i];
         intValue[i] = minInt[i];
-      } 
-      else {
-        example.setMissing(i);
+      } else {
+        values[i] = Utils.missingValue();
       }
     }
-    if (getClassFlag())
-      example.setClassValue(cName);
+    if (getClassFlag()) {
+      values[format.classIndex()] = format.classAttribute().indexOfValue(cName);
+    }
+
+    DenseInstance example = new DenseInstance(1.0, values);
+    example.setDataset(format);
+
     int added = 0;
     int attr = 0;
     // do while not added all
     do {
       // add all for one value combination
       for (int k = 0; k < numEach; k++) {
-        format.add(example);
-        example = (Instance) example.copy();
+        format.add(example); // Instance will be copied here
         added++;
       }
       if (rest > 0) {
-        format.add(example);
-        example = (Instance) example.copy();
+        format.add(example); // Instance will be copied here
         added++;
         rest--;
       }
 
-      if (added >= numInstances) break;
+      if (added >= numInstances) {
+        break;
+      }
       // switch to the next value combination
       boolean done = false;
       do {
         if (attributes[attr] && (intValue[attr] + 1 <= maxInt[attr])) {
           intValue[attr]++;
           done = true;
-        } 
-        else {
+        } else {
           attr++;
         }
       } while (!done);
 
-      example.setValue(attr, (double)intValue[attr]);
+      example.setValue(attr, intValue[attr]);
     } while (added < numInstances);
   }
 
   /**
-   * Generate examples for a uniform cluster dataset. 
+   * Generate examples for a uniform cluster dataset.
    * 
    * @param format the dataset format
    * @param numInstances the number of instances to generate
@@ -893,108 +975,118 @@ public class SubspaceCluster
    * @param cl the cluster definition
    * @param cName the class value
    */
-  private void generateGaussianExamples(
-      Instances format, int numInstances, Random random, 
-      SubspaceClusterDefinition cl, String cName) {
+  private void generateGaussianExamples(Instances format, int numInstances,
+    Random random, SubspaceClusterDefinition cl, String cName) {
 
     boolean makeInteger = cl.isInteger();
-    Instance example = null;
     int numAtts = m_NumAttributes;
-    if (getClassFlag()) numAtts++;
+    if (getClassFlag()) {
+      numAtts++;
+    }
 
-    example = new DenseInstance(numAtts);
-    example.setDataset(format);
     boolean[] attributes = cl.getAttributes();
     double[] meanValue = cl.getMeanValue();
     double[] stddevValue = cl.getStddevValue();
 
     for (int j = 0; j < numInstances; j++) {
+      double[] values = new double[numAtts];
       int num = -1;
       for (int i = 0; i < m_NumAttributes; i++) {
         if (attributes[i]) {
           num++;
-          double value = meanValue[num] + (random.nextGaussian() * stddevValue[num]);
-          if (makeInteger)
+          double value = meanValue[num]
+            + (random.nextGaussian() * stddevValue[num]);
+          if (makeInteger) {
             value = Math.round(value);
-          example.setValue(i, value);
-        } 
-        else {
-          example.setMissing(i);
+          }
+          values[i] = value;
+        } else {
+          values[i] = Utils.missingValue();
         }
       }
-      if (getClassFlag())
-        example.setClassValue(cName);
+      if (getClassFlag()) {
+        values[format.classIndex()] = format.classAttribute().indexOfValue(cName);
+      }
+
+      DenseInstance example = new DenseInstance(1.0, values);
+      example.setDataset(format);
       format.add(example);
     }
   }
 
   /**
-   * Compiles documentation about the data generation after
-   * the generation process
-   *
+   * Compiles documentation about the data generation after the generation
+   * process
+   * 
    * @return string with additional information about generated dataset
    * @throws Exception no input structure has been defined
    */
+  @Override
   public String generateFinished() throws Exception {
     return "";
   }
 
   /**
-   * Compiles documentation about the data generation before
-   * the generation process
-   *
-   * @return string with additional information 
+   * Compiles documentation about the data generation before the generation
+   * process
+   * 
+   * @return string with additional information
    */
+  @Override
   public String generateStart() {
     StringBuffer docu = new StringBuffer();
 
     int sumInst = 0;
     for (int cNum = 0; cNum < getClusters().length; cNum++) {
-      SubspaceClusterDefinition cl  = (SubspaceClusterDefinition) getClusters()[cNum];
+      SubspaceClusterDefinition cl = (SubspaceClusterDefinition) getClusters()[cNum];
       docu.append("%\n");
-      docu.append("% Cluster: c"+ cNum + "   ");
+      docu.append("% Cluster: c" + cNum + "   ");
       switch (cl.getClusterType().getSelectedTag().getID()) {
-        case UNIFORM_RANDOM: 
-          docu.append("Uniform Random");
-          break;
-        case TOTAL_UNIFORM: 
-          docu.append("Total Random");
-          break;
-        case GAUSSIAN: 
-          docu.append("Gaussian");
-          break;
+      case UNIFORM_RANDOM:
+        docu.append("Uniform Random");
+        break;
+      case TOTAL_UNIFORM:
+        docu.append("Total Random");
+        break;
+      case GAUSSIAN:
+        docu.append("Gaussian");
+        break;
       }
       if (cl.isInteger()) {
         docu.append(" / INTEGER");
       }
 
       docu.append("\n% ----------------------------------------------\n");
-      docu.append("%"+cl.attributesToString());
+      docu.append("%" + cl.attributesToString());
 
-      docu.append("\n% Number of Instances:            "  + cl.getInstNums() + "\n");
-      docu.append(  "% Generated Number of Instances:  "  + cl.getNumInstances() + "\n");
+      docu.append("\n% Number of Instances:            " + cl.getInstNums()
+        + "\n");
+      docu.append("% Generated Number of Instances:  " + cl.getNumInstances()
+        + "\n");
       sumInst += cl.getNumInstances();
-        }
-    docu.append("%\n% ----------------------------------------------\n"); 
+    }
+    docu.append("%\n% ----------------------------------------------\n");
     docu.append("% Total Number of Instances: " + sumInst + "\n");
-    docu.append("%                            in " + getClusters().length + " Cluster(s)\n%");
+    docu.append("%                            in " + getClusters().length
+      + " Cluster(s)\n%");
 
     return docu.toString();
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 12478 $");
   }
 
   /**
    * Main method for testing this class.
-   *
-   * @param args should contain arguments for the data producer: 
+   * 
+   * @param args should contain arguments for the data producer:
    */
   public static void main(String[] args) {
     runDataGenerator(new SubspaceCluster(), args);

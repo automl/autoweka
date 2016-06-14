@@ -5,7 +5,7 @@
 #
 # url:     http://weka.wikispaces.com/Windows+Databases
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 5837 $
+# version: $Revision: 11885 $
 
 # JDBC driver (comma-separated list)
 jdbcDriver=sun.jdbc.odbc.JdbcOdbcDriver
@@ -25,6 +25,7 @@ jdbcURL=jdbc:odbc:DSN_name
 # date, getDate() = 8;        --> date
 # text, getString() = 9;      --> string
 # time, getTime() = 10;       --> date
+# timestamp, getTime() = 11;  --> date
 
 varchar=0
 float=2

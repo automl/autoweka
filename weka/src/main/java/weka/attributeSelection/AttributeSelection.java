@@ -24,7 +24,6 @@ package weka.attributeSelection;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
-import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -42,50 +41,60 @@ import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
-/** 
- * Attribute selection class. Takes the name of a search class and
- * an evaluation class on the command line. <p/>
- *
- * Valid options are: <p/>
- *
+/**
+ * Attribute selection class. Takes the name of a search class and an evaluation
+ * class on the command line.
+ * <p/>
+ * 
+ * Valid options are:
+ * <p/>
+ * 
  * -h <br/>
- * Display help. <p/>
- *
+ * Display help.
+ * <p/>
+ * 
  * -i &lt;name of input file&gt; <br/>
- * Specify the training data file. <p/>
+ * Specify the training data file.
+ * <p/>
  * 
  * -c &lt;class index&gt; <br/>
- * The index of the attribute to use as the class. <p/>
+ * The index of the attribute to use as the class.
+ * <p/>
  * 
  * -s &lt;search method&gt; <br/>
  * The full class name of the search method followed by search method options
  * (if any).<br/>
- * Eg. -s "weka.attributeSelection.BestFirst -N 10" <p/>
- *
- * -x &lt;number of folds&gt; <br/>
- * Perform a cross validation. <p/>
- *
- * -n &lt;random number seed&gt; <br/>
- * Specify a random number seed. Use in conjuction with -x. (Default = 1). <p/>
+ * Eg. -s "weka.attributeSelection.BestFirst -N 10"
+ * <p/>
  * 
- * ------------------------------------------------------------------------ <p/>
+ * -x &lt;number of folds&gt; <br/>
+ * Perform a cross validation.
+ * <p/>
+ * 
+ * -n &lt;random number seed&gt; <br/>
+ * Specify a random number seed. Use in conjuction with -x. (Default = 1).
+ * <p/>
+ * 
+ * ------------------------------------------------------------------------
+ * <p/>
  * 
  * Example usage as the main of an attribute evaluator (called FunkyEvaluator):
+ * 
  * <pre>
- * public static void main(String [] args) {
+ * public static void main(String[] args) {
  *   runEvaluator(new FunkyEvaluator(), args);
  * }
  * </pre>
  * <p/>
- *
- * ------------------------------------------------------------------------ <p/>
- *
- * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 8034 $
+ * 
+ * ------------------------------------------------------------------------
+ * <p/>
+ * 
+ * @author Mark Hall (mhall@cs.waikato.ac.nz)
+ * @version $Revision: 11942 $
  */
-public class AttributeSelection 
-  implements Serializable, RevisionHandler {
-  
+public class AttributeSelection implements Serializable, RevisionHandler {
+
   /** for serialization */
   static final long serialVersionUID = 4170171824147584330L;
 
@@ -102,11 +111,11 @@ public class AttributeSelection
   private int m_numFolds;
 
   /** holds a string describing the results of the attribute selection */
-  private StringBuffer m_selectionResults;
+  private final StringBuffer m_selectionResults;
 
   /** rank features (if allowed by the search method) */
   private boolean m_doRank;
-  
+
   /** do cross validation */
   private boolean m_doXval;
 
@@ -115,42 +124,47 @@ public class AttributeSelection
 
   /** number of attributes requested from ranked results */
   private int m_numToSelect;
-  
+
   /** the selected attributes */
-  private int [] m_selectedAttributeSet;
+  private int[] m_selectedAttributeSet;
 
   /** the attribute indexes and associated merits if a ranking is produced */
-  private double [][] m_attributeRanking;
+  private double[][] m_attributeRanking;
 
   /** if a feature selection run involves an attribute transformer */
   private AttributeTransformer m_transformer = null;
-  
-  /** the attribute filter for processing instances with respect to
-      the most recent feature selection run */
-  private Remove m_attributeFilter = null;
-
-  /** hold statistics for repeated feature selection, such as
-      under cross validation */
-  private double [][] m_rankResults = null;
-  private double [] m_subsetResults = null;
-  private int m_trials = 0;
 
   /**
-   * Return the number of attributes selected from the most recent
-   * run of attribute selection
+   * the attribute filter for processing instances with respect to the most
+   * recent feature selection run
+   */
+  private Remove m_attributeFilter = null;
+
+  /**
+   * hold statistics for repeated feature selection, such as under cross
+   * validation
+   */
+  private double[][] m_rankResults = null;
+  private double[] m_subsetResults = null;
+
+  /**
+   * Return the number of attributes selected from the most recent run of
+   * attribute selection
+   * 
    * @return the number of attributes selected
    */
   public int numberAttributesSelected() throws Exception {
-    int [] att = selectedAttributes();
-    return att.length-1;
+    int[] att = selectedAttributes();
+    return att.length - 1;
   }
 
   /**
    * get the final selected set of attributes.
+   * 
    * @return an array of attribute indexes
    * @exception Exception if attribute selection has not been performed yet
    */
-  public int [] selectedAttributes () throws Exception {
+  public int[] selectedAttributes() throws Exception {
     if (m_selectedAttributeSet == null) {
       throw new Exception("Attribute selection has not been performed yet!");
     }
@@ -159,11 +173,12 @@ public class AttributeSelection
 
   /**
    * get the final ranking of the attributes.
+   * 
    * @return a two dimensional array of ranked attribute indexes and their
-   * associated merit scores as doubles.
+   *         associated merit scores as doubles.
    * @exception Exception if a ranking has not been produced
    */
-  public double [][] rankedAttributes () throws Exception {
+  public double[][] rankedAttributes() throws Exception {
     if (m_attributeRanking == null) {
       throw new Exception("Ranking has not been performed");
     }
@@ -172,58 +187,65 @@ public class AttributeSelection
 
   /**
    * set the attribute/subset evaluator
+   * 
    * @param evaluator the evaluator to use
    */
-  public void setEvaluator (ASEvaluation evaluator) {
+  public void setEvaluator(ASEvaluation evaluator) {
     m_ASEvaluator = evaluator;
   }
 
   /**
    * set the search method
+   * 
    * @param search the search method to use
    */
-  public void setSearch (ASSearch search) {
+  public void setSearch(ASSearch search) {
     m_searchMethod = search;
 
     if (m_searchMethod instanceof RankedOutputSearch) {
-      setRanking(((RankedOutputSearch)m_searchMethod).getGenerateRanking());
+      setRanking(((RankedOutputSearch) m_searchMethod).getGenerateRanking());
     }
   }
 
   /**
    * set the number of folds for cross validation
+   * 
    * @param folds the number of folds
    */
-  public void setFolds (int folds) {
+  public void setFolds(int folds) {
     m_numFolds = folds;
   }
 
   /**
    * produce a ranking (if possible with the set search and evaluator)
+   * 
    * @param r true if a ranking is to be produced
    */
-  public void setRanking (boolean r) {
+  public void setRanking(boolean r) {
     m_doRank = r;
   }
 
   /**
    * do a cross validation
+   * 
    * @param x true if a cross validation is to be performed
    */
-  public void setXval (boolean x) {
+  public void setXval(boolean x) {
     m_doXval = x;
   }
 
   /**
    * set the seed for use in cross validation
+   * 
    * @param s the seed
    */
-  public void setSeed (int s) {
+  public void setSeed(int s) {
     m_seed = s;
   }
 
   /**
    * get a description of the attribute selection
+   * 
    * @return a String describing the results of attribute selection
    */
   public String toResultsString() {
@@ -231,8 +253,9 @@ public class AttributeSelection
   }
 
   /**
-   * reduce the dimensionality of a set of instances to include only those 
+   * reduce the dimensionality of a set of instances to include only those
    * attributes chosen by the last run of attribute selection.
+   * 
    * @param in the instances to be reduced
    * @return a dimensionality reduced set of instances
    * @exception Exception if the instances can't be reduced
@@ -243,10 +266,10 @@ public class AttributeSelection
     }
 
     if (m_transformer != null) {
-      Instances transformed = new Instances(m_transformer.transformedHeader(),
-					    in.numInstances());
-      for (int i=0;i<in.numInstances();i++) {
-	transformed.add(m_transformer.convertInstance(in.instance(i)));
+      Instances transformed =
+        new Instances(m_transformer.transformedHeader(), in.numInstances());
+      for (int i = 0; i < in.numInstances(); i++) {
+        transformed.add(m_transformer.convertInstance(in.instance(i)));
       }
       return Filter.useFilter(transformed, m_attributeFilter);
     }
@@ -255,8 +278,9 @@ public class AttributeSelection
   }
 
   /**
-   * reduce the dimensionality of a single instance to include only those 
+   * reduce the dimensionality of a single instance to include only those
    * attributes chosen by the last run of attribute selection.
+   * 
    * @param in the instance to be reduced
    * @return a dimensionality reduced instance
    * @exception Exception if the instance can't be reduced
@@ -275,11 +299,10 @@ public class AttributeSelection
   }
 
   /**
-   * constructor. Sets defaults for each member varaible. Default
-   * attribute evaluator is CfsSubsetEval; default search method is
-   * BestFirst.
+   * constructor. Sets defaults for each member varaible. Default attribute
+   * evaluator is CfsSubsetEval; default search method is BestFirst.
    */
-  public AttributeSelection () {
+  public AttributeSelection() {
     setFolds(10);
     setRanking(false);
     setXval(false);
@@ -292,22 +315,21 @@ public class AttributeSelection
   }
 
   /**
-   * Perform attribute selection with a particular evaluator and
-   * a set of options specifying search method and input file etc.
-   *
+   * Perform attribute selection with a particular evaluator and a set of
+   * options specifying search method and input file etc.
+   * 
    * @param ASEvaluator an evaluator object
-   * @param options an array of options, not only for the evaluator
-   * but also the search method (if any) and an input data file
+   * @param options an array of options, not only for the evaluator but also the
+   *          search method (if any) and an input data file
    * @return the results of attribute selection as a String
    * @exception Exception if no training file is set
    */
-  public static String SelectAttributes (ASEvaluation ASEvaluator, 
-					 String[] options)
-    throws Exception {
+  public static String SelectAttributes(ASEvaluation ASEvaluator,
+    String[] options) throws Exception {
     String trainFileName, searchName;
     Instances train = null;
     ASSearch searchMethod = null;
-    String[] optionsTmp = (String[]) options.clone();
+    String[] optionsTmp = options.clone();
     boolean helpRequested = false;
 
     try {
@@ -319,18 +341,19 @@ public class AttributeSelection
         searchName = Utils.getOption('s', optionsTmp);
         if (searchName.length() != 0) {
           String[] searchOptions = Utils.splitOptions(searchName);
-          searchMethod = (ASSearch)Class.forName(searchOptions[0]).newInstance();
+          searchMethod =
+            (ASSearch) Class.forName(searchOptions[0]).newInstance();
         }
 
-        if (helpRequested)
+        if (helpRequested) {
           throw new Exception("Help requested.");
-        else
+        } else {
           throw new Exception("No training file given.");
+        }
       }
-    }
-    catch (Exception e) {
-      throw  new Exception('\n' + e.getMessage() 
-			   + makeOptionString(ASEvaluator, searchMethod));
+    } catch (Exception e) {
+      throw new Exception('\n' + e.getMessage()
+        + makeOptionString(ASEvaluator, searchMethod));
     }
 
     DataSource source = new DataSource(trainFileName);
@@ -339,32 +362,32 @@ public class AttributeSelection
   }
 
   /**
-   * returns a string summarizing the results of repeated attribute
-   * selection runs on splits of a dataset.
+   * returns a string summarizing the results of repeated attribute selection
+   * runs on splits of a dataset.
+   * 
    * @return a summary of attribute selection results
    * @exception Exception if no attribute selection has been performed.
    */
-  public String CVResultsString () throws Exception {
+  public String CVResultsString() throws Exception {
     StringBuffer CvString = new StringBuffer();
-    
-    if ((m_subsetResults == null && m_rankResults == null) ||
-	( m_trainInstances == null)) {
+
+    if ((m_subsetResults == null && m_rankResults == null)
+      || (m_trainInstances == null)) {
       throw new Exception("Attribute selection has not been performed yet!");
     }
 
-    int fieldWidth = (int)(Math.log(m_trainInstances.numAttributes()) +1.0);
+    int fieldWidth = (int) (Math.log(m_trainInstances.numAttributes()) + 1.0);
 
-    CvString.append("\n\n=== Attribute selection " + m_numFolds 
-		    + " fold cross-validation ");
+    CvString.append("\n\n=== Attribute selection " + m_numFolds
+      + " fold cross-validation ");
 
-    if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) && 
-	!(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator) &&
-	(m_trainInstances.classAttribute().isNominal())) {
-	CvString.append("(stratified), seed: ");
-	CvString.append(m_seed+" ===\n\n");
-    }
-    else {
-      CvString.append("seed: "+m_seed+" ===\n\n");
+    if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator)
+      && !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)
+      && (m_trainInstances.classAttribute().isNominal())) {
+      CvString.append("(stratified), seed: ");
+      CvString.append(m_seed + " ===\n\n");
+    } else {
+      CvString.append("seed: " + m_seed + " ===\n\n");
     }
 
     if ((m_searchMethod instanceof RankedOutputSearch) && (m_doRank == true)) {
@@ -372,74 +395,61 @@ public class AttributeSelection
 
       // calcualte means and std devs
       for (int i = 0; i < m_rankResults[0].length; i++) {
-	m_rankResults[0][i] /= m_numFolds; // mean merit
-	double var = m_rankResults[0][i]*m_rankResults[0][i]*m_numFolds;
-	var = (m_rankResults[2][i] - var);
-	var /= m_numFolds;
+        m_rankResults[0][i] /= m_numFolds; // mean merit
+        double var = m_rankResults[0][i] * m_rankResults[0][i] * m_numFolds;
+        var = (m_rankResults[2][i] - var);
+        var /= m_numFolds;
 
-	if (var <= 0.0) {
-	  var = 0.0;
-	  m_rankResults[2][i] = 0;
-	}
-	else {
-	  m_rankResults[2][i] = Math.sqrt(var);
-	}
+        if (var <= 0.0) {
+          var = 0.0;
+          m_rankResults[2][i] = 0;
+        } else {
+          m_rankResults[2][i] = Math.sqrt(var);
+        }
 
-	m_rankResults[1][i] /= m_numFolds; // mean rank
-	var = m_rankResults[1][i]*m_rankResults[1][i]*m_numFolds;
-	var = (m_rankResults[3][i] - var);
-	var /= m_numFolds;
+        m_rankResults[1][i] /= m_numFolds; // mean rank
+        var = m_rankResults[1][i] * m_rankResults[1][i] * m_numFolds;
+        var = (m_rankResults[3][i] - var);
+        var /= m_numFolds;
 
-	if (var <= 0.0) {
-	  var = 0.0;
-	  m_rankResults[3][i] = 0;
-	}
-	else {
-	  m_rankResults[3][i] = Math.sqrt(var);
-	}
+        if (var <= 0.0) {
+          var = 0.0;
+          m_rankResults[3][i] = 0;
+        } else {
+          m_rankResults[3][i] = Math.sqrt(var);
+        }
       }
 
       // now sort them by mean rank
       int[] s = Utils.sort(m_rankResults[1]);
-      for (int i=0; i<s.length; i++) {
-	if (m_rankResults[1][s[i]] > 0) {
-	  CvString.append(Utils.doubleToString(/*Math.
-					       abs(*/m_rankResults[0][s[i]]/*)*/,
-					       6, 3) 
-			  + " +-" 
-			  + Utils.doubleToString(m_rankResults[2][s[i]], 6, 3) 
-			  + "   " 
-			  + Utils.doubleToString(m_rankResults[1][s[i]],
-						 fieldWidth+2, 1) 
-			  + " +-" 
-			  + Utils.doubleToString(m_rankResults[3][s[i]], 5, 2) 
-			+"  "
-			  + Utils.doubleToString(((double)(s[i] + 1)), 
-						 fieldWidth, 0)
-			  + " " 
-			  + m_trainInstances.attribute(s[i]).name() 
-			  + "\n");
-	}
+      for (int element : s) {
+        if (m_rankResults[1][element] > 0) {
+          CvString.append(Utils.doubleToString(
+          /*
+           * Math. abs(
+           */m_rankResults[0][element]/* ) */, 6, 3)
+            + " +-"
+            + Utils.doubleToString(m_rankResults[2][element], 6, 3)
+            + "   "
+            + Utils
+              .doubleToString(m_rankResults[1][element], fieldWidth + 2, 1)
+            + " +-" + Utils.doubleToString(m_rankResults[3][element], 5, 2)
+            + "  " + Utils.doubleToString((element + 1), fieldWidth, 0) + " "
+            + m_trainInstances.attribute(element).name() + "\n");
+        }
       }
-    }
-    else {
+    } else {
       CvString.append("number of folds (%)  attribute\n");
 
       for (int i = 0; i < m_subsetResults.length; i++) {
-	if ((m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) ||
-	    (i != m_trainInstances.classIndex())) {
-	  CvString.append(Utils.doubleToString(m_subsetResults[i], 12, 0) 
-			  + "(" 
-			  + Utils.doubleToString((m_subsetResults[i] / 
-						  m_numFolds * 100.0)
-						 , 3, 0) 
-			  + " %)  " 
-			  + Utils.doubleToString(((double)(i + 1)),
-						 fieldWidth, 0)
-			  + " " 
-			  + m_trainInstances.attribute(i).name() 
-			  + "\n");
-	}
+        if ((m_ASEvaluator instanceof UnsupervisedSubsetEvaluator)
+          || (i != m_trainInstances.classIndex())) {
+          CvString.append(Utils.doubleToString(m_subsetResults[i], 12, 0)
+            + "("
+            + Utils.doubleToString((m_subsetResults[i] / m_numFolds * 100.0),
+              3, 0) + " %)  " + Utils.doubleToString((i + 1), fieldWidth, 0)
+            + " " + m_trainInstances.attribute(i).name() + "\n");
+        }
       }
     }
 
@@ -447,17 +457,41 @@ public class AttributeSelection
   }
 
   /**
-   * Select attributes for a split of the data. Calling this function
-   * updates the statistics on attribute selection. CVResultsString()
-   * returns a string summarizing the results of repeated calls to
-   * this function. Assumes that splits are from the same dataset---
-   * ie. have the same number and types of attributes as previous
-   * splits.
-   *
+   * Select attributes for a split of the data. Calling this function updates
+   * the statistics on attribute selection. CVResultsString() returns a string
+   * summarizing the results of repeated calls to this function. Assumes that
+   * splits are from the same dataset--- ie. have the same number and types of
+   * attributes as previous splits.
+   * 
    * @param split the instances to select attributes from
    * @exception Exception if an error occurs
    */
   public void selectAttributesCVSplit(Instances split) throws Exception {
+
+    m_ASEvaluator.buildEvaluator(split);
+    // Do the search
+    int[] attributeSet = m_searchMethod.search(m_ASEvaluator, split);
+    // Do any postprocessing that a attribute selection method might
+    // require
+    attributeSet = m_ASEvaluator.postProcess(attributeSet);
+    updateStatsForModelCVSplit(split, m_ASEvaluator, m_searchMethod,
+      attributeSet, m_doRank);
+  }
+
+  /**
+   * Update the attribute selection stats for a cross-validation fold of the
+   * data.
+   *
+   * @param split the instances in this split/fold of the data
+   * @param evaluator the evaluator that was used
+   * @param search the search that was used
+   * @param attributeSet the final subset produced for the split
+   * @param doRank whether to produce a ranking
+   * @throws Exception if a problem occurs
+   */
+  public void updateStatsForModelCVSplit(Instances split,
+    ASEvaluation evaluator, ASSearch search, int[] attributeSet, boolean doRank)
+    throws Exception {
     double[][] attributeRanking = null;
 
     // if the train instances are null then set equal to this split.
@@ -475,63 +509,49 @@ public class AttributeSelection
       m_rankResults = new double[4][split.numAttributes()];
     }
 
-    m_ASEvaluator.buildEvaluator(split);
-    // Do the search
-    int[] attributeSet = m_searchMethod.search(m_ASEvaluator, 
-					       split);
-    // Do any postprocessing that a attribute selection method might 
-    // require
-    attributeSet = m_ASEvaluator.postProcess(attributeSet);
-    
-    if ((m_searchMethod instanceof RankedOutputSearch) && 
-	(m_doRank == true)) {
-      attributeRanking = ((RankedOutputSearch)m_searchMethod).
-	rankedAttributes();
-      
+    if ((search instanceof RankedOutputSearch) && doRank) {
+      attributeRanking = ((RankedOutputSearch) search).rankedAttributes();
       // System.out.println(attributeRanking[0][1]);
       for (int j = 0; j < attributeRanking.length; j++) {
-	// merit
-	m_rankResults[0][(int)attributeRanking[j][0]] += 
-	  attributeRanking[j][1];
-	// squared merit
-	m_rankResults[2][(int)attributeRanking[j][0]] += 
-	  (attributeRanking[j][1]*attributeRanking[j][1]);
-	// rank
-	m_rankResults[1][(int)attributeRanking[j][0]] += (j + 1);
-	// squared rank
-	m_rankResults[3][(int)attributeRanking[j][0]] += (j + 1)*(j + 1);
-	// += (attributeRanking[j][0] * attributeRanking[j][0]);
+        // merit
+        m_rankResults[0][(int) attributeRanking[j][0]] +=
+          attributeRanking[j][1];
+        // squared merit
+        m_rankResults[2][(int) attributeRanking[j][0]] +=
+          (attributeRanking[j][1] * attributeRanking[j][1]);
+        // rank
+        m_rankResults[1][(int) attributeRanking[j][0]] += (j + 1);
+        // squared rank
+        m_rankResults[3][(int) attributeRanking[j][0]] += (j + 1) * (j + 1);
+        // += (attributeRanking[j][0] * attributeRanking[j][0]);
       }
     } else {
       for (int j = 0; j < attributeSet.length; j++) {
-	m_subsetResults[attributeSet[j]]++;
+        m_subsetResults[attributeSet[j]]++;
       }
     }
-
-    m_trials++;
   }
 
   /**
-   * Perform a cross validation for attribute selection. With subset
-   * evaluators the number of times each attribute is selected over
-   * the cross validation is reported. For attribute evaluators, the
-   * average merit and average ranking + std deviation is reported for
-   * each attribute.
-   *
+   * Perform a cross validation for attribute selection. With subset evaluators
+   * the number of times each attribute is selected over the cross validation is
+   * reported. For attribute evaluators, the average merit and average ranking +
+   * std deviation is reported for each attribute.
+   * 
    * @return the results of cross validation as a String
    * @exception Exception if an error occurs during cross validation
    */
-  public String CrossValidateAttributes () throws Exception {
+  public String CrossValidateAttributes() throws Exception {
     Instances cvData = new Instances(m_trainInstances);
     Instances train;
 
     Random random = new Random(m_seed);
     cvData.randomize(random);
 
-    if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) && 
-	!(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) {
+    if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator)
+      && !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) {
       if (cvData.classAttribute().isNominal()) {
-	cvData.stratify(m_numFolds);
+        cvData.stratify(m_numFolds);
       }
 
     }
@@ -542,236 +562,226 @@ public class AttributeSelection
       selectAttributesCVSplit(train);
     }
 
-    return  CVResultsString();
+    return CVResultsString();
   }
 
   /**
    * Perform attribute selection on the supplied training instances.
-   *
+   * 
    * @param data the instances to select attributes from
    * @exception Exception if there is a problem during selection
    */
-  public void SelectAttributes (Instances data) throws Exception {
-    int [] attributeSet;
-    
+  public void SelectAttributes(Instances data) throws Exception {
+    int[] attributeSet;
+
     m_transformer = null;
     m_attributeFilter = null;
     m_trainInstances = data;
-    
+
     if (m_doXval == true && (m_ASEvaluator instanceof AttributeTransformer)) {
       throw new Exception("Can't cross validate an attribute transformer.");
     }
 
-    if (m_ASEvaluator instanceof SubsetEvaluator &&
-	m_searchMethod instanceof Ranker) {
+    if (m_ASEvaluator instanceof SubsetEvaluator
+      && m_searchMethod instanceof Ranker) {
       throw new Exception(m_ASEvaluator.getClass().getName()
-			  +" must use a search method other than Ranker");
+        + " must use a search method other than Ranker");
     }
 
-    if (m_ASEvaluator instanceof AttributeEvaluator &&
-	!(m_searchMethod instanceof Ranker)) {
-            System.err.println("AttributeEvaluators must use a Ranker search "
-      			 +"method. Switching to Ranker...");
-            m_searchMethod = new Ranker();
-      // throw new Exception("AttributeEvaluators must use the Ranker search " 
-	//		  + "method");
+    if (m_ASEvaluator instanceof AttributeEvaluator
+      && !(m_searchMethod instanceof Ranker)) {
+      // System.err.println("AttributeEvaluators must use a Ranker search "
+      // +"method. Switching to Ranker...");
+      // m_searchMethod = new Ranker();
+      throw new Exception("AttributeEvaluators must use the Ranker search "
+        + "method");
     }
 
     if (m_searchMethod instanceof RankedOutputSearch) {
-      m_doRank = ((RankedOutputSearch)m_searchMethod).getGenerateRanking();
+      m_doRank = ((RankedOutputSearch) m_searchMethod).getGenerateRanking();
     }
 
-    if (m_ASEvaluator instanceof UnsupervisedAttributeEvaluator ||
-	m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) {
+    if (m_ASEvaluator instanceof UnsupervisedAttributeEvaluator
+      || m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) {
       // unset the class index
-      //      m_trainInstances.setClassIndex(-1);
+      // m_trainInstances.setClassIndex(-1);
     } else {
       // check that a class index has been set
       if (m_trainInstances.classIndex() < 0) {
-	m_trainInstances.setClassIndex(m_trainInstances.numAttributes()-1);
+        m_trainInstances.setClassIndex(m_trainInstances.numAttributes() - 1);
       }
     }
-    
+
     // Initialize the attribute evaluator
     m_ASEvaluator.buildEvaluator(m_trainInstances);
     if (m_ASEvaluator instanceof AttributeTransformer) {
-      m_trainInstances = 
-	((AttributeTransformer)m_ASEvaluator).transformedHeader();
-      m_transformer = (AttributeTransformer)m_ASEvaluator;
+      m_trainInstances =
+        ((AttributeTransformer) m_ASEvaluator).transformedHeader();
+      m_transformer = (AttributeTransformer) m_ASEvaluator;
     }
-    int fieldWidth = (int)(Math.log(m_trainInstances.numAttributes()) +1.0);
+    int fieldWidth = (int) (Math.log(m_trainInstances.numAttributes()) + 1.0);
 
     // Do the search
-    attributeSet = m_searchMethod.search(m_ASEvaluator, 
-					 m_trainInstances);
+    attributeSet = m_searchMethod.search(m_ASEvaluator, m_trainInstances);
 
     // try and determine if the search method uses an attribute transformer---
     // this is a bit of a hack to make things work properly with RankSearch
     // using PrincipalComponents as its attribute ranker
-     try {
-       BeanInfo bi = Introspector.getBeanInfo(m_searchMethod.getClass());
-       PropertyDescriptor properties[];
-       MethodDescriptor methods[];
-       //       methods = bi.getMethodDescriptors();
-       properties = bi.getPropertyDescriptors();
-       for (int i=0;i<properties.length;i++) {
-	 String name = properties[i].getDisplayName();
-	 Method meth = properties[i].getReadMethod();
-	 Object retType = meth.getReturnType();
-	 if (retType.equals(ASEvaluation.class)) {
-	   Class args [] = { };
-	   ASEvaluation tempEval = (ASEvaluation)(meth.invoke(m_searchMethod,
-							      (Object[])args));
-	   if (tempEval instanceof AttributeTransformer) {
-	     // grab the transformed data header
-	     m_trainInstances = 
-	       ((AttributeTransformer)tempEval).transformedHeader();
-	     m_transformer = (AttributeTransformer)tempEval;
-	   }
-	 }
-       }
-     } catch (IntrospectionException ex) {
-       System.err.println("AttributeSelection: Couldn't "
-			  +"introspect");
-     }
-     
-     
-     // Do any postprocessing that a attribute selection method might require
-     attributeSet = m_ASEvaluator.postProcess(attributeSet);
-     if (!m_doRank) {
-       m_selectionResults.append(printSelectionResults());
-     }
-     
+    try {
+      BeanInfo bi = Introspector.getBeanInfo(m_searchMethod.getClass());
+      PropertyDescriptor properties[];
+      // methods = bi.getMethodDescriptors();
+      properties = bi.getPropertyDescriptors();
+      for (PropertyDescriptor propertie : properties) {
+        propertie.getDisplayName();
+        Method meth = propertie.getReadMethod();
+        Object retType = meth.getReturnType();
+        if (retType.equals(ASEvaluation.class)) {
+          Class<?> args[] = {};
+          ASEvaluation tempEval =
+            (ASEvaluation) (meth.invoke(m_searchMethod, (Object[]) args));
+          if (tempEval instanceof AttributeTransformer) {
+            // grab the transformed data header
+            m_trainInstances =
+              ((AttributeTransformer) tempEval).transformedHeader();
+            m_transformer = (AttributeTransformer) tempEval;
+          }
+        }
+      }
+    } catch (IntrospectionException ex) {
+      System.err.println("AttributeSelection: Couldn't " + "introspect");
+    }
+
+    // Do any postprocessing that a attribute selection method might require
+    attributeSet = m_ASEvaluator.postProcess(attributeSet);
+    if (!m_doRank) {
+      m_selectionResults.append(printSelectionResults());
+    }
+
     if ((m_searchMethod instanceof RankedOutputSearch) && m_doRank == true) {
-      m_attributeRanking = 
-	((RankedOutputSearch)m_searchMethod).rankedAttributes();
+      try {
+        m_attributeRanking =
+          ((RankedOutputSearch) m_searchMethod).rankedAttributes();
+      } catch (Exception ex) {
+        ex.printStackTrace();
+        throw ex;
+      }
       m_selectionResults.append(printSelectionResults());
       m_selectionResults.append("Ranked attributes:\n");
 
       // retrieve the number of attributes to retain
-      m_numToSelect = 
-	((RankedOutputSearch)m_searchMethod).getCalculatedNumToSelect();
+      m_numToSelect =
+        ((RankedOutputSearch) m_searchMethod).getCalculatedNumToSelect();
 
       // determine fieldwidth for merit
-      int f_p=0;
-      int w_p=0;
-     
-      for (int i = 0; i < m_numToSelect; i++) {
-	double precision = (Math.abs(m_attributeRanking[i][1]) - 
-			    (int)(Math.abs(m_attributeRanking[i][1])));
-        double intPart = (int)(Math.abs(m_attributeRanking[i][1]));
+      int f_p = 0;
+      int w_p = 0;
 
-	if (precision > 0) {
-	  precision = Math.abs((Math.log(Math.abs(precision)) / 
-				Math.log(10)))+3;
-	}
-	if (precision > f_p) {
-	  f_p = (int)precision;
-	}
+      for (int i = 0; i < m_numToSelect; i++) {
+        double precision =
+          (Math.abs(m_attributeRanking[i][1]) - (int) (Math
+            .abs(m_attributeRanking[i][1])));
+        double intPart = (int) (Math.abs(m_attributeRanking[i][1]));
+
+        if (precision > 0) {
+          precision =
+            Math.abs((Math.log(Math.abs(precision)) / Math.log(10))) + 3;
+        }
+        if (precision > f_p) {
+          f_p = (int) precision;
+        }
 
         if (intPart == 0) {
           if (w_p < 2) {
             w_p = 2;
           }
-        } else if ((Math.abs((Math.log(Math.abs(m_attributeRanking[i][1])) 
-		       / Math.log(10)))+1) > w_p) {
-	  if (m_attributeRanking[i][1] > 0) {
-	    w_p = (int)Math.abs((Math.log(Math.abs(m_attributeRanking[i][1]))
-				 / Math.log(10)))+1;
-	  }
-	}
+        } else if ((Math
+          .abs((Math.log(Math.abs(m_attributeRanking[i][1])) / Math.log(10))) + 1) > w_p) {
+          if (m_attributeRanking[i][1] > 0) {
+            w_p =
+              (int) Math
+                .abs(
+                  (Math.log(Math.abs(m_attributeRanking[i][1])) / Math.log(10))) + 1;
+          }
+        }
       }
 
       for (int i = 0; i < m_numToSelect; i++) {
-	m_selectionResults.
-	  append(Utils.doubleToString(m_attributeRanking[i][1],
-				      f_p+w_p+1,f_p) 
-		 + Utils.doubleToString((m_attributeRanking[i][0] + 1),
-					fieldWidth+1,0) 
-		 + " " 
-		 + m_trainInstances.
-		 attribute((int)m_attributeRanking[i][0]).name() 
-		 + "\n");
+        m_selectionResults.append(Utils.doubleToString(
+          m_attributeRanking[i][1], f_p + w_p + 1, f_p)
+          + Utils.doubleToString((m_attributeRanking[i][0] + 1),
+            fieldWidth + 1, 0)
+          + " "
+          + m_trainInstances.attribute((int) m_attributeRanking[i][0]).name()
+          + "\n");
       }
-       
+
       // set up the selected attributes array - usable by a filter or
       // whatever
       if (m_trainInstances.classIndex() >= 0) {
-        if ((!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator)        
-             && !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) ||
-            m_ASEvaluator instanceof AttributeTransformer) {
+        if ((!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) && !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator))
+          || m_ASEvaluator instanceof AttributeTransformer) {
           // one more for the class
           m_selectedAttributeSet = new int[m_numToSelect + 1];
-          m_selectedAttributeSet[m_numToSelect] = 
-              m_trainInstances.classIndex();
+          m_selectedAttributeSet[m_numToSelect] = m_trainInstances.classIndex();
         } else {
           m_selectedAttributeSet = new int[m_numToSelect];
         }
       } else {
-	m_selectedAttributeSet = new int[m_numToSelect];
+        m_selectedAttributeSet = new int[m_numToSelect];
       }
 
       m_selectionResults.append("\nSelected attributes: ");
 
       for (int i = 0; i < m_numToSelect; i++) {
-	m_selectedAttributeSet[i] = (int)m_attributeRanking[i][0];
-	 
-	if (i == m_numToSelect - 1) {
-	  m_selectionResults.append(((int)m_attributeRanking[i][0] + 1) 
-				    + " : " 
-				    + (i + 1) 
-				    + "\n");
-	}
-	else {
-	  m_selectionResults.append(((int)m_attributeRanking[i][0] + 1));
-	  m_selectionResults.append(",");
-	}
+        m_selectedAttributeSet[i] = (int) m_attributeRanking[i][0];
+
+        if (i == m_numToSelect - 1) {
+          m_selectionResults.append(((int) m_attributeRanking[i][0] + 1)
+            + " : " + (i + 1) + "\n");
+        } else {
+          m_selectionResults.append(((int) m_attributeRanking[i][0] + 1));
+          m_selectionResults.append(",");
+        }
       }
     } else {
       // set up the selected attributes array - usable by a filter or
       // whatever
-      if ((!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) 
-	   && !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) || 
-	  m_trainInstances.classIndex() >= 0) 
-	// one more for the class
-	{
-	  m_selectedAttributeSet = new int[attributeSet.length + 1];
-	  m_selectedAttributeSet[attributeSet.length] = 
-	    m_trainInstances.classIndex();
-	}
-      else {
-	m_selectedAttributeSet = new int[attributeSet.length];
+      if ((!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) && !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator))
+        || m_trainInstances.classIndex() >= 0)
+      // one more for the class
+      {
+        m_selectedAttributeSet = new int[attributeSet.length + 1];
+        m_selectedAttributeSet[attributeSet.length] =
+          m_trainInstances.classIndex();
+      } else {
+        m_selectedAttributeSet = new int[attributeSet.length];
       }
-      
+
       for (int i = 0; i < attributeSet.length; i++) {
-	m_selectedAttributeSet[i] = attributeSet[i];
+        m_selectedAttributeSet[i] = attributeSet[i];
       }
 
       m_selectionResults.append("Selected attributes: ");
 
       for (int i = 0; i < attributeSet.length; i++) {
-	if (i == (attributeSet.length - 1)) {
-	  m_selectionResults.append((attributeSet[i] + 1) 
-				    + " : " 
-				    + attributeSet.length 
-				    + "\n");
-	}
-	else {
-	  m_selectionResults.append((attributeSet[i] + 1) + ",");
-	}
+        if (i == (attributeSet.length - 1)) {
+          m_selectionResults.append((attributeSet[i] + 1) + " : "
+            + attributeSet.length + "\n");
+        } else {
+          m_selectionResults.append((attributeSet[i] + 1) + ",");
+        }
       }
 
-      for (int i=0;i<attributeSet.length;i++) {
-	m_selectionResults.append("                     "
-				  +m_trainInstances
-				  .attribute(attributeSet[i]).name()
-				  +"\n");
+      for (int element : attributeSet) {
+        m_selectionResults.append("                     "
+          + m_trainInstances.attribute(element).name() + "\n");
       }
     }
 
     // Cross validation should be called from here
     if (m_doXval == true) {
-      m_selectionResults.append(CrossValidateAttributes()); 
+      m_selectionResults.append(CrossValidateAttributes());
     }
 
     // set up the attribute filter with the selected attributes
@@ -779,34 +789,33 @@ public class AttributeSelection
       m_attributeFilter = new Remove();
       m_attributeFilter.setAttributeIndicesArray(m_selectedAttributeSet);
       m_attributeFilter.setInvertSelection(true);
-      m_attributeFilter.setInputFormat(m_trainInstances);  
+      m_attributeFilter.setInputFormat(m_trainInstances);
     }
 
     // Save space
     m_trainInstances = new Instances(m_trainInstances, 0);
+    m_ASEvaluator.clean();
   }
 
   /**
-   * Perform attribute selection with a particular evaluator and
-   * a set of options specifying search method and options for the
-   * search method and evaluator.
-   *
+   * Perform attribute selection with a particular evaluator and a set of
+   * options specifying search method and options for the search method and
+   * evaluator.
+   * 
    * @param ASEvaluator an evaluator object
-   * @param options an array of options, not only for the evaluator
-   * but also the search method (if any) and an input data file
+   * @param options an array of options, not only for the evaluator but also the
+   *          search method (if any) and an input data file
    * @param train the input instances
    * @return the results of attribute selection as a String
    * @exception Exception if incorrect options are supplied
    */
-  public static String SelectAttributes (ASEvaluation ASEvaluator, 
-					 String[] options, 
-					 Instances train)
-    throws Exception {
+  public static String SelectAttributes(ASEvaluation ASEvaluator,
+    String[] options, Instances train) throws Exception {
     int seed = 1, folds = 10;
     String foldsString, seedString, searchName;
     String classString;
     String searchClassName;
-    String[] searchOptions = null; //new String [1];
+    String[] searchOptions = null; // new String [1];
     ASSearch searchMethod = null;
     boolean doCrossVal = false;
     int classIndex = -1;
@@ -815,129 +824,121 @@ public class AttributeSelection
 
     try {
       if (Utils.getFlag('h', options)) {
-	helpRequested = true;
+        helpRequested = true;
       }
 
       // does data already have a class attribute set?
-      if (train.classIndex() != -1)
-	classIndex = train.classIndex() + 1;
+      if (train.classIndex() != -1) {
+        classIndex = train.classIndex() + 1;
+      }
 
       // get basic options (options the same for all attribute selectors
       classString = Utils.getOption('c', options);
 
       if (classString.length() != 0) {
-	if (classString.equals("first")) {
-	  classIndex = 1;
-	} else if (classString.equals("last")) {
-	  classIndex = train.numAttributes();
-	} else {
-	  classIndex = Integer.parseInt(classString);
-	}
+        if (classString.equals("first")) {
+          classIndex = 1;
+        } else if (classString.equals("last")) {
+          classIndex = train.numAttributes();
+        } else {
+          classIndex = Integer.parseInt(classString);
+        }
       }
 
-      if ((classIndex != -1) && 
-	  ((classIndex == 0) || (classIndex > train.numAttributes()))) {
-	throw  new Exception("Class index out of range.");
+      if ((classIndex != -1)
+        && ((classIndex == 0) || (classIndex > train.numAttributes()))) {
+        throw new Exception("Class index out of range.");
       }
 
       if (classIndex != -1) {
-	train.setClassIndex(classIndex - 1);
+        train.setClassIndex(classIndex - 1);
+      } else {
+        // classIndex = train.numAttributes();
+        // train.setClassIndex(classIndex - 1);
       }
-      else {
-	//	classIndex = train.numAttributes();
-	//	train.setClassIndex(classIndex - 1);
-      }
-      
+
       foldsString = Utils.getOption('x', options);
 
       if (foldsString.length() != 0) {
-	folds = Integer.parseInt(foldsString);
-	doCrossVal = true;
+        folds = Integer.parseInt(foldsString);
+        doCrossVal = true;
       }
-      
+
       trainSelector.setFolds(folds);
       trainSelector.setXval(doCrossVal);
 
       seedString = Utils.getOption('n', options);
 
       if (seedString.length() != 0) {
-	seed = Integer.parseInt(seedString);
+        seed = Integer.parseInt(seedString);
       }
 
       trainSelector.setSeed(seed);
 
       searchName = Utils.getOption('s', options);
 
-      if ((searchName.length() == 0) && 
-	  (!(ASEvaluator instanceof AttributeEvaluator))) {
-	throw  new Exception("No search method given.");
+      if ((searchName.length() == 0)
+        && (!(ASEvaluator instanceof AttributeEvaluator))) {
+        throw new Exception("No search method given.");
       }
 
       if (searchName.length() != 0) {
-	searchName = searchName.trim();
-	// split off any search options
-	int breakLoc = searchName.indexOf(' ');
-	searchClassName = searchName;
-	String searchOptionsString = "";
+        searchName = searchName.trim();
+        // split off any search options
+        int breakLoc = searchName.indexOf(' ');
+        searchClassName = searchName;
+        String searchOptionsString = "";
 
-	if (breakLoc != -1) {
-	  searchClassName = searchName.substring(0, breakLoc);
-	  searchOptionsString = searchName.substring(breakLoc).trim();
-	  searchOptions = Utils.splitOptions(searchOptionsString);
-	}
-      }
-      else {
-	try {
-	  searchClassName = new String("weka.attributeSelection.Ranker");
-	  searchMethod = (ASSearch)Class.
-	    forName(searchClassName).newInstance();
-	}
-	catch (Exception e) {
-	  throw  new Exception("Can't create Ranker object");
-	}
+        if (breakLoc != -1) {
+          searchClassName = searchName.substring(0, breakLoc);
+          searchOptionsString = searchName.substring(breakLoc).trim();
+          searchOptions = Utils.splitOptions(searchOptionsString);
+        }
+      } else {
+        try {
+          searchClassName = new String("weka.attributeSelection.Ranker");
+          searchMethod =
+            (ASSearch) Class.forName(searchClassName).newInstance();
+        } catch (Exception e) {
+          throw new Exception("Can't create Ranker object");
+        }
       }
 
       // if evaluator is a subset evaluator
       // create search method and set its options (if any)
       if (searchMethod == null) {
-	searchMethod = ASSearch.forName(searchClassName, searchOptions);
+        searchMethod = ASSearch.forName(searchClassName, searchOptions);
       }
 
       // set the search method
       trainSelector.setSearch(searchMethod);
-    }
-    catch (Exception e) {
-      throw  new Exception('\n' + e.getMessage() 
-			   + makeOptionString(ASEvaluator, searchMethod));
+    } catch (Exception e) {
+      throw new Exception('\n' + e.getMessage()
+        + makeOptionString(ASEvaluator, searchMethod));
     }
 
     try {
       // Set options for ASEvaluator
       if (ASEvaluator instanceof OptionHandler) {
-	((OptionHandler)ASEvaluator).setOptions(options);
+        ((OptionHandler) ASEvaluator).setOptions(options);
       }
 
-      /* // Set options for Search method
-	 if (searchMethod instanceof OptionHandler)
-	 {
-	 if (searchOptions != null)
-	 {
-	 ((OptionHandler)searchMethod).setOptions(searchOptions);
-	 }
-	 }
-	 Utils.checkForRemainingOptions(searchOptions); */
-    }
-    catch (Exception e) {
-      throw  new Exception("\n" + e.getMessage() 
-			   + makeOptionString(ASEvaluator, searchMethod));
+      /*
+       * // Set options for Search method if (searchMethod instanceof
+       * OptionHandler) { if (searchOptions != null) {
+       * ((OptionHandler)searchMethod).setOptions(searchOptions); } }
+       * Utils.checkForRemainingOptions(searchOptions);
+       */
+    } catch (Exception e) {
+      throw new Exception("\n" + e.getMessage()
+        + makeOptionString(ASEvaluator, searchMethod));
     }
 
     try {
       Utils.checkForRemainingOptions(options);
-    }
-    catch (Exception e) {
-      throw  new Exception('\n' + e.getMessage() 
-			   + makeOptionString(ASEvaluator, searchMethod));
+    } catch (Exception e) {
+      throw new Exception('\n' + e.getMessage()
+        + makeOptionString(ASEvaluator, searchMethod));
     }
 
     if (helpRequested) {
@@ -955,66 +956,57 @@ public class AttributeSelection
     return trainSelector.toResultsString();
   }
 
-
   /**
    * Assembles a text description of the attribute selection results.
-   *
+   * 
    * @return a string describing the results of attribute selection.
    */
-  private String printSelectionResults () {
+  private String printSelectionResults() {
     StringBuffer text = new StringBuffer();
-    text.append("\n\n=== Attribute Selection on all input data ===\n\n" 
-		+ "Search Method:\n");
+    text.append("\n\n=== Attribute Selection on all input data ===\n\n"
+      + "Search Method:\n");
     text.append(m_searchMethod.toString());
     text.append("\nAttribute ");
 
     if (m_ASEvaluator instanceof SubsetEvaluator) {
       text.append("Subset Evaluator (");
-    }
-    else {
+    } else {
       text.append("Evaluator (");
     }
 
-    if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator) 
-	&& !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) {
+    if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator)
+      && !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) {
       text.append("supervised, ");
       text.append("Class (");
 
-      if (m_trainInstances.attribute(m_trainInstances.classIndex())
-	  .isNumeric()) {
-	text.append("numeric): ");
-      }
-      else {
-	text.append("nominal): ");
+      if (m_trainInstances.attribute(m_trainInstances.classIndex()).isNumeric()) {
+        text.append("numeric): ");
+      } else {
+        text.append("nominal): ");
       }
 
-      text.append((m_trainInstances.classIndex() + 1) 
-		  + " " 
-		  + m_trainInstances.attribute(m_trainInstances
-					       .classIndex()).name() 
-		  + "):\n");
-    }
-    else {
+      text.append((m_trainInstances.classIndex() + 1) + " "
+        + m_trainInstances.attribute(m_trainInstances.classIndex()).name()
+        + "):\n");
+    } else {
       text.append("unsupervised):\n");
     }
 
     text.append(m_ASEvaluator.toString() + "\n");
-    return  text.toString();
+    return text.toString();
   }
-
 
   /**
    * Make up the help string giving all the command line options
-   *
+   * 
    * @param ASEvaluator the attribute evaluator to include options for
    * @param searchMethod the search method to include options for
    * @return a string detailing the valid command line options
    * @throws Exception if something goes wrong
    */
-  private static String makeOptionString (ASEvaluation ASEvaluator, 
-					  ASSearch searchMethod)
-    throws Exception {
-    
+  private static String makeOptionString(ASEvaluation ASEvaluator,
+    ASSearch searchMethod) throws Exception {
+
     StringBuffer optionsText = new StringBuffer("");
     // General options
     optionsText.append("\n\nGeneral options:\n\n");
@@ -1033,70 +1025,66 @@ public class AttributeSelection
 
     // Get attribute evaluator-specific options
     if (ASEvaluator instanceof OptionHandler) {
-      optionsText.append("\nOptions specific to " 
-			 + ASEvaluator.getClass().getName() 
-			 + ":\n\n");
-      Enumeration enu = ((OptionHandler)ASEvaluator).listOptions();
+      optionsText.append("\nOptions specific to "
+        + ASEvaluator.getClass().getName() + ":\n\n");
+      Enumeration<Option> enu = ((OptionHandler) ASEvaluator).listOptions();
 
       while (enu.hasMoreElements()) {
-	Option option = (Option)enu.nextElement();
-	optionsText.append(option.synopsis() + '\n');
-	optionsText.append(option.description() + "\n");
+        Option option = enu.nextElement();
+        optionsText.append(option.synopsis() + '\n');
+        optionsText.append(option.description() + "\n");
       }
     }
 
     if (searchMethod != null) {
       if (searchMethod instanceof OptionHandler) {
-	optionsText.append("\nOptions specific to " 
-			   + searchMethod.getClass().getName() 
-			   + ":\n\n");
-	Enumeration enu = ((OptionHandler)searchMethod).listOptions();
+        optionsText.append("\nOptions specific to "
+          + searchMethod.getClass().getName() + ":\n\n");
+        Enumeration<Option> enu = ((OptionHandler) searchMethod).listOptions();
 
-	while (enu.hasMoreElements()) {
-	  Option option = (Option)enu.nextElement();
-	  optionsText.append(option.synopsis() + '\n');
-	  optionsText.append(option.description() + "\n");
-	}
+        while (enu.hasMoreElements()) {
+          Option option = enu.nextElement();
+          optionsText.append(option.synopsis() + '\n');
+          optionsText.append(option.description() + "\n");
+        }
       }
-    }
-    else {
+    } else {
       if (ASEvaluator instanceof SubsetEvaluator) {
-	System.out.println("No search method given.");
+        System.out.println("No search method given.");
       }
     }
 
-    return  optionsText.toString();
+    return optionsText.toString();
   }
-
 
   /**
    * Main method for testing this class.
-   *
+   * 
    * @param args the options
    */
-  public static void main (String[] args) {
+  public static void main(String[] args) {
     try {
       if (args.length == 0) {
-	throw  new Exception("The first argument must be the name of an " 
-			     + "attribute/subset evaluator");
+        throw new Exception("The first argument must be the name of an "
+          + "attribute/subset evaluator");
       }
 
       String EvaluatorName = args[0];
       args[0] = "";
       ASEvaluation newEval = ASEvaluation.forName(EvaluatorName, null);
       System.out.println(SelectAttributes(newEval, args));
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       System.out.println(e.getMessage());
     }
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 11942 $");
   }
 }

@@ -25,7 +25,6 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.beancontext.BeanContextSupport;
-import java.util.Vector;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -42,36 +41,38 @@ import weka.gui.sql.event.ConnectionListener;
  * Simple Knowledge Flow perspective that wraps the SqlViewer class
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 8034 $
+ * @version $Revision: 11286 $
  */
-public class SQLViewerPerspective extends JPanel implements KnowledgeFlowApp.KFPerspective {
-  
+public class SQLViewerPerspective extends JPanel implements
+  KnowledgeFlowApp.KFPerspective {
+
   /**
    * For serialization
    */
   private static final long serialVersionUID = 3684166225482042972L;
-  
+
   protected MainKFPerspective m_mainPerspective;
   protected SqlViewer m_viewer;
   protected JButton m_newFlowBut;
-  
+
   /**
    * Constructor
    */
   public SQLViewerPerspective() {
     setLayout(new BorderLayout());
-    
+
     m_viewer = new SqlViewer(null);
     add(m_viewer, BorderLayout.CENTER);
-    
+
     m_newFlowBut = new JButton("New Flow");
-    m_newFlowBut.setToolTipText("Set up a new Knowledge Flow with the " +
-    		"current connection and query");
+    m_newFlowBut.setToolTipText("Set up a new Knowledge Flow with the "
+      + "current connection and query");
     JPanel butHolder = new JPanel();
     butHolder.add(m_newFlowBut);
     add(butHolder, BorderLayout.SOUTH);
-    
+
     m_newFlowBut.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         if (m_mainPerspective != null) {
           newFlow();
@@ -79,7 +80,7 @@ public class SQLViewerPerspective extends JPanel implements KnowledgeFlowApp.KFP
       }
     });
     m_newFlowBut.setEnabled(false);
-    
+
     m_viewer.addConnectionListener(new ConnectionListener() {
 
       @Override
@@ -92,45 +93,52 @@ public class SQLViewerPerspective extends JPanel implements KnowledgeFlowApp.KFP
       }
     });
   }
-  
+
   protected void newFlow() {
     m_newFlowBut.setEnabled(false);
-    
+
     String user = m_viewer.getUser();
     String password = m_viewer.getPassword();
     String uRL = m_viewer.getURL();
     String query = m_viewer.getQuery();
-    
+
     if (query == null) {
       query = "";
     }
-    
+
     try {
       DatabaseLoader dbl = new DatabaseLoader();
       dbl.setUser(user);
       dbl.setPassword(password);
       dbl.setUrl(uRL);
       dbl.setQuery(query);
-      
+
       BeanContextSupport bc = new BeanContextSupport();
       bc.setDesignTime(true);
-      
+
       Loader loaderComp = new Loader();
       bc.add(loaderComp);
       loaderComp.setLoader(dbl);
-      
-      KnowledgeFlowApp singleton = KnowledgeFlowApp.getSingleton();      
+
+      KnowledgeFlowApp singleton = KnowledgeFlowApp.getSingleton();
       m_mainPerspective.addTab("DBSource");
-      BeanInstance beanI = 
-        new BeanInstance(m_mainPerspective.getBeanLayout(m_mainPerspective.getNumTabs() - 1),
-            loaderComp, 50, 50, m_mainPerspective.getNumTabs() - 1);
-      Vector beans = BeanInstance.getBeanInstances(m_mainPerspective.getNumTabs() - 1);
-      Vector connections = BeanConnection.getConnections(m_mainPerspective.getNumTabs() - 1);
-      singleton.integrateFlow(beans, connections, true, false);
-      singleton.setActivePerspective(0); // switch back to the main perspective                  
-      
+
+      // The process of creating a BeanInstance integrates will result
+      // in it integrating itself into the flow in the specified tab
+      new BeanInstance(m_mainPerspective.getBeanLayout(m_mainPerspective
+        .getNumTabs() - 1), loaderComp, 50, 50,
+        m_mainPerspective.getNumTabs()
+        - 1);
+
+      // Vector<Object> beans = BeanInstance.getBeanInstances(m_mainPerspective
+      // .getNumTabs() - 1);
+      // Vector<BeanConnection> connections = BeanConnection
+      // .getConnections(m_mainPerspective.getNumTabs() - 1);
+      // singleton.integrateFlow(beans, connections, true, false);
+      singleton.setActivePerspective(0); // switch back to the main perspective
+
       m_newFlowBut.setEnabled(true);
-      
+
     } catch (Exception ex) {
       ex.printStackTrace();
     }
@@ -141,9 +149,10 @@ public class SQLViewerPerspective extends JPanel implements KnowledgeFlowApp.KFP
    * 
    * @param insts the instances
    */
+  @Override
   public void setInstances(Instances insts) throws Exception {
     // nothing to do - we don't take instances
-    
+
   }
 
   /**
@@ -151,6 +160,7 @@ public class SQLViewerPerspective extends JPanel implements KnowledgeFlowApp.KFP
    * 
    * @return true if this perspective can accept instances
    */
+  @Override
   public boolean acceptsInstances() {
     return false;
   }
@@ -160,6 +170,7 @@ public class SQLViewerPerspective extends JPanel implements KnowledgeFlowApp.KFP
    * 
    * @return the title of this perspective
    */
+  @Override
   public String getPerspectiveTitle() {
     return "SQL Viewer";
   }
@@ -169,6 +180,7 @@ public class SQLViewerPerspective extends JPanel implements KnowledgeFlowApp.KFP
    * 
    * @return the tool tip text for this perspective
    */
+  @Override
   public String getPerspectiveTipText() {
     return "Explore database tables with SQL";
   }
@@ -176,59 +188,61 @@ public class SQLViewerPerspective extends JPanel implements KnowledgeFlowApp.KFP
   /**
    * Get the icon for this perspective.
    * 
-   * @return the Icon for this perspective (or null if the
-   * perspective does not have an icon)
+   * @return the Icon for this perspective (or null if the perspective does not
+   *         have an icon)
    */
+  @Override
   public Icon getPerspectiveIcon() {
     java.awt.Image pic = null;
-    java.net.URL imageURL = this.getClass().getClassLoader().
-      getResource("weka/gui/beans/icons/database.png");
+    java.net.URL imageURL = this.getClass().getClassLoader()
+      .getResource("weka/gui/beans/icons/database.png");
 
     if (imageURL == null) {
     } else {
-      pic = java.awt.Toolkit.getDefaultToolkit().
-        getImage(imageURL);
+      pic = java.awt.Toolkit.getDefaultToolkit().getImage(imageURL);
     }
     return new javax.swing.ImageIcon(pic);
   }
 
   /**
-   * Set active status of this perspective. True indicates
-   * that this perspective is the visible active perspective
-   * in the KnowledgeFlow
+   * Set active status of this perspective. True indicates that this perspective
+   * is the visible active perspective in the KnowledgeFlow
    * 
    * @param active true if this perspective is the active one
    */
+  @Override
   public void setActive(boolean active) {
     // nothing to do
-    
+
   }
 
   /**
-   * Set whether this perspective is "loaded" - i.e. whether
-   * or not the user has opted to have it available in the
-   * perspective toolbar. The perspective can make the decision
-   * as to allocating or freeing resources on the basis of this.
+   * Set whether this perspective is "loaded" - i.e. whether or not the user has
+   * opted to have it available in the perspective toolbar. The perspective can
+   * make the decision as to allocating or freeing resources on the basis of
+   * this.
    * 
-   * @param loaded true if the perspective is available in
-   * the perspective toolbar of the KnowledgeFlow
+   * @param loaded true if the perspective is available in the perspective
+   *          toolbar of the KnowledgeFlow
    */
+  @Override
   public void setLoaded(boolean loaded) {
     // nothing to do
   }
 
   /**
-   * Set a reference to the main KnowledgeFlow perspective - i.e.
-   * the perspective that manages flow layouts.
+   * Set a reference to the main KnowledgeFlow perspective - i.e. the
+   * perspective that manages flow layouts.
    * 
    * @param main the main KnowledgeFlow perspective.
    */
+  @Override
   public void setMainKFPerspective(MainKFPerspective main) {
-    // nothing to do (could potentially create a new flow in 
+    // nothing to do (could potentially create a new flow in
     // the knowledge flow with a configured DatabaseLoader).
-    m_mainPerspective = main;    
+    m_mainPerspective = main;
   }
-  
+
   /**
    * Main method for testing this class
    * 
@@ -238,15 +252,16 @@ public class SQLViewerPerspective extends JPanel implements KnowledgeFlowApp.KFP
     final javax.swing.JFrame jf = new javax.swing.JFrame();
     jf.getContentPane().setLayout(new java.awt.BorderLayout());
     SQLViewerPerspective p = new SQLViewerPerspective();
-    
+
     jf.getContentPane().add(p, BorderLayout.CENTER);
     jf.addWindowListener(new java.awt.event.WindowAdapter() {
+      @Override
       public void windowClosing(java.awt.event.WindowEvent e) {
         jf.dispose();
         System.exit(0);
       }
     });
-    jf.setSize(800,600);
+    jf.setSize(800, 600);
     jf.setVisible(true);
   }
 
