@@ -11,7 +11,6 @@ import java.io.FileInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import autoweka.smac.SMACWrapper;
 
 /**
  *  Generic class that gets called from an SMBO method, completes the evaluation, and returns the result back up to the SMBO method.
