@@ -75,10 +75,6 @@ import autoweka.Trajectory;
 import autoweka.TrajectoryGroup;
 import autoweka.TrajectoryMerger;
 
-import autoweka.Configuration;
-import autoweka.ConfigurationRanker;
-import autoweka.ConfigurationCollection;
-
 import autoweka.tools.GetBestFromTrajectoryGroup;
 
 /**
@@ -164,8 +160,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     protected int timeLimit = DEFAULT_TIME_LIMIT;
     /** The memory limit for running classifiers. */
     protected int memLimit = DEFAULT_MEM_LIMIT;
-    /** The amout of best configurations to return as output*/
-    protected int nBestConfigs = DEFAULT_N_BEST;
     /** The internal evaluation method. */
     protected Resampling resampling = DEFAULT_RESAMPLING;
     /** The arguments to the evaluation method. */
@@ -260,20 +254,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         //Make the thing
         ExperimentConstructor.buildSingle("autoweka.smac.SMACExperimentConstructor", exp, args);
 
-        //Initializing logs
-        if(nBestConfigs>1){
-          try{
-            Util.initializeFile(msExperimentPath+expName+"/"+temporaryConfigurationLog);
-          }catch(Exception e){
-            log.debug("Couldn't initialize log at: "+msExperimentPath+expName+"/"+temporaryConfigurationLog);
-
-          }
-          try{
-            Util.initializeFile(msExperimentPath+expName+"/"+sortedConfigurationLog);
-          }catch(Exception e){
-            log.debug("Couldn't initialize log at: "+msExperimentPath+expName+"/"+sortedConfigurationLog);
-          }
-        }
 
         // run experiment
         Thread worker = new Thread(new Runnable() {
@@ -376,11 +356,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         log.info("classifier: {}, arguments: {}, attribute search: {}, attribute search arguments: {}, attribute evaluation: {}, attribute evaluation arguments: {}",
             classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
 
-        //Print log of best configurations
-        if (nBestConfigs>1){
-          ConfigurationRanker.rank(nBestConfigs,msExperimentPath+expName+"/"+temporaryConfigurationLog,msExperimentPath+expName+"/"+sortedConfigurationLog,mBest.rawArgs);
-        }
-
 
         // train model on entire dataset and save
         as = new AttributeSelection();
@@ -451,9 +426,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.addElement(
             new Option("\tThe memory limit for runs in MiB.\n" + "\t(default: " + DEFAULT_MEM_LIMIT + ")",
                 "memLimit", 1, "-memLimit <limit>"));
-        result.addElement(
-            new Option("\tThe amount of best configurations to return.\n" + "\t(default: " + DEFAULT_MEM_LIMIT + ")",
-                "nBestConfigs", 1, "-nBestConfigs <limit>"));
         //result.addElement(
         //    new Option("\tThe type of resampling used.\n" + "\t(default: " + String.valueOf(DEFAULT_RESAMPLING) + ")",
         //        "resampling", 1, "-resampling <resampling>"));
@@ -487,8 +459,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.add("" + timeLimit);
         result.add("-memLimit");
         result.add("" + memLimit);
-        result.add("-nBestConfigs");
-        result.add("" + nBestConfigs);
         //result.add("-resampling");
         //result.add("" + resampling);
         //result.add("-resamplingArgs");
@@ -529,12 +499,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             memLimit = DEFAULT_MEM_LIMIT;
         }
 
-        tmpStr = Utils.getOption("nBestConfigs", options);
-        if (tmpStr.length() != 0) {
-            nBestConfigs = Integer.parseInt(tmpStr);
-        } else {
-            nBestConfigs = DEFAULT_N_BEST;
-        }
 
         //tmpStr = Utils.getOption("resampling", options);
         //if (tmpStr.length() != 0) {
@@ -632,29 +596,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         return "the memory limit for runs (in MiB)";
     }
 
-    /**
-     * Set the amount of configurations that will be given as output
-     * @param The amount of best configurations desired by the user
-     */
-    public void setNBestConfigs(int nbc) {
-        nBestConfigs = nbc;
-    }
-
-    /**
-     * Get the memory limit.
-     * @return The amount of best configurations that will be given as output
-     */
-    public int getNBestConfigs() {
-        return nBestConfigs;
-    }
-
-    /**
-     * Returns the tip text for this property.
-     * @return tip text for this property
-     */
-    public String nBestConfigsTipText() {
-        return "How many of the best configurations should be returned as output";
-    }
 
 
     //public void setResampling(Resampling r) {
