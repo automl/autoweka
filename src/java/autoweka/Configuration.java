@@ -113,7 +113,7 @@ public class Configuration extends XmlSerializable implements Comparable{
 
 	public void forceUpdateAverage(){
 		mAverageScore=average(mScores);
-		averagedFlag=true;
+		averagedFlag=true; 
 	}
 
 	private double average(List<String> l){ //Apparently theres no standard java method for that. @TODO Check if thats true
@@ -138,8 +138,8 @@ public class Configuration extends XmlSerializable implements Comparable{
 			}else if (this.mFolds.size() < cTarget.mFolds.size()){
 				return -1;
 			}else{
-				if      (this.mAverageScore < cTarget.mAverageScore ) return 1; //Assumes smaller score is better. If that isn't the case, change that. @TODO make this receive Metric as input and do this change automatically
-				else if (this.mAverageScore > cTarget.mAverageScore)  return -1;
+				if      (this.mAverageScore < cTarget.mAverageScore ) return 1; //Assumes smaller score is better. If that isn't the case, change that.
+				else if (this.mAverageScore > cTarget.mAverageScore)  return -1; // @TODO make this class receive a Metric as input and do this change automatically
 				else return 0;
 			}
 
