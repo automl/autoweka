@@ -21,47 +21,66 @@
 
 package weka.gui.beans;
 
+import weka.core.Copyright;
+import weka.core.Version;
+
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Startup class for the KnowledgeFlow. Displays a splash screen.
  *
  * @author Mark Hall
- * @version  $Revision: 8034 $
+ * @version $Revision: 12269 $
  */
 public class KnowledgeFlow {
 
   /**
-   * Static method that can be called from a running program
-   * to launch the KnowledgeFlow
+   * Static method that can be called from a running program to launch the
+   * KnowledgeFlow
    */
   public static void startApp() {
     KnowledgeFlowApp.addStartupListener(new StartUpListener() {
-        public void startUpComplete() {
-          weka.gui.SplashWindow.disposeSplash();
-        }
-      });
-                                        
-    weka.gui.SplashWindow.splash(ClassLoader.
-                                 getSystemResource("weka/gui/beans/icons/splash.jpg"));
+      public void startUpComplete() {
+        weka.gui.SplashWindow.disposeSplash();
+      }
+    });
+
+    List<String> message =
+      Arrays.asList("WEKA Knowledge Flow", "Version " + Version.VERSION,
+        "(c) " + Copyright.getFromYear() + " - " + Copyright.getToYear(),
+        "The University of Waikato", "Hamilton, New Zealand");
+    weka.gui.SplashWindow.splash(
+      ClassLoader.getSystemResource("weka/gui/weka_icon_new.png"),
+      message);
 
     Thread nt = new Thread() {
-        public void run() {
-          weka.gui.SplashWindow.invokeMethod("weka.gui.beans.KnowledgeFlowApp", 
-                                             "createSingleton", null);
-        }};
-      nt.start();
+      public void run() {
+        weka.gui.SplashWindow.invokeMethod("weka.gui.beans.KnowledgeFlowApp",
+          "createSingleton", null);
+      }
+    };
+    nt.start();
   }
 
-    /**
-     * Shows the splash screen, launches the application and then disposes
-     * the splash screen.
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-      weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
-      weka.gui.SplashWindow.splash(ClassLoader.
-                                   getSystemResource("weka/gui/beans/icons/splash.jpg"));
-      weka.gui.SplashWindow.invokeMain("weka.gui.beans.KnowledgeFlowApp", args);
-      weka.gui.SplashWindow.disposeSplash();
-    }
-  
+  /**
+   * Shows the splash screen, launches the application and then disposes the
+   * splash screen.
+   * 
+   * @param args the command line arguments
+   */
+  public static void main(String[] args) {
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
+      "Logging started");
+    List<String> message =
+      Arrays.asList("WEKA Knowledge Flow", "Version " + Version.VERSION,
+        "(c) " + Copyright.getFromYear() + " - " + Copyright.getToYear(),
+        "The University of Waikato", "Hamilton, New Zealand");
+    weka.gui.SplashWindow.splash(ClassLoader.
+      // getSystemResource("weka/gui/beans/icons/splash.jpg"));
+      getSystemResource("weka/gui/weka_icon_new.png"), message);
+    weka.gui.SplashWindow.invokeMain("weka.gui.beans.KnowledgeFlowApp", args);
+    weka.gui.SplashWindow.disposeSplash();
+  }
+
 }

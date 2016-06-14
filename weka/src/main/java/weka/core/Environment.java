@@ -30,24 +30,24 @@ import java.util.TreeMap;
 
 /**
  * This class encapsulates a map of all environment and java system properties.
- * There are methods for adding and removing variables to this
- * Environment object as well as to the system wide global environment. There
- * is also a method for replacing key names (enclosed by ${}) with their associated 
- * value in Strings.
- *
+ * There are methods for adding and removing variables to this Environment
+ * object as well as to the system wide global environment. There is also a
+ * method for replacing key names (enclosed by ${}) with their associated value
+ * in Strings.
+ * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 8034 $
+ * @version $Revision: 10203 $
  */
 public class Environment implements RevisionHandler {
-  
+
   private static Environment m_systemWide = new Environment();
-  
+
   // Map to hold all the system environment variables + java properties
-  private Map<String,String> m_envVars = new TreeMap<String,String>();
-  
+  private final Map<String, String> m_envVars = new TreeMap<String, String>();
+
   public Environment() {
     // get the env variables first
-    Map<String,String> env = System.getenv();
+    Map<String, String> env = System.getenv();
     Set<String> keys = env.keySet();
     Iterator<String> i = keys.iterator();
     while (i.hasNext()) {
@@ -58,32 +58,30 @@ public class Environment implements RevisionHandler {
 
     // get the java properties
     Properties jvmProps = System.getProperties();
-    Enumeration pKeys = jvmProps.propertyNames();
+    Enumeration<?> pKeys = jvmProps.propertyNames();
     while (pKeys.hasMoreElements()) {
-      String kv = (String)pKeys.nextElement();
+      String kv = (String) pKeys.nextElement();
       String value = jvmProps.getProperty(kv);
       m_envVars.put(kv, value);
     }
     m_envVars.put("weka.version", Version.VERSION);
   }
-  
+
   /**
-   * Get the singleton system-wide (visible to every
-   * class in the running VM) set of environment
-   * variables.
+   * Get the singleton system-wide (visible to every class in the running VM)
+   * set of environment variables.
    * 
    * @return the system-wide set of environment variables.
    */
   public static Environment getSystemWide() {
     return m_systemWide;
   }
-  
+
   /**
    * Tests for the presence of environment variables.
    * 
    * @param source the string to test
-   * @return true if the argument contains one or more environment
-   * variables
+   * @return true if the argument contains one or more environment variables
    */
   public static boolean containsEnvVariables(String source) {
     return (source.indexOf("${") >= 0);
@@ -103,7 +101,7 @@ public class Environment implements RevisionHandler {
     while (index >= 0) {
       index += 2;
       int endIndex = source.indexOf('}');
-      if (endIndex >= 0 && endIndex > index +1) {
+      if (endIndex >= 0 && endIndex > index + 1) {
         String key = source.substring(index, endIndex);
 
         // look this sucker up
@@ -112,8 +110,8 @@ public class Environment implements RevisionHandler {
           String toReplace = "${" + key + "}";
           source = source.replace(toReplace, replace);
         } else {
-          throw new Exception("[Environment] Variable " 
-                              + key + " doesn't seem to be set.");
+          throw new Exception("[Environment] Variable " + key
+            + " doesn't seem to be set.");
         }
       } else {
         break;
@@ -125,24 +123,24 @@ public class Environment implements RevisionHandler {
 
   /**
    * Add a variable to the internal map of this properties object.
-   *
+   * 
    * @param key the name of the variable
    * @param value its value
    */
   public void addVariable(String key, String value) {
     m_envVars.put(key, value);
   }
-  
+
   /**
-   * Add a a variable to the internal map of this properties
-   * object and to the global system-wide environment;
+   * Add a a variable to the internal map of this properties object and to the
+   * global system-wide environment;
    * 
    * @param key the name of the variable
    * @param value its value
    */
   public void addVariableSystemWide(String key, String value) {
     addVariable(key, value); // local
-    
+
     // system wide
     if (this != getSystemWide()) {
       getSystemWide().addVariableSystemWide(key, value);
@@ -152,16 +150,15 @@ public class Environment implements RevisionHandler {
 
   /**
    * Remove a named variable from the map.
-   *
+   * 
    * @param key the name of the varaible to remove.
    */
   public void removeVariable(String key) {
     m_envVars.remove(key);
   }
-  
+
   /**
-   * Get the names of the variables (keys) stored in the 
-   * internal map.
+   * Get the names of the variables (keys) stored in the internal map.
    * 
    * @return a Set of variable names (keys)
    */
@@ -171,32 +168,35 @@ public class Environment implements RevisionHandler {
 
   /**
    * Get the value for a particular variable.
-   *
+   * 
    * @param key the name of the variable to get
-   * @return the associated value or null if this variable
-   * is not in the internal map
+   * @return the associated value or null if this variable is not in the
+   *         internal map
    */
   public String getVariableValue(String key) {
     return m_envVars.get(key);
   }
-  
+
   /**
    * Main method for testing this class.
-   *
-   * @param args a list of strings to replace variables in 
-   * (e.g. "\${os.name} "\${java.version}")
+   * 
+   * @param args a list of strings to replace variables in (e.g. "\${os.name}
+   *          "\${java.version}")
    */
   public static void main(String[] args) {
     Environment t = new Environment();
-    //    String test = "Here is a string with the variable ${java.version} and ${os.name} in it";
+    // String test =
+    // "Here is a string with the variable ${java.version} and ${os.name} in it";
 
     if (args.length == 0) {
-      System.err.println("Usage: java weka.core.Environment <string> <string> ...");
+      System.err
+        .println("Usage: java weka.core.Environment <string> <string> ...");
     } else {
       try {
-        for (int i = 0; i < args.length; i++) {
-          String newS = t.substitute(args[i]);
-          System.out.println("Original string:\n" + args[i] +"\n\nNew string:\n" + newS);
+        for (String arg : args) {
+          String newS = t.substitute(arg);
+          System.out.println("Original string:\n" + arg + "\n\nNew string:\n"
+            + newS);
         }
       } catch (Exception ex) {
         ex.printStackTrace();
@@ -207,9 +207,10 @@ public class Environment implements RevisionHandler {
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10203 $");
   }
 }

@@ -21,12 +21,17 @@
 
 package weka.classifiers.meta;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
+import java.util.ArrayList;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.IteratedSingleClassifierEnhancer;
+import weka.classifiers.IterativeClassifier;
 import weka.classifiers.rules.ZeroR;
+
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
@@ -41,6 +46,7 @@ import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.UnassignedClassException;
 
 /**
  <!-- globalinfo-start -->
@@ -76,6 +82,9 @@ import weka.core.WeightedInstancesHandler;
  * <pre> -I &lt;num&gt;
  *  Number of iterations.
  *  (default 10)</pre>
+ *
+ * <pre> -A
+ *  Minimize absolute error instead of squared error (assumes that base learner minimizes absolute error).
  * 
  * <pre> -D
  *  If set, classifier is run in debug mode and
@@ -96,31 +105,38 @@ import weka.core.WeightedInstancesHandler;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 12091 $
  */
-public class AdditiveRegression 
-  extends IteratedSingleClassifierEnhancer 
-  implements OptionHandler,
-	     AdditionalMeasureProducer,
-	     WeightedInstancesHandler,
-	     TechnicalInformationHandler {
+public class AdditiveRegression extends IteratedSingleClassifierEnhancer implements OptionHandler, 
+        AdditionalMeasureProducer, WeightedInstancesHandler, TechnicalInformationHandler, IterativeClassifier {
 
   /** for serialization */
   static final long serialVersionUID = -2368937577670527151L;
+
+  /** ArrayList for storing the generated base classifiers. 
+   Note: we are hiding the variable from IteratedSingleClassifierEnhancer*/
+  protected ArrayList<Classifier> m_Classifiers;
   
-  /**
-   * Shrinkage (Learning rate). Default = no shrinkage.
-   */
+  /** Shrinkage (Learning rate). Default = no shrinkage. */
   protected double m_shrinkage = 1.0;
 
-  /** The number of successfully generated base classifiers. */
-  protected int m_NumIterationsPerformed;
+  /** The mean or median */
+  protected double m_InitialPrediction;
 
-  /** The model for the mean */
-  protected ZeroR m_zeroR;
-
-  /** whether we have suitable data or nor (if not, ZeroR model is used) */
+  /** whether we have suitable data or nor (if only mean/mode is used) */
   protected boolean m_SuitableData = true;
+
+  /** The working data */
+  protected Instances m_Data;
+
+  /** The sum of (absolute or squared) residuals. */
+  protected double m_Error;
+
+  /** The improvement in the sum of (absolute or squared) residuals. */
+  protected double m_Diff;
+  
+  /** Whether to minimise absolute error instead of squared error. */
+  protected boolean m_MinimizeAbsoluteError = false;
   
   /**
    * Returns a string describing this attribute evaluator
@@ -192,19 +208,20 @@ public class AdditiveRegression
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(4);
+    Vector<Option> newVector = new Vector<Option>(2);
 
     newVector.addElement(new Option(
-	      "\tSpecify shrinkage rate. "
-	      +"(default = 1.0, ie. no shrinkage)\n", 
-	      "S", 1, "-S"));
+            "\tSpecify shrinkage rate. (default = 1.0, i.e., no shrinkage)",
+            "S", 1, "-S"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
-    }
+    newVector.addElement(new Option(
+            "\tMinimize absolute error instead of squared error (assumes that base learner minimizes absolute error).",
+            "A", 0, "-A"));
+
+    newVector.addAll(Collections.list(super.listOptions()));
+    
     return newVector.elements();
   }
 
@@ -221,7 +238,10 @@ public class AdditiveRegression
    * <pre> -I &lt;num&gt;
    *  Number of iterations.
    *  (default 10)</pre>
-   * 
+   *
+   * <pre> -A
+   *  Minimize absolute error instead of squared error (assumes that base learner minimizes absolute error).
+   *  
    * <pre> -D
    *  If set, classifier is run in debug mode and
    *  may output additional info to the console</pre>
@@ -250,8 +270,11 @@ public class AdditiveRegression
       Double temp = Double.valueOf(optionString);
       setShrinkage(temp.doubleValue());
     }
+    setMinimizeAbsoluteError(Utils.getFlag('A', options));
 
     super.setOptions(options);
+    
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -261,20 +284,17 @@ public class AdditiveRegression
    */
   public String [] getOptions() {
     
-    String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 2];
-    int current = 0;
+    Vector<String> options = new Vector<String>();
 
-    options[current++] = "-S"; options[current++] = "" + getShrinkage();
+    options.add("-S"); options.add("" + getShrinkage());
 
-    System.arraycopy(superOptions, 0, options, current, 
-		     superOptions.length);
-
-    current += superOptions.length;
-    while (current < options.length) {
-      options[current++] = "";
+    if (getMinimizeAbsoluteError()) {
+      options.add("-A");
     }
-    return options;
+    
+    Collections.addAll(options, super.getOptions());
+    
+    return options.toArray(new String[0]);
   }
 
   /**
@@ -284,8 +304,8 @@ public class AdditiveRegression
    */
   public String shrinkageTipText() {
     return "Shrinkage rate. Smaller values help prevent overfitting and "
-      + "have a smoothing effect (but increase learning time). "
-      +"Default = 1.0, ie. no shrinkage."; 
+            + "have a smoothing effect (but increase learning time). "
+            +"Default = 1.0, ie. no shrinkage.";
   }
 
   /**
@@ -307,6 +327,33 @@ public class AdditiveRegression
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String minimizeAbsoluteErrorTipText() {
+    return "Minimize absolute error instead of squared error (assume base learner minimizes absolute error)";
+  }
+
+  /**
+   * Sets whether absolute error is to be minimized.
+   *
+   * @param f true if absolute error is to be minimized.
+   */
+  public void setMinimizeAbsoluteError(boolean f) {
+    m_MinimizeAbsoluteError = f;
+  }
+
+  /**
+   * Gets whether absolute error is to be minimized.
+   *
+   * @return true if absolute error is to be minimized
+   */
+  public boolean getMinimizeAbsoluteError() {
+    return m_MinimizeAbsoluteError;
+  }
+
+  /**
    * Returns default capabilities of the classifier.
    *
    * @return      the capabilities of this classifier
@@ -324,69 +371,117 @@ public class AdditiveRegression
   }
 
   /**
-   * Build the classifier on the supplied data
-   *
-   * @param data the training data
-   * @throws Exception if the classifier could not be built successfully
+   * Method used to build the classifier.
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    super.buildClassifier(data);
+    // Initialize classifier
+    initializeClassifier(data);
+
+    // For the given number of iterations
+    while (next()) {};
+
+    // Clean up
+    done();
+  }
+
+  /**
+   * Initialize classifier.
+   *
+   * @param data the training data
+   * @throws Exception if the classifier could not be initialized successfully
+   */
+  public void initializeClassifier(Instances data) throws Exception {
 
     // can classifier handle the data?
     getCapabilities().testWithFail(data);
 
     // remove instances with missing class
-    Instances newData = new Instances(data);
-    newData.deleteWithMissingClass();
+    m_Data = new Instances(data);
+    m_Data.deleteWithMissingClass();
 
-    double sum = 0;
-    double temp_sum = 0;
     // Add the model for the mean first
-    m_zeroR = new ZeroR();
-    m_zeroR.buildClassifier(newData);
+    if (getMinimizeAbsoluteError()) {
+      m_InitialPrediction = m_Data.kthSmallestValue(m_Data.classIndex(), m_Data.numInstances() / 2);
+    } else {
+      m_InitialPrediction = m_Data.meanOrMode(m_Data.classIndex());
+    }
     
     // only class? -> use only ZeroR model
-    if (newData.numAttributes() == 1) {
-      System.err.println(
-	  "Cannot build model (only class attribute present in data!), "
-	  + "using ZeroR model instead!");
+    if (m_Data.numAttributes() == 1) {
+      System.err.println("Cannot build non-trivial model (only class attribute present in data!).");
       m_SuitableData = false;
       return;
-    }
-    else {
+    } else {
       m_SuitableData = true;
     }
-    
-    newData = residualReplace(newData, m_zeroR, false);
-    for (int i = 0; i < newData.numInstances(); i++) {
-      sum += newData.instance(i).weight() *
-	newData.instance(i).classValue() * newData.instance(i).classValue();
+   
+    // Initialize list of classifiers and data
+    m_Classifiers = new ArrayList<Classifier>(m_NumIterations);
+    m_Data = residualReplace(m_Data, m_InitialPrediction);
+
+    // Calculate error
+    m_Error = 0;
+    m_Diff = Double.MAX_VALUE;
+    for (int i = 0; i < m_Data.numInstances(); i++) {
+      if (getMinimizeAbsoluteError()) {
+        m_Error += m_Data.instance(i).weight() * Math.abs(m_Data.instance(i).classValue());
+      } else {
+        m_Error += m_Data.instance(i).weight() * m_Data.instance(i).classValue() * m_Data.instance(i).classValue();
+      }
     }
     if (m_Debug) {
-      System.err.println("Sum of squared residuals "
-			 +"(predicting the mean) : " + sum);
+      if (getMinimizeAbsoluteError()) {
+        System.err.println("Sum of absolute residuals (predicting the median) : " + m_Error);
+      } else {
+        System.err.println("Sum of squared residuals (predicting the mean) : " + m_Error);
+      }
+    }
+  }
+
+  /**
+   * Perform another iteration.
+   */
+  public boolean next() throws Exception {
+
+    if ((!m_SuitableData) || (m_Classifiers.size() >= m_NumIterations) ||
+            (m_Diff <= Utils.SMALL)) {
+      return false;
     }
 
-    m_NumIterationsPerformed = 0;
-    do {
-      temp_sum = sum;
+    // Build the classifier
+    m_Classifiers.add(AbstractClassifier.makeCopy(m_Classifier));
+    m_Classifiers.get(m_Classifiers.size() - 1).buildClassifier(m_Data);
 
-      // Build the classifier
-      m_Classifiers[m_NumIterationsPerformed].buildClassifier(newData);
+    m_Data = residualReplace(m_Data, m_Classifiers.get(m_Classifiers.size() - 1));
+    double sum = 0;
+    for (int i = 0; i < m_Data.numInstances(); i++) {
+      if (getMinimizeAbsoluteError()) {
+        sum += m_Data.instance(i).weight() * Math.abs(m_Data.instance(i).classValue());
+      } else {
+        sum += m_Data.instance(i).weight() * m_Data.instance(i).classValue() * m_Data.instance(i).classValue();
+      }
+    }
+    if (m_Debug) {
+      if (getMinimizeAbsoluteError()) {
+        System.err.println("Sum of absolute residuals: " + sum);
+      } else {
+        System.err.println("Sum of squared residuals: " + sum);
+      }
+    }
+  
+    m_Diff = m_Error - sum;
+    m_Error = sum;
 
-      newData = residualReplace(newData, m_Classifiers[m_NumIterationsPerformed], true);
-      sum = 0;
-      for (int i = 0; i < newData.numInstances(); i++) {
-	sum += newData.instance(i).weight() *
-	  newData.instance(i).classValue() * newData.instance(i).classValue();
-      }
-      if (m_Debug) {
-	System.err.println("Sum of squared residuals : "+sum);
-      }
-      m_NumIterationsPerformed++;
-    } while (((temp_sum - sum) > Utils.SMALL) && 
-	     (m_NumIterationsPerformed < m_Classifiers.length));
+    return true;
+  }
+
+  /**
+   * Clean up.
+   */
+  public void done() {
+    
+    m_Data = null;
   }
 
   /**
@@ -398,17 +493,19 @@ public class AdditiveRegression
    */
   public double classifyInstance(Instance inst) throws Exception {
 
-    double prediction = m_zeroR.classifyInstance(inst);
+    double prediction = m_InitialPrediction;
 
     // default model?
     if (!m_SuitableData) {
       return prediction;
     }
     
-    for (int i = 0; i < m_NumIterationsPerformed; i++) {
-      double toAdd = m_Classifiers[i].classifyInstance(inst);
-      toAdd *= getShrinkage();
-      prediction += toAdd;
+    for (Classifier classifier : m_Classifiers) {
+      double toAdd = classifier.classifyInstance(inst);
+      if (Utils.isMissingValue(toAdd)) {
+        throw new UnassignedClassException("AdditiveRegression: base learner predicted missing value.");
+      }
+      prediction += (toAdd * getShrinkage());
     }
 
     return prediction;
@@ -416,28 +513,41 @@ public class AdditiveRegression
 
   /**
    * Replace the class values of the instances from the current iteration
-   * with residuals ater predicting with the supplied classifier.
+   * with residuals after predicting with the supplied classifier.
    *
    * @param data the instances to predict
    * @param c the classifier to use
-   * @param useShrinkage whether shrinkage is to be applied to the model's output
    * @return a new set of instances with class values replaced by residuals
    * @throws Exception if something goes wrong
    */
-  private Instances residualReplace(Instances data, Classifier c, 
-				    boolean useShrinkage) throws Exception {
-    double pred,residual;
-    Instances newInst = new Instances(data);
+  private Instances residualReplace(Instances data, Classifier c) throws Exception {
 
+    Instances newInst = new Instances(data);
     for (int i = 0; i < newInst.numInstances(); i++) {
-      pred = c.classifyInstance(newInst.instance(i));
-      if (useShrinkage) {
-	pred *= getShrinkage();
+      double pred = c.classifyInstance(newInst.instance(i));
+      if (Utils.isMissingValue(pred)) {
+        throw new UnassignedClassException("AdditiveRegression: base learner predicted missing value.");
       }
-      residual = newInst.instance(i).classValue() - pred;
-      newInst.instance(i).setClassValue(residual);
+      newInst.instance(i).setClassValue(newInst.instance(i).classValue() - (pred * getShrinkage()));
     }
-    //    System.err.print(newInst);
+    return newInst;
+  }
+
+  /**
+   * Replace the class values of the instances from the current iteration
+   * with residuals after predicting the given constant.
+   *
+   * @param data the instances to predict
+   * @param c the constant to use
+   * @return a new set of instances with class values replaced by residuals
+   * @throws Exception if something goes wrong
+   */
+  private Instances residualReplace(Instances data, double c) throws Exception {
+
+    Instances newInst = new Instances(data);
+    for (int i = 0; i < newInst.numInstances(); i++) {
+      newInst.instance(i).setClassValue(newInst.instance(i).classValue() - c);
+    }
     return newInst;
   }
 
@@ -445,8 +555,8 @@ public class AdditiveRegression
    * Returns an enumeration of the additional measure names
    * @return an enumeration of the measure names
    */
-  public Enumeration enumerateMeasures() {
-    Vector newVector = new Vector(1);
+  public Enumeration<String> enumerateMeasures() {
+    Vector<String> newVector = new Vector<String>(1);
     newVector.addElement("measureNumIterations");
     return newVector.elements();
   }
@@ -472,7 +582,7 @@ public class AdditiveRegression
    * models)
    */
   public double measureNumIterations() {
-    return m_NumIterationsPerformed;
+    return m_Classifiers.size();
   }
 
   /**
@@ -482,33 +592,33 @@ public class AdditiveRegression
    */
   public String toString() {
     StringBuffer text = new StringBuffer();
+    
+    if (m_SuitableData && m_Classifiers == null) {
+      return "Classifier hasn't been built yet!";
+    }
 
     // only ZeroR model?
     if (!m_SuitableData) {
       StringBuffer buf = new StringBuffer();
       buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
       buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
-      buf.append("Warning: No model could be built, hence ZeroR model is used:\n\n");
-      buf.append(m_zeroR.toString());
+      buf.append("Warning: Non-trivial model could not be built, initial prediction is: ");
+      buf.append(m_InitialPrediction);
       return buf.toString();
-    }
-    
-    if (m_NumIterations == 0) {
-      return "Classifier hasn't been built yet!";
     }
 
     text.append("Additive Regression\n\n");
 
-    text.append("ZeroR model\n\n" + m_zeroR + "\n\n");
+    text.append("Initial prediction: " + m_InitialPrediction + "\n\n");
 
     text.append("Base classifier " 
 		+ getClassifier().getClass().getName()
 		+ "\n\n");
-    text.append("" + m_NumIterationsPerformed + " models generated.\n");
+    text.append("" + m_Classifiers.size() + " models generated.\n");
 
-    for (int i = 0; i < m_NumIterationsPerformed; i++) {
+    for (int i = 0; i < m_Classifiers.size(); i++) {
       text.append("\nModel number " + i + "\n\n" +
-		  m_Classifiers[i] + "\n");
+		  m_Classifiers.get(i) + "\n");
     }
 
     return text.toString();
@@ -520,7 +630,7 @@ public class AdditiveRegression
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 12091 $");
   }
 
   /**

@@ -58,10 +58,10 @@ import weka.gui.PropertySheetPanel;
  * Customizer for the FlowByExpression node
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 9129 $
+ * @version $Revision: 10638 $
  */
 public class FlowByExpressionCustomizer extends JPanel implements
-    EnvironmentHandler, BeanCustomizer, CustomizerCloseRequester {
+  EnvironmentHandler, BeanCustomizer, CustomizerCloseRequester {
 
   /** For serialization */
   private static final long serialVersionUID = -3574741335754017794L;
@@ -117,11 +117,11 @@ public class FlowByExpressionCustomizer extends JPanel implements
 
     lhsP.add(m_lhsField, BorderLayout.CENTER);
     lhsP.setToolTipText("<html>Name or index of attribute. "
-        + "also accepts<br>the special labels \"/first\" and \"/last\""
-        + " to indicate<br>the first and last attribute respecitively</html>");
+      + "also accepts<br>the special labels \"/first\" and \"/last\""
+      + " to indicate<br>the first and last attribute respecitively</html>");
     m_lhsField.setToolTipText("<html>Name or index of attribute. "
-        + "also accepts<br>the special labels \"/first\" and \"/last\""
-        + " to indicate<br>the first and last attribute respecitively</html>");
+      + "also accepts<br>the special labels \"/first\" and \"/last\""
+      + " to indicate<br>the first and last attribute respecitively</html>");
 
     JPanel operatorP = new JPanel();
     operatorP.setLayout(new BorderLayout());
@@ -143,8 +143,8 @@ public class FlowByExpressionCustomizer extends JPanel implements
     rhsP.setLayout(new BorderLayout());
     rhsP.setBorder(BorderFactory.createTitledBorder("Constant or attribute"));
     rhsP.setToolTipText("<html>Constant value to test/check for. If "
-        + "testing<br>against an attribute, then this specifies"
-        + "an attribute index or name</html>");
+      + "testing<br>against an attribute, then this specifies"
+      + "an attribute index or name</html>");
     // m_rhsField = new EnvironmentField(m_env);
     m_rhsField.setEditable(true);
     rhsP.add(m_rhsField, BorderLayout.CENTER);
@@ -172,15 +172,17 @@ public class FlowByExpressionCustomizer extends JPanel implements
     JPanel flowControlP = new JPanel();
     flowControlP.setLayout(new GridLayout(2, 2));
     flowControlP.add(new JLabel("Send true instances to node",
-        SwingConstants.RIGHT));
+      SwingConstants.RIGHT));
     flowControlP.add(m_trueData);
     flowControlP.add(new JLabel("Send false instances to node",
-        SwingConstants.RIGHT));
+      SwingConstants.RIGHT));
     flowControlP.add(m_falseData);
     tempPanel.add(flowControlP, BorderLayout.NORTH);
     String falseStepN = m_expression.getFalseStepName();
     String trueStepN = m_expression.getTrueStepName();
     Object[] connectedSteps = m_expression.m_downstream;
+    m_trueData.addItem("<none>");
+    m_falseData.addItem("<none>");
     if (connectedSteps != null && connectedSteps.length > 0) {
       if (connectedSteps[0] != null) {
         String first = ((BeanCommon) connectedSteps[0]).getCustomName();
@@ -217,17 +219,17 @@ public class FlowByExpressionCustomizer extends JPanel implements
           if (p != null) {
             if (p.getLastPathComponent() instanceof DefaultMutableTreeNode) {
 
-              DefaultMutableTreeNode tNode = (DefaultMutableTreeNode) p
-                  .getLastPathComponent();
-              FlowByExpression.ExpressionNode thisNode = (FlowByExpression.ExpressionNode) tNode
-                  .getUserObject();
+              DefaultMutableTreeNode tNode =
+                (DefaultMutableTreeNode) p.getLastPathComponent();
+              FlowByExpression.ExpressionNode thisNode =
+                (FlowByExpression.ExpressionNode) tNode.getUserObject();
 
               if (thisNode instanceof FlowByExpression.ExpressionClause) {
-                ((FlowByExpression.ExpressionClause) thisNode).m_rhsIsAttribute = m_rhsIsAttribute
-                    .isSelected();
+                ((FlowByExpression.ExpressionClause) thisNode).m_rhsIsAttribute =
+                  m_rhsIsAttribute.isSelected();
 
-                DefaultTreeModel tmodel = (DefaultTreeModel) m_expressionTree
-                    .getModel();
+                DefaultTreeModel tmodel =
+                  (DefaultTreeModel) m_expressionTree.getModel();
                 tmodel.nodeStructureChanged(tNode);
 
                 updateExpressionLabel();
@@ -254,16 +256,17 @@ public class FlowByExpressionCustomizer extends JPanel implements
           if (p != null) {
             if (p.getLastPathComponent() instanceof DefaultMutableTreeNode) {
 
-              DefaultMutableTreeNode tNode = (DefaultMutableTreeNode) p
-                  .getLastPathComponent();
-              FlowByExpression.ExpressionNode thisNode = (FlowByExpression.ExpressionNode) tNode
-                  .getUserObject();
+              DefaultMutableTreeNode tNode =
+                (DefaultMutableTreeNode) p.getLastPathComponent();
+              FlowByExpression.ExpressionNode thisNode =
+                (FlowByExpression.ExpressionNode) tNode.getUserObject();
 
               if (thisNode instanceof FlowByExpression.ExpressionClause) {
                 String selection = m_operatorCombo.getSelectedItem().toString();
-                FlowByExpression.ExpressionClause.ExpressionType t = FlowByExpression.ExpressionClause.ExpressionType.EQUALS;
+                FlowByExpression.ExpressionClause.ExpressionType t =
+                  FlowByExpression.ExpressionClause.ExpressionType.EQUALS;
                 for (FlowByExpression.ExpressionClause.ExpressionType et : FlowByExpression.ExpressionClause.ExpressionType
-                    .values()) {
+                  .values()) {
                   if (et.toString().equals(selection)) {
                     t = et;
                     break;
@@ -271,8 +274,8 @@ public class FlowByExpressionCustomizer extends JPanel implements
                 }
 
                 ((FlowByExpression.ExpressionClause) thisNode).m_operator = t;
-                DefaultTreeModel tmodel = (DefaultTreeModel) m_expressionTree
-                    .getModel();
+                DefaultTreeModel tmodel =
+                  (DefaultTreeModel) m_expressionTree.getModel();
                 tmodel.nodeStructureChanged(tNode);
 
                 updateExpressionLabel();
@@ -291,18 +294,18 @@ public class FlowByExpressionCustomizer extends JPanel implements
           if (p != null) {
             if (p.getLastPathComponent() instanceof DefaultMutableTreeNode) {
 
-              DefaultMutableTreeNode tNode = (DefaultMutableTreeNode) p
-                  .getLastPathComponent();
-              FlowByExpression.ExpressionNode thisNode = (FlowByExpression.ExpressionNode) tNode
-                  .getUserObject();
+              DefaultMutableTreeNode tNode =
+                (DefaultMutableTreeNode) p.getLastPathComponent();
+              FlowByExpression.ExpressionNode thisNode =
+                (FlowByExpression.ExpressionNode) tNode.getUserObject();
 
               if (thisNode instanceof FlowByExpression.ExpressionClause) {
                 Object text = m_lhsField.getSelectedItem();
                 if (text != null) {
-                  ((FlowByExpression.ExpressionClause) thisNode).m_lhsAttributeName = text
-                      .toString();
-                  DefaultTreeModel tmodel = (DefaultTreeModel) m_expressionTree
-                      .getModel();
+                  ((FlowByExpression.ExpressionClause) thisNode).m_lhsAttributeName =
+                    text.toString();
+                  DefaultTreeModel tmodel =
+                    (DefaultTreeModel) m_expressionTree.getModel();
                   tmodel.nodeStructureChanged(tNode);
 
                   updateExpressionLabel();
@@ -315,41 +318,42 @@ public class FlowByExpressionCustomizer extends JPanel implements
     });
 
     m_lhsField.getEditor().getEditorComponent()
-        .addKeyListener(new KeyAdapter() {
-          @Override
-          public void keyReleased(KeyEvent e) {
-            if (m_expressionTree != null) {
-              TreePath p = m_expressionTree.getSelectionPath();
-              if (p != null) {
-                if (p.getLastPathComponent() instanceof DefaultMutableTreeNode) {
+      .addKeyListener(new KeyAdapter() {
+        @Override
+        public void keyReleased(KeyEvent e) {
+          if (m_expressionTree != null) {
+            TreePath p = m_expressionTree.getSelectionPath();
+            if (p != null) {
+              if (p.getLastPathComponent() instanceof DefaultMutableTreeNode) {
 
-                  DefaultMutableTreeNode tNode = (DefaultMutableTreeNode) p
-                      .getLastPathComponent();
-                  FlowByExpression.ExpressionNode thisNode = (FlowByExpression.ExpressionNode) tNode
-                      .getUserObject();
+                DefaultMutableTreeNode tNode =
+                  (DefaultMutableTreeNode) p.getLastPathComponent();
+                FlowByExpression.ExpressionNode thisNode =
+                  (FlowByExpression.ExpressionNode) tNode.getUserObject();
 
-                  if (thisNode instanceof FlowByExpression.ExpressionClause) {
-                    String text = "";
-                    if (m_lhsField.getSelectedItem() != null) {
-                      text = m_lhsField.getSelectedItem().toString();
-                    }
-                    java.awt.Component theEditor = m_lhsField.getEditor()
-                        .getEditorComponent();
-                    if (theEditor instanceof JTextField) {
-                      text = ((JTextField) theEditor).getText();
-                    }
-                    ((FlowByExpression.ExpressionClause) thisNode).m_lhsAttributeName = text;
-                    DefaultTreeModel tmodel = (DefaultTreeModel) m_expressionTree
-                        .getModel();
-                    tmodel.nodeStructureChanged(tNode);
-
-                    updateExpressionLabel();
+                if (thisNode instanceof FlowByExpression.ExpressionClause) {
+                  String text = "";
+                  if (m_lhsField.getSelectedItem() != null) {
+                    text = m_lhsField.getSelectedItem().toString();
                   }
+                  java.awt.Component theEditor =
+                    m_lhsField.getEditor().getEditorComponent();
+                  if (theEditor instanceof JTextField) {
+                    text = ((JTextField) theEditor).getText();
+                  }
+                  ((FlowByExpression.ExpressionClause) thisNode).m_lhsAttributeName =
+                    text;
+                  DefaultTreeModel tmodel =
+                    (DefaultTreeModel) m_expressionTree.getModel();
+                  tmodel.nodeStructureChanged(tNode);
+
+                  updateExpressionLabel();
                 }
               }
             }
           }
-        });
+        }
+      });
 
     m_rhsField.addActionListener(new ActionListener() {
       @Override
@@ -359,18 +363,18 @@ public class FlowByExpressionCustomizer extends JPanel implements
           if (p != null) {
             if (p.getLastPathComponent() instanceof DefaultMutableTreeNode) {
 
-              DefaultMutableTreeNode tNode = (DefaultMutableTreeNode) p
-                  .getLastPathComponent();
-              FlowByExpression.ExpressionNode thisNode = (FlowByExpression.ExpressionNode) tNode
-                  .getUserObject();
+              DefaultMutableTreeNode tNode =
+                (DefaultMutableTreeNode) p.getLastPathComponent();
+              FlowByExpression.ExpressionNode thisNode =
+                (FlowByExpression.ExpressionNode) tNode.getUserObject();
 
               if (thisNode instanceof FlowByExpression.ExpressionClause) {
                 Object text = m_rhsField.getSelectedItem();
                 if (text != null) {
-                  ((FlowByExpression.ExpressionClause) thisNode).m_rhsOperand = text
-                      .toString();
-                  DefaultTreeModel tmodel = (DefaultTreeModel) m_expressionTree
-                      .getModel();
+                  ((FlowByExpression.ExpressionClause) thisNode).m_rhsOperand =
+                    text.toString();
+                  DefaultTreeModel tmodel =
+                    (DefaultTreeModel) m_expressionTree.getModel();
                   tmodel.nodeStructureChanged(tNode);
 
                   updateExpressionLabel();
@@ -383,44 +387,45 @@ public class FlowByExpressionCustomizer extends JPanel implements
     });
 
     m_rhsField.getEditor().getEditorComponent()
-        .addKeyListener(new KeyAdapter() {
-          @Override
-          public void keyReleased(KeyEvent e) {
-            if (m_expressionTree != null) {
-              TreePath p = m_expressionTree.getSelectionPath();
-              if (p != null) {
-                if (p.getLastPathComponent() instanceof DefaultMutableTreeNode) {
+      .addKeyListener(new KeyAdapter() {
+        @Override
+        public void keyReleased(KeyEvent e) {
+          if (m_expressionTree != null) {
+            TreePath p = m_expressionTree.getSelectionPath();
+            if (p != null) {
+              if (p.getLastPathComponent() instanceof DefaultMutableTreeNode) {
 
-                  DefaultMutableTreeNode tNode = (DefaultMutableTreeNode) p
-                      .getLastPathComponent();
-                  FlowByExpression.ExpressionNode thisNode = (FlowByExpression.ExpressionNode) tNode
-                      .getUserObject();
+                DefaultMutableTreeNode tNode =
+                  (DefaultMutableTreeNode) p.getLastPathComponent();
+                FlowByExpression.ExpressionNode thisNode =
+                  (FlowByExpression.ExpressionNode) tNode.getUserObject();
 
-                  if (thisNode instanceof FlowByExpression.ExpressionClause) {
-                    String text = "";
-                    if (m_rhsField.getSelectedItem() != null) {
-                      text = m_rhsField.getSelectedItem().toString();
-                    }
-                    java.awt.Component theEditor = m_rhsField.getEditor()
-                        .getEditorComponent();
-                    if (theEditor instanceof JTextField) {
-                      text = ((JTextField) theEditor).getText();
-                    }
+                if (thisNode instanceof FlowByExpression.ExpressionClause) {
+                  String text = "";
+                  if (m_rhsField.getSelectedItem() != null) {
+                    text = m_rhsField.getSelectedItem().toString();
+                  }
+                  java.awt.Component theEditor =
+                    m_rhsField.getEditor().getEditorComponent();
+                  if (theEditor instanceof JTextField) {
+                    text = ((JTextField) theEditor).getText();
+                  }
 
-                    if (m_rhsField.getSelectedItem() != null) {
-                      ((FlowByExpression.ExpressionClause) thisNode).m_rhsOperand = text;
-                      DefaultTreeModel tmodel = (DefaultTreeModel) m_expressionTree
-                          .getModel();
-                      tmodel.nodeStructureChanged(tNode);
+                  if (m_rhsField.getSelectedItem() != null) {
+                    ((FlowByExpression.ExpressionClause) thisNode).m_rhsOperand =
+                      text;
+                    DefaultTreeModel tmodel =
+                      (DefaultTreeModel) m_expressionTree.getModel();
+                    tmodel.nodeStructureChanged(tNode);
 
-                      updateExpressionLabel();
-                    }
+                    updateExpressionLabel();
                   }
                 }
               }
             }
           }
-        });
+        }
+      });
 
     // try and setup combo boxes with incoming attribute names
     if (m_expression.getConnectedFormat() != null) {
@@ -471,8 +476,8 @@ public class FlowByExpressionCustomizer extends JPanel implements
   private void updateExpressionLabel() {
     StringBuffer buff = new StringBuffer();
 
-    FlowByExpression.ExpressionNode root = (FlowByExpression.ExpressionNode) m_treeRoot
-        .getUserObject();
+    FlowByExpression.ExpressionNode root =
+      (FlowByExpression.ExpressionNode) m_treeRoot.getUserObject();
     root.toStringDisplay(buff);
     m_expressionLab.setText(buff.toString());
   }
@@ -522,11 +527,11 @@ public class FlowByExpressionCustomizer extends JPanel implements
         TreePath p = m_expressionTree.getSelectionPath();
         if (p != null) {
           if (p.getLastPathComponent() instanceof DefaultMutableTreeNode) {
-            DefaultMutableTreeNode tNode = (DefaultMutableTreeNode) p
-                .getLastPathComponent();
+            DefaultMutableTreeNode tNode =
+              (DefaultMutableTreeNode) p.getLastPathComponent();
 
-            FlowByExpression.ExpressionNode thisNode = (FlowByExpression.ExpressionNode) tNode
-                .getUserObject();
+            FlowByExpression.ExpressionNode thisNode =
+              (FlowByExpression.ExpressionNode) tNode.getUserObject();
 
             if (thisNode instanceof FlowByExpression.ExpressionClause) {
               setExpressionEditor((FlowByExpression.ExpressionClause) thisNode);
@@ -561,24 +566,24 @@ public class FlowByExpressionCustomizer extends JPanel implements
         if (p != null) {
           if (p.getLastPathComponent() instanceof DefaultMutableTreeNode) {
 
-            DefaultMutableTreeNode tNode = (DefaultMutableTreeNode) p
-                .getLastPathComponent();
-            FlowByExpression.ExpressionNode thisNode = (FlowByExpression.ExpressionNode) tNode
-                .getUserObject();
+            DefaultMutableTreeNode tNode =
+              (DefaultMutableTreeNode) p.getLastPathComponent();
+            FlowByExpression.ExpressionNode thisNode =
+              (FlowByExpression.ExpressionNode) tNode.getUserObject();
 
             thisNode.setIsOr(!thisNode.isOr());
-            DefaultTreeModel tmodel = (DefaultTreeModel) m_expressionTree
-                .getModel();
+            DefaultTreeModel tmodel =
+              (DefaultTreeModel) m_expressionTree.getModel();
             tmodel.nodeStructureChanged(tNode);
 
             updateExpressionLabel();
           }
         } else {
           JOptionPane
-              .showMessageDialog(
-                  FlowByExpressionCustomizer.this,
-                  "Please select a node in the tree to alter the boolean operator of",
-                  "And/Or", JOptionPane.INFORMATION_MESSAGE);
+            .showMessageDialog(
+              FlowByExpressionCustomizer.this,
+              "Please select a node in the tree to alter the boolean operator of",
+              "And/Or", JOptionPane.INFORMATION_MESSAGE);
         }
       }
     });
@@ -590,22 +595,22 @@ public class FlowByExpressionCustomizer extends JPanel implements
         if (p != null) {
           if (p.getLastPathComponent() instanceof DefaultMutableTreeNode) {
 
-            DefaultMutableTreeNode tNode = (DefaultMutableTreeNode) p
-                .getLastPathComponent();
-            FlowByExpression.ExpressionNode thisNode = (FlowByExpression.ExpressionNode) tNode
-                .getUserObject();
+            DefaultMutableTreeNode tNode =
+              (DefaultMutableTreeNode) p.getLastPathComponent();
+            FlowByExpression.ExpressionNode thisNode =
+              (FlowByExpression.ExpressionNode) tNode.getUserObject();
 
             thisNode.setNegated(!thisNode.isNegated());
-            DefaultTreeModel tmodel = (DefaultTreeModel) m_expressionTree
-                .getModel();
+            DefaultTreeModel tmodel =
+              (DefaultTreeModel) m_expressionTree.getModel();
             tmodel.nodeStructureChanged(tNode);
 
             updateExpressionLabel();
           }
         } else {
           JOptionPane.showMessageDialog(FlowByExpressionCustomizer.this,
-              "Please select a node in the tree to toggle its negation",
-              "Toggle negation", JOptionPane.INFORMATION_MESSAGE);
+            "Please select a node in the tree to toggle its negation",
+            "Toggle negation", JOptionPane.INFORMATION_MESSAGE);
         }
       }
     });
@@ -616,34 +621,35 @@ public class FlowByExpressionCustomizer extends JPanel implements
         TreePath p = m_expressionTree.getSelectionPath();
         if (p != null) {
           if (p.getLastPathComponent() instanceof DefaultMutableTreeNode) {
-            DefaultMutableTreeNode tNode = (DefaultMutableTreeNode) p
-                .getLastPathComponent();
+            DefaultMutableTreeNode tNode =
+              (DefaultMutableTreeNode) p.getLastPathComponent();
 
             if (tNode == m_treeRoot) {
               JOptionPane.showMessageDialog(FlowByExpressionCustomizer.this,
-                  "You can't delete the root of the tree!", "Delete node",
-                  JOptionPane.INFORMATION_MESSAGE);
+                "You can't delete the root of the tree!", "Delete node",
+                JOptionPane.INFORMATION_MESSAGE);
             } else {
-              FlowByExpression.ExpressionNode thisNode = (FlowByExpression.ExpressionNode) tNode
-                  .getUserObject();
+              FlowByExpression.ExpressionNode thisNode =
+                (FlowByExpression.ExpressionNode) tNode.getUserObject();
 
-              FlowByExpression.BracketNode parentNode = (FlowByExpression.BracketNode) ((DefaultMutableTreeNode) tNode
+              FlowByExpression.BracketNode parentNode =
+                (FlowByExpression.BracketNode) ((DefaultMutableTreeNode) tNode
                   .getParent()).getUserObject();
 
               // remove from internal tree structure
               parentNode.removeChild(thisNode);
 
               // remove from jtree structure
-              DefaultTreeModel tmodel = (DefaultTreeModel) m_expressionTree
-                  .getModel();
+              DefaultTreeModel tmodel =
+                (DefaultTreeModel) m_expressionTree.getModel();
               tmodel.removeNodeFromParent(tNode);
               updateExpressionLabel();
             }
           }
         } else {
           JOptionPane.showMessageDialog(FlowByExpressionCustomizer.this,
-              "Please select a node in the tree to delete.", "Delete node",
-              JOptionPane.INFORMATION_MESSAGE);
+            "Please select a node in the tree to delete.", "Delete node",
+            JOptionPane.INFORMATION_MESSAGE);
         }
       }
     });
@@ -655,37 +661,38 @@ public class FlowByExpressionCustomizer extends JPanel implements
         if (p != null) {
           if (p.getLastPathComponent() instanceof DefaultMutableTreeNode) {
 
-            DefaultMutableTreeNode tNode = (DefaultMutableTreeNode) p
-                .getLastPathComponent();
-            FlowByExpression.ExpressionNode thisNode = (FlowByExpression.ExpressionNode) tNode
-                .getUserObject();
+            DefaultMutableTreeNode tNode =
+              (DefaultMutableTreeNode) p.getLastPathComponent();
+            FlowByExpression.ExpressionNode thisNode =
+              (FlowByExpression.ExpressionNode) tNode.getUserObject();
 
             if (thisNode instanceof FlowByExpression.BracketNode) {
-              FlowByExpression.ExpressionClause newNode = new FlowByExpression.ExpressionClause(
+              FlowByExpression.ExpressionClause newNode =
+                new FlowByExpression.ExpressionClause(
                   FlowByExpression.ExpressionClause.ExpressionType.EQUALS,
                   "<att name>", "<value>", false, false);
 
               ((FlowByExpression.BracketNode) thisNode).addChild(newNode);
-              DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(
-                  newNode);
+              DefaultMutableTreeNode childNode =
+                new DefaultMutableTreeNode(newNode);
 
-              DefaultTreeModel tmodel = (DefaultTreeModel) m_expressionTree
-                  .getModel();
+              DefaultTreeModel tmodel =
+                (DefaultTreeModel) m_expressionTree.getModel();
               tNode.add(childNode);
               tmodel.nodeStructureChanged(tNode);
               updateExpressionLabel();
             } else {
               JOptionPane.showMessageDialog(FlowByExpressionCustomizer.this,
-                  "An expression can only be added to a bracket node.",
-                  "Add expression", JOptionPane.INFORMATION_MESSAGE);
+                "An expression can only be added to a bracket node.",
+                "Add expression", JOptionPane.INFORMATION_MESSAGE);
             }
           }
         } else {
           JOptionPane
-              .showMessageDialog(
-                  FlowByExpressionCustomizer.this,
-                  "You must select a bracket node in the tree view to add a new expression to.",
-                  "Add expression", JOptionPane.INFORMATION_MESSAGE);
+            .showMessageDialog(
+              FlowByExpressionCustomizer.this,
+              "You must select a bracket node in the tree view to add a new expression to.",
+              "Add expression", JOptionPane.INFORMATION_MESSAGE);
         }
       }
     });
@@ -697,36 +704,37 @@ public class FlowByExpressionCustomizer extends JPanel implements
         if (p != null) {
           if (p.getLastPathComponent() instanceof DefaultMutableTreeNode) {
 
-            DefaultMutableTreeNode tNode = (DefaultMutableTreeNode) p
-                .getLastPathComponent();
-            FlowByExpression.ExpressionNode thisNode = (FlowByExpression.ExpressionNode) tNode
-                .getUserObject();
+            DefaultMutableTreeNode tNode =
+              (DefaultMutableTreeNode) p.getLastPathComponent();
+            FlowByExpression.ExpressionNode thisNode =
+              (FlowByExpression.ExpressionNode) tNode.getUserObject();
 
             if (thisNode instanceof FlowByExpression.BracketNode) {
-              FlowByExpression.BracketNode newNode = new FlowByExpression.BracketNode();
+              FlowByExpression.BracketNode newNode =
+                new FlowByExpression.BracketNode();
               ((FlowByExpression.BracketNode) thisNode).addChild(newNode);
-              DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(
-                  newNode);
+              DefaultMutableTreeNode childNode =
+                new DefaultMutableTreeNode(newNode);
 
-              DefaultTreeModel tmodel = (DefaultTreeModel) m_expressionTree
-                  .getModel();
+              DefaultTreeModel tmodel =
+                (DefaultTreeModel) m_expressionTree.getModel();
               tNode.add(childNode);
               tmodel.nodeStructureChanged(tNode);
               updateExpressionLabel();
             } else {
               JOptionPane
-                  .showMessageDialog(
-                      FlowByExpressionCustomizer.this,
-                      "An new bracket node can only be added to an existing bracket node.",
-                      "Add bracket", JOptionPane.INFORMATION_MESSAGE);
+                .showMessageDialog(
+                  FlowByExpressionCustomizer.this,
+                  "An new bracket node can only be added to an existing bracket node.",
+                  "Add bracket", JOptionPane.INFORMATION_MESSAGE);
             }
           }
         } else {
           JOptionPane
-              .showMessageDialog(
-                  FlowByExpressionCustomizer.this,
-                  "You must select an existing bracket node in the tree in order to add a new bracket node.",
-                  "Add bracket", JOptionPane.INFORMATION_MESSAGE);
+            .showMessageDialog(
+              FlowByExpressionCustomizer.this,
+              "You must select an existing bracket node in the tree in order to add a new bracket node.",
+              "Add bracket", JOptionPane.INFORMATION_MESSAGE);
         }
       }
     });
@@ -763,20 +771,20 @@ public class FlowByExpressionCustomizer extends JPanel implements
    */
   private void closingOK() {
     if (m_treeRoot != null) {
-      FlowByExpression.ExpressionNode en = (FlowByExpression.ExpressionNode) m_treeRoot
-          .getUserObject();
+      FlowByExpression.ExpressionNode en =
+        (FlowByExpression.ExpressionNode) m_treeRoot.getUserObject();
       StringBuffer buff = new StringBuffer();
       en.toStringInternal(buff);
 
       m_expression.setExpressionString(buff.toString());
 
       if (m_trueData.getSelectedItem() != null
-          && m_trueData.getSelectedItem().toString().length() > 0) {
+        && m_trueData.getSelectedItem().toString().length() > 0) {
         m_expression.setTrueStepName(m_trueData.getSelectedItem().toString());
       }
 
       if (m_falseData.getSelectedItem() != null
-          && m_falseData.getSelectedItem().toString().length() > 0) {
+        && m_falseData.getSelectedItem().toString().length() > 0) {
         m_expression.setFalseStepName(m_falseData.getSelectedItem().toString());
       }
     }

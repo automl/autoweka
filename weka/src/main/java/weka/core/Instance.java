@@ -62,7 +62,7 @@ import java.util.Enumeration;
  * change of an instance's attribute values must not affect any other instances.
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 9028 $
+ * @version $Revision: 12472 $
  */
 public interface Instance extends Copyable {
 
@@ -126,6 +126,15 @@ public interface Instance extends Copyable {
   public double classValue();
 
   /**
+   * Copies the instance but fills up its values based on the given array
+   * of doubles. The copy has access to the same dataset.
+   *
+   * @param values the array with new values
+   * @return the new instance
+   */
+  public Instance copy(double[] values);
+
+  /**
    * Returns the dataset this instance has access to. (ie. obtains information
    * about attribute types from) Null if the instance doesn't have access to a
    * dataset.
@@ -151,7 +160,7 @@ public interface Instance extends Copyable {
    * @throws UnassignedDatasetException if the instance doesn't have access to a
    *           dataset
    */
-  public Enumeration enumerateAttributes();
+  public Enumeration<Attribute> enumerateAttributes();
 
   /**
    * Tests if the headers of two instances are equivalent.
@@ -168,7 +177,7 @@ public interface Instance extends Copyable {
    * Checks if the headers of two instances are equivalent. If not, then returns
    * a message why they differ.
    * 
-   * @param dataset another instance
+   * @param inst another instance
    * @return null if the header of the given instance is equivalent to this
    *         instance's header, otherwise a message with details on why they
    *         differ
@@ -296,7 +305,7 @@ public interface Instance extends Copyable {
    *          nominal (or a string) then this is the new value's index as a
    *          double).
    * @throws UnassignedClassException if the class is not set
-   * @throws UnaddignedDatasetException if the instance doesn't have access to a
+   * @throws UnassignedDatasetException if the instance doesn't have access to a
    *           dataset
    */
   public void setClassValue(double value);

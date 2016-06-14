@@ -22,6 +22,7 @@
 package weka.classifiers.meta;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -30,19 +31,9 @@ import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.RandomizableParallelMultipleClassifiersCombiner;
 import weka.classifiers.rules.ZeroR;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.TechnicalInformation;
+import weka.core.*;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
 
 /**
  <!-- globalinfo-start -->
@@ -96,7 +87,7 @@ import weka.core.Utils;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 8034 $ 
+ * @version $Revision: 12205 $ 
  */
 public class Stacking 
   extends RandomizableParallelMultipleClassifiersCombiner
@@ -157,9 +148,9 @@ public class Stacking
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
     
-    Vector newVector = new Vector(2);
+    Vector<Option> newVector = new Vector<Option>(2);
     newVector.addElement(new Option(
 	      metaOption(),
 	      "M", 0, "-M <scheme specification>"));
@@ -167,9 +158,14 @@ public class Stacking
 	      "\tSets the number of cross-validation folds.",
 	      "X", 1, "-X <number of folds>"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
+    newVector.addAll(Collections.list(super.listOptions()));
+    
+    if (getMetaClassifier() instanceof OptionHandler) {
+      newVector.addElement(new Option(
+        "",
+        "", 0, "\nOptions specific to meta classifier "
+          + getMetaClassifier().getClass().getName() + ":"));
+      newVector.addAll(Collections.list(((OptionHandler)getMetaClassifier()).listOptions()));
     }
     return newVector.elements();
   }
@@ -520,14 +516,30 @@ public class Stacking
     metaInstance.setDataset(m_MetaFormat);
     return metaInstance;
   }
-  
+
+  @Override
+  public void preExecution() throws Exception {
+    super.preExecution();
+    if (getMetaClassifier() instanceof CommandlineRunnable) {
+      ((CommandlineRunnable) getMetaClassifier()).preExecution();
+    }
+  }
+
+  @Override
+  public void postExecution() throws Exception {
+    super.postExecution();
+    if (getMetaClassifier() instanceof CommandlineRunnable) {
+      ((CommandlineRunnable) getMetaClassifier()).postExecution();
+    }
+  }
+
   /**
    * Returns the revision string.
    * 
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 12205 $");
   }
 
   /**

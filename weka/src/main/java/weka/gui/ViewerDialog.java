@@ -21,20 +21,19 @@
 
 package weka.gui;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Frame;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import weka.core.Instances;
+import weka.gui.arffviewer.ArffPanel;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
-import weka.core.Instances;
-import weka.gui.arffviewer.ArffPanel;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * A downsized version of the ArffViewer, displaying only one Instances-Object.
@@ -42,7 +41,7 @@ import weka.gui.arffviewer.ArffPanel;
  *
  * @see weka.gui.arffviewer.ArffViewer
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $ 
+ * @version $Revision: 12697 $ 
  */
 public class ViewerDialog 
   extends JDialog 
@@ -68,6 +67,9 @@ public class ViewerDialog
 
   /** Click to undo the last action */
   protected JButton m_UndoButton = new JButton("Undo");
+
+  /** Click to add a new instance to the end of the dataset */
+  protected JButton m_addInstanceButton = new JButton("Add instance");
   
   /** the panel to display the Instances-object */
   protected ArffPanel m_ArffPanel = new ArffPanel();
@@ -81,7 +83,7 @@ public class ViewerDialog
     super(parent, ModalityType.DOCUMENT_MODAL);
     createDialog();
   }
-
+  
   /**
    * creates all the elements of the dialog
    */
@@ -117,6 +119,13 @@ public class ViewerDialog
         setVisible(false);
       }
     });
+    m_addInstanceButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        m_ArffPanel.addInstanceAtEnd();
+      }
+    });
+    panel.add(m_addInstanceButton);
     panel.add(m_UndoButton);
     panel.add(m_OkButton);
     panel.add(m_CancelButton);

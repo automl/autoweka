@@ -63,7 +63,7 @@ import weka.core.converters.ConverterUtils.DataSource;
  * Options after -- are passed to the designated classifier (specified with -W).
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10141 $
  * @see     weka.classifiers.Sourcable
  */
 public class CheckSource
@@ -86,8 +86,8 @@ public class CheckSource
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
-    Vector result = new Vector();
+  public Enumeration<Option> listOptions() {
+    Vector<Option> result = new Vector<Option>();
 
     result.addElement(new Option(
         "\tThe classifier (incl. options) that was used to generate\n"
@@ -390,7 +390,7 @@ public class CheckSource
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10141 $");
   }
 
   /**
@@ -402,7 +402,7 @@ public class CheckSource
   public static void main(String[] args) throws Exception{
     CheckSource         check;
     StringBuffer        text;
-    Enumeration         enm;
+    Enumeration<Option>         enm;
 
     check = new CheckSource();
     if (Utils.getFlag('h', args)) {

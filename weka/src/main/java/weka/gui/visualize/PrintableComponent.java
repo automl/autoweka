@@ -13,11 +13,11 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- /*
-  *    PrintableComponent.java
-  *    Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
-  *
-  */
+/*
+ *    PrintableComponent.java
+ *    Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ *
+ */
 
 package weka.gui.visualize;
 
@@ -48,45 +48,44 @@ import javax.swing.event.DocumentListener;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 
-/** 
- * This class extends the component which is handed over in the constructor
- * by a print dialog.
- * The Print dialog is accessible via Alt+Shift+LeftMouseClick. <p>
+/**
+ * This class extends the component which is handed over in the constructor by a
+ * print dialog. The Print dialog is accessible via Alt+Shift+LeftMouseClick.
+ * <p>
  * The individual JComponentWriter-descendants can be accessed by the
  * <code>getWriter(String)</code> method, if the parameters need to be changed.
- *
+ * 
  * @see #getWriters()
  * @see #getWriter(String)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10222 $
  */
-public class PrintableComponent
-  implements PrintableHandler {
-  
+public class PrintableComponent implements PrintableHandler {
+
   /** the parent component of this print dialog. */
   protected JComponent m_Component;
-  
+
   /** the filechooser for saving the panel. */
   protected static JFileChooser m_FileChooserPanel;
 
   /** the checkbox for the custom dimensions. */
   protected static JCheckBox m_CustomDimensionsCheckBox;
-  
+
   /** the edit field for the custom width. */
   protected static JTextField m_CustomWidthText;
-  
+
   /** the edit field for the custom height. */
   protected static JTextField m_CustomHeightText;
 
   /** the checkbox for keeping the aspect ration. */
   protected static JCheckBox m_AspectRatioCheckBox;
-  
+
   /** the title of the save dialog. */
   protected String m_SaveDialogTitle = "Save as...";
-  
+
   /** the x scale factor. */
   protected double m_xScale = 1.0;
-  
+
   /** the y scale factor. */
   protected double m_yScale = 1.0;
 
@@ -95,10 +94,10 @@ public class PrintableComponent
 
   /** whether to ignore the update of the text field (in case of "keep ratio"). */
   protected boolean m_IgnoreChange;
-  
+
   /** whether to print some debug information. */
   private static final boolean DEBUG = false;
-  
+
   /** whether the user was already asked about the tooltip behavior. */
   protected static boolean m_ToolTipUserAsked = false;
 
@@ -107,162 +106,164 @@ public class PrintableComponent
 
   /** the property name whether the user was already asked. */
   protected final static String PROPERTY_USERASKED = "PrintableComponentToolTipUserAsked";
-  
+
   /** whether to display the tooltip or not. */
   protected static boolean m_ShowToolTip = true;
   static {
     try {
       m_ShowToolTip = Boolean.valueOf(
-          VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(
-            PROPERTY_SHOW, 
-            "true")).booleanValue();
+        VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(PROPERTY_SHOW, "true"))
+        .booleanValue();
       m_ToolTipUserAsked = Boolean.valueOf(
-          VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(
-            PROPERTY_USERASKED, 
-            "false")).booleanValue();
-    }
-    catch (Exception e) {
+        VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(PROPERTY_USERASKED,
+          "false")).booleanValue();
+    } catch (Exception e) {
       // ignore exception
       m_ToolTipUserAsked = false;
-      m_ShowToolTip      = true;
+      m_ShowToolTip = true;
     }
   }
-  
+
   /** output if we're in debug mode */
   static {
-    if (DEBUG)
+    if (DEBUG) {
       System.err.println(PrintablePanel.class.getName() + ": DEBUG ON");
+    }
   }
-  
+
   /**
    * initializes the panel.
    * 
-   * @param component     the component to enhance with printing functionality
+   * @param component the component to enhance with printing functionality
    */
   public PrintableComponent(JComponent component) {
     super();
-    
-    m_Component   = component;
+
+    m_Component = component;
     m_AspectRatio = Double.NaN;
-    
+
     getComponent().addMouseListener(new PrintMouseListener(this));
     getComponent().setToolTipText(getToolTipText(this));
     initFileChooser();
   }
-  
+
   /**
    * returns the GUI component this print dialog is part of.
    * 
-   * @return		the GUI component
+   * @return the GUI component
    */
   public JComponent getComponent() {
     return m_Component;
   }
 
   /**
-   * Returns a tooltip only if the user wants it. If retrieved for the first,
-   * a dialog pops up and asks the user whether the tooltip should always
-   * appear or not. The weka/gui/visualize/Visualize.props is then written
-   * in the user's home directory.
-   *
+   * Returns a tooltip only if the user wants it. If retrieved for the first, a
+   * dialog pops up and asks the user whether the tooltip should always appear
+   * or not. The weka/gui/visualize/Visualize.props is then written in the
+   * user's home directory.
+   * 
    * @param component the PrintableComponent to ask for
    * @return null if the user doesn't want the tooltip, otherwise the text
    */
+  @SuppressWarnings("unused")
   public static String getToolTipText(PrintableComponent component) {
-    String        result;
-    int           retVal;
-    Properties    props;
-    String        name;
-    Enumeration   names;
-    String        filename;
+    String result;
+    int retVal;
+    Properties props;
+    String name;
+    Enumeration<?> names;
+    String filename;
 
     // ToolTip is disabled for the moment...
-    if (true)
+    if (true) {
       return null;
+    }
 
     // ask user whether the tooltip should be shown
     if (!m_ToolTipUserAsked) {
       m_ToolTipUserAsked = true;
-      
-      retVal = JOptionPane.showConfirmDialog(
-          component.getComponent(),
-            "Some panels enable the user to save the content as JPEG or EPS.\n"
+
+      retVal = JOptionPane.showConfirmDialog(component.getComponent(),
+        "Some panels enable the user to save the content as JPEG or EPS.\n"
           + "In order to see which panels support this, a tooltip can be "
-          + "displayed. Enable tooltip?",
-          "ToolTip for Panels...",
-          JOptionPane.YES_NO_OPTION);
+          + "displayed. Enable tooltip?", "ToolTip for Panels...",
+        JOptionPane.YES_NO_OPTION);
 
       m_ShowToolTip = (retVal == JOptionPane.YES_OPTION);
 
       // save props file
-      VisualizeUtils.VISUALIZE_PROPERTIES.setProperty(
-               PROPERTY_SHOW, "" + m_ShowToolTip);
-      VisualizeUtils.VISUALIZE_PROPERTIES.setProperty(
-               PROPERTY_USERASKED, "" + m_ToolTipUserAsked);
+      VisualizeUtils.VISUALIZE_PROPERTIES.setProperty(PROPERTY_SHOW, ""
+        + m_ShowToolTip);
+      VisualizeUtils.VISUALIZE_PROPERTIES.setProperty(PROPERTY_USERASKED, ""
+        + m_ToolTipUserAsked);
       try {
         // NOTE: properties that got inherited from another props file don't
-        //       get saved. I.e., one could overwrite the existing props
-        //       file with an (nearly) empty one.
-        //       => transfer all properties into a new one
+        // get saved. I.e., one could overwrite the existing props
+        // file with an (nearly) empty one.
+        // => transfer all properties into a new one
         props = new Properties();
         names = VisualizeUtils.VISUALIZE_PROPERTIES.propertyNames();
         while (names.hasMoreElements()) {
           name = names.nextElement().toString();
-          props.setProperty(
-              name,  
-              VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(name, ""));
+          props.setProperty(name,
+            VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(name, ""));
         }
         filename = System.getProperty("user.home") + "/Visualize.props";
-        props.store(
-            new BufferedOutputStream(new FileOutputStream(filename)), null);
+        props.store(new BufferedOutputStream(new FileOutputStream(filename)),
+          null);
 
         // inform user about location of props file and name of property
-        JOptionPane.showMessageDialog(
-            component.getComponent(), 
+        JOptionPane
+          .showMessageDialog(
+            component.getComponent(),
             "You can still manually enable or disable the ToolTip via the following property\n"
-            + "    " + PROPERTY_SHOW + "\n"
-            + "in the following file\n"
-            + "    " + filename);
-      }
-      catch (Exception e) {
-        JOptionPane.showMessageDialog(
-            component.getComponent(), 
-              "Error saving the props file!\n"
-            + e.getMessage() + "\n\n"
-            + "Note:\n"
-            + "If you want to disable these messages from popping up, place a file\n"
-            + "called 'Visualize.props' either in your home directory or in the directory\n"
-            + "you're starting Weka from and add the following lines:\n"
-            + "    " + PROPERTY_USERASKED + "=true\n"
-            + "    " + PROPERTY_SHOW + "=" + m_ShowToolTip,
-            "Error...",
+              + "    "
+              + PROPERTY_SHOW
+              + "\n"
+              + "in the following file\n"
+              + "    " + filename);
+      } catch (Exception e) {
+        JOptionPane
+          .showMessageDialog(
+            component.getComponent(),
+            "Error saving the props file!\n"
+              + e.getMessage()
+              + "\n\n"
+              + "Note:\n"
+              + "If you want to disable these messages from popping up, place a file\n"
+              + "called 'Visualize.props' either in your home directory or in the directory\n"
+              + "you're starting Weka from and add the following lines:\n"
+              + "    " + PROPERTY_USERASKED + "=true\n" + "    "
+              + PROPERTY_SHOW + "=" + m_ShowToolTip, "Error...",
             JOptionPane.ERROR_MESSAGE);
       }
     }
-    
-    if (m_ShowToolTip)
+
+    if (m_ShowToolTip) {
       result = "Click left mouse button while holding <alt> and <shift> to display a save dialog.";
-    else
+    } else {
       result = null;
+    }
 
     return result;
   }
-  
+
   /**
-   * initializes the filechooser, i.e. locates all the available writers in
-   * the current package
+   * initializes the filechooser, i.e. locates all the available writers in the
+   * current package
    */
   protected void initFileChooser() {
-    Vector              writerNames;
-    int                 i;
-    Class               cls;
-    JComponentWriter    writer;
-    JPanel		accessory;
-    JLabel		label;
+    Vector<String> writerNames;
+    int i;
+    Class<?> cls;
+    JComponentWriter writer;
+    JPanel accessory;
+    JLabel label;
 
     // already initialized?
-    if (m_FileChooserPanel != null)
+    if (m_FileChooserPanel != null) {
       return;
+    }
 
     m_FileChooserPanel = new JFileChooser();
     m_FileChooserPanel.resetChoosableFileFilters();
@@ -274,46 +275,49 @@ public class PrintableComponent
     accessory.setPreferredSize(new Dimension(200, 200));
     accessory.revalidate();
     m_FileChooserPanel.setAccessory(accessory);
- 
+
     m_CustomDimensionsCheckBox = new JCheckBox("Use custom dimensions");
     m_CustomDimensionsCheckBox.setBounds(14, 7, 200, 21);
     m_CustomDimensionsCheckBox.addItemListener(new ItemListener() {
+      @Override
       public void itemStateChanged(ItemEvent e) {
-	boolean custom = m_CustomDimensionsCheckBox.isSelected();
-	m_CustomWidthText.setEnabled(custom);
-	m_CustomHeightText.setEnabled(custom);
-	m_AspectRatioCheckBox.setEnabled(custom);
-	if (custom) {
-	  m_IgnoreChange = true;
-	  m_CustomWidthText.setText("" + m_Component.getWidth());
-	  m_CustomHeightText.setText("" + m_Component.getHeight());
-	  m_IgnoreChange = false;
-	}
-	else {
-	  m_IgnoreChange = true;
-	  m_CustomWidthText.setText("-1");
-	  m_CustomHeightText.setText("-1");
-	  m_IgnoreChange = false;
-	}
+        boolean custom = m_CustomDimensionsCheckBox.isSelected();
+        m_CustomWidthText.setEnabled(custom);
+        m_CustomHeightText.setEnabled(custom);
+        m_AspectRatioCheckBox.setEnabled(custom);
+        if (custom) {
+          m_IgnoreChange = true;
+          m_CustomWidthText.setText("" + m_Component.getWidth());
+          m_CustomHeightText.setText("" + m_Component.getHeight());
+          m_IgnoreChange = false;
+        } else {
+          m_IgnoreChange = true;
+          m_CustomWidthText.setText("-1");
+          m_CustomHeightText.setText("-1");
+          m_IgnoreChange = false;
+        }
       }
     });
     accessory.add(m_CustomDimensionsCheckBox);
-    
+
     m_CustomWidthText = new JTextField(5);
     m_CustomWidthText.setText("-1");
     m_CustomWidthText.setEnabled(false);
     m_CustomWidthText.setBounds(65, 35, 50, 21);
     m_CustomWidthText.getDocument().addDocumentListener(new DocumentListener() {
+      @Override
       public void changedUpdate(DocumentEvent e) {
-	updateDimensions(m_CustomWidthText);
+        updateDimensions(m_CustomWidthText);
       }
-      
+
+      @Override
       public void insertUpdate(DocumentEvent e) {
-	updateDimensions(m_CustomWidthText);
+        updateDimensions(m_CustomWidthText);
       }
-      
+
+      @Override
       public void removeUpdate(DocumentEvent e) {
-	updateDimensions(m_CustomWidthText);
+        updateDimensions(m_CustomWidthText);
       }
     });
     label = new JLabel("Width");
@@ -322,101 +326,110 @@ public class PrintableComponent
     label.setBounds(14, 35, 50, 21);
     accessory.add(label);
     accessory.add(m_CustomWidthText);
-    
+
     m_CustomHeightText = new JTextField(5);
     m_CustomHeightText.setText("-1");
     m_CustomHeightText.setEnabled(false);
     m_CustomHeightText.setBounds(65, 63, 50, 21);
-    m_CustomHeightText.getDocument().addDocumentListener(new DocumentListener() {
-      public void changedUpdate(DocumentEvent e) {
-	updateDimensions(m_CustomHeightText);
-      }
-      
-      public void insertUpdate(DocumentEvent e) {
-	updateDimensions(m_CustomHeightText);
-      }
-      
-      public void removeUpdate(DocumentEvent e) {
-	updateDimensions(m_CustomHeightText);
-      }
-    });
+    m_CustomHeightText.getDocument().addDocumentListener(
+      new DocumentListener() {
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+          updateDimensions(m_CustomHeightText);
+        }
+
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+          updateDimensions(m_CustomHeightText);
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+          updateDimensions(m_CustomHeightText);
+        }
+      });
     label = new JLabel("Height");
     label.setLabelFor(m_CustomHeightText);
     label.setDisplayedMnemonic('H');
     label.setBounds(14, 63, 50, 21);
     accessory.add(label);
     accessory.add(m_CustomHeightText);
-    
+
     m_AspectRatioCheckBox = new JCheckBox("Keep aspect ratio");
     m_AspectRatioCheckBox.setBounds(14, 91, 200, 21);
     m_AspectRatioCheckBox.setEnabled(false);
     m_AspectRatioCheckBox.setSelected(true);
     m_AspectRatioCheckBox.addItemListener(new ItemListener() {
+      @Override
       public void itemStateChanged(ItemEvent e) {
-	boolean keep = m_AspectRatioCheckBox.isSelected();
-	if (keep) {
-	  m_IgnoreChange = true;
-	  m_CustomWidthText.setText("" + m_Component.getWidth());
-	  m_CustomHeightText.setText("" + m_Component.getHeight());
-	  m_IgnoreChange = false;
-	}
+        boolean keep = m_AspectRatioCheckBox.isSelected();
+        if (keep) {
+          m_IgnoreChange = true;
+          m_CustomWidthText.setText("" + m_Component.getWidth());
+          m_CustomHeightText.setText("" + m_Component.getHeight());
+          m_IgnoreChange = false;
+        }
       }
     });
     accessory.add(m_AspectRatioCheckBox);
-    
+
     // determine all available writers and add them to the filechooser
-    writerNames = GenericObjectEditor.getClassnames(JComponentWriter.class.getName());
+    writerNames = GenericObjectEditor.getClassnames(JComponentWriter.class
+      .getName());
     Collections.sort(writerNames);
     for (i = 0; i < writerNames.size(); i++) {
       try {
-        cls    = Class.forName(writerNames.get(i).toString());
+        cls = Class.forName(writerNames.get(i).toString());
         writer = (JComponentWriter) cls.newInstance();
-        m_FileChooserPanel.addChoosableFileFilter(
-            new JComponentWriterFileFilter(
-        	writer.getExtension(), 
-        	writer.getDescription() + " (*" + writer.getExtension() + ")", 
-        	writer));
-      }
-      catch (Exception e) {
+        m_FileChooserPanel
+          .addChoosableFileFilter(new JComponentWriterFileFilter(writer
+            .getExtension(), writer.getDescription() + " (*"
+            + writer.getExtension() + ")", writer));
+      } catch (Exception e) {
         System.err.println(writerNames.get(i) + ": " + e);
       }
     }
-    
+
     // set first filter as active filter
-    if (m_FileChooserPanel.getChoosableFileFilters().length > 0)
-      m_FileChooserPanel.setFileFilter(m_FileChooserPanel.getChoosableFileFilters()[0]);
+    if (m_FileChooserPanel.getChoosableFileFilters().length > 0) {
+      m_FileChooserPanel.setFileFilter(m_FileChooserPanel
+        .getChoosableFileFilters()[0]);
+    }
   }
-  
+
   /**
    * updates the dimensions if necessary (i.e., if aspect ratio is to be kept).
    * 
-   * @param sender	the JTextField which send the notification to update
+   * @param sender the JTextField which send the notification to update
    */
   protected void updateDimensions(JTextField sender) {
-    int		newValue;
-    int		baseValue;
-    
+    int newValue;
+    int baseValue;
+
     // some sanity checks
-    if (!m_AspectRatioCheckBox.isSelected() || m_IgnoreChange)
+    if (!m_AspectRatioCheckBox.isSelected() || m_IgnoreChange) {
       return;
-    if (!(sender instanceof JTextField) || (sender == null))
+    }
+    if (!(sender instanceof JTextField) || (sender == null)) {
       return;
-    if (sender.getText().length() == 0)
+    }
+    if (sender.getText().length() == 0) {
       return;
-    
+    }
+
     // is it a valid integer, greater than 0?
     try {
       baseValue = Integer.parseInt(sender.getText());
-      newValue  = 0;
-      if (baseValue <= 0)
-	return;
+      newValue = 0;
+      if (baseValue <= 0) {
+        return;
+      }
 
       if (Double.isNaN(m_AspectRatio)) {
-	m_AspectRatio = (double) getComponent().getWidth() / 
-	(double) getComponent().getHeight();
+        m_AspectRatio = (double) getComponent().getWidth()
+          / (double) getComponent().getHeight();
       }
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       // we can't parse the string!
       return;
     }
@@ -424,48 +437,50 @@ public class PrintableComponent
     // computer and update
     m_IgnoreChange = true;
     if (sender == m_CustomWidthText) {
-      newValue = (int) (((double) baseValue) * (1/m_AspectRatio));
+      newValue = (int) ((baseValue) * (1 / m_AspectRatio));
       m_CustomHeightText.setText("" + newValue);
-    }
-    else if (sender == m_CustomHeightText) {
-      newValue = (int) (((double) baseValue) * m_AspectRatio);
+    } else if (sender == m_CustomHeightText) {
+      newValue = (int) ((baseValue) * m_AspectRatio);
       m_CustomWidthText.setText("" + newValue);
     }
     m_IgnoreChange = false;
   }
-  
+
   /**
-   * returns a Hashtable with the current available JComponentWriters in the 
+   * returns a Hashtable with the current available JComponentWriters in the
    * save dialog. the key of the Hashtable is the description of the writer.
    * 
-   * @return all currently available JComponentWriters 
+   * @return all currently available JComponentWriters
    * @see JComponentWriter#getDescription()
    */
-  public Hashtable getWriters() {
-    Hashtable         result;
-    int               i;
-    JComponentWriter  writer;
-    
-    result = new Hashtable();
-    
+  @Override
+  public Hashtable<String, JComponentWriter> getWriters() {
+    Hashtable<String, JComponentWriter> result;
+    int i;
+    JComponentWriter writer;
+
+    result = new Hashtable<String, JComponentWriter>();
+
     for (i = 0; i < m_FileChooserPanel.getChoosableFileFilters().length; i++) {
-      writer = ((JComponentWriterFileFilter) m_FileChooserPanel.getChoosableFileFilters()[i]).getWriter();
+      writer = ((JComponentWriterFileFilter) m_FileChooserPanel
+        .getChoosableFileFilters()[i]).getWriter();
       result.put(writer.getDescription(), writer);
     }
-    
+
     return result;
   }
-  
+
   /**
-   * returns the JComponentWriter associated with the given name, is 
+   * returns the JComponentWriter associated with the given name, is
    * <code>null</code> if not found.
    * 
    * @param name the name of the writer
    * @return the writer associated with the given name
    * @see JComponentWriter#getDescription()
    */
+  @Override
   public JComponentWriter getWriter(String name) {
-    return (JComponentWriter) getWriters().get(name);
+    return getWriters().get(name);
   }
 
   /**
@@ -473,123 +488,134 @@ public class PrintableComponent
    * 
    * @param title the title of the save dialog
    */
+  @Override
   public void setSaveDialogTitle(String title) {
     m_SaveDialogTitle = title;
   }
-  
+
   /**
    * returns the title for the save dialog.
    * 
    * @return the title of the save dialog
    */
+  @Override
   public String getSaveDialogTitle() {
     return m_SaveDialogTitle;
   }
-  
+
   /**
    * sets the scale factor.
    * 
-   * @param x the scale factor for the x-axis 
-   * @param y the scale factor for the y-axis 
+   * @param x the scale factor for the x-axis
+   * @param y the scale factor for the y-axis
    */
+  @Override
   public void setScale(double x, double y) {
     m_xScale = x;
     m_yScale = y;
-    if (DEBUG)
+    if (DEBUG) {
       System.err.println("x = " + x + ", y = " + y);
+    }
   }
-  
+
   /**
    * returns the scale factor for the x-axis.
    * 
    * @return the scale factor
    */
+  @Override
   public double getXScale() {
     return m_xScale;
   }
-  
+
   /**
    * returns the scale factor for the y-axis.
    * 
    * @return the scale factor
    */
+  @Override
   public double getYScale() {
     return m_xScale;
   }
-  
+
   /**
-   * displays a save dialog for saving the panel to a file.  
-   * Fixes a bug with the Swing JFileChooser: if you entered a new
-   * filename in the save dialog and press Enter the <code>getSelectedFile</code>
-   * method returns <code>null</code> instead of the filename.<br>
+   * displays a save dialog for saving the panel to a file. Fixes a bug with the
+   * Swing JFileChooser: if you entered a new filename in the save dialog and
+   * press Enter the <code>getSelectedFile</code> method returns
+   * <code>null</code> instead of the filename.<br>
    * To solve this annoying behavior we call the save dialog once again s.t. the
-   * filename is set. Might look a little bit strange to the user, but no 
+   * filename is set. Might look a little bit strange to the user, but no
    * NullPointerException! ;-)
    */
+  @Override
   public void saveComponent() {
-    int                           result;
-    JComponentWriter              writer;
-    File                          file;
-    JComponentWriterFileFilter    filter;
-    
+    int result;
+    JComponentWriter writer;
+    File file;
+    JComponentWriterFileFilter filter;
+
     // display save dialog
     m_FileChooserPanel.setDialogTitle(getSaveDialogTitle());
     do {
       result = m_FileChooserPanel.showSaveDialog(getComponent());
-      if (result != JFileChooser.APPROVE_OPTION)
+      if (result != JFileChooser.APPROVE_OPTION) {
         return;
-    }
-    while (m_FileChooserPanel.getSelectedFile() == null);
-    
+      }
+    } while (m_FileChooserPanel.getSelectedFile() == null);
+
     // save the file
     try {
       filter = (JComponentWriterFileFilter) m_FileChooserPanel.getFileFilter();
-      file   = m_FileChooserPanel.getSelectedFile();
+      file = m_FileChooserPanel.getSelectedFile();
       writer = filter.getWriter();
-      if (!file.getAbsolutePath().toLowerCase().endsWith(writer.getExtension().toLowerCase()))
-        file = new File(file.getAbsolutePath() + writer.getExtension()); 
+      if (!file.getAbsolutePath().toLowerCase()
+        .endsWith(writer.getExtension().toLowerCase())) {
+        file = new File(file.getAbsolutePath() + writer.getExtension());
+      }
       writer.setComponent(getComponent());
       writer.setFile(file);
       writer.setScale(getXScale(), getYScale());
       writer.setUseCustomDimensions(m_CustomDimensionsCheckBox.isSelected());
       if (m_CustomDimensionsCheckBox.isSelected()) {
-	writer.setCustomWidth(Integer.parseInt(m_CustomWidthText.getText()));
-	writer.setCustomHeight(Integer.parseInt(m_CustomHeightText.getText()));
-      }
-      else {
-	writer.setCustomWidth(-1);
-	writer.setCustomHeight(-1);
+        writer.setCustomWidth(Integer.parseInt(m_CustomWidthText.getText()));
+        writer.setCustomHeight(Integer.parseInt(m_CustomHeightText.getText()));
+      } else {
+        writer.setCustomWidth(-1);
+        writer.setCustomHeight(-1);
       }
       writer.toOutput();
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
-  
+
   /**
    * a specialized filter that also contains the associated filter class.
    */
   protected class JComponentWriterFileFilter extends ExtensionFileFilter {
+
+    /** ID added to avoid warning */
+    private static final long serialVersionUID = 8540426888094207515L;
     /** the associated writer. */
-    private JComponentWriter m_Writer; 
-    
+    private final JComponentWriter m_Writer;
+
     /**
      * Creates the ExtensionFileFilter.
-     *
-     * @param extension       the extension of accepted files.
-     * @param description     a text description of accepted files.
-     * @param writer          the associated writer 
+     * 
+     * @param extension the extension of accepted files.
+     * @param description a text description of accepted files.
+     * @param writer the associated writer
      */
-    public JComponentWriterFileFilter(String extension, String description, JComponentWriter writer) {
+    public JComponentWriterFileFilter(String extension, String description,
+      JComponentWriter writer) {
       super(extension, description);
       m_Writer = writer;
     }
-    
+
     /**
      * returns the associated writer.
      * 
-     * @return		the writer
+     * @return the writer
      */
     public JComponentWriter getWriter() {
       return m_Writer;
@@ -601,27 +627,28 @@ public class PrintableComponent
    */
   private class PrintMouseListener extends MouseAdapter {
     /** the listener's component. */
-    private PrintableComponent m_Component;
-    
+    private final PrintableComponent m_Component;
+
     /**
      * initializes the listener.
      * 
      * @param component the component for which to create the listener
      */
-    public PrintMouseListener(PrintableComponent component){
+    public PrintMouseListener(PrintableComponent component) {
       m_Component = component;
     }
-    
+
     /**
      * Invoked when the mouse has been clicked on a component.
      * 
-     * @param e	the event
+     * @param e the event
      */
+    @Override
     public void mouseClicked(MouseEvent e) {
       int modifiers = e.getModifiers();
-      if (((modifiers & MouseEvent.SHIFT_MASK) == MouseEvent.SHIFT_MASK) && 
-          ((modifiers & MouseEvent.ALT_MASK) == MouseEvent.ALT_MASK) &&
-          ((modifiers & MouseEvent.BUTTON1_MASK) == MouseEvent.BUTTON1_MASK)) {
+      if (((modifiers & MouseEvent.SHIFT_MASK) == MouseEvent.SHIFT_MASK)
+        && ((modifiers & MouseEvent.ALT_MASK) == MouseEvent.ALT_MASK)
+        && ((modifiers & MouseEvent.BUTTON1_MASK) == MouseEvent.BUTTON1_MASK)) {
         e.consume();
         m_Component.saveComponent();
       }

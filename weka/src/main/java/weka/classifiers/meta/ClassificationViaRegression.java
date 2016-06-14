@@ -34,6 +34,7 @@ import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.UnassignedClassException;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MakeIndicator;
 
@@ -97,7 +98,7 @@ import weka.filters.unsupervised.attribute.MakeIndicator;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 8034 $ 
+ * @version $Revision: 10470 $ 
 */
 public class ClassificationViaRegression 
   extends SingleClassifierEnhancer
@@ -229,6 +230,9 @@ public class ClassificationViaRegression
       m_ClassFilters[i].batchFinished();
       newInst = m_ClassFilters[i].output();
       probs[i] = m_Classifiers[i].classifyInstance(newInst);
+      if (Utils.isMissingValue(probs[i])) {
+        throw new UnassignedClassException("ClassificationViaRegression: base learner predicted missing value.");
+      }
       if (probs[i] > 1) {
         probs[i] = 1;
       }
@@ -268,7 +272,7 @@ public class ClassificationViaRegression
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10470 $");
   }
 
   /**

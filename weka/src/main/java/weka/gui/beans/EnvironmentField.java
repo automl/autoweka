@@ -55,13 +55,16 @@ import weka.gui.CustomPanelSupplier;
  * Widget that displays a label and a combo box for selecting environment
  * variables. The enter arbitrary text, select an environment variable or a
  * combination of both. Any variables are resolved (if possible) and resolved
- * values are displayed in a tip-text.
+ * values are displayed in a tip-text.<p></p>
+ *
+ * This class is deprecated - use the version in weka.gui instead.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 9113 $
+ * @version $Revision: 12232 $
  */
+@Deprecated
 public class EnvironmentField extends JPanel implements EnvironmentHandler,
-    PropertyEditor, CustomPanelSupplier {
+  PropertyEditor, CustomPanelSupplier {
 
   /** For serialization */
   private static final long serialVersionUID = -3125404573324734121L;
@@ -102,7 +105,7 @@ public class EnvironmentField extends JPanel implements EnvironmentHandler,
       super(items);
     }
 
-    public WideComboBox(Vector items) {
+    public WideComboBox(Vector<Object> items) {
       super(items);
     }
 
@@ -181,15 +184,15 @@ public class EnvironmentField extends JPanel implements EnvironmentHandler,
     java.awt.Component theEditor = m_combo.getEditor().getEditorComponent();
     if (theEditor instanceof JTextField) {
       ((JTextField) m_combo.getEditor().getEditorComponent())
-          .addCaretListener(new CaretListener() {
+        .addCaretListener(new CaretListener() {
 
-            @Override
-            public void caretUpdate(CaretEvent e) {
-              m_firstCaretPos = m_previousCaretPos;
-              m_previousCaretPos = m_currentCaretPos;
-              m_currentCaretPos = e.getDot();
-            }
-          });
+          @Override
+          public void caretUpdate(CaretEvent e) {
+            m_firstCaretPos = m_previousCaretPos;
+            m_previousCaretPos = m_currentCaretPos;
+            m_currentCaretPos = e.getDot();
+          }
+        });
 
       m_combo.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
         @Override
@@ -199,12 +202,12 @@ public class EnvironmentField extends JPanel implements EnvironmentHandler,
       });
 
       ((JTextField) m_combo.getEditor().getEditorComponent())
-          .addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusLost(FocusEvent e) {
-              m_support.firePropertyChange("", null, null);
-            }
-          });
+        .addFocusListener(new FocusAdapter() {
+          @Override
+          public void focusLost(FocusEvent e) {
+            m_support.firePropertyChange("", null, null);
+          }
+        });
     }
     add(m_combo, BorderLayout.CENTER);
 
@@ -305,12 +308,16 @@ public class EnvironmentField extends JPanel implements EnvironmentHandler,
 
   @Override
   public void addPropertyChangeListener(PropertyChangeListener pcl) {
-    m_support.addPropertyChangeListener(pcl);
+    if (m_support != null && pcl != null) {
+      m_support.addPropertyChangeListener(pcl);
+    }
   }
 
   @Override
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
-    m_support.removePropertyChangeListener(pcl);
+    if (m_support != null && pcl != null) {
+      m_support.removePropertyChangeListener(pcl);
+    }
   }
 
   @Override
@@ -332,7 +339,7 @@ public class EnvironmentField extends JPanel implements EnvironmentHandler,
     } else {
       String left = m_currentContents.substring(0, m_firstCaretPos);
       String right = m_currentContents.substring(m_firstCaretPos,
-          m_currentContents.length());
+        m_currentContents.length());
 
       m_currentContents = left + selected + right;
     }
@@ -359,6 +366,7 @@ public class EnvironmentField extends JPanel implements EnvironmentHandler,
     m_env = env;
     Vector<String> varKeys = new Vector<String>(env.getVariableNames());
 
+    @SuppressWarnings("serial")
     DefaultComboBoxModel dm = new DefaultComboBoxModel(varKeys) {
       @Override
       public Object getSelectedItem() {

@@ -22,8 +22,7 @@
 package weka.classifiers.meta;
 
 import java.io.Serializable;
-import java.io.StreamTokenizer;
-import java.io.StringReader;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -32,7 +31,6 @@ import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.core.Capabilities;
 import weka.core.Drawable;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -112,7 +110,7 @@ import weka.core.Utils;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 8181 $ 
+ * @version $Revision: 10141 $ 
 */
 public class CVParameterSelection 
   extends RandomizableSingleClassifierEnhancer
@@ -242,7 +240,7 @@ public class CVParameterSelection
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 8181 $");
+      return RevisionUtils.extract("$Revision: 10141 $");
     }
   }
 
@@ -263,7 +261,7 @@ public class CVParameterSelection
   protected double m_BestPerformance;
 
   /** The set of parameters to cross-validate over */
-  protected FastVector m_CVParams = new FastVector();
+  protected Vector<CVParameter> m_CVParams = new Vector<CVParameter>();
 
   /** The number of attributes in the data */
   protected int m_NumAttributes;
@@ -426,9 +424,9 @@ public class CVParameterSelection
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(2);
+    Vector<Option> newVector = new Vector<Option>(2);
 
     newVector.addElement(new Option(
 	      "\tNumber of folds used for cross validation (default 10).",
@@ -445,11 +443,8 @@ public class CVParameterSelection
 	      + "\tsimultaneously.",
 	      "P", 1, "-P <classifier parameter>"));
 
-
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
-    }
+    newVector.addAll(Collections.list(super.listOptions()));
+    
     return newVector.elements();
   }
 
@@ -511,7 +506,7 @@ public class CVParameterSelection
     }
 
     String cvParam;
-    m_CVParams = new FastVector();
+    m_CVParams = new Vector<CVParameter>();
     do {
       cvParam = Utils.getOption('P', options);
       if (cvParam.length() != 0) {
@@ -520,6 +515,8 @@ public class CVParameterSelection
     } while (cvParam.length() != 0);
 
     super.setOptions(options);
+    
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -529,32 +526,25 @@ public class CVParameterSelection
    */
   public String [] getOptions() {
 
-    String[] superOptions;
-
+    Vector<String> options = new Vector<String>();
+    
     if (m_InitOptions != null) {
       try {
 	((OptionHandler)m_Classifier).setOptions((String[])m_InitOptions.clone());
-	superOptions = super.getOptions();
 	((OptionHandler)m_Classifier).setOptions((String[])m_BestClassifierOptions.clone());
       } catch (Exception e) {
 	throw new RuntimeException("CVParameterSelection: could not set options " +
 				   "in getOptions().");
       } 
-    } else {
-      superOptions = super.getOptions();
     }
-    String [] options = new String [superOptions.length + m_CVParams.size() * 2 + 2];
-
-    int current = 0;
     for (int i = 0; i < m_CVParams.size(); i++) {
-      options[current++] = "-P"; options[current++] = "" + getCVParameter(i);
+      options.add("-P"); options.add("" + getCVParameter(i));
     }
-    options[current++] = "-X"; options[current++] = "" + getNumFolds();
+    options.add("-X"); options.add("" + getNumFolds());
 
-    System.arraycopy(superOptions, 0, options, current, 
-		     superOptions.length);
-
-    return options;
+    Collections.addAll(options, super.getOptions());
+    
+    return options.toArray(new String[0]);
   }
 
   /**
@@ -715,8 +705,8 @@ public class CVParameterSelection
    */
   public void setCVParameters(Object[] params) throws Exception {
       
-      FastVector backup = m_CVParams;
-      m_CVParams = new FastVector();
+      Vector<CVParameter> backup = m_CVParams;
+      m_CVParams = new Vector<CVParameter>();
       
       for(int i=0; i<params.length; i++) {
           try{
@@ -849,7 +839,7 @@ public class CVParameterSelection
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8181 $");
+    return RevisionUtils.extract("$Revision: 10141 $");
   }
   
   /**

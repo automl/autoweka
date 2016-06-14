@@ -55,6 +55,7 @@ import weka.core.TechnicalInformation.Type;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.Reader;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -152,7 +153,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Paul Conilione (paulc4321@yahoo.com.au)
- * @version $Revision: 8034 $
+ * @version $Revision: 10141 $
  */
 public class BVDecomposeSegCVSub
     implements OptionHandler, TechnicalInformationHandler, RevisionHandler {
@@ -262,9 +263,9 @@ public class BVDecomposeSegCVSub
      *
      * @return an enumeration of all the available options.
      */
-    public Enumeration listOptions() {
+    public Enumeration<Option> listOptions() {
 
-        Vector newVector = new Vector(8);
+        Vector<Option> newVector = new Vector<Option>(8);
 
         newVector.addElement(new Option(
         "\tThe index of the class attribute.\n"+
@@ -301,10 +302,7 @@ public class BVDecomposeSegCVSub
             "", 0, "\nOptions specific to learner "
             + m_Classifier.getClass().getName()
             + ":"));
-            Enumeration enu = ((OptionHandler)m_Classifier).listOptions();
-            while (enu.hasMoreElements()) {
-                newVector.addElement(enu.nextElement());
-            }
+            newVector.addAll(Collections.list(((OptionHandler)m_Classifier).listOptions()));
         }
         return newVector.elements();
     }
@@ -757,7 +755,7 @@ public class BVDecomposeSegCVSub
         //create confusion matrix, columns = number of instances in data set, as all will be used,  by rows = number of classes.
         double [][] instanceProbs = new double [data.numInstances()][numClasses];
         int [][] foldIndex = new int [ k ][ 2 ];
-        Vector segmentList = new Vector(q + 1);
+        Vector<int[]> segmentList = new Vector<int[]>(q + 1);
 
         //Set random seed
         Random random = new Random(m_Seed);
@@ -895,7 +893,7 @@ public class BVDecomposeSegCVSub
             double bsum = 0, vsum = 0, ssum = 0;
             double wBSum = 0, wVSum = 0;
 
-            Vector centralTendencies = findCentralTendencies( predProbs );
+            Vector<Integer> centralTendencies = findCentralTendencies( predProbs );
 
             if( centralTendencies == null ){
                 throw new Exception("Central tendency was null.");
@@ -980,14 +978,14 @@ public class BVDecomposeSegCVSub
      * @return a Vector containing Integer objects which store the class(s) which
      * are the central tendency.
      */
-    public Vector findCentralTendencies(double[] predProbs) {
+    public Vector<Integer> findCentralTendencies(double[] predProbs) {
 
         int centralTValue = 0;
         int currentValue = 0;
         //array to store the list of classes the have the greatest number of classifictions.
-        Vector centralTClasses;
+        Vector<Integer> centralTClasses;
 
-        centralTClasses = new Vector(); //create an array with size of the number of classes.
+        centralTClasses = new Vector<Integer>(); //create an array with size of the number of classes.
 
         // Go through array, finding the central tendency.
         for( int i = 0; i < predProbs.length; i++) {
@@ -1061,7 +1059,7 @@ public class BVDecomposeSegCVSub
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 8034 $");
+      return RevisionUtils.extract("$Revision: 10141 $");
     }
 
     /**
@@ -1079,7 +1077,7 @@ public class BVDecomposeSegCVSub
                 Utils.checkForRemainingOptions(args);
             } catch (Exception ex) {
                 String result = ex.getMessage() + "\nBVDecompose Options:\n\n";
-                Enumeration enu = bvd.listOptions();
+                Enumeration<Option> enu = bvd.listOptions();
                 while (enu.hasMoreElements()) {
                     Option option = (Option) enu.nextElement();
                     result += option.synopsis() + "\n" + option.description() + "\n";

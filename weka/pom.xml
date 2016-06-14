@@ -4,15 +4,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
-  <artifactId>weka-dev</artifactId>
-  <version>3.7.8-SNAPSHOT</version><!-- weka-version -->
+  <artifactId>weka-stable</artifactId>
+  <version>3.8.0-SNAPSHOT</version><!-- weka-version -->
   <packaging>jar</packaging>
 
-  <name>weka-dev</name>
+  <name>weka-stable</name>
   <description>The Waikato Environment for Knowledge Analysis (WEKA), a machine 
-  learning workbench. This version represents the developer version, the
-  "bleeding edge" of development, you could say. New functionality gets added
-  to this version.
+  learning workbench. This is the stable version. Apart from bugfixes, this version
+  does not receive any other updates.
   </description>
   <url>http://www.cms.waikato.ac.nz/ml/weka/</url>
   <organization>
@@ -31,16 +30,16 @@
     <developer>
       <id>wekateam</id>
       <name>The WEKA Team</name>
-      <email>wekalist@list.scms.waikato.ac.nz</email>
+      <email>wekalist@list.waikato.ac.nz</email>
     </developer>
   </developers>
 
   <mailingLists>
     <mailingList>
       <name>wekalist</name>
-      <subscribe>https://list.scms.waikato.ac.nz/mailman/listinfo/wekalist</subscribe>
-      <unsubscribe>https://list.scms.waikato.ac.nz/mailman/listinfo/wekalist</unsubscribe>
-      <archive>https://list.scms.waikato.ac.nz/mailman/htdig/wekalist/</archive>
+      <subscribe>https://list.waikato.ac.nz/mailman/listinfo/wekalist</subscribe>
+      <unsubscribe>https://list.waikato.ac.nz/mailman/listinfo/wekalist</unsubscribe>
+      <archive>https://list.waikato.ac.nz/mailman/htdig/wekalist/</archive>
     </mailingList>
   </mailingLists>
 
@@ -51,9 +50,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/weka</connection>
-    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/weka</developerConnection>
-    <url>https://svn.scms.waikato.ac.nz/svn/weka/trunk/weka</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/branches/stable-3-8/weka</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/branches/stable-3-8/weka</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/branches/stable-3-8/weka</url>
   </scm>
 
   <profiles>
@@ -103,16 +102,48 @@
     </dependency>
 
     <dependency>
-      <groupId>net.sf.squirrel-sql.thirdparty-non-maven</groupId>
-      <artifactId>java-cup</artifactId>
-      <version>0.11a</version>
+      <groupId>nz.ac.waikato.cms.weka.thirdparty</groupId>
+      <artifactId>java-cup-11b</artifactId>
+      <version>2015.03.26</version>
+      <scope>compile</scope>
     </dependency>    
 
     <dependency>
-      <groupId>org.pentaho.pentaho-commons</groupId>
-      <artifactId>pentaho-package-manager</artifactId>
-      <version>1.0.3</version>
+      <groupId>nz.ac.waikato.cms.weka.thirdparty</groupId>
+      <artifactId>java-cup-11b-runtime</artifactId>
+      <version>2015.03.26</version>
+    </dependency>    
+
+    <dependency>
+      <groupId>nz.ac.waikato.cms.weka.thirdparty</groupId>
+      <artifactId>bounce</artifactId>
+      <version>0.18</version>
+    </dependency>    
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+      <version>1.10</version>
+      <optional>true</optional>
     </dependency>
+    
+    <dependency>
+      <groupId>com.googlecode.matrix-toolkits-java</groupId>
+      <artifactId>mtj</artifactId>
+      <version>1.0.4</version>
+    </dependency>
+
+    <dependency>
+      <groupId>net.sourceforge.f2j</groupId>
+      <artifactId>arpack_combined_all</artifactId>
+      <version>0.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.googlecode.netlib-java</groupId>
+      <artifactId>netlib-java</artifactId>
+      <version>1.1</version>
+    </dependency>    
   </dependencies>
 
   <properties>
@@ -190,8 +221,8 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>2.0.2</version>
           <configuration>
-            <source>1.6</source>
-            <target>1.6</target>
+            <source>1.7</source>
+            <target>1.7</target>
           </configuration>
         </plugin>
 
@@ -207,6 +238,8 @@
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
             <systemPropertyVariables>
               <weka.test.Regression.root>src/test/resources/wekarefs</weka.test.Regression.root>
+	      <weka.test.maventest>true</weka.test.maventest>
+	      <user.timezone>Pacific/Auckland</user.timezone>
             </systemPropertyVariables>
           </configuration>
         </plugin>
@@ -216,7 +249,7 @@
           <artifactId>maven-release-plugin</artifactId>
           <version>2.1</version>
           <configuration>
-            <tagBase>https://svn.scms.waikato.ac.nz/svn/weka/tags</tagBase>
+            <tagBase>https://svn.cms.waikato.ac.nz/svn/weka/tags</tagBase>
             <useReleaseProfile>false</useReleaseProfile>
             <!-- tests are performed with the ant build file, hence skipped here. -->
             <preparationGoals>clean verify -P no-tests</preparationGoals>
@@ -298,6 +331,8 @@
           <subpackages>weka:org</subpackages>
           <show>public</show>
           <outputDirectory>${project.basedir}/doc</outputDirectory>
+          <!-- when using Java 8, use this setting to avoid overly strict javadoclet -->
+          <!--additionalparam>-Xdoclint:none</additionalparam-->
         </configuration>
         <executions>
           <execution>

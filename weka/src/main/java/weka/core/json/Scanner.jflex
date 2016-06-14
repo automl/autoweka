@@ -27,7 +27,7 @@ import java.io.*;
  * A scanner for JSON data files.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 11496 $
  */
 %%
 %cup
@@ -36,13 +36,13 @@ import java.io.*;
 %class Scanner
 %{
   // Author: FracPete (fracpete at waikato dot ac dot nz)
-  // Version: $Revision: 8034 $
+  // Version: $Revision: 11496 $
   protected SymbolFactory m_SF;
 
   protected StringBuffer m_String = new StringBuffer();
 
   public Scanner(InputStream r, SymbolFactory sf) {
-    this(r);
+    this(new InputStreamReader(r));
     m_SF = sf;
   }
 

@@ -13,37 +13,37 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- /*
-  *    PrintableComponent.java
-  *    Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
-  *
-  */
+/*
+ *    PrintableComponent.java
+ *    Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ *
+ */
 
 package weka.gui.visualize;
 
 import java.util.Hashtable;
 
 /**
- * This interface is for all JComponent classes that provide the ability to 
- * print itself to a file. 
+ * This interface is for all JComponent classes that provide the ability to
+ * print itself to a file.
  * 
  * @see PrintableComponent
  * @see PrintablePanel
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10222 $
  */
 public interface PrintableHandler {
   /**
-   * returns a Hashtable with the current available JComponentWriters in the 
+   * returns a Hashtable with the current available JComponentWriters in the
    * save dialog. the key of the Hashtable is the description of the writer.
    * 
-   * @return all currently available JComponentWriters 
+   * @return all currently available JComponentWriters
    * @see JComponentWriter#getDescription()
    */
-  public Hashtable getWriters();
-  
+  public Hashtable<String, JComponentWriter> getWriters();
+
   /**
-   * returns the JComponentWriter associated with the given name, is 
+   * returns the JComponentWriter associated with the given name, is
    * <code>null</code> if not found
    * 
    * @return the writer associated with the given name
@@ -55,31 +55,32 @@ public interface PrintableHandler {
    * sets the title for the save dialog
    */
   public void setSaveDialogTitle(String title);
-  
+
   /**
    * returns the title for the save dialog
    */
   public String getSaveDialogTitle();
-  
+
   /**
    * sets the scale factor
-   * @param x the scale factor for the x-axis 
-   * @param y the scale factor for the y-axis 
+   * 
+   * @param x the scale factor for the x-axis
+   * @param y the scale factor for the y-axis
    */
   public void setScale(double x, double y);
-  
+
   /**
    * returns the scale factor for the x-axis
    */
   public double getXScale();
-  
+
   /**
    * returns the scale factor for the y-axis
    */
   public double getYScale();
-  
+
   /**
-   * displays a save dialog for saving the component to a file.  
+   * displays a save dialog for saving the component to a file.
    */
   public void saveComponent();
 }

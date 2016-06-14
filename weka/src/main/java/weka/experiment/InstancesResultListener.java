@@ -19,60 +19,60 @@
  *
  */
 
-
 package weka.experiment;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Hashtable;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
- <!-- globalinfo-start -->
- * Outputs the received results in arff format to a Writer. All results must be received before the instances can be written out.
+ * <!-- globalinfo-start --> Outputs the received results in arff format to a
+ * Writer. All results must be received before the instances can be written out.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -O &lt;file name&gt;
+ * <!-- options-start --> Valid options are:
+ * <p/>
+ * 
+ * <pre>
+ * -O &lt;file name&gt;
  *  The filename where output will be stored. Use - for stdout.
- *  (default temp file)</pre>
+ *  (default temp file)
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10203 $
  */
-public class InstancesResultListener 
-  extends CSVResultListener {
-  
+public class InstancesResultListener extends CSVResultListener {
+
   /** for serialization */
   static final long serialVersionUID = -2203808461809311178L;
 
   /** Stores the instances created so far, before assigning to a header */
-  protected transient FastVector m_Instances;
-  
+  protected transient ArrayList<Instance> m_Instances;
+
   /** Stores the attribute types for each column */
-  protected transient int [] m_AttributeTypes;
+  protected transient int[] m_AttributeTypes;
 
   /** For lookup of indices given a string value for each nominal attribute */
-  protected transient Hashtable [] m_NominalIndexes;
+  protected transient Hashtable<String, Double>[] m_NominalIndexes;
 
-  /** Contains strings seen so far for each nominal attribute */ 
-  protected transient FastVector [] m_NominalStrings;
- 
-  /** 
+  /** Contains strings seen so far for each nominal attribute */
+  protected transient ArrayList<String>[] m_NominalStrings;
+
+  /**
    * Sets temporary file.
    */
   public InstancesResultListener() {
@@ -87,119 +87,120 @@ public class InstancesResultListener
     }
     setOutputFile(resultsFile);
     setOutputFileName("");
-  } 
+  }
 
   /**
    * Returns a string describing this result listener
-   * @return a description of the result listener suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the result listener suitable for displaying in the
+   *         explorer/experimenter gui
    */
+  @Override
   public String globalInfo() {
-    return
-        "Outputs the received results in arff format to "
+    return "Outputs the received results in arff format to "
       + "a Writer. All results must be received before the instances can be "
       + "written out.";
   }
 
   /**
    * Prepare for the results to be received.
-   *
+   * 
    * @param rp the ResultProducer that will generate the results
    * @exception Exception if an error occurs during preprocessing.
    */
+  @SuppressWarnings("unchecked")
+  @Override
   public void preProcess(ResultProducer rp) throws Exception {
 
     m_RP = rp;
     if ((m_OutputFile == null) || (m_OutputFile.getName().equals("-"))) {
       m_Out = new PrintWriter(System.out, true);
     } else {
-      m_Out = new PrintWriter(
-	      new BufferedOutputStream(
-	      new FileOutputStream(m_OutputFile)), true);
+      m_Out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(
+        m_OutputFile)), true);
     }
 
-    Object [] keyTypes = m_RP.getKeyTypes();
-    Object [] resultTypes = m_RP.getResultTypes();
+    Object[] keyTypes = m_RP.getKeyTypes();
+    Object[] resultTypes = m_RP.getResultTypes();
 
-    m_AttributeTypes = new int [keyTypes.length + resultTypes.length];
-    m_NominalIndexes = new Hashtable [m_AttributeTypes.length];
-    m_NominalStrings = new FastVector [m_AttributeTypes.length];
-    m_Instances = new FastVector();
+    m_AttributeTypes = new int[keyTypes.length + resultTypes.length];
+    m_NominalIndexes = new Hashtable[m_AttributeTypes.length];
+    m_NominalStrings = new ArrayList[m_AttributeTypes.length];
+    m_Instances = new ArrayList<Instance>();
 
     for (int i = 0; i < m_AttributeTypes.length; i++) {
       Object attribute = null;
       if (i < keyTypes.length) {
-	attribute = keyTypes[i];
+        attribute = keyTypes[i];
       } else {
-	attribute = resultTypes[i - keyTypes.length];
+        attribute = resultTypes[i - keyTypes.length];
       }
       if (attribute instanceof String) {
-	m_AttributeTypes[i] = Attribute.NOMINAL;
-	m_NominalIndexes[i] = new Hashtable();
-	m_NominalStrings[i] = new FastVector();
+        m_AttributeTypes[i] = Attribute.NOMINAL;
+        m_NominalIndexes[i] = new Hashtable<String, Double>();
+        m_NominalStrings[i] = new ArrayList<String>();
       } else if (attribute instanceof Double) {
-	m_AttributeTypes[i] = Attribute.NUMERIC;
+        m_AttributeTypes[i] = Attribute.NUMERIC;
       } else {
-	throw new Exception("Unknown attribute type in column " + (i + 1));
+        throw new Exception("Unknown attribute type in column " + (i + 1));
       }
     }
   }
-  
+
   /**
-   * Perform any postprocessing. When this method is called, it indicates
-   * that no more results will be sent that need to be grouped together
-   * in any way.
-   *
+   * Perform any postprocessing. When this method is called, it indicates that
+   * no more results will be sent that need to be grouped together in any way.
+   * 
    * @param rp the ResultProducer that generated the results
    * @exception Exception if an error occurs
    */
+  @Override
   public void postProcess(ResultProducer rp) throws Exception {
 
     if (m_RP != rp) {
       throw new Error("Unrecognized ResultProducer sending results!!");
     }
-    String [] keyNames = m_RP.getKeyNames();
-    String [] resultNames = m_RP.getResultNames();
-    FastVector attribInfo = new FastVector();
+    String[] keyNames = m_RP.getKeyNames();
+    String[] resultNames = m_RP.getResultNames();
+    ArrayList<Attribute> attribInfo = new ArrayList<Attribute>();
     for (int i = 0; i < m_AttributeTypes.length; i++) {
       String attribName = "Unknown";
       if (i < keyNames.length) {
-	attribName = "Key_" + keyNames[i];
+        attribName = "Key_" + keyNames[i];
       } else {
-	attribName = resultNames[i - keyNames.length];
+        attribName = resultNames[i - keyNames.length];
       }
-      
+
       switch (m_AttributeTypes[i]) {
       case Attribute.NOMINAL:
-	if (m_NominalStrings[i].size() > 0) {
-	  attribInfo.addElement(new Attribute(attribName,
-					      m_NominalStrings[i]));
-	} else {
-	  attribInfo.addElement(new Attribute(attribName, (FastVector)null));
-	}
-	break;
+        if (m_NominalStrings[i].size() > 0) {
+          attribInfo.add(new Attribute(attribName, m_NominalStrings[i]));
+        } else {
+          attribInfo.add(new Attribute(attribName, (ArrayList<String>) null));
+        }
+        break;
       case Attribute.NUMERIC:
-	attribInfo.addElement(new Attribute(attribName));
-	break;
+        attribInfo.add(new Attribute(attribName));
+        break;
       case Attribute.STRING:
-	attribInfo.addElement(new Attribute(attribName, (FastVector)null));
-	break;
+        attribInfo.add(new Attribute(attribName, (ArrayList<String>) null));
+        break;
       default:
-	throw new Exception("Unknown attribute type");
+        throw new Exception("Unknown attribute type");
       }
     }
 
-    Instances result = new Instances("InstanceResultListener", attribInfo, 
-				     m_Instances.size());
+    Instances result = new Instances("InstanceResultListener", attribInfo,
+      m_Instances.size());
     for (int i = 0; i < m_Instances.size(); i++) {
-      result.add((Instance)m_Instances.elementAt(i));
+      result.add(m_Instances.get(i));
     }
 
     m_Out.println(new Instances(result, 0));
     for (int i = 0; i < result.numInstances(); i++) {
       m_Out.println(result.instance(i));
     }
-    
+
     if (!(m_OutputFile == null) && !(m_OutputFile.getName().equals("-"))) {
       m_Out.close();
     }
@@ -207,59 +208,61 @@ public class InstancesResultListener
 
   /**
    * Collects each instance and adjusts the header information.
-   *
+   * 
    * @param rp the ResultProducer that generated the result
    * @param key The key for the results.
    * @param result The actual results.
    * @exception Exception if the result could not be accepted.
    */
-  public void acceptResult(ResultProducer rp, Object[] key, Object[] result) 
+  @Override
+  public void acceptResult(ResultProducer rp, Object[] key, Object[] result)
     throws Exception {
 
     if (m_RP != rp) {
       throw new Error("Unrecognized ResultProducer sending results!!");
     }
-    
+
     Instance newInst = new DenseInstance(m_AttributeTypes.length);
-    for(int i = 0; i < m_AttributeTypes.length; i++) {
+    for (int i = 0; i < m_AttributeTypes.length; i++) {
       Object val = null;
       if (i < key.length) {
-	val = key[i];
+        val = key[i];
       } else {
-	val = result[i - key.length];
+        val = result[i - key.length];
       }
       if (val == null) {
-	newInst.setValue(i, Utils.missingValue());
+        newInst.setValue(i, Utils.missingValue());
       } else {
-	switch (m_AttributeTypes[i]) {
-	case Attribute.NOMINAL:
-	  String str = (String) val;
-	  Double index = (Double)m_NominalIndexes[i].get(str);
-	  if (index == null) {
-	    index = new Double(m_NominalStrings[i].size());
-	    m_NominalIndexes[i].put(str, index);
-	    m_NominalStrings[i].addElement(str);
-	  }
-	  newInst.setValue(i, index.doubleValue());
-	  break;
-	case Attribute.NUMERIC:
-	  double dou = ((Double) val).doubleValue();
-	  newInst.setValue(i, (double)dou);
-	  break;
-	default:
-	  newInst.setValue(i, Utils.missingValue());
-	}
+        switch (m_AttributeTypes[i]) {
+        case Attribute.NOMINAL:
+          String str = (String) val;
+          Double index = m_NominalIndexes[i].get(str);
+          if (index == null) {
+            index = new Double(m_NominalStrings[i].size());
+            m_NominalIndexes[i].put(str, index);
+            m_NominalStrings[i].add(str);
+          }
+          newInst.setValue(i, index.doubleValue());
+          break;
+        case Attribute.NUMERIC:
+          double dou = ((Double) val).doubleValue();
+          newInst.setValue(i, dou);
+          break;
+        default:
+          newInst.setValue(i, Utils.missingValue());
+        }
       }
     }
-    m_Instances.addElement(newInst);
+    m_Instances.add(newInst);
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10203 $");
   }
 } // InstancesResultListener

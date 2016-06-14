@@ -50,16 +50,12 @@ import weka.gui.sql.event.ResultChangedListener;
 
 /**
  * Represents a little tool for querying SQL databases.
- *
- * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 8034 $
+ * 
+ * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 10434 $
  */
-public class SqlViewer 
-  extends    JPanel 
-  implements ConnectionListener, 
-             HistoryChangedListener,
-             QueryExecuteListener, 
-             ResultChangedListener {
+public class SqlViewer extends JPanel implements ConnectionListener,
+  HistoryChangedListener, QueryExecuteListener, ResultChangedListener {
 
   /** for serialization. */
   private static final long serialVersionUID = -4395028775566514329L;
@@ -72,7 +68,7 @@ public class SqlViewer
 
   /** the height property in the history file. */
   public final static String HEIGHT = "height";
-  
+
   /** the parent of this panel. */
   protected JFrame m_Parent;
 
@@ -102,22 +98,22 @@ public class SqlViewer
 
   /** stores the history. */
   protected Properties m_History;
-  
+
   /**
    * initializes the SqlViewer.
    * 
-   * @param parent        the parent of this panel
+   * @param parent the parent of this panel
    */
   public SqlViewer(JFrame parent) {
     super();
-   
-    m_Parent   = parent;
-    m_URL      = "";
-    m_User     = "";
+
+    m_Parent = parent;
+    m_URL = "";
+    m_User = "";
     m_Password = "";
-    m_Query    = "";
-    m_History  = new Properties();
-   
+    m_Query = "";
+    m_History = new Properties();
+
     createPanel();
   }
 
@@ -125,9 +121,9 @@ public class SqlViewer
    * builds the interface.
    */
   protected void createPanel() {
-    JPanel          panel;
-    JPanel          panel2;
-    
+    JPanel panel;
+    JPanel panel2;
+
     setLayout(new BorderLayout());
 
     // connection
@@ -135,8 +131,8 @@ public class SqlViewer
     panel = new JPanel(new BorderLayout());
     add(panel, BorderLayout.NORTH);
     panel.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createTitledBorder("Connection"),
-                    BorderFactory.createEmptyBorder(0, 5, 5, 5)));
+      BorderFactory.createTitledBorder("Connection"),
+      BorderFactory.createEmptyBorder(0, 5, 5, 5)));
     panel.add(m_ConnectionPanel, BorderLayout.CENTER);
 
     // query
@@ -145,8 +141,8 @@ public class SqlViewer
     add(panel, BorderLayout.CENTER);
     panel2 = new JPanel(new BorderLayout());
     panel2.setBorder(BorderFactory.createCompoundBorder(
-                     BorderFactory.createTitledBorder("Query"),
-                     BorderFactory.createEmptyBorder(0, 5, 5, 5)));
+      BorderFactory.createTitledBorder("Query"),
+      BorderFactory.createEmptyBorder(0, 5, 5, 5)));
     panel2.add(m_QueryPanel, BorderLayout.NORTH);
     panel.add(panel2, BorderLayout.NORTH);
 
@@ -155,8 +151,8 @@ public class SqlViewer
     m_ResultPanel.setQueryPanel(m_QueryPanel);
     panel2 = new JPanel(new BorderLayout());
     panel2.setBorder(BorderFactory.createCompoundBorder(
-                     BorderFactory.createTitledBorder("Result"),
-                     BorderFactory.createEmptyBorder(0, 5, 5, 5)));
+      BorderFactory.createTitledBorder("Result"),
+      BorderFactory.createEmptyBorder(0, 5, 5, 5)));
     panel2.add(m_ResultPanel, BorderLayout.CENTER);
     panel.add(panel2, BorderLayout.CENTER);
 
@@ -165,8 +161,8 @@ public class SqlViewer
     panel = new JPanel(new BorderLayout());
     add(panel, BorderLayout.SOUTH);
     panel.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createTitledBorder("Info"),
-                    BorderFactory.createEmptyBorder(0, 5, 5, 5)));
+      BorderFactory.createTitledBorder("Info"),
+      BorderFactory.createEmptyBorder(0, 5, 5, 5)));
     panel.add(m_InfoPanel, BorderLayout.CENTER);
 
     // listeners
@@ -180,102 +176,106 @@ public class SqlViewer
     // history
     loadHistory(true);
   }
-  
+
   /**
-   * This method gets called when the connection is either established
-   * or disconnected.
+   * This method gets called when the connection is either established or
+   * disconnected.
    * 
-   * @param evt		the event
+   * @param evt the event
    */
+  @Override
   public void connectionChange(ConnectionEvent evt) {
     if (evt.getType() == ConnectionEvent.DISCONNECT) {
-      m_InfoPanel.append(   "disconnect from: " 
-                          + evt.getDbUtils().getDatabaseURL(),
-                          "information_small.gif" );
-    }
-    else {
-      m_InfoPanel.append(   "connecting to: " 
-                          + evt.getDbUtils().getDatabaseURL() 
-                          + " = " + evt.isConnected(),
-                          "information_small.gif" );
+      m_InfoPanel.append("disconnect from: "
+        + evt.getDbUtils().getDatabaseURL(), "information_small.gif");
+    } else {
+      m_InfoPanel.append("connecting to: " + evt.getDbUtils().getDatabaseURL()
+        + " = " + evt.isConnected(), "information_small.gif");
     }
 
     // did an exception happen?
-    if (evt.getException() != null)
+    if (evt.getException() != null) {
       m_InfoPanel.append("exception: " + evt.getException(), "error_small.gif");
+    }
 
     // set focus
-    if (evt.isConnected())
+    if (evt.isConnected()) {
       m_QueryPanel.setFocus();
-    else
+    } else {
       m_ConnectionPanel.setFocus();
+    }
   }
-  
+
   /**
    * This method gets called when a query has been executed.
    * 
-   * @param evt		the event
+   * @param evt the event
    */
+  @Override
   public void queryExecuted(QueryExecuteEvent evt) {
-    ResultSetHelper   helper;
-    
+    ResultSetHelper helper;
+
     if (evt.failed()) {
       m_InfoPanel.append("Query:" + evt.getQuery(), "error_small.gif");
       m_InfoPanel.append("exception: " + evt.getException(), "error_small.gif");
-    }
-    else {
+    } else {
       m_InfoPanel.append("Query: " + evt.getQuery(), "information_small.gif");
       try {
         if (evt.hasResult()) {
           helper = new ResultSetHelper(evt.getResultSet());
-          if ((evt.getMaxRows() > 0) && (helper.getRowCount() >= evt.getMaxRows()))
-            m_InfoPanel.append(helper.getRowCount() + " rows selected (" 
-                + evt.getMaxRows() + " displayed).", 
+          if ((evt.getMaxRows() > 0)
+            && (helper.getRowCount() >= evt.getMaxRows())) {
+            m_InfoPanel.append(
+              helper.getRowCount() + " rows selected (" + evt.getMaxRows()
+                + " displayed).", "information_small.gif");
+          } else if (helper.getRowCount() == -1) {
+            m_InfoPanel
+              .append(
+                "Unknown number of rows selected (due to JDBC driver restrictions).",
                 "information_small.gif");
-          else if (helper.getRowCount() == -1)
-            m_InfoPanel.append("Unknown number of rows selected (due to JDBC driver restrictions).", 
+          } else {
+            m_InfoPanel.append(helper.getRowCount() + " rows selected.",
               "information_small.gif");
-          else
-            m_InfoPanel.append(helper.getRowCount() + " rows selected.", 
-                "information_small.gif");
+          }
         }
 
         // save max rows
         loadHistory(false);
-        m_History.setProperty(
-            QueryPanel.MAX_ROWS, Integer.toString(evt.getMaxRows()));
+        m_History.setProperty(QueryPanel.MAX_ROWS,
+          Integer.toString(evt.getMaxRows()));
         saveHistory();
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
         e.printStackTrace();
       }
     }
   }
-  
+
   /**
    * This method gets called when a query has been executed.
    * 
-   * @param evt		the event
+   * @param evt the event
    */
+  @Override
   public void resultChanged(ResultChangedEvent evt) {
-    m_URL      = evt.getURL();
-    m_User     = evt.getUser();
+    m_URL = evt.getURL();
+    m_User = evt.getUser();
     m_Password = evt.getPassword();
-    m_Query    = evt.getQuery();
+    m_Query = evt.getQuery();
   }
-  
+
   /**
-   * This method gets called when a history is modified.
-   * It saves the history immediately to the users home directory.
+   * This method gets called when a history is modified. It saves the history
+   * immediately to the users home directory.
    * 
-   * @param evt		the event
+   * @param evt the event
    */
+  @Override
   public void historyChanged(HistoryChangedEvent evt) {
     // load history, in case some other process changed it!
     loadHistory(false);
-    
-    m_History.setProperty( 
-        evt.getHistoryName(), modelToString(evt.getHistory()));
+
+    m_History
+      .setProperty(evt.getHistoryName(), modelToString(evt.getHistory()));
 
     // save it
     saveHistory();
@@ -284,77 +284,74 @@ public class SqlViewer
   /**
    * returns the filename of the history file.
    * 
-   * @return		the history file
+   * @return the history file
    */
   protected String getHistoryFilename() {
-    return   System.getProperties().getProperty("user.home")
-           + File.separatorChar
-           + HISTORY_FILE;
+    return System.getProperties().getProperty("user.home") + File.separatorChar
+      + HISTORY_FILE;
   }
 
   /**
    * transforms the given, comma-separated string into a DefaultListModel.
    * 
-   * @param s     the string to break up and transform into a list model
-   * @return      the generated DefaultListModel
+   * @param s the string to break up and transform into a list model
+   * @return the generated DefaultListModel
    */
   protected DefaultListModel stringToModel(String s) {
-    DefaultListModel    result;
-    String              tmpStr;
-    int                 i;
-    boolean             quote;
-    String[]            find;
-    String[]            replace;
-    int                 index;
+    DefaultListModel result;
+    String tmpStr;
+    int i;
+    boolean quote;
+    String[] find;
+    String[] replace;
+    int index;
 
     result = new DefaultListModel();
-    
+
     // get rid of doubled quotes, \\n, etc.
-    find    = new String[]{"\"\"", "\\n", "\\r", "\\t"};
-    replace = new String[]{"\"",   "\n",  "\r",  "\t"};
+    find = new String[] { "\"\"", "\\n", "\\r", "\\t" };
+    replace = new String[] { "\"", "\n", "\r", "\t" };
     for (i = 0; i < find.length; i++) {
       tmpStr = "";
       while (s.length() > 0) {
         index = s.indexOf(find[i]);
         if (index > -1) {
           tmpStr += s.substring(0, index) + replace[i];
-          s       = s.substring(index + 2);
-        }
-        else {
+          s = s.substring(index + 2);
+        } else {
           tmpStr += s;
-          s       = "";
+          s = "";
         }
       }
       s = tmpStr;
     }
 
-    quote  = false;
+    quote = false;
     tmpStr = "";
     for (i = 0; i < s.length(); i++) {
       if (s.charAt(i) == '"') {
         quote = !quote;
         tmpStr += "" + s.charAt(i);
-      }
-      else if (s.charAt(i) == ',') {
+      } else if (s.charAt(i) == ',') {
         if (quote) {
           tmpStr += "" + s.charAt(i);
-        }
-        else {
-          if (tmpStr.startsWith("\""))
+        } else {
+          if (tmpStr.startsWith("\"")) {
             tmpStr = tmpStr.substring(1, tmpStr.length() - 1);
+          }
           result.addElement(tmpStr);
           tmpStr = "";
         }
-      }
-      else {
+      } else {
         tmpStr += "" + s.charAt(i);
       }
     }
-    
+
     // add last element
     if (!tmpStr.equals("")) {
-      if (tmpStr.startsWith("\""))
+      if (tmpStr.startsWith("\"")) {
         tmpStr = tmpStr.substring(1, tmpStr.length() - 1);
+      }
       result.addElement(tmpStr);
     }
 
@@ -364,39 +361,43 @@ public class SqlViewer
   /**
    * converts the given model into a comma-separated string.
    * 
-   * @param m       the model to convert
-   * @return        the string representation of the model
+   * @param m the model to convert
+   * @return the string representation of the model
    */
   protected String modelToString(DefaultListModel m) {
-    String      result;
-    String      tmpStr;
-    int         i;
-    int         n;
-    boolean     quote;
+    String result;
+    String tmpStr;
+    int i;
+    int n;
+    boolean quote;
 
     result = "";
 
     for (i = 0; i < m.size(); i++) {
-      if (i > 0)
+      if (i > 0) {
         result += ",";
-      
+      }
+
       tmpStr = m.get(i).toString();
-      quote  = (tmpStr.indexOf(",") > -1) || (tmpStr.indexOf(" ") > -1);
-      
-      if (quote)
+      quote = (tmpStr.indexOf(",") > -1) || (tmpStr.indexOf(" ") > -1);
+
+      if (quote) {
         result += "\"";
-      
+      }
+
       for (n = 0; n < tmpStr.length(); n++) {
         // double quotes
-        if (tmpStr.charAt(n) == '"')
+        if (tmpStr.charAt(n) == '"') {
           result += "" + "\"\"";
-        // normal character
-        else
+          // normal character
+        } else {
           result += "" + tmpStr.charAt(n);
+        }
       }
-      
-      if (quote)
+
+      if (quote) {
         result += "\"";
+      }
     }
 
     return result;
@@ -405,42 +406,39 @@ public class SqlViewer
   /**
    * loads the history properties of the SqlViewer in the user's home directory.
    * 
-   * @param set       whether to set the read properties in the panels or not
+   * @param set whether to set the read properties in the panels or not
    * @see #HISTORY_FILE
    */
   protected void loadHistory(boolean set) {
-    BufferedInputStream		str;
-    File			file;
-    int				width;
-    int				height;
+    BufferedInputStream str;
+    File file;
+    int width;
+    int height;
 
     try {
       file = new File(getHistoryFilename());
       if (file.exists()) {
-        str = new BufferedInputStream(
-            new FileInputStream(getHistoryFilename()));
+        str = new BufferedInputStream(new FileInputStream(getHistoryFilename()));
         m_History.load(str);
       }
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
 
     // set the histories
     if (set) {
-      m_ConnectionPanel.setHistory(
-          stringToModel(
-            m_History.getProperty(ConnectionPanel.HISTORY_NAME, "")));
-      m_QueryPanel.setHistory(
-          stringToModel(
-            m_History.getProperty(QueryPanel.HISTORY_NAME, "")));
-      m_QueryPanel.setMaxRows(
-          Integer.parseInt(m_History.getProperty(QueryPanel.MAX_ROWS, "100")));
+      m_ConnectionPanel.setHistory(stringToModel(m_History.getProperty(
+        ConnectionPanel.HISTORY_NAME, "")));
+      m_QueryPanel.setHistory(stringToModel(m_History.getProperty(
+        QueryPanel.HISTORY_NAME, "")));
+      m_QueryPanel.setMaxRows(Integer.parseInt(m_History.getProperty(
+        QueryPanel.MAX_ROWS, "100")));
 
-      width  = Integer.parseInt(m_History.getProperty(WIDTH, "0"));
+      width = Integer.parseInt(m_History.getProperty(WIDTH, "0"));
       height = Integer.parseInt(m_History.getProperty(HEIGHT, "0"));
-      if ((width != 0) && (height != 0))
-	setPreferredSize(new Dimension(width, height));
+      if ((width != 0) && (height != 0)) {
+        setPreferredSize(new Dimension(width, height));
+      }
     }
   }
 
@@ -450,14 +448,12 @@ public class SqlViewer
    * @see #HISTORY_FILE
    */
   protected void saveHistory() {
-    BufferedOutputStream    str;
-    
+    BufferedOutputStream str;
+
     try {
-      str = new BufferedOutputStream(
-          new FileOutputStream(getHistoryFilename()));
+      str = new BufferedOutputStream(new FileOutputStream(getHistoryFilename()));
       m_History.store(str, "SQL-Viewer-History");
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
@@ -473,10 +469,10 @@ public class SqlViewer
 
     saveHistory();
   }
-  
+
   /**
-   * calls the clear method of all sub-panels to set back to default values
-   * and free up memory.
+   * calls the clear method of all sub-panels to set back to default values and
+   * free up memory.
    */
   public void clear() {
     m_ConnectionPanel.clear();
@@ -489,8 +485,8 @@ public class SqlViewer
    * returns the database URL from the currently active tab in the ResultPanel,
    * otherwise an empty string.
    * 
-   * @see 		ResultPanel
-   * @return		the currently selected tab's URL
+   * @see ResultPanel
+   * @return the currently selected tab's URL
    */
   public String getURL() {
     return m_URL;
@@ -500,8 +496,8 @@ public class SqlViewer
    * returns the user from the currently active tab in the ResultPanel,
    * otherwise an empty string.
    * 
-   * @see		ResultPanel
-   * @return		the currently selected tab's user
+   * @see ResultPanel
+   * @return the currently selected tab's user
    */
   public String getUser() {
     return m_User;
@@ -511,8 +507,8 @@ public class SqlViewer
    * returns the password from the currently active tab in the ResultPanel,
    * otherwise an empty string.
    * 
-   * @see 		ResultPanel
-   * @return		the currently selected tab's password
+   * @see ResultPanel
+   * @return the currently selected tab's password
    */
   public String getPassword() {
     return m_Password;
@@ -522,8 +518,8 @@ public class SqlViewer
    * returns the query from the currently active tab in the ResultPanel,
    * otherwise an empty string.
    * 
-   * @see		ResultPanel
-   * @return		the currently selected tab's query
+   * @see ResultPanel
+   * @return the currently selected tab's query
    */
   public String getQuery() {
     return m_Query;
@@ -532,7 +528,7 @@ public class SqlViewer
   /**
    * adds the given listener to the list of listeners.
    * 
-   * @param l		the listener to add to the list
+   * @param l the listener to add to the list
    */
   public void addConnectionListener(ConnectionListener l) {
     m_ConnectionPanel.addConnectionListener(l);
@@ -541,7 +537,7 @@ public class SqlViewer
   /**
    * removes the given listener from the list of listeners.
    * 
-   * @param l		the listener to remove
+   * @param l the listener to remove
    */
   public void removeConnectionListener(ConnectionListener l) {
     m_ConnectionPanel.removeConnectionListener(l);
@@ -550,7 +546,7 @@ public class SqlViewer
   /**
    * adds the given listener to the list of listeners.
    * 
-   * @param l		the listener to add to the list
+   * @param l the listener to add to the list
    */
   public void addQueryExecuteListener(QueryExecuteListener l) {
     m_QueryPanel.addQueryExecuteListener(l);
@@ -559,7 +555,7 @@ public class SqlViewer
   /**
    * removes the given listener from the list of listeners.
    * 
-   * @param l		the listener to remove
+   * @param l the listener to remove
    */
   public void removeQueryExecuteListener(QueryExecuteListener l) {
     m_QueryPanel.removeQueryExecuteListener(l);
@@ -568,7 +564,7 @@ public class SqlViewer
   /**
    * adds the given listener to the list of listeners.
    * 
-   * @param l		the listener to add to the list
+   * @param l the listener to add to the list
    */
   public void addResultChangedListener(ResultChangedListener l) {
     m_ResultPanel.addResultChangedListener(l);
@@ -577,7 +573,7 @@ public class SqlViewer
   /**
    * removes the given listener from the list of listeners.
    * 
-   * @param l		the listener to remove
+   * @param l the listener to remove
    */
   public void removeResultChangedListener(ResultChangedListener l) {
     m_ResultPanel.removeResultChangedListener(l);
@@ -586,7 +582,7 @@ public class SqlViewer
   /**
    * adds the given listener to the list of listeners.
    * 
-   * @param l		the listener to add to the list
+   * @param l the listener to add to the list
    */
   public void addHistoryChangedListener(HistoryChangedListener l) {
     m_ConnectionPanel.addHistoryChangedListener(l);
@@ -596,7 +592,7 @@ public class SqlViewer
   /**
    * removes the given listener from the list of listeners.
    * 
-   * @param l		the listener to remove
+   * @param l the listener to remove
    */
   public void removeHistoryChangedListener(HistoryChangedListener l) {
     m_ConnectionPanel.removeHistoryChangedListener(l);
@@ -605,28 +601,30 @@ public class SqlViewer
 
   /** for monitoring the Memory consumption. */
   private static Memory m_Memory = new Memory(true);
-  
+
   /** the sql viewer. */
   private static SqlViewer m_Viewer;
-  
+
   /**
    * starts the SQL-Viewer interface.
    * 
-   * @param args	the commandline arguments - ignored
+   * @param args the commandline arguments - ignored
    */
   public static void main(String[] args) {
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
+      "Logging started");
     LookAndFeel.setLookAndFeel();
-    
+
     try {
       // uncomment to disable the memory management:
-      //m_Memory.setEnabled(false);
+      // m_Memory.setEnabled(false);
 
       final JFrame jf = new JFrame("Weka SQL-Viewer");
       m_Viewer = new SqlViewer(jf);
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(m_Viewer, BorderLayout.CENTER);
       jf.addWindowListener(new WindowAdapter() {
+        @Override
         public void windowClosing(WindowEvent e) {
           m_Viewer.saveSize();
           jf.dispose();
@@ -638,41 +636,35 @@ public class SqlViewer
       jf.setVisible(true);
 
       Thread memMonitor = new Thread() {
+        @Override
         public void run() {
           while (true) {
-            try {
-              this.sleep(4000);
+            // try {
+            // Thread.sleep(10);
 
+            if (m_Memory.isOutOfMemory()) {
+              // clean up
+              jf.dispose();
+              m_Viewer = null;
               System.gc();
 
-              if (m_Memory.isOutOfMemory()) {
-                // clean up
-                jf.dispose();
-                m_Viewer = null;
-                System.gc();
-
-                // stop threads
-                m_Memory.stopThreads();
-
-                // display error
-                System.err.println("\ndisplayed message:");
-                m_Memory.showOutOfMemory();
-                System.err.println("\nexiting");
-                System.exit(-1);
-              }
-
-            } 
-            catch (InterruptedException ex) { 
-              ex.printStackTrace(); 
+              // display error
+              System.err.println("\ndisplayed message:");
+              m_Memory.showOutOfMemory();
+              System.err.println("\nexiting");
+              System.exit(-1);
             }
+
+            // } catch (InterruptedException ex) {
+            // ex.printStackTrace();
+            // }
           }
         }
       };
 
       memMonitor.setPriority(Thread.MAX_PRIORITY);
       memMonitor.start();
-    } 
-    catch (Exception ex) {
+    } catch (Exception ex) {
       ex.printStackTrace();
       System.err.println(ex.getMessage());
     }

@@ -30,7 +30,7 @@ import java.beans.SimpleBeanInfo;
  * Bean info class for the strip chart bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 8034 $
+ * @version $Revision: 12008 $
  */
 public class StripChartBeanInfo extends SimpleBeanInfo {
   
@@ -54,9 +54,11 @@ public class StripChartBeanInfo extends SimpleBeanInfo {
     try {
       PropertyDescriptor p1;
       PropertyDescriptor p2;
+      PropertyDescriptor p3;
       p1 = new PropertyDescriptor("xLabelFreq", StripChart.class);
       p2 = new PropertyDescriptor("refreshFreq", StripChart.class);
-      PropertyDescriptor [] pds = { p1, p2 };
+      p3 = new PropertyDescriptor("refreshWidth", StripChart.class);
+      PropertyDescriptor [] pds = { p1, p2, p3 };
       return pds;
     } catch (Exception ex) {
       ex.printStackTrace();

@@ -19,6 +19,7 @@
 
 package weka.filters.unsupervised.attribute;
 
+import weka.classifiers.meta.FilteredClassifier;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.filters.AbstractFilterTest;
@@ -32,11 +33,18 @@ import junit.framework.TestSuite;
  * java weka.filters.unsupervised.attribute.ObfuscateTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 8034 $
+ * @version $Revision: 12656 $
  */
 public class ObfuscateTest extends AbstractFilterTest {
   
   public ObfuscateTest(String name) { super(name);  }
+
+  protected FilteredClassifier getFilteredClassifier() {
+    FilteredClassifier result = super.getFilteredClassifier();
+    result.setDoNotCheckForModifiedClassAttribute(true);
+
+    return result;
+  }
 
   /** Creates a default Obfuscate */
   public Filter getFilter() {

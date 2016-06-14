@@ -21,6 +21,7 @@
 
 package weka.classifiers;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -34,7 +35,7 @@ import weka.core.Utils;
  * classifiers based on a given random number seed.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 8034 $
+ * @version $Revision: 10141 $
  */
 public abstract class RandomizableParallelMultipleClassifiersCombiner extends
     ParallelMultipleClassifiersCombiner implements Randomizable {
@@ -50,21 +51,20 @@ public abstract class RandomizableParallelMultipleClassifiersCombiner extends
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(2);
+    Vector<Option> newVector = new Vector<Option>(1);
 
     newVector.addElement(new Option(
-              "\tRandom number seed.\n"
-              + "\t(default 1)",
-              "S", 1, "-S <num>"));
+          "\tRandom number seed.\n"
+          + "\t(default 1)",
+          "S", 1, "-S <num>"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
-    }
+    newVector.addAll(Collections.list(super.listOptions()));
+    
     return newVector.elements();
   }
+ 
 
   /**
    * Parses a given list of options. Valid options are:<p>
@@ -99,17 +99,14 @@ public abstract class RandomizableParallelMultipleClassifiersCombiner extends
    */
   public String [] getOptions() {
 
-    String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 2];
+    Vector<String> options = new Vector<String>();
+    
+    options.add("-S");
+    options.add("" + getSeed());
 
-    int current = 0;
-    options[current++] = "-S";
-    options[current++] = "" + getSeed();
-
-    System.arraycopy(superOptions, 0, options, current,
-                     superOptions.length);
-
-    return options;
+    Collections.addAll(options, super.getOptions());
+    
+    return options.toArray(new String[0]);
   }
 
   /**

@@ -21,6 +21,7 @@
 
 package weka.clusterers;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -32,76 +33,81 @@ import weka.core.Utils;
 /**
  * Abstract utility class for handling settings common to randomizable
  * clusterers.
- *
+ * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10203 $
  */
-public abstract class RandomizableSingleClustererEnhancer
-  extends AbstractClusterer
-  implements OptionHandler, Randomizable {
+public abstract class RandomizableSingleClustererEnhancer extends
+  AbstractClusterer implements OptionHandler, Randomizable {
 
   /** for serialization */
   private static final long serialVersionUID = -644847037106316249L;
-  
+
   /** the default seed value */
   protected int m_SeedDefault = 1;
-  
+
   /** The random number seed. */
   protected int m_Seed = m_SeedDefault;
 
   /**
    * Returns an enumeration describing the available options.
-   *
-   * @return 		an enumeration of all the available options.
+   * 
+   * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
-    Vector result = new Vector();
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> result = new Vector<Option>();
 
-    result.addElement(new Option(
-	"\tRandom number seed.\n"
-	+ "\t(default " + m_SeedDefault + ")",
-	"S", 1, "-S <num>"));
+    result.addElement(new Option("\tRandom number seed.\n" + "\t(default "
+      + m_SeedDefault + ")", "S", 1, "-S <num>"));
+
+    result.addAll(Collections.list(super.listOptions()));
 
     return result.elements();
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
-   *
-   * @param options 	the list of options as an array of strings
-   * @throws Exception 	if an option is not supported
+   * Parses a given list of options. Valid options are:
+   * <p>
+   * 
+   * @param options the list of options as an array of strings
+   * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    String	tmpStr;
-    
-    tmpStr = Utils.getOption('S', options);
-    if (tmpStr.length() != 0)
+
+    String tmpStr = Utils.getOption('S', options);
+    if (tmpStr.length() != 0) {
       setSeed(Integer.parseInt(tmpStr));
-    else
+    } else {
       setSeed(m_SeedDefault);
+    }
+
+    super.setOptions(options);
   }
 
   /**
    * Gets the current settings of the classifier.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
+  @Override
   public String[] getOptions() {
-    Vector	result;
-    
-    result = new Vector();
+    Vector<String> result = new Vector<String>();
 
     result.add("-S");
     result.add("" + getSeed());
 
-    return (String[]) result.toArray(new String[result.size()]);
+    Collections.addAll(result, super.getOptions());
+
+    return result.toArray(new String[result.size()]);
   }
-  
+
   /**
    * Returns the tip text for this property
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String seedTipText() {
     return "The random number seed to be used.";
@@ -109,18 +115,20 @@ public abstract class RandomizableSingleClustererEnhancer
 
   /**
    * Set the seed for random number generation.
-   *
-   * @param value 	the seed to use
+   * 
+   * @param value the seed to use
    */
+  @Override
   public void setSeed(int value) {
     m_Seed = value;
   }
 
   /**
    * Gets the seed for the random number generations
-   *
-   * @return 		the seed for the random number generation
+   * 
+   * @return the seed for the random number generation
    */
+  @Override
   public int getSeed() {
     return m_Seed;
   }

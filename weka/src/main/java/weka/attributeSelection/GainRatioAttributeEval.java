@@ -36,32 +36,33 @@ import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.Discretize;
 
-/** 
- <!-- globalinfo-start -->
- * GainRatioAttributeEval :<br/>
+/**
+ * <!-- globalinfo-start --> GainRatioAttributeEval :<br/>
  * <br/>
- * Evaluates the worth of an attribute by measuring the gain ratio with respect to the class.<br/>
+ * Evaluates the worth of an attribute by measuring the gain ratio with respect
+ * to the class.<br/>
  * <br/>
  * GainR(Class, Attribute) = (H(Class) - H(Class | Attribute)) / H(Attribute).<br/>
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -M
- *  treat missing values as a seperate value.</pre>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- <!-- options-end -->
- *
+ * <pre>
+ * -M
+ *  treat missing values as a seperate value.
+ * </pre>
+ * 
+ * <!-- options-end -->
+ * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 11215 $
  * @see Discretize
  */
-public class GainRatioAttributeEval
-  extends ASEvaluation
-  implements AttributeEvaluator, OptionHandler {
-  
+public class GainRatioAttributeEval extends ASEvaluation implements
+  AttributeEvaluator, OptionHandler {
+
   /** for serialization */
   static final long serialVersionUID = -8504656625598579926L;
 
@@ -70,9 +71,6 @@ public class GainRatioAttributeEval
 
   /** The class index */
   private int m_classIndex;
-
-  /** The number of attributes */
-  private int m_numAttribs;
 
   /** The number of instances */
   private int m_numInstances;
@@ -85,146 +83,147 @@ public class GainRatioAttributeEval
 
   /**
    * Returns a string describing this attribute evaluator
-   * @return a description of the evaluator suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the evaluator suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
     return "GainRatioAttributeEval :\n\nEvaluates the worth of an attribute "
-      +"by measuring the gain ratio with respect to the class.\n\n"
-      +"GainR(Class, Attribute) = (H(Class) - H(Class | Attribute)) / "
-      +"H(Attribute).\n";
+      + "by measuring the gain ratio with respect to the class.\n\n"
+      + "GainR(Class, Attribute) = (H(Class) - H(Class | Attribute)) / "
+      + "H(Attribute).\n";
   }
 
   /**
    * Constructor
    */
-  public GainRatioAttributeEval () {
+  public GainRatioAttributeEval() {
     resetOptions();
   }
-
 
   /**
    * Returns an enumeration describing the available options.
+   * 
    * @return an enumeration of all the available options.
    **/
-  public Enumeration listOptions () {
-    Vector newVector = new Vector(1);
-    newVector.addElement(new Option("\ttreat missing values as a seperate " 
-				    + "value.", "M", 0, "-M"));
-    return  newVector.elements();
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector = new Vector<Option>(1);
+    newVector.addElement(new Option("\ttreat missing values as a seperate "
+      + "value.", "M", 0, "-M"));
+    return newVector.elements();
   }
 
-
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <pre> -M
-   *  treat missing values as a seperate value.</pre>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   <!-- options-end -->
-   *
+   * <pre>
+   * -M
+   *  treat missing values as a seperate value.
+   * </pre>
+   * 
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    **/
-  public void setOptions (String[] options)
-    throws Exception {
+  @Override
+  public void setOptions(String[] options) throws Exception {
     resetOptions();
     setMissingMerge(!(Utils.getFlag('M', options)));
   }
-  
+
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String missingMergeTipText() {
     return "Distribute counts for missing values. Counts are distributed "
-      +"across other values in proportion to their frequency. Otherwise, "
-      +"missing is treated as a separate value.";
+      + "across other values in proportion to their frequency. Otherwise, "
+      + "missing is treated as a separate value.";
   }
 
   /**
    * distribute the counts for missing values across observed values
-   *
+   * 
    * @param b true=distribute missing values.
    */
-  public void setMissingMerge (boolean b) {
+  public void setMissingMerge(boolean b) {
     m_missing_merge = b;
   }
 
-
   /**
    * get whether missing values are being distributed or not
-   *
+   * 
    * @return true if missing values are being distributed.
    */
-  public boolean getMissingMerge () {
-    return  m_missing_merge;
+  public boolean getMissingMerge() {
+    return m_missing_merge;
   }
-
 
   /**
    * Gets the current settings of WrapperSubsetEval.
+   * 
    * @return an array of strings suitable for passing to setOptions()
    */
-  public String[] getOptions () {
+  @Override
+  public String[] getOptions() {
     String[] options = new String[1];
-    int current = 0;
 
     if (!getMissingMerge()) {
-      options[current++] = "-M";
+      options[0] = "-M";
+    } else {
+      options[0] = "";
     }
 
-    while (current < options.length) {
-      options[current++] = "";
-    }
-
-    return  options;
+    return options;
   }
 
   /**
    * Returns the capabilities of this evaluator.
-   *
-   * @return            the capabilities of this evaluator
-   * @see               Capabilities
+   * 
+   * @return the capabilities of this evaluator
+   * @see Capabilities
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
     result.disableAll();
-    
+
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enable(Capability.DATE_ATTRIBUTES);
     result.enable(Capability.MISSING_VALUES);
-    
+
     // class
     result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
-    
+
     return result;
   }
 
   /**
-   * Initializes a gain ratio attribute evaluator.
-   * Discretizes all attributes that are numeric.
-   *
-   * @param data set of instances serving as training data 
-   * @throws Exception if the evaluator has not been 
-   * generated successfully
+   * Initializes a gain ratio attribute evaluator. Discretizes all attributes
+   * that are numeric.
+   * 
+   * @param data set of instances serving as training data
+   * @throws Exception if the evaluator has not been generated successfully
    */
-  public void buildEvaluator (Instances data)
-    throws Exception {
-    
+  @Override
+  public void buildEvaluator(Instances data) throws Exception {
+
     // can evaluator handle data?
     getCapabilities().testWithFail(data);
 
     m_trainInstances = data;
     m_classIndex = m_trainInstances.classIndex();
-    m_numAttribs = m_trainInstances.numAttributes();
     m_numInstances = m_trainInstances.numInstances();
     Discretize disTransform = new Discretize();
     disTransform.setUseBetterEncoding(true);
@@ -233,26 +232,24 @@ public class GainRatioAttributeEval
     m_numClasses = m_trainInstances.attribute(m_classIndex).numValues();
   }
 
-
   /**
    * reset options to default values
    */
-  protected void resetOptions () {
+  protected void resetOptions() {
     m_trainInstances = null;
     m_missing_merge = true;
   }
 
-
   /**
-   * evaluates an individual attribute by measuring the gain ratio
-   * of the class given the attribute.
-   *
+   * evaluates an individual attribute by measuring the gain ratio of the class
+   * given the attribute.
+   * 
    * @param attribute the index of the attribute to be evaluated
    * @return the gain ratio
    * @throws Exception if the attribute could not be evaluated
    */
-  public double evaluateAttribute (int attribute)
-    throws Exception {
+  @Override
+  public double evaluateAttribute(int attribute) throws Exception {
     int i, j, ii, jj;
     int ni, nj;
     double sum = 0.0;
@@ -282,19 +279,17 @@ public class GainRatioAttributeEval
 
       if (inst.isMissing(attribute)) {
         ii = ni - 1;
-      }
-      else {
-        ii = (int)inst.value(attribute);
+      } else {
+        ii = (int) inst.value(attribute);
       }
 
       if (inst.isMissing(m_classIndex)) {
         jj = nj - 1;
-      }
-      else {
-        jj = (int)inst.value(m_classIndex);
+      } else {
+        jj = (int) inst.value(m_classIndex);
       }
 
-      counts[ii][jj]++;
+      counts[ii][jj] += inst.weight();
     }
 
     // get the row totals
@@ -317,9 +312,7 @@ public class GainRatioAttributeEval
     }
 
     // distribute missing counts
-    if (m_missing_merge && 
-	(sumi[ni-1] < m_numInstances) && 
-	(sumj[nj-1] < m_numInstances)) {
+    if (m_missing_merge && (sumi[ni - 1] < sum) && (sumj[nj - 1] < sum)) {
       double[] i_copy = new double[sumi.length];
       double[] j_copy = new double[sumj.length];
       double[][] counts_copy = new double[sumi.length][sumj.length];
@@ -330,15 +323,15 @@ public class GainRatioAttributeEval
 
       System.arraycopy(sumi, 0, i_copy, 0, sumi.length);
       System.arraycopy(sumj, 0, j_copy, 0, sumj.length);
-      double total_missing = (sumi[ni - 1] + sumj[nj - 1] - 
-			      counts[ni - 1][nj - 1]);
+      double total_missing =
+        (sumi[ni - 1] + sumj[nj - 1] - counts[ni - 1][nj - 1]);
 
       // do the missing i's
       if (sumi[ni - 1] > 0.0) {
         for (j = 0; j < nj - 1; j++) {
           if (counts[ni - 1][j] > 0.0) {
             for (i = 0; i < ni - 1; i++) {
-              temp = ((i_copy[i]/(sum - i_copy[ni - 1]))*counts[ni - 1][j]);
+              temp = ((i_copy[i] / (sum - i_copy[ni - 1])) * counts[ni - 1][j]);
               counts[i][j] += temp;
               sumi[i] += temp;
             }
@@ -355,7 +348,7 @@ public class GainRatioAttributeEval
         for (i = 0; i < ni - 1; i++) {
           if (counts[i][nj - 1] > 0.0) {
             for (j = 0; j < nj - 1; j++) {
-              temp = ((j_copy[j]/(sum - j_copy[nj - 1]))*counts[i][nj - 1]);
+              temp = ((j_copy[j] / (sum - j_copy[nj - 1])) * counts[i][nj - 1]);
               counts[i][j] += temp;
               sumj[j] += temp;
             }
@@ -368,11 +361,11 @@ public class GainRatioAttributeEval
       sumj[nj - 1] = 0.0;
 
       // do the both missing
-      if (counts[ni - 1][nj - 1] > 0.0  && total_missing != sum) {
+      if (counts[ni - 1][nj - 1] > 0.0 && total_missing < sum) {
         for (i = 0; i < ni - 1; i++) {
           for (j = 0; j < nj - 1; j++) {
-            temp = (counts_copy[i][j]/(sum - total_missing)) * 
-	      counts_copy[ni - 1][nj - 1];
+            temp = (counts_copy[i][j] / (sum - total_missing))
+              * counts_copy[ni - 1][nj - 1];
             counts[i][j] += temp;
             sumi[i] += temp;
             sumj[j] += temp;
@@ -383,21 +376,21 @@ public class GainRatioAttributeEval
       }
     }
 
-    return  ContingencyTables.gainRatio(counts);
+    return ContingencyTables.gainRatio(counts);
   }
-
 
   /**
    * Return a description of the evaluator
+   * 
    * @return description as a string
    */
-  public String toString () {
+  @Override
+  public String toString() {
     StringBuffer text = new StringBuffer();
 
     if (m_trainInstances == null) {
       text.append("\tGain Ratio evaluator has not been built");
-    }
-    else {
+    } else {
       text.append("\tGain Ratio feature evaluator");
 
       if (!m_missing_merge) {
@@ -406,25 +399,34 @@ public class GainRatioAttributeEval
     }
 
     text.append("\n");
-    return  text.toString();
+    return text.toString();
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 11215 $");
+  }
+
+  @Override
+  public int[] postProcess(int[] attributeSet) {
+
+    // save memory
+    m_trainInstances = new Instances(m_trainInstances, 0);
+
+    return attributeSet;
   }
 
   /**
    * Main method.
-   *
-   * @param args the options
-   * -t training file
+   * 
+   * @param args the options -t training file
    */
-  public static void main (String[] args) {
+  public static void main(String[] args) {
     runEvaluator(new GainRatioAttributeEval(), args);
   }
 }

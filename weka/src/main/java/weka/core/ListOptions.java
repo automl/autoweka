@@ -26,159 +26,161 @@ import java.util.Vector;
 /**
  * Lists the options of an OptionHandler
  * 
- * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @author fracpete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 10203 $
  */
-public class ListOptions
-  implements OptionHandler, RevisionHandler {
-  
+public class ListOptions implements OptionHandler, RevisionHandler {
+
   /** the classname */
   protected String m_Classname = ListOptions.class.getName();
-  
+
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  @Override
+  public Enumeration<Option> listOptions() {
     Vector<Option> result = new Vector<Option>();
 
-    result.addElement(new Option(
-        "\tThe class to load.",
-        "W", 1, "-W <classname>"));
-    
+    result.addElement(new Option("\tThe class to load.", "W", 1,
+      "-W <classname>"));
+
     return result.elements();
   }
-  
+
   /**
-   * Parses a given list of options. 
-   *
+   * Parses a given list of options.
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    String      		tmpStr;
-    
+    String tmpStr;
+
     tmpStr = Utils.getOption('W', options);
-    if (tmpStr.length() > 0)
+    if (tmpStr.length() > 0) {
       setClassname(tmpStr);
-    else
+    } else {
       setClassname(this.getClass().getName());
+    }
   }
-  
+
   /**
    * Gets the current settings of this object.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
+  @Override
   public String[] getOptions() {
-    Vector<String> 	result;
+    Vector<String> result;
 
     result = new Vector<String>();
-    
+
     result.add("-W");
     result.add(getClassname());
-    
-    return (String[]) result.toArray(new String[result.size()]);
+
+    return result.toArray(new String[result.size()]);
   }
-  
+
   /**
    * sets the classname of the class to generate the Javadoc for
    * 
-   * @param value	the new classname
+   * @param value the new classname
    */
   public void setClassname(String value) {
     m_Classname = value;
   }
-  
+
   /**
    * returns the current classname
    * 
-   * @return	the current classname
+   * @return the current classname
    */
   public String getClassname() {
     return m_Classname;
   }
-  
+
   /**
    * generates a string to print as help on the console
    * 
-   * @return 	the generated help
+   * @return the generated help
    */
   public String generateHelp() {
-    String 		result;
-    Enumeration 	enm;
-    Option 		option;
-    
+    String result;
+    Enumeration<Option> enm;
+    Option option;
+
     result = getClass().getName().replaceAll(".*\\.", "") + " Options:\n\n";
     enm = listOptions();
     while (enm.hasMoreElements()) {
-      option = (Option) enm.nextElement();
+      option = enm.nextElement();
       result += option.synopsis() + "\n" + option.description() + "\n";
     }
-    
+
     return result;
   }
-  
+
   /**
    * generates the options string.
    * 
-   * @return 		the options string
-   * @throws Exception 	in case the generation fails
+   * @return the options string
+   * @throws Exception in case the generation fails
    */
   public String generate() throws Exception {
-    StringBuffer 	result;
-    OptionHandler	handler;
-    Enumeration 	enm;
-    Option 		option;
-    
+    StringBuffer result;
+    OptionHandler handler;
+    Enumeration<Option> enm;
+    Option option;
+
     result = new StringBuffer();
-    
+
     handler = (OptionHandler) Class.forName(getClassname()).newInstance();
-    
-    enm = ((OptionHandler) handler).listOptions();
+
+    enm = handler.listOptions();
     while (enm.hasMoreElements()) {
-      option = (Option) enm.nextElement();
+      option = enm.nextElement();
       result.append(option.synopsis() + '\n');
       result.append(option.description() + "\n");
     }
-    
+
     return result.toString();
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10203 $");
   }
-  
+
   /**
    * runs the javadoc producer with the given commandline options
    * 
-   * @param options	the commandline options
+   * @param options the commandline options
    */
   public static void main(String[] options) {
     ListOptions list = new ListOptions();
-    
+
     try {
       try {
-	if (Utils.getFlag('h', options))
-	  throw new Exception("Help requested");
+        if (Utils.getFlag('h', options)) {
+          throw new Exception("Help requested");
+        }
 
-	list.setOptions(options);
+        list.setOptions(options);
         Utils.checkForRemainingOptions(options);
-      } 
-      catch (Exception ex) {
+      } catch (Exception ex) {
         String result = "\n" + ex.getMessage() + "\n\n" + list.generateHelp();
         throw new Exception(result);
       }
 
       System.out.println("\n" + list.generate());
-    } 
-    catch (Exception ex) {
+    } catch (Exception ex) {
       System.err.println(ex.getMessage());
     }
   }

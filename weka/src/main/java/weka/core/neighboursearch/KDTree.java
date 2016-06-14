@@ -21,6 +21,7 @@
 
 package weka.core.neighboursearch;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -105,7 +106,7 @@ import weka.core.neighboursearch.kdtrees.SlidingMidPointOfWidestSide;
  * @author Gabi Schmidberger (gabi[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
  * @author Malcolm Ware (mfw4[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 12479 $
  */
 public class KDTree
   extends NearestNeighbourSearch
@@ -710,15 +711,13 @@ public class KDTree
    * 
    * @return 		an enumeration of the measure names
    */
-  public Enumeration enumerateMeasures() {
+  public Enumeration<String> enumerateMeasures() {
     Vector<String> newVector = new Vector<String>();
     newVector.addElement("measureTreeSize");
     newVector.addElement("measureNumLeaves");
     newVector.addElement("measureMaxDepth");
     if (m_Stats != null) {
-      for (Enumeration e = m_Stats.enumerateMeasures(); e.hasMoreElements();) {
-        newVector.addElement((String)e.nextElement());
-      }
+      newVector.addAll(Collections.list(m_Stats.enumerateMeasures()));
     }
     return newVector.elements();
   }
@@ -955,16 +954,17 @@ public class KDTree
   protected boolean candidateIsFullOwner(KDTreeNode node, Instance candidate,
       Instance competitor) throws Exception {
     // get extreme point
-    Instance extreme = (Instance)candidate.copy();
+    double[] extreme = new double[m_Instances.numAttributes()];
     for (int i = 0; i < m_Instances.numAttributes(); i++) {
       if ((competitor.value(i) - candidate.value(i)) > 0) {
-        extreme.setValue(i, node.m_NodeRanges[i][MAX]);
+        extreme[i] = node.m_NodeRanges[i][MAX];
       } else {
-        extreme.setValue(i, node.m_NodeRanges[i][MIN]);
+        extreme[i] = node.m_NodeRanges[i][MIN];
       }
     }
-    boolean isFullOwner = m_EuclideanDistance.distance(extreme, candidate) < m_EuclideanDistance
-        .distance(extreme, competitor);
+    Instance extremeI = candidate.copy(extreme);
+    boolean isFullOwner = m_EuclideanDistance.distance(extremeI, candidate) < m_EuclideanDistance
+        .distance(extremeI, competitor);
 
     return isFullOwner;
   }
@@ -982,8 +982,7 @@ public class KDTree
   public void assignSubToCenters(KDTreeNode node, Instances centers,
       int[] centList, int[] assignments) throws Exception {
     // todo: undecided situations
-    int numCent = centList.length;
-
+    
     // WARNING: assignments is "input/output-parameter"
     // should not be null and the following should not happen
     if (assignments == null) {
@@ -1201,7 +1200,7 @@ public class KDTree
    * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
     Vector<Option> newVector = new Vector<Option>();
     
     newVector.add(new Option(
@@ -1223,6 +1222,8 @@ public class KDTree
 	"\tNormalizing will be done\n"
         + "\t(Select dimension for split, with normalising to universe).",
         "N", 0, "-N"));
+    
+    newVector.addAll(Collections.list(super.listOptions()));
     
     return newVector.elements();
   }
@@ -1286,6 +1287,8 @@ public class KDTree
       setMaxInstInLeaf(40);
 
     setNormalizeNodeWidth(Utils.getFlag('N', options));
+    
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -1327,6 +1330,6 @@ public class KDTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 12479 $");
   }
 }

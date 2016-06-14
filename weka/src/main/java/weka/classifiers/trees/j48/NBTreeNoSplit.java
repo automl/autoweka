@@ -38,7 +38,7 @@ import weka.filters.supervised.attribute.Discretize;
  * trees.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10531 $
  */
 public final class NBTreeNoSplit
   extends ClassifierSplitModel {
@@ -47,13 +47,13 @@ public final class NBTreeNoSplit
   private static final long serialVersionUID = 7824804381545259618L;
 
   /** the naive bayes classifier */
-  private NaiveBayesUpdateable m_nb;
+  protected NaiveBayesUpdateable m_nb;
 
   /** the discretizer used */
-  private Discretize m_disc;
+  protected Discretize m_disc;
 
   /** errors on the training data at this node */
-  private double m_errors;
+  protected double m_errors;
 
   public NBTreeNoSplit() {
     m_numSubsets = 1;
@@ -211,6 +211,6 @@ public final class NBTreeNoSplit
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10531 $");
   }
 }

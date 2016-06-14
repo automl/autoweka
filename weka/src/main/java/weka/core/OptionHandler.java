@@ -28,7 +28,7 @@ import java.util.Enumeration;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10141 $
  */
 public interface OptionHandler {
 
@@ -37,7 +37,7 @@ public interface OptionHandler {
    *
    * @return an enumeration of all available options.
    */
-  Enumeration listOptions();
+  Enumeration<Option> listOptions();
 
   /**
    * Sets the OptionHandler's options using the given list. All options

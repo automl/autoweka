@@ -6,7 +6,7 @@
 # url:     http://www.mysql.com/
 # jdbc:    http://www.mysql.com/products/connector/j/
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 5837 $
+# version: $Revision: 11885 $
 
 # JDBC driver (comma-separated list)
 jdbcDriver=org.gjt.mm.mysql.Driver
@@ -26,6 +26,7 @@ jdbcURL=jdbc:mysql://server_name:3306/database_name
 # date, getDate() = 8;        --> date
 # text, getString() = 9;      --> string
 # time, getTime() = 10;       --> date
+# timestamp, getTime() = 11;  --> date
 
 # other options
 CREATE_DOUBLE=DOUBLE

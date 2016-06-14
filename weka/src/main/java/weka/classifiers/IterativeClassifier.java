@@ -29,26 +29,26 @@ import weka.core.Instances;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10861 $
  */
 
-public interface IterativeClassifier {
+public interface IterativeClassifier extends Classifier {
 
   /**
-   * Inits an iterative classifier.
+   * Initializes an iterative classifier.
    *
    * @param instances the instances to be used in induction
    * @exception Exception if the model cannot be initialized
    */
-  void initClassifier(Instances instances) throws Exception;
+  void initializeClassifier(Instances instances) throws Exception;
 
   /**
    * Performs one iteration.
    *
-   * @param iteration the index of the current iteration (0-based)
-   * @exception Exception if this iteration fails
+   * @return false if no further iterations could be performed, true otherwise
+   * @exception Exception if this iteration fails for unexpected reasons
    */
-  void next(int iteration) throws Exception;
+  boolean next() throws Exception;
 
   /**
    * Signal end of iterating, useful for any house-keeping/cleanup
@@ -56,13 +56,4 @@ public interface IterativeClassifier {
    * @exception Exception if cleanup fails
    */
   void done() throws Exception;
-
-  /**
-    * Performs a deep copy of the classifier, and a reference copy
-    * of the training instances (or a deep copy if required).
-    *
-    * @return a clone of the classifier
-    */
-  Object clone() throws CloneNotSupportedException;
-
 }

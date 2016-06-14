@@ -25,7 +25,7 @@ package weka.core;
  * to datasets.
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 11006 $
  * @see     Capabilities
  */
 public interface CapabilitiesHandler {

@@ -22,6 +22,7 @@
 package weka.gui.explorer;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -53,15 +54,21 @@ import javax.swing.event.ChangeListener;
 
 import weka.associations.AssociationRules;
 import weka.associations.Associator;
+import weka.associations.FPGrowth;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
+import weka.core.Defaults;
 import weka.core.Drawable;
+import weka.core.Environment;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.Settings;
 import weka.core.Utils;
+import weka.gui.AbstractPerspective;
 import weka.gui.GenericObjectEditor;
 import weka.gui.Logger;
+import weka.gui.PerspectiveInfo;
 import weka.gui.PropertyPanel;
 import weka.gui.ResultHistoryPanel;
 import weka.gui.SaveBuffer;
@@ -81,10 +88,13 @@ import weka.gui.visualize.plugins.TreeVisualizePlugin;
  * associations.
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 9010 $
+ * @version $Revision: 12232 $
  */
-public class AssociationsPanel extends JPanel implements
-    CapabilitiesFilterChangeListener, ExplorerPanel, LogHandler {
+@PerspectiveInfo(ID = "weka.gui.explorer.associationspanel",
+  title = "Associate", toolTipText = "Discover association rules",
+  iconPath = "weka/gui/weka_icon_new_small.png")
+public class AssociationsPanel extends AbstractPerspective implements
+  CapabilitiesFilterChangeListener, ExplorerPanel, LogHandler {
 
   /** for serialization */
   static final long serialVersionUID = -6867871711865476971L;
@@ -120,7 +130,7 @@ public class AssociationsPanel extends JPanel implements
    * Whether to store any graph or xml rules output in the history list
    */
   protected JCheckBox m_storeOutput = new JCheckBox(
-      "Store output for visualization");
+    "Store output for visualization");
 
   /** The main set of instances we're playing with */
   protected Instances m_Instances;
@@ -130,6 +140,12 @@ public class AssociationsPanel extends JPanel implements
 
   /** A thread that associator runs in */
   protected Thread m_RunThread;
+
+  /**
+   * Whether start-up settings have been applied (i.e. initial default
+   * associator to use
+   */
+  protected boolean m_initialSettingsSet;
 
   /* Register the property editors we need */
   static {
@@ -153,15 +169,17 @@ public class AssociationsPanel extends JPanel implements
         }
       }
     });
-    m_History.setBorder(BorderFactory
-        .createTitledBorder("Result list (right-click for options)"));
+    JPanel historyHolder = new JPanel(new BorderLayout());
+    historyHolder.setBorder(BorderFactory
+      .createTitledBorder("Result list (right-click for options)"));
+    historyHolder.add(m_History, BorderLayout.CENTER);
     m_History.setHandleRightClicks(false);
     // see if we can popup a menu for the selected result
     m_History.getList().addMouseListener(new MouseAdapter() {
       @Override
       public void mouseClicked(MouseEvent e) {
         if (((e.getModifiers() & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK)
-            || e.isAltDown()) {
+          || e.isAltDown()) {
           int index = m_History.getList().locationToIndex(e.getPoint());
           if (index != -1) {
             String name = m_History.getNameAtIndex(index);
@@ -184,12 +202,12 @@ public class AssociationsPanel extends JPanel implements
         Associator associator = (Associator) m_AssociatorEditor.getValue();
         Capabilities currentSchemeCapabilities = null;
         if (associator != null && currentFilter != null
-            && (associator instanceof CapabilitiesHandler)) {
-          currentSchemeCapabilities = ((CapabilitiesHandler) associator)
-              .getCapabilities();
+          && (associator instanceof CapabilitiesHandler)) {
+          currentSchemeCapabilities =
+            ((CapabilitiesHandler) associator).getCapabilities();
 
           if (!currentSchemeCapabilities.supportsMaybe(currentFilter)
-              && !currentSchemeCapabilities.supports(currentFilter)) {
+            && !currentSchemeCapabilities.supports(currentFilter)) {
             m_StartBut.setEnabled(false);
           }
         }
@@ -204,7 +222,14 @@ public class AssociationsPanel extends JPanel implements
     m_StartBut.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        startAssociator();
+        boolean proceed = true;
+        if (Explorer.m_Memory.memoryIsLow()) {
+          proceed = Explorer.m_Memory.showMemoryIsLow();
+        }
+
+        if (proceed) {
+          startAssociator();
+        }
       }
     });
     m_StopBut.addActionListener(new ActionListener() {
@@ -216,15 +241,16 @@ public class AssociationsPanel extends JPanel implements
 
     // check for any visualization plugins so that we
     // can add a checkbox for storing graphs or rules
-    boolean showStoreOutput = (GenericObjectEditor.getClassnames(
+    boolean showStoreOutput =
+      (GenericObjectEditor.getClassnames(
         AssociationRuleVisualizePlugin.class.getName()).size() > 0 || GenericObjectEditor
         .getClassnames(TreeVisualizePlugin.class.getName()).size() > 0);
 
     // Layout the GUI
     JPanel p1 = new JPanel();
     p1.setBorder(BorderFactory.createCompoundBorder(
-        BorderFactory.createTitledBorder("Associator"),
-        BorderFactory.createEmptyBorder(0, 5, 5, 5)));
+      BorderFactory.createTitledBorder("Associator"),
+      BorderFactory.createEmptyBorder(0, 5, 5, 5)));
     p1.setLayout(new BorderLayout());
     p1.add(m_CEPanel, BorderLayout.NORTH);
 
@@ -281,8 +307,8 @@ public class AssociationsPanel extends JPanel implements
     gbC.gridy = 2;
     gbC.gridx = 0;
     gbC.weightx = 0;
-    gbL.setConstraints(m_History, gbC);
-    mondo.add(m_History);
+    gbL.setConstraints(historyHolder, gbC);
+    mondo.add(historyHolder);
     gbC = new GridBagConstraints();
     gbC.fill = GridBagConstraints.BOTH;
     gbC.gridy = 0;
@@ -320,8 +346,8 @@ public class AssociationsPanel extends JPanel implements
     m_Instances = inst;
     String[] attribNames = new String[m_Instances.numAttributes()];
     for (int i = 0; i < attribNames.length; i++) {
-      String type = "(" + Attribute.typeToStringShort(m_Instances.attribute(i))
-          + ") ";
+      String type =
+        "(" + Attribute.typeToStringShort(m_Instances.attribute(i)) + ") ";
       attribNames[i] = type + m_Instances.attribute(i).name();
     }
     m_StartBut.setEnabled(m_RunThread == null);
@@ -352,8 +378,8 @@ public class AssociationsPanel extends JPanel implements
           AssociationRules rulesList = null;
           Associator associator = (Associator) m_AssociatorEditor.getValue();
           StringBuffer outBuff = new StringBuffer();
-          String name = (new SimpleDateFormat("HH:mm:ss - "))
-              .format(new Date());
+          String name =
+            (new SimpleDateFormat("HH:mm:ss - ")).format(new Date());
           String cname = associator.getClass().getName();
           if (cname.startsWith("weka.associations.")) {
             name += cname.substring("weka.associations.".length());
@@ -361,10 +387,12 @@ public class AssociationsPanel extends JPanel implements
             name += cname;
           }
           String cmd = m_AssociatorEditor.getValue().getClass().getName();
-          if (m_AssociatorEditor.getValue() instanceof OptionHandler)
-            cmd += " "
+          if (m_AssociatorEditor.getValue() instanceof OptionHandler) {
+            cmd +=
+              " "
                 + Utils.joinOptions(((OptionHandler) m_AssociatorEditor
-                    .getValue()).getOptions());
+                  .getValue()).getOptions());
+          }
           try {
 
             // Output some header information
@@ -386,7 +414,7 @@ public class AssociationsPanel extends JPanel implements
             if (inst.numAttributes() < 100) {
               for (int i = 0; i < inst.numAttributes(); i++) {
                 outBuff.append("              " + inst.attribute(i).name()
-                    + '\n');
+                  + '\n');
               }
             } else {
               outBuff.append("              [list of attributes omitted]\n");
@@ -415,7 +443,8 @@ public class AssociationsPanel extends JPanel implements
                 try {
                   // xmlRules =
                   // ((weka.associations.XMLRulesProducer)associator).xmlRules();
-                  rulesList = ((weka.associations.AssociationRulesProducer) associator)
+                  rulesList =
+                    ((weka.associations.AssociationRulesProducer) associator)
                       .getAssociationRules();
                 } catch (Exception ex) {
                 }
@@ -437,7 +466,7 @@ public class AssociationsPanel extends JPanel implements
               Associator configCopy = associator.getClass().newInstance();
               if (configCopy instanceof OptionHandler) {
                 ((OptionHandler) configCopy)
-                    .setOptions(((OptionHandler) associator).getOptions());
+                  .setOptions(((OptionHandler) associator).getOptions());
               }
               visVect.add(configCopy);
             } catch (Exception ex) {
@@ -479,6 +508,7 @@ public class AssociationsPanel extends JPanel implements
   /**
    * Stops the currently running Associator (if any).
    */
+  @SuppressWarnings("deprecation")
   protected void stopAssociator() {
 
     if (m_RunThread != null) {
@@ -512,8 +542,8 @@ public class AssociationsPanel extends JPanel implements
    * @param treeName the title to assign to the display
    */
   protected void visualizeTree(String dottyString, String treeName) {
-    final javax.swing.JFrame jf = new javax.swing.JFrame(
-        "Weka Classifier Tree Visualizer: " + treeName);
+    final javax.swing.JFrame jf =
+      new javax.swing.JFrame("Weka Classifier Tree Visualizer: " + treeName);
     jf.setSize(500, 400);
     jf.getContentPane().setLayout(new BorderLayout());
     TreeVisualizer tv = new TreeVisualizer(null, dottyString, new PlaceNode2());
@@ -537,6 +567,7 @@ public class AssociationsPanel extends JPanel implements
    * @param x the x coordinate for popping up the menu
    * @param y the y coordinate for popping up the menu
    */
+  @SuppressWarnings("unchecked")
   protected void historyRightClickPopup(String name, int x, int y) {
     final String selectedName = name;
     JPopupMenu resultListMenu = new JPopupMenu();
@@ -595,7 +626,7 @@ public class AssociationsPanel extends JPanel implements
 
     Vector<Object> visVect = null;
     if (selectedName != null) {
-      visVect = (Vector) m_History.getNamedObject(selectedName);
+      visVect = (Vector<Object>) m_History.getNamedObject(selectedName);
     }
 
     // check for the associator itself
@@ -607,8 +638,8 @@ public class AssociationsPanel extends JPanel implements
       }
 
       final Associator model = temp_model;
-      JMenuItem reApplyConfig = new JMenuItem(
-          "Re-apply this model's configuration");
+      JMenuItem reApplyConfig =
+        new JMenuItem("Re-apply this model's configuration");
       if (model != null) {
         reApplyConfig.addActionListener(new ActionListener() {
           @Override
@@ -630,19 +661,21 @@ public class AssociationsPanel extends JPanel implements
     if (visVect != null) {
       for (Object o : visVect) {
         if (o instanceof AssociationRules) {
-          Vector pluginsVector = GenericObjectEditor
+          Vector<String> pluginsVector =
+            GenericObjectEditor
               .getClassnames(AssociationRuleVisualizePlugin.class.getName());
           for (int i = 0; i < pluginsVector.size(); i++) {
-            String className = (String) (pluginsVector.elementAt(i));
+            String className = (pluginsVector.elementAt(i));
             try {
-              AssociationRuleVisualizePlugin plugin = (AssociationRuleVisualizePlugin) Class
-                  .forName(className).newInstance();
+              AssociationRuleVisualizePlugin plugin =
+                (AssociationRuleVisualizePlugin) Class.forName(className)
+                  .newInstance();
               if (plugin == null) {
                 continue;
               }
               availablePlugins = true;
-              JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(
-                  (AssociationRules) o, selectedName);
+              JMenuItem pluginMenuItem =
+                plugin.getVisualizeMenuItem((AssociationRules) o, selectedName);
               if (pluginMenuItem != null) {
                 visPlugins.add(pluginMenuItem);
               }
@@ -651,18 +684,20 @@ public class AssociationsPanel extends JPanel implements
             }
           }
         } else if (o instanceof String) {
-          Vector pluginsVector = GenericObjectEditor
-              .getClassnames(TreeVisualizePlugin.class.getName());
+          Vector<String> pluginsVector =
+            GenericObjectEditor.getClassnames(TreeVisualizePlugin.class
+              .getName());
           for (int i = 0; i < pluginsVector.size(); i++) {
-            String className = (String) (pluginsVector.elementAt(i));
+            String className = (pluginsVector.elementAt(i));
             try {
-              TreeVisualizePlugin plugin = (TreeVisualizePlugin) Class.forName(
-                  className).newInstance();
-              if (plugin == null)
+              TreeVisualizePlugin plugin =
+                (TreeVisualizePlugin) Class.forName(className).newInstance();
+              if (plugin == null) {
                 continue;
+              }
               availablePlugins = true;
-              JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(
-                  (String) o, selectedName);
+              JMenuItem pluginMenuItem =
+                plugin.getVisualizeMenuItem((String) o, selectedName);
               // Version version = new Version();
               if (pluginMenuItem != null) {
                 /*
@@ -704,10 +739,11 @@ public class AssociationsPanel extends JPanel implements
       return;
     }
 
-    if (!ExplorerDefaults.getInitGenericObjectEditorFilter())
+    if (!ExplorerDefaults.getInitGenericObjectEditorFilter()) {
       tempInst = new Instances(m_Instances, 0);
-    else
+    } else {
       tempInst = new Instances(m_Instances);
+    }
     tempInst.setClassIndex(-1);
 
     try {
@@ -724,12 +760,12 @@ public class AssociationsPanel extends JPanel implements
     Associator associator = (Associator) m_AssociatorEditor.getValue();
     Capabilities currentSchemeCapabilities = null;
     if (associator != null && currentFilter != null
-        && (associator instanceof CapabilitiesHandler)) {
-      currentSchemeCapabilities = ((CapabilitiesHandler) associator)
-          .getCapabilities();
+      && (associator instanceof CapabilitiesHandler)) {
+      currentSchemeCapabilities =
+        ((CapabilitiesHandler) associator).getCapabilities();
 
       if (!currentSchemeCapabilities.supportsMaybe(currentFilter)
-          && !currentSchemeCapabilities.supports(currentFilter)) {
+        && !currentSchemeCapabilities.supports(currentFilter)) {
         m_StartBut.setEnabled(false);
       }
     }
@@ -742,10 +778,11 @@ public class AssociationsPanel extends JPanel implements
    */
   @Override
   public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
-    if (e.getFilter() == null)
+    if (e.getFilter() == null) {
       updateCapabilitiesFilter(null);
-    else
+    } else {
       updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
+    }
   }
 
   /**
@@ -789,6 +826,106 @@ public class AssociationsPanel extends JPanel implements
     return "Discover association rules";
   }
 
+  @Override
+  public boolean requiresLog() {
+    return true;
+  }
+
+  @Override
+  public boolean acceptsInstances() {
+    return true;
+  }
+
+  @Override
+  public Defaults getDefaultSettings() {
+    return new AssociationsPanelDefaults();
+  }
+
+  @Override
+  public boolean okToBeActive() {
+    return m_Instances != null;
+  }
+
+  public void setActive(boolean active) {
+    super.setActive(active);
+    if (m_isActive) {
+      // make sure initial settings get applied
+      settingsChanged();
+    }
+  }
+
+  @Override
+  public void settingsChanged() {
+    if (getMainApplication() != null) {
+      if (!m_initialSettingsSet) {
+        m_initialSettingsSet = true;
+
+        Object initialA =
+          getMainApplication().getApplicationSettings().getSetting(
+            getPerspectiveID(), AssociationsPanelDefaults.ASSOCIATOR_KEY,
+            AssociationsPanelDefaults.ASSOCIATOR, Environment.getSystemWide());
+        m_AssociatorEditor.setValue(initialA);
+      }
+
+      Font outputFont =
+        getMainApplication().getApplicationSettings().getSetting(
+          getPerspectiveID(), AssociationsPanelDefaults.OUTPUT_FONT_KEY,
+          AssociationsPanelDefaults.OUTPUT_FONT, Environment.getSystemWide());
+      m_OutText.setFont(outputFont);
+      Color textColor =
+        getMainApplication().getApplicationSettings().getSetting(
+          getPerspectiveID(), AssociationsPanelDefaults.OUTPUT_TEXT_COLOR_KEY,
+          AssociationsPanelDefaults.OUTPUT_TEXT_COLOR,
+          Environment.getSystemWide());
+      m_OutText.setForeground(textColor);
+      Color outputBackgroundColor =
+        getMainApplication().getApplicationSettings().getSetting(
+          getPerspectiveID(),
+          AssociationsPanelDefaults.OUTPUT_BACKGROUND_COLOR_KEY,
+          AssociationsPanelDefaults.OUTPUT_BACKGROUND_COLOR,
+          Environment.getSystemWide());
+      m_OutText.setBackground(outputBackgroundColor);
+      m_History.setBackground(outputBackgroundColor);
+    }
+  }
+
+  /**
+   * Default settings for the associations panel
+   */
+  protected static final class AssociationsPanelDefaults extends Defaults {
+    public static final String ID = "weka.gui.explorer.associationspanel";
+
+    protected static final Settings.SettingKey ASSOCIATOR_KEY =
+      new Settings.SettingKey(ID + ".initialAssociator", "Initial associator",
+        "On startup, set this associator as the default one");
+    protected static final Associator ASSOCIATOR = new FPGrowth();
+
+    protected static final Settings.SettingKey OUTPUT_FONT_KEY =
+      new Settings.SettingKey(ID + ".outputFont", "Font for text output",
+        "Font to " + "use in the output area");
+    protected static final Font OUTPUT_FONT = new Font("Monospaced",
+      Font.PLAIN, 12);
+
+    protected static final Settings.SettingKey OUTPUT_TEXT_COLOR_KEY =
+      new Settings.SettingKey(ID + ".outputFontColor", "Output text color",
+        "Color " + "of output text");
+    protected static final Color OUTPUT_TEXT_COLOR = Color.black;
+
+    protected static final Settings.SettingKey OUTPUT_BACKGROUND_COLOR_KEY =
+      new Settings.SettingKey(ID + ".outputBackgroundColor",
+        "Output background color", "Output background color");
+    protected static final Color OUTPUT_BACKGROUND_COLOR = Color.white;
+    private static final long serialVersionUID = 1108450683775771792L;
+
+    public AssociationsPanelDefaults() {
+      super(ID);
+      m_defaults.put(ASSOCIATOR_KEY, ASSOCIATOR);
+      m_defaults.put(OUTPUT_FONT_KEY, OUTPUT_FONT);
+      m_defaults.put(OUTPUT_TEXT_COLOR_KEY, OUTPUT_TEXT_COLOR);
+      m_defaults.put(OUTPUT_BACKGROUND_COLOR_KEY, OUTPUT_BACKGROUND_COLOR);
+    }
+  }
+
   /**
    * Tests out the Associator panel from the command line.
    * 
@@ -797,8 +934,8 @@ public class AssociationsPanel extends JPanel implements
   public static void main(String[] args) {
 
     try {
-      final javax.swing.JFrame jf = new javax.swing.JFrame(
-          "Weka Explorer: Associator");
+      final javax.swing.JFrame jf =
+        new javax.swing.JFrame("Weka Explorer: Associator");
       jf.getContentPane().setLayout(new BorderLayout());
       final AssociationsPanel sp = new AssociationsPanel();
       jf.getContentPane().add(sp, BorderLayout.CENTER);
@@ -816,8 +953,8 @@ public class AssociationsPanel extends JPanel implements
       jf.setVisible(true);
       if (args.length == 1) {
         System.err.println("Loading instances from " + args[0]);
-        java.io.Reader r = new java.io.BufferedReader(new java.io.FileReader(
-            args[0]));
+        java.io.Reader r =
+          new java.io.BufferedReader(new java.io.FileReader(args[0]));
         Instances i = new Instances(r);
         sp.setInstances(i);
       }

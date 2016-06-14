@@ -37,7 +37,8 @@ import java.io.Serializable;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 5953 $
+ * @author eibe@cs.waikato.ac.nz
+ * @version $Revision: 11815 $
  */
 public class SingularValueDecomposition 
   implements Serializable, RevisionHandler {
@@ -73,7 +74,7 @@ public class SingularValueDecomposition
 
     // Derived from LINPACK code.
     // Initialize.
-    double[][] A = Arg.getArrayCopy();
+    double[][] A = null;
     m = Arg.getRowDimension();
     n = Arg.getColumnDimension();
 
@@ -83,9 +84,23 @@ public class SingularValueDecomposition
 	  throw new IllegalArgumentException("Jama SVD only works for m >= n"); }
     */
 
+    boolean usingTranspose = false;
+    if (m < n) {
+
+      // Use transpose and convert back at the end
+      // Otherwise m < n case may yield incorrect results (see above comment)
+      A = Arg.transpose().getArrayCopy();
+      usingTranspose = true;
+      int temp = m;
+      m = n;
+      n = temp;
+    } else {
+      A = Arg.getArrayCopy();
+    }
+
     int nu = Math.min(m,n);
     s = new double [Math.min(m+1,n)];
-    U = new double [m][nu];
+    U = new double [m][m];
     V = new double [n][n];
     double[] e = new double [n];
     double[] work = new double [m];
@@ -310,7 +325,7 @@ public class SingularValueDecomposition
           if (ks == k) {
             break;
           }
-          double t = (ks != p ? Math.abs(e[ks]) : 0.) + 
+          double t = (ks != p ? Math.abs(e[ks]) : 0.) +
                                                   (ks != k+1 ? Math.abs(e[ks-1]) : 0.);
           if (Math.abs(s[ks]) <= tiny + eps*t)  {
             s[ks] = 0.0;
@@ -387,7 +402,7 @@ public class SingularValueDecomposition
                   // Calculate the shift.
 
                   double scale = Math.max(Math.max(Math.max(Math.max(
-                            Math.abs(s[p-1]),Math.abs(s[p-2])),Math.abs(e[p-2])), 
+                            Math.abs(s[p-1]),Math.abs(s[p-2])),Math.abs(e[p-2])),
                         Math.abs(s[k])),Math.abs(e[k]));
                   double sp = s[p-1]/scale;
                   double spm1 = s[p-2]/scale;
@@ -490,6 +505,15 @@ public class SingularValueDecomposition
         break;
       }
     }
+
+    if (usingTranspose) {
+      int temp = m;
+      m = n;
+      n = temp;
+      double[][] tempA = U;
+      U = V;
+      V = tempA;
+    }
   }
 
   /** 
@@ -497,7 +521,7 @@ public class SingularValueDecomposition
    * @return     U
    */
   public Matrix getU() {
-    return new Matrix(U,m,Math.min(m+1,n));
+    return new Matrix(U,m,m);
   }
 
   /** 
@@ -521,12 +545,9 @@ public class SingularValueDecomposition
    * @return     S
    */
   public Matrix getS() {
-    Matrix X = new Matrix(n,n);
+    Matrix X = new Matrix(m,n);
     double[][] S = X.getArray();
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < n; j++) {
-        S[i][j] = 0.0;
-      }
+    for (int i = 0; i < Math.min(m, n); i++) {
       S[i][i] = this.s[i];
     }
     return X;
@@ -570,6 +591,6 @@ public class SingularValueDecomposition
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 5953 $");
+    return RevisionUtils.extract("$Revision: 11815 $");
   }
 }

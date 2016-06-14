@@ -21,6 +21,7 @@
 
 package weka.core.xml;
 
+import java.awt.Color;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Collection;
@@ -28,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
@@ -44,529 +46,689 @@ import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
- * This serializer contains some read/write methods for common classes that
- * are not beans-conform. Currently supported are:
+ * This serializer contains some read/write methods for common classes that are
+ * not beans-conform. Currently supported are:
  * <ul>
- *    <li>java.util.HashMap</li>
- *    <li>java.util.HashSet</li>
- *    <li>java.util.Hashtable</li>
- *    <li>java.util.LinkedList</li>
- *    <li>java.util.Properties</li>
- *    <li>java.util.Stack</li>
- *    <li>java.util.TreeMap</li>
- *    <li>java.util.TreeSet</li>
- *    <li>java.util.Vector</li>
- *    <li>javax.swing.DefaultListModel</li>
+ * <li>java.util.HashMap</li>
+ * <li>java.util.LinkedHashMap</li>
+ * <li>java.util.HashSet</li>
+ * <li>java.util.Hashtable</li>
+ * <li>java.util.LinkedList</li>
+ * <li>java.util.Properties</li>
+ * <li>java.util.Stack</li>
+ * <li>java.util.TreeMap</li>
+ * <li>java.util.TreeSet</li>
+ * <li>java.util.Vector</li>
+ * <li>javax.swing.DefaultListModel</li>
+ * <li>java.awt.Color</li>
  * </ul>
- *
+ * 
  * Weka classes:
  * <ul>
- *    <li>weka.core.Matrix</li>
- *    <li>weka.core.matrix.Matrix</li>
+ * <li>weka.core.Matrix</li>
+ * <li>weka.core.matrix.Matrix</li>
  * </ul>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $ 
+ * @version $Revision: 11865 $
  */
-public class XMLBasicSerialization
-   extends XMLSerialization {
+public class XMLBasicSerialization extends XMLSerialization {
 
-   /** the value for mapping, e.g., Maps */
-   public final static String VAL_MAPPING = "mapping";
+  /** the value for mapping, e.g., Maps */
+  public final static String VAL_MAPPING = "mapping";
 
-   /** the value for a mapping-key, e.g., Maps */
-   public final static String VAL_KEY = "key";
+  /** the value for a mapping-key, e.g., Maps */
+  public final static String VAL_KEY = "key";
 
-   /** the value for mapping-value, e.g., Maps */
-   public final static String VAL_VALUE = "value";
+  /** the value for mapping-value, e.g., Maps */
+  public final static String VAL_VALUE = "value";
 
-   /** the matrix cells */
-   public final static String VAL_CELLS = "cells";
+  /** the matrix cells */
+  public final static String VAL_CELLS = "cells";
 
-   /**
-    * initializes the serialization
-    * 
-    * @throws Exception if initialization fails
-    */
-   public XMLBasicSerialization() throws Exception {
-      super();
-   }
-   
-   /**
-    * generates internally a new XML document and clears also the IgnoreList
-    * and the mappings for the Read/Write-Methods
-    * 
-    * @throws Exception if initializing fails
-    */
-   public void clear() throws Exception {
-      super.clear();
-      
-      // Java classes
-      m_CustomMethods.register(this, DefaultListModel.class, "DefaultListModel");
-      m_CustomMethods.register(this, HashMap.class, "Map");
-      m_CustomMethods.register(this, HashSet.class, "Collection");
-      m_CustomMethods.register(this, Hashtable.class, "Map");
-      m_CustomMethods.register(this, LinkedList.class, "Collection");
-      m_CustomMethods.register(this, Properties.class, "Map");
-      m_CustomMethods.register(this, Stack.class, "Collection");
-      m_CustomMethods.register(this, TreeMap.class, "Map");
-      m_CustomMethods.register(this, TreeSet.class, "Collection");
-      m_CustomMethods.register(this, Vector.class, "Collection");
+  /**
+   * initializes the serialization
+   * 
+   * @throws Exception if initialization fails
+   */
+  public XMLBasicSerialization() throws Exception {
+    super();
+  }
 
-      // Weka classes
-      m_CustomMethods.register(this, weka.core.matrix.Matrix.class, "Matrix");
-      m_CustomMethods.register(this, weka.core.Matrix.class, "MatrixOld");
-      m_CustomMethods.register(this, weka.classifiers.CostMatrix.class, "CostMatrixOld");
-   }
-   
-   /**
-    * adds the given DefaultListModel to a DOM structure. 
-    * 
-    * @param parent the parent of this object, e.g. the class this object is a
-    * member of
-    * @param o the Object to describe in XML
-    * @param name the name of the object
-    * @return the node that was created
-    * @throws Exception if the DOM creation fails
-    * @see javax.swing.DefaultListModel
-    */
-   public Element writeDefaultListModel(Element parent, Object o, String name) 
-      throws Exception {
+  /**
+   * generates internally a new XML document and clears also the IgnoreList and
+   * the mappings for the Read/Write-Methods
+   * 
+   * @throws Exception if initializing fails
+   */
+  @Override
+  @SuppressWarnings("deprecation")
+  public void clear() throws Exception {
+    super.clear();
 
-      Element              node;
-      int                  i;
-      DefaultListModel     model;
+    // Java classes
+    m_CustomMethods.register(this, DefaultListModel.class, "DefaultListModel");
+    m_CustomMethods.register(this, HashMap.class, "Map");
+    m_CustomMethods.register(this, HashSet.class, "Collection");
+    m_CustomMethods.register(this, Hashtable.class, "Map");
+    m_CustomMethods.register(this, LinkedList.class, "Collection");
+    m_CustomMethods.register(this, Properties.class, "Map");
+    m_CustomMethods.register(this, Stack.class, "Collection");
+    m_CustomMethods.register(this, TreeMap.class, "Map");
+    m_CustomMethods.register(this, LinkedHashMap.class, "Map");
+    m_CustomMethods.register(this, TreeSet.class, "Collection");
+    m_CustomMethods.register(this, Vector.class, "Collection");
+    m_CustomMethods.register(this, Color.class, "Color");
 
-      // for debugging only
-      if (DEBUG)
-         trace(new Throwable(), name);
-      
-      m_CurrentNode = parent;
-      
-      model = (DefaultListModel) o;
-      node = addElement(parent, name, o.getClass().getName(), false);
+    // Weka classes
+    m_CustomMethods.register(this, weka.core.matrix.Matrix.class, "Matrix");
+    m_CustomMethods.register(this, weka.core.Matrix.class, "MatrixOld");
+    m_CustomMethods.register(this, weka.classifiers.CostMatrix.class,
+      "CostMatrix");
+  }
 
-      for (i = 0; i < model.getSize(); i++)
-         invokeWriteToXML(node, model.get(i), Integer.toString(i));
-      
-      return node;
-   }
+  /**
+   * adds the given Color to a DOM structure.
+   *
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
+   * @param o the Object to describe in XML
+   * @param name the name of the object
+   * @return the node that was created
+   * @throws Exception if the DOM creation fails
+   * @see java.awt.Color
+   */
+  public Element writeColor(Element parent, Object o, String name)
+    throws Exception {
+    Element node;
+    Color c;
 
-   /**
-    * builds the DefaultListModel from the given DOM node. 
-    * 
-    * @param node the associated XML node
-    * @return the instance created from the XML description
-    * @throws Exception if instantiation fails 
-    * @see javax.swing.DefaultListModel
-    */
-   public Object readDefaultListModel(Element node) throws Exception {
-      DefaultListModel     model;
-      Vector               children;
-      Element              child;
-      int                  i;
-      int                  index;
-      int                  currIndex;
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
 
-      // for debugging only
-      if (DEBUG)
-         trace(new Throwable(), node.getAttribute(ATT_NAME));
+    m_CurrentNode = parent;
+    c = (Color) o;
+    node = addElement(parent, name, o.getClass().getName(), false);
 
-      m_CurrentNode = node;
-      
-      children = XMLDocument.getChildTags(node); 
-      model    = new DefaultListModel();
-      
-      // determine highest index for size
-      index    = children.size() - 1;
-      for (i = 0; i < children.size(); i++) {
-        child     = (Element) children.get(i);
-        currIndex = Integer.parseInt(child.getAttribute(ATT_NAME));
-        if (currIndex > index)
-          index = currIndex;
+    invokeWriteToXML(node, c.getRed(), "red");
+    invokeWriteToXML(node, c.getGreen(), "green");
+    invokeWriteToXML(node, c.getBlue(), "blue");
+
+    return node;
+  }
+
+  /**
+   * builds the Color object from the given DOM node.
+   *
+   * @param node the associated XML node
+   * @return the instance created from the XML description
+   * @throws Exception if instantiation fails
+   * @see java.awt.Color
+   */
+  public Object readColor(Element node) throws Exception {
+
+    Vector<Element> children;
+
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
+
+    children = XMLDocument.getChildTags(node);
+    Element redchild = children.get(0);
+    Element greenchild = children.get(1);
+    Element bluechild = children.get(2);
+    Integer red = (Integer) readFromXML(redchild);
+    Integer green = (Integer) readFromXML(greenchild);
+    Integer blue = (Integer) readFromXML(bluechild);
+
+    return new Color(red, green, blue);
+  }
+
+  /**
+   * adds the given DefaultListModel to a DOM structure.
+   *
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
+   * @param o the Object to describe in XML
+   * @param name the name of the object
+   * @return the node that was created
+   * @throws Exception if the DOM creation fails
+   * @see javax.swing.DefaultListModel
+   */
+  public Element writeDefaultListModel(Element parent, Object o, String name)
+    throws Exception {
+
+    Element node;
+    int i;
+    DefaultListModel model;
+
+    // for debugging only
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
+    m_CurrentNode = parent;
+
+    model = (DefaultListModel) o;
+    node = addElement(parent, name, o.getClass().getName(), false);
+
+    for (i = 0; i < model.getSize(); i++) {
+      invokeWriteToXML(node, model.get(i), Integer.toString(i));
+    }
+
+    return node;
+  }
+
+  /**
+   * builds the DefaultListModel from the given DOM node.
+   *
+   * @param node the associated XML node
+   * @return the instance created from the XML description
+   * @throws Exception if instantiation fails
+   * @see javax.swing.DefaultListModel
+   */
+  public Object readDefaultListModel(Element node) throws Exception {
+    DefaultListModel model;
+    Vector<Element> children;
+    Element child;
+    int i;
+    int index;
+    int currIndex;
+
+    // for debugging only
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
+
+    m_CurrentNode = node;
+
+    children = XMLDocument.getChildTags(node);
+    model = new DefaultListModel();
+
+    // determine highest index for size
+    index = children.size() - 1;
+    for (i = 0; i < children.size(); i++) {
+      child = children.get(i);
+      currIndex = Integer.parseInt(child.getAttribute(ATT_NAME));
+      if (currIndex > index) {
+        index = currIndex;
       }
-      model.setSize(index + 1);
+    }
+    model.setSize(index + 1);
 
-      // set values
-      for (i = 0; i < children.size(); i++) {
-         child = (Element) children.get(i);
-         model.set(
-             Integer.parseInt(child.getAttribute(ATT_NAME)), 
-             invokeReadFromXML(child));
+    // set values
+    for (i = 0; i < children.size(); i++) {
+      child = children.get(i);
+      model.set(Integer.parseInt(child.getAttribute(ATT_NAME)),
+        invokeReadFromXML(child));
+    }
+
+    return model;
+  }
+
+  /**
+   * adds the given Collection to a DOM structure.
+   * 
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
+   * @param o the Object to describe in XML
+   * @param name the name of the object
+   * @return the node that was created
+   * @throws Exception if the DOM creation fails
+   * @see java.util.Collection
+   */
+  public Element writeCollection(Element parent, Object o, String name)
+    throws Exception {
+
+    Element node;
+    Iterator<?> iter;
+    int i;
+
+    // for debugging only
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
+    m_CurrentNode = parent;
+
+    iter = ((Collection<?>) o).iterator();
+    node = addElement(parent, name, o.getClass().getName(), false);
+
+    i = 0;
+    while (iter.hasNext()) {
+      invokeWriteToXML(node, iter.next(), Integer.toString(i));
+      i++;
+    }
+
+    return node;
+  }
+
+  /**
+   * builds the Collection from the given DOM node.
+   * 
+   * @param node the associated XML node
+   * @return the instance created from the XML description
+   * @throws Exception if instantiation fails
+   * @see java.util.Collection
+   */
+  public Object readCollection(Element node) throws Exception {
+    Collection<Object> coll;
+    Vector<Object> v;
+    Vector<Element> children;
+    Element child;
+    int i;
+    int index;
+    int currIndex;
+
+    // for debugging only
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
+
+    m_CurrentNode = node;
+
+    children = XMLDocument.getChildTags(node);
+    v = new Vector<Object>();
+
+    // determine highest index for size
+    index = children.size() - 1;
+    for (i = 0; i < children.size(); i++) {
+      child = children.get(i);
+      currIndex = Integer.parseInt(child.getAttribute(ATT_NAME));
+      if (currIndex > index) {
+        index = currIndex;
       }
-      
-      return model;
-   }
-   
-   /**
-    * adds the given Collection to a DOM structure. 
-    * 
-    * @param parent the parent of this object, e.g. the class this object is a
-    * member of
-    * @param o the Object to describe in XML
-    * @param name the name of the object
-    * @return the node that was created
-    * @throws Exception if the DOM creation fails
-    * @see java.util.Collection
-    */
-   public Element writeCollection(Element parent, Object o, String name) 
-      throws Exception {
+    }
+    v.setSize(index + 1);
 
-      Element         node;
-      Iterator        iter;
-      int             i;
+    // put the children in the vector to sort them according their index
+    for (i = 0; i < children.size(); i++) {
+      child = children.get(i);
+      v.set(Integer.parseInt(child.getAttribute(ATT_NAME)),
+        invokeReadFromXML(child));
+    }
 
-      // for debugging only
-      if (DEBUG)
-         trace(new Throwable(), name);
-      
-      m_CurrentNode = parent;
-      
-      iter = ((Collection) o).iterator();
-      node = addElement(parent, name, o.getClass().getName(), false);
+    // populate collection
+    coll =
+      Utils.cast(Class.forName(node.getAttribute(ATT_CLASS)).newInstance());
+    coll.addAll(v);
 
-      i = 0;
-      while (iter.hasNext()) {
-         invokeWriteToXML(node, iter.next(), Integer.toString(i));
-         i++;
+    return coll;
+  }
+
+  /**
+   * adds the given Map to a DOM structure.
+   * 
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
+   * @param o the Object to describe in XML
+   * @param name the name of the object
+   * @return the node that was created
+   * @throws Exception if the DOM creation fails
+   * @see java.util.Map
+   */
+  public Element writeMap(Element parent, Object o, String name)
+    throws Exception {
+
+    Map<?, ?> map;
+    Object key;
+    Element node;
+    Element child;
+    Iterator<?> iter;
+
+    // for debugging only
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
+    m_CurrentNode = parent;
+
+    map = (Map<?, ?>) o;
+    iter = map.keySet().iterator();
+    node = addElement(parent, name, o.getClass().getName(), false);
+
+    while (iter.hasNext()) {
+      key = iter.next();
+      child = addElement(node, VAL_MAPPING, Object.class.getName(), false);
+      invokeWriteToXML(child, key, VAL_KEY);
+      invokeWriteToXML(child, map.get(key), VAL_VALUE);
+    }
+
+    return node;
+  }
+
+  /**
+   * builds the Map from the given DOM node.
+   * 
+   * @param node the associated XML node
+   * @return the instance created from the XML description
+   * @throws Exception if instantiation fails
+   * @see java.util.Map
+   */
+  public Object readMap(Element node) throws Exception {
+    Map<Object, Object> map;
+    Object key;
+    Object value;
+    Vector<Element> children;
+    Vector<Element> cchildren;
+    Element child;
+    Element cchild;
+    int i;
+    int n;
+    String name;
+
+    // for debugging only
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
+
+    m_CurrentNode = node;
+
+    map = Utils.cast(Class.forName(node.getAttribute(ATT_CLASS)).newInstance());
+    children = XMLDocument.getChildTags(node);
+
+    for (i = 0; i < children.size(); i++) {
+      child = children.get(i);
+      cchildren = XMLDocument.getChildTags(child);
+      key = null;
+      value = null;
+
+      for (n = 0; n < cchildren.size(); n++) {
+        cchild = cchildren.get(n);
+        name = cchild.getAttribute(ATT_NAME);
+        if (name.equals(VAL_KEY)) {
+          key = invokeReadFromXML(cchild);
+        } else if (name.equals(VAL_VALUE)) {
+          value = invokeReadFromXML(cchild);
+        } else {
+          System.out.println("WARNING: '" + name
+            + "' is not a recognized name for maps!");
+        }
       }
-      
-      return node;
-   }
 
-   /**
-    * builds the Collection from the given DOM node. 
-    * 
-    * @param node the associated XML node
-    * @return the instance created from the XML description
-    * @throws Exception if instantiation fails 
-    * @see java.util.Collection
-    */
-   public Object readCollection(Element node) throws Exception {
-      Collection<Object>           coll;
-      Vector<Object>               v;
-      Vector<Element>               children;
-      Element              child;
-      int                  i;
-      int                  index;
-      int                  currIndex;
+      map.put(key, value);
+    }
 
-      // for debugging only
-      if (DEBUG)
-         trace(new Throwable(), node.getAttribute(ATT_NAME));
+    return map;
+  }
 
-      m_CurrentNode = node;
-      
-      children = XMLDocument.getChildTags(node); 
-      v        = new Vector<Object>();
+  /**
+   * adds the given CostMatrix to a DOM structure.
+   *
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
+   * @param o the Object to describe in XML
+   * @param name the name of the object
+   * @return the node that was created
+   * @throws Exception if the DOM creation fails
+   * @see weka.classifiers.CostMatrix
+   */
+  public Element writeCostMatrix(Element parent, Object o, String name)
+    throws Exception {
+    weka.classifiers.CostMatrix matrix = (weka.classifiers.CostMatrix) o;
+    Element node;
 
-      // determine highest index for size
-      index    = children.size() - 1;
-      for (i = 0; i < children.size(); i++) {
-        child     = (Element) children.get(i);
-        currIndex = Integer.parseInt(child.getAttribute(ATT_NAME));
-        if (currIndex > index)
-          index = currIndex;
+    // for debugging only
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
+    m_CurrentNode = parent;
+    node = addElement(parent, name, o.getClass().getName(), false);
+    Object[][] m = new Object[matrix.size()][matrix.size()];
+    for (int i = 0; i < matrix.size(); i++) {
+      for (int j = 0; j < matrix.size(); j++) {
+        m[i][j] = matrix.getCell(i, j);
       }
-      v.setSize(index + 1);
+    }
 
+    invokeWriteToXML(node, m, VAL_CELLS);
 
-      // put the children in the vector to sort them according their index
-      for (i = 0; i < children.size(); i++) {
-         child = (Element) children.get(i);
-         v.set(
-               Integer.parseInt(child.getAttribute(ATT_NAME)), 
-               invokeReadFromXML(child));
+    return node;
+  }
+
+  /**
+   * builds the Matrix from the given DOM node.
+   *
+   * @param node the associated XML node
+   * @return the instance created from the XML description
+   * @throws Exception if instantiation fails
+   * @see weka.classifiers.CostMatrix
+   */
+  public Object readCostMatrix(Element node) throws Exception {
+    weka.classifiers.CostMatrix matrix;
+    Vector<Element> children;
+    Element child;
+    int i;
+    String name;
+    Object o;
+
+    // for debugging only
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
+
+    m_CurrentNode = node;
+
+    matrix = null;
+    children = XMLDocument.getChildTags(node);
+
+    for (i = 0; i < children.size(); i++) {
+      child = children.get(i);
+      name = child.getAttribute(ATT_NAME);
+
+      if (name.equals(VAL_CELLS)) {
+        o = invokeReadFromXML(child);
+
+        Object[][] m = (Object[][]) o;
+        matrix = new weka.classifiers.CostMatrix(m.length);
+        for (int j = 0; j < matrix.size(); j++) {
+          for (int k = 0; k < matrix.size(); k++) {
+            matrix.setCell(j, k, m[j][k]);
+          }
+        }
       }
-      
-      // populate collection
-      coll = Utils.cast(Class.forName(node.getAttribute(ATT_CLASS)).
-                        newInstance());
-      coll.addAll(v);
-      
-      return coll;
-   }
-   
-   /**
-    * adds the given Map to a DOM structure. 
-    * 
-    * @param parent the parent of this object, e.g. the class this object is a
-    * member of
-    * @param o the Object to describe in XML
-    * @param name the name of the object
-    * @return the node that was created
-    * @throws Exception if the DOM creation fails
-    * @see java.util.Map
-    */
-   public Element writeMap(Element parent, Object o, String name) 
-      throws Exception {
+    }
 
-      Map            map;
-      Object         key;
-      Element        node;
-      Element        child;
-      Iterator       iter;
+    return matrix;
+  }
 
-      // for debugging only
-      if (DEBUG)
-         trace(new Throwable(), name);
-      
-      m_CurrentNode = parent;
-      
-      map  = (Map) o;
-      iter = map.keySet().iterator();
-      node = addElement(parent, name, o.getClass().getName(), false);
+  /**
+   * adds the given Matrix to a DOM structure.
+   *
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
+   * @param o the Object to describe in XML
+   * @param name the name of the object
+   * @return the node that was created
+   * @throws Exception if the DOM creation fails
+   * @see weka.core.matrix.Matrix
+   */
+  public Element writeMatrix(Element parent, Object o, String name)
+    throws Exception {
 
-      while (iter.hasNext()) {
-         key   = iter.next();
-         child = addElement(
-                     node, VAL_MAPPING, Object.class.getName(), false);
-         invokeWriteToXML(child, key,          VAL_KEY);
-         invokeWriteToXML(child, map.get(key), VAL_VALUE);
+    weka.core.matrix.Matrix matrix;
+    Element node;
+
+    // for debugging only
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
+    m_CurrentNode = parent;
+
+    matrix = (weka.core.matrix.Matrix) o;
+    node = addElement(parent, name, o.getClass().getName(), false);
+
+    invokeWriteToXML(node, matrix.getArray(), VAL_CELLS);
+
+    return node;
+  }
+
+  /**
+   * builds the Matrix from the given DOM node.
+   *
+   * @param node the associated XML node
+   * @return the instance created from the XML description
+   * @throws Exception if instantiation fails
+   * @see weka.core.matrix.Matrix
+   */
+  public Object readMatrix(Element node) throws Exception {
+    weka.core.matrix.Matrix matrix;
+    Vector<Element> children;
+    Element child;
+    int i;
+    String name;
+    Object o;
+
+    // for debugging only
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
+
+    m_CurrentNode = node;
+
+    matrix = null;
+    children = XMLDocument.getChildTags(node);
+    for (i = 0; i < children.size(); i++) {
+      child = children.get(i);
+      name = child.getAttribute(ATT_NAME);
+
+      if (name.equals(VAL_CELLS)) {
+        o = invokeReadFromXML(child);
+        matrix = new weka.core.matrix.Matrix((double[][]) o);
       }
-      
-      return node;
-   }
+    }
 
-   /**
-    * builds the Map from the given DOM node. 
-    * 
-    * @param node the associated XML node
-    * @return the instance created from the XML description
-    * @throws Exception if instantiation fails 
-    * @see java.util.Map
-    */
-   public Object readMap(Element node) throws Exception {
-     Map<Object,Object>                  map;
-      Object               key;
-      Object               value;
-      Vector               children;
-      Vector               cchildren;
-      Element              child;
-      Element              cchild;
-      int                  i;
-      int                  n;
-      String               name;
+    return matrix;
+  }
 
-      // for debugging only
-      if (DEBUG)
-         trace(new Throwable(), node.getAttribute(ATT_NAME));
+  /**
+   * adds the given Matrix (old) to a DOM structure.
+   * 
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
+   * @param o the Object to describe in XML
+   * @param name the name of the object
+   * @return the node that was created
+   * @throws Exception if the DOM creation fails
+   * @see weka.core.Matrix
+   */
+  @SuppressWarnings("deprecation")
+  public Element writeMatrixOld(Element parent, Object o, String name)
+    throws Exception {
 
-      m_CurrentNode = node;
-      
-      map      = Utils.cast(Class.forName(node.getAttribute(ATT_CLASS)).
-                            newInstance());
-      children = XMLDocument.getChildTags(node); 
+    weka.core.Matrix matrix;
+    Element node;
+    double[][] array;
+    int i;
 
-      for (i = 0; i < children.size(); i++) {
-         child     = (Element) children.get(i);
-         cchildren = XMLDocument.getChildTags(child);
-         key       = null;
-         value     = null;
-         
-         for (n = 0; n < cchildren.size(); n++) {
-            cchild = (Element) cchildren.get(n);
-            name   = cchild.getAttribute(ATT_NAME);
-            if (name.equals(VAL_KEY))
-               key = invokeReadFromXML(cchild);
-            else if (name.equals(VAL_VALUE))
-               value = invokeReadFromXML(cchild);
-            else
-               System.out.println("WARNING: '" 
-                     + name + "' is not a recognized name for maps!");
-         }
-         
-         map.put(key, value);
-      }
-      
-      return map;
-   }
-   
-   /**
-    * adds the given Matrix to a DOM structure. 
-    * 
-    * @param parent the parent of this object, e.g. the class this object is a
-    * member of
-    * @param o the Object to describe in XML
-    * @param name the name of the object
-    * @return the node that was created
-    * @throws Exception if the DOM creation fails
-    * @see weka.core.matrix.Matrix
-    */
-   public Element writeMatrix(Element parent, Object o, String name) 
-      throws Exception {
+    // for debugging only
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
 
-      weka.core.matrix.Matrix    matrix;
-      Element                    node;
+    m_CurrentNode = parent;
 
-      // for debugging only
-      if (DEBUG)
-         trace(new Throwable(), name);
-      
-      m_CurrentNode = parent;
-      
-      matrix = (weka.core.matrix.Matrix) o;
-      node   = addElement(parent, name, o.getClass().getName(), false);
+    matrix = (weka.core.Matrix) o;
+    node = addElement(parent, name, o.getClass().getName(), false);
 
-      invokeWriteToXML(node, matrix.getArray(), VAL_CELLS);
-      
-      return node;
-   }
+    array = new double[matrix.numRows()][];
+    for (i = 0; i < array.length; i++) {
+      array[i] = matrix.getRow(i);
+    }
+    invokeWriteToXML(node, array, VAL_CELLS);
 
-   /**
-    * builds the Matrix from the given DOM node. 
-    * 
-    * @param node the associated XML node
-    * @return the instance created from the XML description
-    * @throws Exception if instantiation fails 
-    * @see weka.core.matrix.Matrix
-    */
-   public Object readMatrix(Element node) throws Exception {
-      weka.core.matrix.Matrix    matrix;
-      Vector                     children;
-      Element                    child;
-      int                        i;
-      String                     name;
-      Object                     o;
+    return node;
+  }
 
-      // for debugging only
-      if (DEBUG)
-         trace(new Throwable(), node.getAttribute(ATT_NAME));
+  /**
+   * builds the Matrix (old) from the given DOM node.
+   * 
+   * @param node the associated XML node
+   * @return the instance created from the XML description
+   * @throws Exception if instantiation fails
+   * @see weka.core.Matrix
+   */
+  @SuppressWarnings("deprecation")
+  public Object readMatrixOld(Element node) throws Exception {
+    weka.core.Matrix matrix;
+    weka.core.matrix.Matrix matrixNew;
 
-      m_CurrentNode = node;
-      
-      matrix   = null;
-      children = XMLDocument.getChildTags(node); 
-      for (i = 0; i < children.size(); i++) {
-         child = (Element) children.get(i);
-         name  = child.getAttribute(ATT_NAME);
+    // for debugging only
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
-         if (name.equals(VAL_CELLS)) {
-            o = invokeReadFromXML(child);
-            matrix = new weka.core.matrix.Matrix(
-                        (double[][]) o);
-         }
-      }
-      
-      return matrix;
-   }
-   
-   /**
-    * adds the given Matrix (old) to a DOM structure. 
-    * 
-    * @param parent the parent of this object, e.g. the class this object is a
-    * member of
-    * @param o the Object to describe in XML
-    * @param name the name of the object
-    * @return the node that was created
-    * @throws Exception if the DOM creation fails
-    * @see weka.core.Matrix
-    */
-   public Element writeMatrixOld(Element parent, Object o, String name) 
-      throws Exception {
+    m_CurrentNode = node;
 
-      weka.core.Matrix  matrix;
-      Element           node;
-      double[][]        array;
-      int               i;
+    matrixNew = (weka.core.matrix.Matrix) readMatrix(node);
+    matrix = new weka.core.Matrix(matrixNew.getArrayCopy());
 
-      // for debugging only
-      if (DEBUG)
-         trace(new Throwable(), name);
-      
-      m_CurrentNode = parent;
-      
-      matrix = (weka.core.Matrix) o;
-      node   = addElement(parent, name, o.getClass().getName(), false);
+    return matrix;
+  }
 
-      array = new double[matrix.numRows()][];
-      for (i = 0; i < array.length; i++)
-         array[i] = matrix.getRow(i);
-      invokeWriteToXML(node, array, VAL_CELLS);
-      
-      return node;
-   }
+  /**
+   * adds the given CostMatrix (old) to a DOM structure.
+   * 
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
+   * @param o the Object to describe in XML
+   * @param name the name of the object
+   * @return the node that was created
+   * @throws Exception if the DOM creation fails
+   * @see weka.classifiers.CostMatrix
+   */
+  public Element writeCostMatrixOld(Element parent, Object o, String name)
+    throws Exception {
 
-   /**
-    * builds the Matrix (old) from the given DOM node. 
-    * 
-    * @param node the associated XML node
-    * @return the instance created from the XML description
-    * @throws Exception if instantiation fails 
-    * @see weka.core.Matrix
-    */
-   public Object readMatrixOld(Element node) throws Exception {
-      weka.core.Matrix           matrix;
-      weka.core.matrix.Matrix    matrixNew;
+    // for debugging only
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
 
-      // for debugging only
-      if (DEBUG)
-         trace(new Throwable(), node.getAttribute(ATT_NAME));
+    m_CurrentNode = parent;
 
-      m_CurrentNode = node;
-      
-      matrixNew = (weka.core.matrix.Matrix) readMatrix(node);
-      matrix    = new weka.core.Matrix(matrixNew.getArrayCopy());
-      
-      return matrix;
-   }
-   
-   /**
-    * adds the given CostMatrix (old) to a DOM structure. 
-    * 
-    * @param parent the parent of this object, e.g. the class this object is a
-    * member of
-    * @param o the Object to describe in XML
-    * @param name the name of the object
-    * @return the node that was created
-    * @throws Exception if the DOM creation fails
-    * @see weka.classifiers.CostMatrix
-    */
-   public Element writeCostMatrixOld(Element parent, Object o, String name) 
-      throws Exception {
+    return writeMatrixOld(parent, o, name);
+  }
 
-      // for debugging only
-      if (DEBUG)
-         trace(new Throwable(), name);
-      
-      m_CurrentNode = parent;
-      
-      return writeMatrixOld(parent, o, name);
-   }
+  /**
+   * builds the Matrix (old) from the given DOM node.
+   * 
+   * @param node the associated XML node
+   * @return the instance created from the XML description
+   * @throws Exception if instantiation fails
+   * @see weka.classifiers.CostMatrix
+   */
+  public Object readCostMatrixOld(Element node) throws Exception {
+    weka.classifiers.CostMatrix matrix;
+    weka.core.matrix.Matrix matrixNew;
+    StringWriter writer;
 
-   /**
-    * builds the Matrix (old) from the given DOM node. 
-    * 
-    * @param node the associated XML node
-    * @return the instance created from the XML description
-    * @throws Exception if instantiation fails 
-    * @see weka.classifiers.CostMatrix
-    */
-   public Object readCostMatrixOld(Element node) throws Exception {
-      weka.classifiers.CostMatrix   matrix;
-      weka.core.matrix.Matrix       matrixNew;
-      StringWriter                  writer;
+    // for debugging only
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
-      // for debugging only
-      if (DEBUG)
-         trace(new Throwable(), node.getAttribute(ATT_NAME));
+    m_CurrentNode = node;
 
-      m_CurrentNode = node;
-      
-      matrixNew = (weka.core.matrix.Matrix) readMatrix(node);
-      writer    = new StringWriter();
-      matrixNew.write(writer);
-      matrix    = new weka.classifiers.CostMatrix(new StringReader(writer.toString()));
-      
-      return matrix;
-   }
-   
-   /**
-    * Returns the revision string.
-    * 
-    * @return		the revision
-    */
-   public String getRevision() {
-     return RevisionUtils.extract("$Revision: 8034 $");
-   }
+    matrixNew = (weka.core.matrix.Matrix) readMatrix(node);
+    writer = new StringWriter();
+    matrixNew.write(writer);
+    matrix =
+      new weka.classifiers.CostMatrix(new StringReader(writer.toString()));
+
+    return matrix;
+  }
+
+  /**
+   * Returns the revision string.
+   * 
+   * @return the revision
+   */
+  @Override
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 11865 $");
+  }
 }

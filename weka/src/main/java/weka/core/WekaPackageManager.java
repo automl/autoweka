@@ -15,10 +15,24 @@
 
 /*
  *    WekaPackageManager.java
- *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009-2013 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
+
+import weka.core.converters.ConverterUtils;
+import weka.core.logging.Logger;
+import weka.core.packageManagement.DefaultPackageManager;
+import weka.core.packageManagement.Dependency;
+import weka.core.packageManagement.Package;
+import weka.core.packageManagement.PackageConstraint;
+import weka.core.packageManagement.PackageManager;
+import weka.core.packageManagement.VersionPackageConstraint;
+import weka.gui.GenericObjectEditor;
+import weka.gui.GenericPropertiesCreator;
+import weka.gui.beans.BeansProperties;
+import weka.gui.beans.KnowledgeFlowApp;
+import weka.gui.explorer.ExplorerDefaults;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -32,6 +46,8 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -42,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -51,65 +68,120 @@ import java.util.StringTokenizer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.pentaho.packageManagement.DefaultPackageManager;
-import org.pentaho.packageManagement.Dependency;
-import org.pentaho.packageManagement.Package;
-import org.pentaho.packageManagement.PackageConstraint;
-import org.pentaho.packageManagement.PackageManager;
-
-import weka.core.converters.ConverterUtils;
-import weka.gui.GenericObjectEditor;
-import weka.gui.GenericPropertiesCreator;
-import weka.gui.beans.KnowledgeFlowApp;
-import weka.gui.explorer.ExplorerDefaults;
-
 /**
  * Class providing package management and manipulation routines. Also provides a
  * command line interface for package management.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 9147 $
+ * @version $Revision: 12554 $
  */
 public class WekaPackageManager {
 
-  private static String WEKAFILES_DIR_NAME = ".wekafiles";
-  public static File WEKA_HOME = new File(System.getProperty("user.home")
-      + File.separator + WEKAFILES_DIR_NAME);
-  public static File PACKAGES_DIR = new File(System.getProperty("user.home")
-      + File.separator + WEKAFILES_DIR_NAME + File.separator + "packages");
+  /** The default folder name for Weka bits and bobs */
+  private static String WEKAFILES_DIR_NAME = "wekafiles";
 
+  /** Default path to where Weka's configuration and packages are stored */
+  public static File WEKA_HOME = new File(
+    System.getProperty("user.home") + File.separator + WEKAFILES_DIR_NAME);
+
+  /** The default packages directory */
+  public static File PACKAGES_DIR =
+    new File(WEKA_HOME.toString() + File.separator + "packages");
+
+  /** The default props dir name */
   private static String PROPERTIES_DIR_NAME = "props";
-  public static File PROPERTIES_DIR = new File(WEKA_HOME.toString()
-      + File.separator + PROPERTIES_DIR_NAME);
 
+  /** The default properties directory */
+  public static File PROPERTIES_DIR =
+    new File(WEKA_HOME.toString() + File.separator + PROPERTIES_DIR_NAME);
+
+  /** The underlying package manager */
   private static PackageManager PACKAGE_MANAGER = PackageManager.create();
-  private static URL REP_URL; // current repository URL to use
+
+  /** Current repository URL to use */
+  private static URL REP_URL;
+
+  /** Location of the repository cache */
   private static URL CACHE_URL;
+
+  /** True if a cache build is required */
   private static boolean INITIAL_CACHE_BUILD_NEEDED = false;
+
+  /**
+   * The name of the file that contains the list of packages in the repository
+   */
   private static String PACKAGE_LIST_FILENAME = "packageListWithVersion.txt";
 
-  private static String PRIMARY_REPOSITORY = "http://weka.sourceforge.net/packageMetaData";
+  /** Primary repository */
+  private static String PRIMARY_REPOSITORY =
+    "http://weka.sourceforge.net/packageMetaData";
+
+  /** Backup mirror of the repository */
   private static String REP_MIRROR;
+
+  /**
+   * True if the user has specified a custom repository via a property in
+   * PackageManager.props
+   */
   private static boolean USER_SET_REPO = false;
 
-  private static String PACKAGE_MANAGER_PROPS_FILE_NAME = "PackageManager.props";
+  /** The package manager's property file */
+  private static String PACKAGE_MANAGER_PROPS_FILE_NAME =
+    "PackageManager.props";
 
+  /** Operating offline? */
   public static boolean m_offline;
+
+  /** Load packages? */
   private static boolean m_loadPackages = true;
 
+  /** Established WEKA_HOME successfully? */
   protected static boolean m_wekaHomeEstablished;
+
+  /** Packages loaded OK? */
   protected static boolean m_packagesLoaded;
+
+  /** File to check against server for new/updated packages */
+  protected static final String PACKAGE_LIST_WITH_VERSION_FILE =
+    "packageListWithVersion.txt";
+
+  /** File to check against server equivalent for forced refresh */
+  protected static final String FORCED_REFRESH_COUNT_FILE =
+    "forcedRefreshCount.txt";
+
+  /** Package loading in progress? */
   public static boolean m_initialPackageLoadingInProcess = false;
+
+  /* True if an initial cache build is needed and working offline */
   public static boolean m_noPackageMetaDataAvailable;
+
+  /** The set of packages that the user has requested not to load */
+  public static Set<String> m_doNotLoadList;
 
   static {
     establishWekaHome();
   }
 
+  /**
+   * Establish WEKA_HOME if needed
+   * 
+   * @return true if WEKA_HOME was successfully established
+   */
   protected static boolean establishWekaHome() {
     if (m_wekaHomeEstablished) {
       return true;
     }
+
+    // process core PluginManager.props before any from packages.
+    // This is to have some control over the order of certain plugins
+    try {
+      PluginManager.addFromProperties(WekaPackageManager.class.getClassLoader()
+        .getResourceAsStream("weka/PluginManager.props"), true);
+    } catch (Exception ex) {
+      log(Logger.Level.WARNING,
+        "[WekaPackageManager] unable to read weka/PluginManager.props");
+    }
+
     // look to see if WEKA_HOME has been defined as an environment
     // variable
     Environment env = Environment.getSystemWide();
@@ -126,8 +198,8 @@ public class WekaPackageManager {
     if (!WEKA_HOME.exists()) {
       // create it for the user
       if (!WEKA_HOME.mkdir()) {
-        System.err.println("Unable to create WEKA_HOME ("
-            + WEKA_HOME.getAbsolutePath() + ")");
+        System.err.println(
+          "Unable to create WEKA_HOME (" + WEKA_HOME.getAbsolutePath() + ")");
         ok = false;
       }
     }
@@ -136,25 +208,27 @@ public class WekaPackageManager {
       // create the packages dir
       if (!PACKAGES_DIR.mkdir()) {
         System.err.println("Unable to create packages directory ("
-            + PACKAGES_DIR.getAbsolutePath() + ")");
+          + PACKAGES_DIR.getAbsolutePath() + ")");
         ok = false;
       }
     }
 
     m_wekaHomeEstablished = ok;
     PACKAGE_MANAGER.setPackageHome(PACKAGES_DIR);
+
+    m_doNotLoadList = getDoNotLoadList();
     try {
       // setup the backup mirror first
       // establishMirror();
 
       // user-supplied repository URL takes precedence over anything else
-      String repURL = env
-          .getVariableValue("weka.core.wekaPackageRepositoryURL");
+      String repURL =
+        env.getVariableValue("weka.core.wekaPackageRepositoryURL");
       if (repURL == null || repURL.length() == 0) {
         // See if there is a URL named in
         // $WEKA_HOME/props/PackageRepository.props
         File repPropsFile = new File(PROPERTIES_DIR.toString() + File.separator
-            + "PackageRepository.props");
+          + "PackageRepository.props");
 
         if (repPropsFile.exists()) {
           Properties repProps = new Properties();
@@ -167,9 +241,10 @@ public class WekaPackageManager {
         repURL = PRIMARY_REPOSITORY;
       } else {
         log(weka.core.logging.Logger.Level.INFO,
-            "[WekaPackageManager] weka.core.WekaPackageRepositoryURL = "
-                + repURL);
-        // System.err.println("[WekaPackageManager] weka.core.WekaPackageRepositoryURL = "
+          "[WekaPackageManager] weka.core.WekaPackageRepositoryURL = "
+            + repURL);
+        // System.err.println("[WekaPackageManager]
+        // weka.core.WekaPackageRepositoryURL = "
         // + repURL);
         USER_SET_REPO = true;
       }
@@ -186,14 +261,15 @@ public class WekaPackageManager {
     PACKAGE_MANAGER.setBaseSystemVersion(weka.core.Version.VERSION);
 
     // Now check the cache and establish it if necessary
-    File cacheDir = new File(WEKA_HOME.toString() + File.separator + "repCache");
+    File cacheDir =
+      new File(WEKA_HOME.toString() + File.separator + "repCache");
     try {
       String tempCacheString = "file://" + cacheDir.toString();
       // sanitize URI and fix slashes (for Windows)
       tempCacheString = tempCacheString.replace(" ", "%20");
       tempCacheString = tempCacheString.replace('\\', '/');
       if (tempCacheString.startsWith("file://")
-          && !tempCacheString.startsWith("file:///")) {
+        && !tempCacheString.startsWith("file:///")) {
         tempCacheString = tempCacheString.substring(7);
         tempCacheString = "file:///" + tempCacheString;
       }
@@ -204,15 +280,15 @@ public class WekaPackageManager {
       e.printStackTrace();
     }
 
-    File packagesList = new File(cacheDir.getAbsolutePath() + File.separator
-        + PACKAGE_LIST_FILENAME);
+    File packagesList = new File(
+      cacheDir.getAbsolutePath() + File.separator + PACKAGE_LIST_FILENAME);
     if (!cacheDir.exists()) {
       if (!cacheDir.mkdir()) {
         System.err.println("Unable to create repository cache directory ("
-            + cacheDir.getAbsolutePath() + ")");
+          + cacheDir.getAbsolutePath() + ")");
         log(weka.core.logging.Logger.Level.WARNING,
-            "Unable to create repository cache directory ("
-                + cacheDir.getAbsolutePath() + ")");
+          "Unable to create repository cache directory ("
+            + cacheDir.getAbsolutePath() + ")");
         CACHE_URL = null;
       } else {
         // refreshCache();
@@ -230,8 +306,8 @@ public class WekaPackageManager {
     if (offline != null) {
       m_offline = offline.equalsIgnoreCase("true");
     }
-    String loadPackages = env
-        .getVariableValue("weka.packageManager.loadPackages");
+    String loadPackages =
+      env.getVariableValue("weka.packageManager.loadPackages");
     if (loadPackages == null) {
       // try legacy
       loadPackages = env.getVariableValue("weka.core.loadPackages");
@@ -243,15 +319,14 @@ public class WekaPackageManager {
 
     // load any general package manager properties from props file
     File generalProps = new File(PROPERTIES_DIR.toString() + File.separator
-        + PACKAGE_MANAGER_PROPS_FILE_NAME);
+      + PACKAGE_MANAGER_PROPS_FILE_NAME);
     if (generalProps.exists()) {
       Properties gProps = new Properties();
       try {
         gProps.load(new FileInputStream(generalProps));
-
         // this one takes precedence over the legacy one
-        String repURL = gProps
-            .getProperty("weka.core.wekaPackageRepositoryURL");
+        String repURL =
+          gProps.getProperty("weka.core.wekaPackageRepositoryURL");
         if (repURL != null && repURL.length() > 0) {
           REP_URL = new URL(repURL);
           PACKAGE_MANAGER.setPackageRepositoryURL(REP_URL);
@@ -270,6 +345,18 @@ public class WekaPackageManager {
         if (loadPackages != null) {
           m_loadPackages = loadPackages.equalsIgnoreCase("true");
         }
+
+        String pluginManagerDisableList =
+          gProps.getProperty("weka.pluginManager.disable");
+        if (pluginManagerDisableList != null
+          && pluginManagerDisableList.length() > 0) {
+          List<String> disable = new ArrayList<String>();
+          String[] parts = pluginManagerDisableList.split(",");
+          for (String s : parts) {
+            disable.add(s.trim());
+          }
+          PluginManager.addToDisabledList(disable);
+        }
       } catch (FileNotFoundException e) {
         e.printStackTrace();
       } catch (IOException e) {
@@ -281,16 +368,28 @@ public class WekaPackageManager {
       m_noPackageMetaDataAvailable = true;
     }
 
+    // Pass a valid http URL to the setProxyAuthentication()
+    // method to ensure that a proxy or direct connection
+    // is configured initially. This will prevent this method from
+    // trying to configure the ProxySelector and proxy
+    // via the file-based CACHE_URL somewhere down the track
+    PACKAGE_MANAGER.setPackageRepositoryURL(REP_URL);
+    PACKAGE_MANAGER.setProxyAuthentication(REP_URL);
+
     return ok;
   }
 
+  /**
+   * Establish the location of a mirror
+   */
   protected static void establishMirror() {
     if (m_offline) {
       return;
     }
 
     try {
-      String mirrorListURL = "http://www.cs.waikato.ac.nz/ml/weka/packageMetaDataMirror.txt";
+      String mirrorListURL =
+        "http://www.cs.waikato.ac.nz/ml/weka/packageMetaDataMirror.txt";
 
       URLConnection conn = null;
       URL connURL = new URL(mirrorListURL);
@@ -302,9 +401,10 @@ public class WekaPackageManager {
       }
 
       conn.setConnectTimeout(10000); // timeout after 10 seconds
+      conn.setReadTimeout(10000);
 
-      BufferedReader bi = new BufferedReader(new InputStreamReader(
-          conn.getInputStream()));
+      BufferedReader bi =
+        new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
       REP_MIRROR = bi.readLine();
 
@@ -316,28 +416,35 @@ public class WekaPackageManager {
         if (!REP_MIRROR.equals(PRIMARY_REPOSITORY) && !USER_SET_REPO) {
 
           log(weka.core.logging.Logger.Level.INFO,
-              "[WekaPackageManager] Package manager using repository mirror: "
-                  + REP_MIRROR);
+            "[WekaPackageManager] Package manager using repository mirror: "
+              + REP_MIRROR);
 
           REP_URL = new URL(REP_MIRROR);
         }
       }
     } catch (Exception ex) {
       log(weka.core.logging.Logger.Level.WARNING,
-          "[WekaPackageManager] The repository meta data mirror file seems "
-              + "to be unavailable (" + ex.getMessage() + ")");
+        "[WekaPackageManager] The repository meta data mirror file seems "
+          + "to be unavailable (" + ex.getMessage() + ")");
     }
   }
 
-  protected static void log(weka.core.logging.Logger.Level level, String message) {
+  /**
+   * Write to the weka log
+   * 
+   * @param level logging level
+   * @param message message to write
+   */
+  protected static void log(weka.core.logging.Logger.Level level,
+    String message) {
     try {
-      File logFile = new File(WEKA_HOME.toString() + File.separator
-          + "weka.log");
+      File logFile =
+        new File(WEKA_HOME.toString() + File.separator + "weka.log");
       BufferedWriter writer = new BufferedWriter(new FileWriter(logFile, true));
       SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
       String linefeed = System.getProperty("line.separator");
-      String m = format.format(new Date()) + " " + level + ": " + message
-          + linefeed;
+      String m =
+        format.format(new Date()) + " " + level + ": " + message + linefeed;
       writer.write(m);
       writer.flush();
       writer.close();
@@ -345,19 +452,24 @@ public class WekaPackageManager {
     }
   }
 
+  /**
+   * Remove any ExplorerDefaults properties specified in the supplied package
+   * 
+   * @param installedPackageName the package specifying properties that should
+   *          be removed from ExplorerDefaults
+   */
   public static void removeExplorerProps(String installedPackageName) {
     try {
       Properties expProps = new Properties();
-      String explorerProps = getPackageHome().getAbsolutePath()
-          + File.separator + installedPackageName + File.separator
-          + "Explorer.props";
-      BufferedInputStream bi = new BufferedInputStream(new FileInputStream(
-          explorerProps));
+      String explorerProps = getPackageHome().getAbsolutePath() + File.separator
+        + installedPackageName + File.separator + "Explorer.props";
+      BufferedInputStream bi =
+        new BufferedInputStream(new FileInputStream(explorerProps));
       expProps.load(bi);
       bi.close();
       bi = null;
-      Set keys = expProps.keySet();
-      Iterator keysI = keys.iterator();
+      Set<Object> keys = expProps.keySet();
+      Iterator<Object> keysI = keys.iterator();
       while (keysI.hasNext()) {
         String key = (String) keysI.next();
         if (!key.endsWith("Policy")) {
@@ -379,19 +491,24 @@ public class WekaPackageManager {
     }
   }
 
+  /**
+   * Process a package's GenericPropertiesCreator.props file
+   * 
+   * @param propsFile the props file to process
+   */
   protected static void processGenericPropertiesCreatorProps(File propsFile) {
     try {
       Properties expProps = new Properties();
-      BufferedInputStream bi = new BufferedInputStream(new FileInputStream(
-          propsFile));
+      BufferedInputStream bi =
+        new BufferedInputStream(new FileInputStream(propsFile));
       expProps.load(bi);
       bi.close();
       bi = null;
-      Properties GPCInputProps = GenericPropertiesCreator
-          .getGlobalInputProperties();
+      Properties GPCInputProps =
+        GenericPropertiesCreator.getGlobalInputProperties();
 
-      Set keys = expProps.keySet();
-      Iterator keysI = keys.iterator();
+      Set<Object> keys = expProps.keySet();
+      Iterator<Object> keysI = keys.iterator();
       while (keysI.hasNext()) {
         String key = (String) keysI.next();
         // see if this key is in the GPC input props
@@ -415,16 +532,21 @@ public class WekaPackageManager {
     }
   }
 
+  /**
+   * Process a package's Explorer.props file
+   * 
+   * @param propsFile the properties file to process
+   */
   protected static void processExplorerProps(File propsFile) {
     try {
       Properties expProps = new Properties();
-      BufferedInputStream bi = new BufferedInputStream(new FileInputStream(
-          propsFile));
+      BufferedInputStream bi =
+        new BufferedInputStream(new FileInputStream(propsFile));
       expProps.load(bi);
       bi.close();
       bi = null;
-      Set keys = expProps.keySet();
-      Iterator keysI = keys.iterator();
+      Set<Object> keys = expProps.keySet();
+      Iterator<Object> keysI = keys.iterator();
       while (keysI.hasNext()) {
         String key = (String) keysI.next();
         if (!key.endsWith("Policy")) {
@@ -468,21 +590,30 @@ public class WekaPackageManager {
     }
   }
 
-  protected static void processGUIEditorsProps(File propsFile) {
+  /**
+   * Process a package's GUIEditors.props file
+   * 
+   * @param propsFile the properties file to process
+   * @param verbose true to output more info
+   */
+  protected static void processGUIEditorsProps(File propsFile,
+    boolean verbose) {
     GenericObjectEditor.registerEditors();
     try {
       Properties editorProps = new Properties();
-      BufferedInputStream bi = new BufferedInputStream(new FileInputStream(
-          propsFile));
+      BufferedInputStream bi =
+        new BufferedInputStream(new FileInputStream(propsFile));
       editorProps.load(bi);
       bi.close();
       bi = null;
 
-      Enumeration enm = editorProps.propertyNames();
+      Enumeration<?> enm = editorProps.propertyNames();
       while (enm.hasMoreElements()) {
         String name = enm.nextElement().toString();
         String value = editorProps.getProperty(name, "");
-        System.err.println("Registering " + name + " " + value);
+        if (verbose) {
+          System.err.println("Registering " + name + " " + value);
+        }
         GenericObjectEditor.registerEditor(name, value);
       }
 
@@ -491,51 +622,96 @@ public class WekaPackageManager {
     }
   }
 
-  protected static void loadPackageDirectory(File directory, boolean verbose)
+  /**
+   * Process a package's PluginManager.props file
+   * 
+   * @param propsFile the properties file to process
+   */
+  protected static void processPluginManagerProps(File propsFile) {
+    try {
+      PluginManager.addFromProperties(propsFile);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  /**
+   * Recursively load the jars and process properties in a package directory
+   * 
+   * @param directory the package directory to process
+   * @param verbose true for verbose output
+   * @param goePropsFiles store any GenericObjectEditor.props files for
+   *          post-processing after all jars have been loaded
+   * @throws Exception if a problem occurs
+   */
+  protected static void loadPackageDirectory(File directory, boolean verbose,
+    List<File> goePropsFiles, boolean avoidTriggeringFullClassDiscovery)
       throws Exception {
     File[] contents = directory.listFiles();
 
     // make sure that jar files and lib directory get processed first
-    for (int i = 0; i < contents.length; i++) {
-      if (contents[i].isFile() && contents[i].getPath().endsWith(".jar")) {
+    for (File content : contents) {
+      if (content.isFile() && content.getPath().endsWith(".jar")) {
         if (verbose) {
-          System.out.println("[Weka] loading " + contents[i].getPath());
+          System.out.println("[Weka] loading " + content.getPath());
         }
-        ClassloaderUtil.addFile(contents[i].getPath());
-      } else if (contents[i].isDirectory()
-          && contents[i].getName().equalsIgnoreCase("lib")) {
+        ClassloaderUtil.addFile(content.getPath());
+      } else if (content.isDirectory()
+        && content.getName().equalsIgnoreCase("lib")) {
         // add any jar files in the lib directory to the classpath
-        loadPackageDirectory(contents[i], verbose);
+        loadPackageDirectory(content, verbose, goePropsFiles,
+          avoidTriggeringFullClassDiscovery);
       }
     }
 
     // now any auxilliary files
-    for (int i = 0; i < contents.length; i++) {
-      if (contents[i].isFile() && contents[i].getPath().endsWith("Beans.props")) {
+    for (File content : contents) {
+      if (content.isFile() && content.getPath().endsWith("Beans.props")) {
         // KnowledgeFlow plugin -- add the Beans.props file to the list of
         // bean plugin props
 
-        KnowledgeFlowApp.addToPluginBeanProps(contents[i]);
-        KnowledgeFlowApp.disposeSingleton();
+        BeansProperties.addToPluginBeanProps(content);
 
-      } else if (contents[i].isFile()
-          && contents[i].getPath().endsWith("Explorer.props")) {
+        if (!avoidTriggeringFullClassDiscovery) {
+          KnowledgeFlowApp.disposeSingleton();
+        }
+      } else
+        if (content.isFile() && content.getPath().endsWith("Explorer.props")
+          && !avoidTriggeringFullClassDiscovery) {
         // Explorer tabs plugin
         // process the keys in the properties file and append/add values
-        processExplorerProps(contents[i]);
-      } else if (contents[i].isFile()
-          && contents[i].getPath().endsWith("GUIEditors.props")) {
+        processExplorerProps(content);
+      } else
+          if (content.isFile() && content.getPath().endsWith("GUIEditors.props")
+            && !avoidTriggeringFullClassDiscovery) {
         // Editor for a particular component
-        processGUIEditorsProps(contents[i]);
-      } else if (contents[i].isFile()
-          && contents[i].getPath().endsWith("GenericPropertiesCreator.props")) {
-        processGenericPropertiesCreatorProps(contents[i]);
+        processGUIEditorsProps(content, verbose);
+      } else if (content.isFile()
+        && content.getPath().endsWith("GenericPropertiesCreator.props")
+        && !avoidTriggeringFullClassDiscovery) {
+        if (goePropsFiles != null) {
+          goePropsFiles.add(content);
+        } else {
+          processGenericPropertiesCreatorProps(content);
+        }
+      } else if (content.isFile()
+        && content.getPath().endsWith("PluginManager.props")) {
+        processPluginManagerProps(content);
       }
     }
   }
 
+  /**
+   * Check whether a package should be loaded or not. Checks for missing
+   * classes, unset environment variables, missing dependencies etc.
+   * 
+   * @param toLoad the package to check
+   * @param packageRoot the root directory of the package
+   * @param progress for reporting loading progress
+   * @return true if the package is good to load
+   */
   public static boolean loadCheck(Package toLoad, File packageRoot,
-      PrintStream... progress) {
+    PrintStream... progress) {
 
     // first check against the base version of the system
     boolean load;
@@ -549,8 +725,40 @@ public class WekaPackageManager {
     if (!load) {
       for (PrintStream p : progress) {
         p.println("[Weka] Skipping package " + toLoad.getName()
-            + " because it is not compatible with Weka "
-            + PACKAGE_MANAGER.getBaseSystemVersion().toString());
+          + " because it is not compatible with Weka "
+          + PACKAGE_MANAGER.getBaseSystemVersion().toString());
+      }
+      return false;
+    }
+
+    // check to see if this package has been disabled for all users
+    try {
+      Package repoP = getRepositoryPackageInfo(toLoad.getName(),
+        toLoad.getPackageMetaDataElement("Version").toString());
+      if (repoP != null) {
+        Object disabled = repoP.getPackageMetaDataElement("Disabled");
+        if (disabled == null) {
+          disabled = repoP.getPackageMetaDataElement("Disable");
+        }
+        if (disabled != null && disabled.toString().equalsIgnoreCase("true")) {
+          for (PrintStream p : progress) {
+            p.println("[Weka] Skipping package " + toLoad.getName()
+              + " because it has been marked as disabled at the repository");
+          }
+          return false;
+        }
+      }
+    } catch (Exception ex) {
+      // Ignore - we will get an exception when checking for an unofficial
+      // package
+      return true;
+    }
+
+    load = !m_doNotLoadList.contains(toLoad.getName());
+    if (!load) {
+      for (PrintStream p : progress) {
+        p.println("[Weka] Skipping package " + toLoad.getName()
+          + " because it is has been marked as do not load");
       }
       return false;
     }
@@ -558,8 +766,8 @@ public class WekaPackageManager {
     // first check for missing special files/directories and
     // missing external classes (if any)
 
-    if (!(checkForMissingClasses(toLoad, progress) && checkForMissingFiles(
-        toLoad, packageRoot, progress))) {
+    if (!(checkForMissingClasses(toLoad, progress)
+      && checkForMissingFiles(toLoad, packageRoot, progress))) {
       return false;
     }
 
@@ -578,8 +786,8 @@ public class WekaPackageManager {
       if (missing.size() > 0) {
         for (PrintStream p : progress) {
           p.println("[Weka] " + toLoad.getName()
-              + " can't be loaded because the following"
-              + " packages are missing:");
+            + " can't be loaded because the following"
+            + " packages are missing:");
           for (Dependency d : missing) {
             p.println(d.getTarget());
           }
@@ -599,7 +807,20 @@ public class WekaPackageManager {
           if (!loadCheck(d.getTarget().getPackage(), packageRoot, progress)) {
             for (PrintStream p : progress) {
               p.println("[Weka] Can't load " + toLoad.getName() + " because "
-                  + d.getTarget() + " can't be loaded.");
+                + d.getTarget() + " can't be loaded.");
+            }
+            return false;
+          }
+
+          // check that the version of installed dependency is OK
+          Package installedD =
+            getInstalledPackageInfo(d.getTarget().getPackage().getName());
+          if (!d.getTarget().checkConstraint(installedD)) {
+            for (PrintStream p : progress) {
+              p.println("[Weka] Can't load " + toLoad.getName()
+                + " because the installed "
+                + d.getTarget().getPackage().getName()
+                + " is not compatible (requires: " + d.getTarget() + ")");
             }
             return false;
           }
@@ -618,18 +839,18 @@ public class WekaPackageManager {
    * should be set at startup before allowing this package to be loaded. This is
    * useful for packages that might not be able to function correctly if certain
    * variables are not set correctly.
-   * 
+   *
    * @param toLoad the package to check
    * @return true if good to go
    */
   public static boolean checkForUnsetEnvVar(Package toLoad,
-      PrintStream... progress) {
-    Object doNotLoadIfUnsetVar = toLoad
-        .getPackageMetaDataElement("DoNotLoadIfEnvVarNotSet");
+    PrintStream... progress) {
+    Object doNotLoadIfUnsetVar =
+      toLoad.getPackageMetaDataElement("DoNotLoadIfEnvVarNotSet");
 
     boolean result = true;
     if (doNotLoadIfUnsetVar != null
-        && doNotLoadIfUnsetVar.toString().length() > 0) {
+      && doNotLoadIfUnsetVar.toString().length() > 0) {
       String[] elements = doNotLoadIfUnsetVar.toString().split(",");
 
       Environment env = Environment.getSystemWide();
@@ -637,9 +858,8 @@ public class WekaPackageManager {
       for (String var : elements) {
         if (env.getVariableValue(var.trim()) == null) {
           for (PrintStream p : progress) {
-            p.println("[Weka] " + toLoad.getName()
-                + " can't be loaded because " + "the environment variable "
-                + var + " is not set.");
+            p.println("[Weka] " + toLoad.getName() + " can't be loaded because "
+              + "the environment variable " + var + " is not set.");
           }
 
           result = false;
@@ -650,9 +870,10 @@ public class WekaPackageManager {
 
     if (!result) {
       // grab the message to print to the log (if any)
-      Object doNotLoadMessage = toLoad
-          .getPackageMetaDataElement("DoNotLoadIfEnvVarNotSetMessage");
-      if (doNotLoadMessage != null && doNotLoadMessage.toString().length() > 0) {
+      Object doNotLoadMessage =
+        toLoad.getPackageMetaDataElement("DoNotLoadIfEnvVarNotSetMessage");
+      if (doNotLoadMessage != null
+        && doNotLoadMessage.toString().length() > 0) {
         for (PrintStream p : progress) {
           String dnlM = doNotLoadMessage.toString();
           try {
@@ -673,30 +894,29 @@ public class WekaPackageManager {
    * before allowing this package to be loaded. This is useful for checking to
    * see if third-party classes are accessible. An example would be Java3D,
    * which has an installer that installs into the JRE/JDK.
-   * 
+   *
    * @param toLoad the package to check
    * @return true if good to go
    */
   public static boolean checkForMissingClasses(Package toLoad,
-      PrintStream... progress) {
+    PrintStream... progress) {
     boolean result = true;
-    Object doNotLoadIfClassNotInstantiable = toLoad
-        .getPackageMetaDataElement("DoNotLoadIfClassNotPresent");
+    Object doNotLoadIfClassNotInstantiable =
+      toLoad.getPackageMetaDataElement("DoNotLoadIfClassNotPresent");
 
     if (doNotLoadIfClassNotInstantiable != null
-        && doNotLoadIfClassNotInstantiable.toString().length() > 0) {
+      && doNotLoadIfClassNotInstantiable.toString().length() > 0) {
 
-      StringTokenizer tok = new StringTokenizer(
-          doNotLoadIfClassNotInstantiable.toString(), ",");
+      StringTokenizer tok =
+        new StringTokenizer(doNotLoadIfClassNotInstantiable.toString(), ",");
       while (tok.hasMoreTokens()) {
         String nextT = tok.nextToken().trim();
         try {
           Class.forName(nextT);
         } catch (Exception ex) {
           for (PrintStream p : progress) {
-            p.println("[Weka] " + toLoad.getName()
-                + " can't be loaded because " + nextT
-                + " can't be instantiated.");
+            p.println("[Weka] " + toLoad.getName() + " can't be loaded because "
+              + nextT + " can't be instantiated.");
           }
           result = false;
           break;
@@ -706,9 +926,10 @@ public class WekaPackageManager {
 
     if (!result) {
       // grab the message to print to the log (if any)
-      Object doNotLoadMessage = toLoad
-          .getPackageMetaDataElement("DoNotLoadIfClassNotPresentMessage");
-      if (doNotLoadMessage != null && doNotLoadMessage.toString().length() > 0) {
+      Object doNotLoadMessage =
+        toLoad.getPackageMetaDataElement("DoNotLoadIfClassNotPresentMessage");
+      if (doNotLoadMessage != null
+        && doNotLoadMessage.toString().length() > 0) {
         for (PrintStream p : progress) {
           String dnlM = doNotLoadMessage.toString();
           try {
@@ -730,32 +951,31 @@ public class WekaPackageManager {
    * example would be a connector package that, for whatever reason, can't
    * include a necessary third-party jar file in its lib folder, and requires
    * the user to download and install this jar file manually.
-   * 
+   *
    * @param toLoad the package to check
    * @param packageRoot the root directory of the package
    * @return true if good to go
    */
   public static boolean checkForMissingFiles(Package toLoad, File packageRoot,
-      PrintStream... progress) {
+    PrintStream... progress) {
     boolean result = true;
 
-    Object doNotLoadIfFileMissing = toLoad
-        .getPackageMetaDataElement("DoNotLoadIfFileNotPresent");
+    Object doNotLoadIfFileMissing =
+      toLoad.getPackageMetaDataElement("DoNotLoadIfFileNotPresent");
     String packageRootPath = packageRoot.getPath() + File.separator;
 
     if (doNotLoadIfFileMissing != null
-        && doNotLoadIfFileMissing.toString().length() > 0) {
+      && doNotLoadIfFileMissing.toString().length() > 0) {
 
-      StringTokenizer tok = new StringTokenizer(
-          doNotLoadIfFileMissing.toString(), ",");
+      StringTokenizer tok =
+        new StringTokenizer(doNotLoadIfFileMissing.toString(), ",");
       while (tok.hasMoreTokens()) {
         String nextT = tok.nextToken().trim();
         File toCheck = new File(packageRootPath + nextT);
         if (!toCheck.exists()) {
           for (PrintStream p : progress) {
-            p.println("[Weka] " + toLoad.getName()
-                + " can't be loaded because " + toCheck.getPath()
-                + " appears to be missing.");
+            p.println("[Weka] " + toLoad.getName() + " can't be loaded because "
+              + toCheck.getPath() + " appears to be missing.");
           }
           result = false;
           break;
@@ -765,9 +985,10 @@ public class WekaPackageManager {
 
     if (!result) {
       // grab the message to print to the log (if any)
-      Object doNotLoadMessage = toLoad
-          .getPackageMetaDataElement("DoNotLoadIfFileNotPresentMessage");
-      if (doNotLoadMessage != null && doNotLoadMessage.toString().length() > 0) {
+      Object doNotLoadMessage =
+        toLoad.getPackageMetaDataElement("DoNotLoadIfFileNotPresentMessage");
+      if (doNotLoadMessage != null
+        && doNotLoadMessage.toString().length() > 0) {
         String dnlM = doNotLoadMessage.toString();
         try {
           dnlM = Environment.getSystemWide().substitute(dnlM);
@@ -783,13 +1004,124 @@ public class WekaPackageManager {
     return result;
   }
 
-  public static synchronized void loadPackages(boolean verbose) {
-    loadPackages(verbose, true);
+  /**
+   * Reads the doNotLoad list (if it exists) from the packages directory
+   *
+   * @return a set of package names that should not be loaded. This will be
+   *         empty if the doNotLoadList does not exist on disk.
+   */
+  @SuppressWarnings("unchecked")
+  protected static Set<String> getDoNotLoadList() {
+
+    Set<String> doNotLoad = new HashSet<String>();
+    File doNotLoadList =
+      new File(PACKAGES_DIR.toString() + File.separator + "doNotLoad.ser");
+    if (doNotLoadList.exists() && doNotLoadList.isFile()) {
+      ObjectInputStream ois = null;
+
+      try {
+        ois = new ObjectInputStream(
+          new BufferedInputStream(new FileInputStream(doNotLoadList)));
+        doNotLoad = (Set<String>) ois.readObject();
+      } catch (FileNotFoundException ex) {
+      } catch (IOException e) {
+        System.err
+          .println("An error occurred while reading the doNotLoad list: "
+            + e.getMessage());
+      } catch (ClassNotFoundException e) {
+        System.err
+          .println("An error occurred while reading the doNotLoad list: "
+            + e.getMessage());
+      } finally {
+        if (ois != null) {
+          try {
+            ois.close();
+          } catch (IOException ex) {
+            ex.printStackTrace();
+          }
+        }
+      }
+    }
+
+    return doNotLoad;
   }
 
-  public static synchronized void loadPackages(boolean verbose,
-      boolean refreshGOEProperties) {
+  /**
+   * Toggle the load status of the supplied list of package names
+   *
+   * @param packageNames the packages to toggle the load status for
+   * @return a list of unknown packages (i.e. any supplied package names that
+   *         don't appear to be installed)
+   * @throws Exception if a problem occurs
+   */
+  public static List<String> toggleLoadStatus(List<String> packageNames)
+    throws Exception {
 
+    List<String> unknownPackages = new ArrayList<String>();
+    boolean changeMade = false;
+    for (String s : packageNames) {
+      Package p = PACKAGE_MANAGER.getInstalledPackageInfo(s);
+      if (p == null) {
+        unknownPackages.add(s);
+      } else {
+        if (m_doNotLoadList.contains(s)) {
+          m_doNotLoadList.remove(s);
+        } else {
+          // only mark as do not load if a package is loadable
+          if (loadCheck(p,
+            new File(WekaPackageManager.getPackageHome().toString()
+              + File.separator + s))) {
+            m_doNotLoadList.add(s);
+          }
+        }
+        changeMade = true;
+      }
+    }
+
+    if (changeMade) {
+      // write the list back to disk
+      File doNotLoadList =
+        new File(PACKAGES_DIR.toString() + File.separator + "doNotLoad.ser");
+      ObjectOutputStream oos = null;
+      try {
+        oos = new ObjectOutputStream(
+          new BufferedOutputStream(new FileOutputStream(doNotLoadList)));
+        oos.writeObject(m_doNotLoadList);
+      } finally {
+        if (oos != null) {
+          oos.flush();
+          oos.close();
+        }
+      }
+    }
+
+    return unknownPackages;
+  }
+
+  /**
+   * Load all packages
+   *
+   * @param verbose true if loading progress should be output
+   */
+  public static synchronized void loadPackages(boolean verbose) {
+    loadPackages(verbose, false, true);
+  }
+
+  /**
+   * Load all packages
+   *
+   * @param verbose true if loading progress should be output
+   * @param avoidTriggeringFullClassDiscovery true if we should avoid processing
+   *          any properties files that might cause a full class discovery run,
+   *          and may involve instantiating GUI classes.
+   * @param refreshGOEProperties true if the GOE properties should be refreshed
+   *          after loading (i.e. a re-run of the class discovery mechanism,
+   *          re-initialization of the Knowledge Flow etc.)
+   */
+  public static synchronized void loadPackages(boolean verbose,
+    boolean avoidTriggeringFullClassDiscovery, boolean refreshGOEProperties) {
+
+    List<File> goePropsFiles = new ArrayList<File>();
     if (!m_loadPackages) {
       return;
     }
@@ -801,6 +1133,7 @@ public class WekaPackageManager {
     m_packagesLoaded = true;
     m_initialPackageLoadingInProcess = true;
     if (establishWekaHome()) {
+
       // try and load any jar files and add to the classpath
       File[] contents = PACKAGES_DIR.listFiles();
 
@@ -810,45 +1143,64 @@ public class WekaPackageManager {
         establishCacheIfNeeded(System.out);
       }
 
-      for (int i = 0; i < contents.length; i++) {
-        if (contents[i].isDirectory()) {
+      for (File content : contents) {
+        if (content.isDirectory()) {
           try {
-            Package toLoad = getInstalledPackageInfo(contents[i].getName());
+            Package toLoad = getInstalledPackageInfo(content.getName());
             boolean load;
             // Only perform the check against the current version of Weka if
             // there exists
             // a Description.props file
             if (toLoad != null) {
 
-              load = loadCheck(toLoad, contents[i], System.err);
+              load = loadCheck(toLoad, content, System.err);
 
               if (load) {
                 if (verbose) {
-                  System.out.println("[Weka] loading package "
-                      + contents[i].getName());
+                  System.out
+                    .println("[Weka] loading package " + content.getName());
                 }
-                loadPackageDirectory(contents[i], verbose);
+                loadPackageDirectory(content, verbose, goePropsFiles,
+                  avoidTriggeringFullClassDiscovery);
               }
             }
           } catch (Exception ex) {
             ex.printStackTrace();
             System.err.println("[Weka] Problem loading package "
-                + contents[i].getName() + " skipping...");
+              + content.getName() + " skipping...");
           }
         }
       }
     }
     m_initialPackageLoadingInProcess = false;
 
+    // it is best to process all of these after all jars have been
+    // inserted into the classpath since the dynamic class discovery
+    // mechanism will load classes during the process of determining
+    // all implementations of base types, and this can cause problems
+    // if processed at the time of package loading and there are
+    // dependencies between packages
+    if (!avoidTriggeringFullClassDiscovery) {
+      for (File f : goePropsFiles) {
+        processGenericPropertiesCreatorProps(f);
+      }
+    }
+
     // do we need to regenerate the list of available schemes for
     // the GUIs (this is not necessary when executing stuff from
-    // the command line
+    // the command line)
     if (refreshGOEProperties) {
-      System.err.println("Refreshing GOE props...");
+      if (verbose) {
+        System.err.println("Refreshing GOE props...");
+      }
       refreshGOEProperties();
     }
   }
 
+  /**
+   * Refresh the generic object editor properties via re-running of the dynamic
+   * class discovery process.
+   */
   public static void refreshGOEProperties() {
     ClassDiscovery.clearClassCache();
     GenericPropertiesCreator.regenerateGlobalOutputProperties();
@@ -860,7 +1212,7 @@ public class WekaPackageManager {
 
   /**
    * Get the underlying package manager implementation
-   * 
+   *
    * @return the underlying concrete package management implementation.
    */
   public static PackageManager getUnderlyingPackageManager() {
@@ -870,7 +1222,7 @@ public class WekaPackageManager {
   /**
    * Retrieves the size (in KB) of the repository zip archive stored on the
    * server.
-   * 
+   *
    * @return the size of the repository zip archive in KB.
    */
   public static int repoZipArchiveSize() {
@@ -878,8 +1230,8 @@ public class WekaPackageManager {
 
     try {
       PACKAGE_MANAGER.setPackageRepositoryURL(REP_URL);
-      String numPackagesS = PACKAGE_MANAGER.getPackageRepositoryURL()
-          .toString() + "/repoSize.txt";
+      String numPackagesS =
+        PACKAGE_MANAGER.getPackageRepositoryURL().toString() + "/repoSize.txt";
       URLConnection conn = null;
       URL connURL = new URL(numPackagesS);
 
@@ -891,15 +1243,15 @@ public class WekaPackageManager {
 
       conn.setConnectTimeout(30000); // timeout after 30 seconds
 
-      BufferedReader bi = new BufferedReader(new InputStreamReader(
-          conn.getInputStream()));
+      BufferedReader bi =
+        new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
       String n = bi.readLine();
       try {
         size = Integer.parseInt(n);
       } catch (NumberFormatException ne) {
         System.err.println("[WekaPackageManager] problem parsing the size "
-            + "of repository zip archive from the server.");
+          + "of repository zip archive from the server.");
       }
       bi.close();
 
@@ -912,16 +1264,20 @@ public class WekaPackageManager {
 
   /**
    * Get the number of packages that are available at the repository.
-   * 
+   *
    * @return the number of packages that are available (or -1 if this can't be
    *         determined for some reason.
    */
   public static int numRepositoryPackages() {
+
+    if (m_offline) {
+      return -1;
+    }
     int numPackages = -1;
     try {
       PACKAGE_MANAGER.setPackageRepositoryURL(REP_URL);
-      String numPackagesS = PACKAGE_MANAGER.getPackageRepositoryURL()
-          .toString() + "/numPackages.txt";
+      String numPackagesS = PACKAGE_MANAGER.getPackageRepositoryURL().toString()
+        + "/numPackages.txt";
       URLConnection conn = null;
       URL connURL = new URL(numPackagesS);
 
@@ -933,15 +1289,15 @@ public class WekaPackageManager {
 
       conn.setConnectTimeout(30000); // timeout after 30 seconds
 
-      BufferedReader bi = new BufferedReader(new InputStreamReader(
-          conn.getInputStream()));
+      BufferedReader bi =
+        new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
       String n = bi.readLine();
       try {
         numPackages = Integer.parseInt(n);
       } catch (NumberFormatException ne) {
         System.err.println("[WekaPackageManager] problem parsing number "
-            + "of packages from server.");
+          + "of packages from server.");
       }
       bi.close();
 
@@ -956,10 +1312,10 @@ public class WekaPackageManager {
    * Just get a list of the package names. This is faster than calling
    * getAllPackages(), especially if fetching from the online repository, since
    * the full meta data for each package doesn't have to be read.
-   * 
+   *
    * @param local true if the local package list in the cache should be read
    *          rather than the online repository
-   * 
+   *
    * @return a Map<String, String> of all the package names available either
    *         locally or at the repository
    */
@@ -973,8 +1329,8 @@ public class WekaPackageManager {
         PACKAGE_MANAGER.setPackageRepositoryURL(REP_URL);
       }
 
-      String packageListS = PACKAGE_MANAGER.getPackageRepositoryURL()
-          .toString() + "/packageListWithVersion.txt";
+      String packageListS = PACKAGE_MANAGER.getPackageRepositoryURL().toString()
+        + "/" + PACKAGE_LIST_WITH_VERSION_FILE;
       URLConnection conn = null;
       URL connURL = new URL(packageListS);
 
@@ -986,8 +1342,8 @@ public class WekaPackageManager {
 
       conn.setConnectTimeout(30000); // timeout after 30 seconds
 
-      BufferedReader bi = new BufferedReader(new InputStreamReader(
-          conn.getInputStream()));
+      BufferedReader bi =
+        new BufferedReader(new InputStreamReader(conn.getInputStream()));
       String l = null;
       while ((l = bi.readLine()) != null) {
         String[] parts = l.split(":");
@@ -1005,6 +1361,12 @@ public class WekaPackageManager {
     return result;
   }
 
+  /**
+   * Establish the local copy of the package meta data if needed
+   *
+   * @param progress for reporting progress
+   * @return any Exception raised or null if all is good
+   */
   public static Exception establishCacheIfNeeded(PrintStream... progress) {
     if (m_offline) {
       return null;
@@ -1017,16 +1379,89 @@ public class WekaPackageManager {
     Exception problem = null;
     if (INITIAL_CACHE_BUILD_NEEDED) {
       for (PrintStream p : progress) {
-        p.println("Caching repository meta data, please wait...");
+        p.println("Caching repository metadata, please wait...");
       }
 
       problem = refreshCache(progress);
 
       INITIAL_CACHE_BUILD_NEEDED = false;
+    } else {
+      // if no initial build needed then check for a server-side forced
+      // refresh...
+      try {
+        if (checkForForcedCacheRefresh()) {
+          for (PrintStream p : progress) {
+            p.println("Forced repository metadata refresh, please wait...");
+          }
+          problem = refreshCache(progress);
+        }
+      } catch (MalformedURLException ex) {
+        problem = ex;
+      }
     }
+
     return problem;
   }
 
+  protected static boolean checkForForcedCacheRefresh()
+    throws MalformedURLException {
+
+    int refreshCountServer = getForcedRefreshCount(false);
+    if (refreshCountServer > 0) {
+      // now check local version of this file...
+      int refreshCountLocal = getForcedRefreshCount(true);
+      return refreshCountServer > refreshCountLocal;
+    }
+
+    return false;
+  }
+
+  protected static int getForcedRefreshCount(boolean local)
+    throws MalformedURLException {
+
+    useCacheOrOnlineRepository();
+    if (!local) {
+      PACKAGE_MANAGER.setPackageRepositoryURL(REP_URL);
+    }
+    String refreshCountS = PACKAGE_MANAGER.getPackageRepositoryURL().toString()
+      + "/" + FORCED_REFRESH_COUNT_FILE;
+    int refreshCount = -1;
+    URLConnection conn = null;
+    URL connURL = new URL(refreshCountS);
+
+    try {
+      if (PACKAGE_MANAGER.setProxyAuthentication(connURL)) {
+        conn = connURL.openConnection(PACKAGE_MANAGER.getProxy());
+      } else {
+        conn = connURL.openConnection();
+      }
+
+      conn.setConnectTimeout(30000); // timeout after 30 seconds
+
+      BufferedReader bi =
+        new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+      String countS = bi.readLine();
+      if (countS != null && countS.length() > 0) {
+        try {
+          refreshCount = Integer.parseInt(countS);
+        } catch (NumberFormatException ne) {
+          // ignore
+        }
+      }
+    } catch (IOException ex) {
+      // ignore
+    }
+
+    return refreshCount;
+  }
+
+  /**
+   * Check for new packages on the server and refresh the local cache if needed
+   *
+   * @param progress to report progress to
+   * @return any Exception raised or null if all is good
+   */
   public static Exception checkForNewPackages(PrintStream... progress) {
 
     if (m_offline) {
@@ -1040,7 +1475,7 @@ public class WekaPackageManager {
     if (localPackageNameList == null) {
 
       System.err.println("Local package list is missing, trying a "
-          + "cache refresh to restore...");
+        + "cache refresh to restore...");
       refreshCache(progress);
       localPackageNameList = getPackageList(true);
       if (localPackageNameList == null) {
@@ -1057,19 +1492,19 @@ public class WekaPackageManager {
     }
 
     if (repositoryPackageNameList.keySet().size() != localPackageNameList
-        .keySet().size()) {
+      .keySet().size()) {
       // package(s) have disappeared from the repository.
       // Force a cache refresh...
       if (repositoryPackageNameList.keySet().size() < localPackageNameList
-          .keySet().size()) {
+        .keySet().size()) {
         for (PrintStream p : progress) {
           p.println("Some packages no longer exist at the repository. "
-              + "Refreshing cache...");
+            + "Refreshing cache...");
         }
       } else {
         for (PrintStream p : progress) {
           p.println("There are new packages at the repository. "
-              + "Refreshing cache...");
+            + "Refreshing cache...");
         }
       }
       problem = refreshCache(progress);
@@ -1094,7 +1529,7 @@ public class WekaPackageManager {
       if (refresh) {
         for (PrintStream p : progress) {
           p.println("There are newer versions of existing packages "
-              + "at the repository. Refreshing cache...");
+            + "at the repository. Refreshing cache...");
         }
         problem = refreshCache(progress);
       }
@@ -1103,6 +1538,12 @@ public class WekaPackageManager {
     return problem;
   }
 
+  /**
+   * Refresh the local copy of the package meta data
+   *
+   * @param progress to report progress to
+   * @return any Exception raised or null if all is successful
+   */
   public static Exception refreshCache(PrintStream... progress) {
     Exception problem = null;
     if (CACHE_URL == null) {
@@ -1115,8 +1556,8 @@ public class WekaPackageManager {
       for (PrintStream p : progress) {
         p.println("Refresh in progress. Please wait...");
       }
-      byte[] zip = PACKAGE_MANAGER
-          .getRepositoryPackageMetaDataOnlyAsZip(progress);
+      byte[] zip =
+        PACKAGE_MANAGER.getRepositoryPackageMetaDataOnlyAsZip(progress);
 
       ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zip));
       ZipEntry ze;
@@ -1128,7 +1569,7 @@ public class WekaPackageManager {
           continue;
         }
         BufferedOutputStream bo = new BufferedOutputStream(
-            new FileOutputStream(new File(cacheDir, ze.getName())));
+          new FileOutputStream(new File(cacheDir, ze.getName())));
         while (true) {
           int amountRead = zis.read(buff);
           if (amountRead == -1) {
@@ -1148,7 +1589,6 @@ public class WekaPackageManager {
       try {
         DefaultPackageManager.deleteDir(new File(cacheDir), System.out);
       } catch (Exception e1) {
-        // TODO Auto-generated catch block
         e1.printStackTrace();
       }
 
@@ -1158,15 +1598,26 @@ public class WekaPackageManager {
     return problem;
   }
 
+  /**
+   * Check if a named resource exists in an installed package
+   *
+   * @param packageName the name of the package in question
+   * @param resourceName the name of the resource to check for
+   * @return true if the resource exists in the package
+   */
   public static boolean installedPackageResourceExists(String packageName,
-      String resourceName) {
+    String resourceName) {
 
     String fullResourcePath = getPackageHome().toString() + File.separator
-        + packageName + File.separator + resourceName;
+      + packageName + File.separator + resourceName;
 
     return new File(fullResourcePath).exists();
   }
 
+  /**
+   * Determines whether to use the local cache or online repository for meta
+   * data
+   */
   private static void useCacheOrOnlineRepository() {
     if (REP_MIRROR == null) {
       establishMirror();
@@ -1186,125 +1637,291 @@ public class WekaPackageManager {
   /**
    * Find the most recent version of the package encapsulated in the supplied
    * PackageConstraint argument that satisfies the constraint
-   * 
+   *
    * @param toCheck the PackageConstraint containing the package in question
    * @return the most recent version of the package satisfying the constraint
    * @throws Exception if a version can't be found that satisfies the constraint
    *           or an error occurs while communicating with the respository
    */
   public static Package mostRecentVersionWithRespectToConstraint(
-      PackageConstraint toCheck) throws Exception {
+    PackageConstraint toCheck) throws Exception {
     Package target = toCheck.getPackage();
     Package result = null;
 
-    List<Object> availableVersions = PACKAGE_MANAGER
-        .getRepositoryPackageVersions(target.getName());
+    List<Object> availableVersions =
+      PACKAGE_MANAGER.getRepositoryPackageVersions(target.getName());
 
     // version numbers will be in descending sorted order from the repository
     // we want the most recent version that meets the target constraint
     for (Object version : availableVersions) {
-      Package candidate = PACKAGE_MANAGER.getRepositoryPackageInfo(
-          target.getName(), version);
-      if (toCheck.checkConstraint(candidate)) {
+      Package candidate =
+        PACKAGE_MANAGER.getRepositoryPackageInfo(target.getName(), version);
+      if (toCheck.checkConstraint(candidate)
+        && candidate.isCompatibleBaseSystem()) {
         result = candidate;
         break;
       }
     }
 
     if (result == null) {
-      throw new Exception("[WekaPackageManager] unable to find a version of "
-          + "package " + target.getName() + " that meets constraint "
-          + toCheck.toString());
+      throw new Exception(
+        "[WekaPackageManager] unable to find a version of " + "package "
+          + target.getName() + " that meets constraint " + toCheck.toString());
     }
 
     return result;
   }
 
-  public static void installPackages(List<Package> toInstall,
-      PrintStream... progress) throws Exception {
+  /**
+   * Install the supplied list of packages
+   *
+   * @param toInstall packages to install
+   * @param progress to report progress to
+   * @return true if successful
+   * @throws Exception if a problem occurs
+   */
+  public static boolean installPackages(List<Package> toInstall,
+    PrintStream... progress) throws Exception {
 
     useCacheOrOnlineRepository();
-    PACKAGE_MANAGER.installPackages(toInstall, progress);
-
+    List<Boolean> upgrades = new ArrayList<Boolean>();
     for (Package p : toInstall) {
+      if (p.isInstalled()) {
+        upgrades.add(new Boolean(true));
+      } else {
+        upgrades.add(new Boolean(false));
+      }
+    }
+    PACKAGE_MANAGER.installPackages(toInstall, progress);
+    boolean atLeastOneUpgrade = false;
+
+    List<File> gpcFiles = new ArrayList<File>();
+    int i = 0;
+    for (Package p : toInstall) {
+      boolean isAnUpgrade = upgrades.get(i++);
+      if (isAnUpgrade) {
+        atLeastOneUpgrade = true;
+      }
 
       String packageName = p.getName();
       File packageDir = new File(PACKAGE_MANAGER.getPackageHome().toString()
-          + File.separator + packageName);
+        + File.separator + packageName);
 
       boolean loadIt = loadCheck(p, packageDir, progress);
 
-      if (loadIt) {
-        loadPackageDirectory(packageDir, false);
+      if (loadIt & !isAnUpgrade) {
+        loadPackageDirectory(packageDir, false, gpcFiles, false);
       }
     }
+
+    for (File f : gpcFiles) {
+      processGenericPropertiesCreatorProps(f);
+    }
+
+    return atLeastOneUpgrade;
   }
 
+  /**
+   * Get the versions of the supplied package available on the server
+   *
+   * @param packageName the package name to get available versions for
+   * @return a list of available versions
+   * @throws Exception if a problem occurs
+   */
   public static List<Object> getRepositoryPackageVersions(String packageName)
-      throws Exception {
+    throws Exception {
     useCacheOrOnlineRepository();
     return PACKAGE_MANAGER.getRepositoryPackageVersions(packageName);
   }
 
+  /**
+   * Get the package repository URL
+   *
+   * @return the package repository URL
+   */
   public static URL getPackageRepositoryURL() {
     useCacheOrOnlineRepository();
     return PACKAGE_MANAGER.getPackageRepositoryURL();
   }
 
+  /**
+   * Get a list of all packages
+   *
+   * @return a list of all packages
+   * @throws Exception if a problem occurs
+   */
   public static List<Package> getAllPackages() throws Exception {
     useCacheOrOnlineRepository();
     return PACKAGE_MANAGER.getAllPackages();
   }
 
+  /**
+   * Get a list of all available packages (i.e. those not yet installed(.
+   *
+   * @return a list of all available packages
+   * @throws Exception if a problem occurs
+   */
   public static List<Package> getAvailablePackages() throws Exception {
     useCacheOrOnlineRepository();
     return PACKAGE_MANAGER.getAvailablePackages();
   }
 
+  /**
+   * Get a list of the most recent version of all available packages (i.e. those
+   * not yet installed or there is a higher version in the repository) that are
+   * compatible with the version of Weka that is installed.
+   *
+   * @return a list of packages that are compatible with the installed version
+   *         of Weka
+   * @throws Exception if a problem occurs
+   */
+  public static List<Package> getAvailableCompatiblePackages()
+    throws Exception {
+    // List<Package> allAvail = getAvailablePackages();
+    List<Package> allAvail = getAllPackages();
+    List<Package> compatible = new ArrayList<Package>();
+
+    for (Package p : allAvail) {
+      List<Object> availableVersions =
+        PACKAGE_MANAGER.getRepositoryPackageVersions(p.getName());
+
+      // version numbers will be in descending sorted order from the repository
+      // we want the most recent version that is compatible with the base weka
+      // version
+      for (Object version : availableVersions) {
+        Package versionedPackage =
+          getRepositoryPackageInfo(p.getName(), version.toString());
+        if (versionedPackage.isCompatibleBaseSystem()) {
+          if (p.isInstalled()) {
+            // see if the latest compatible version is newer than the installed
+            // version
+            Package installed = getInstalledPackageInfo(p.getName());
+            String installedV = installed
+              .getPackageMetaDataElement(VersionPackageConstraint.VERSION_KEY)
+              .toString();
+            String versionedV = versionedPackage
+              .getPackageMetaDataElement(VersionPackageConstraint.VERSION_KEY)
+              .toString();
+            VersionPackageConstraint.VersionComparison v =
+              VersionPackageConstraint.compare(versionedV, installedV);
+            if (v == VersionPackageConstraint.VersionComparison.GREATERTHAN) {
+              compatible.add(versionedPackage);
+            }
+          } else {
+            compatible.add(versionedPackage);
+          }
+          break;
+        }
+      }
+    }
+
+    return compatible;
+  }
+
+  /**
+   * Get a list of installed packages
+   * 
+   * @return a list of installed packages
+   * @throws Exception if a problem occurs
+   */
   public static List<Package> getInstalledPackages() throws Exception {
     useCacheOrOnlineRepository();
     return PACKAGE_MANAGER.getInstalledPackages();
   }
 
+  /**
+   * Get a list of dependencies for a given package
+   * 
+   * @param target the package to get the dependencies for
+   * @param conflicts will hold any conflicts
+   * @return a list of dependencies for the target package
+   * @throws Exception if a problem occurs
+   */
   public static List<Dependency> getAllDependenciesForPackage(Package target,
-      Map<String, List<Dependency>> conflicts) throws Exception {
+    Map<String, List<Dependency>> conflicts) throws Exception {
     useCacheOrOnlineRepository();
     return PACKAGE_MANAGER.getAllDependenciesForPackage(target, conflicts);
   }
 
+  /**
+   * Extract meta data from a package archive
+   * 
+   * @param packageArchivePath the path to the package archive
+   * @return the meta data for the package
+   * @throws Exception if a problem occurs
+   */
   public static Package getPackageArchiveInfo(String packageArchivePath)
-      throws Exception {
+    throws Exception {
     useCacheOrOnlineRepository();
     return PACKAGE_MANAGER.getPackageArchiveInfo(packageArchivePath);
   }
 
+  /**
+   * Get meta data for an installed package
+   * 
+   * @param packageName the name of the package
+   * @return the meta data for the package
+   * @throws Exception if a problem occurs
+   */
   public static Package getInstalledPackageInfo(String packageName)
-      throws Exception {
+    throws Exception {
     useCacheOrOnlineRepository();
     return PACKAGE_MANAGER.getInstalledPackageInfo(packageName);
   }
 
+  /**
+   * Get meta data for the latest version of a package from the repository
+   * 
+   * @param packageName the name of the package
+   * @return the meta data for the package
+   * @throws Exception if a problem occurs
+   */
   public static Package getRepositoryPackageInfo(String packageName)
-      throws Exception {
+    throws Exception {
     useCacheOrOnlineRepository();
     return PACKAGE_MANAGER.getRepositoryPackageInfo(packageName);
   }
 
+  /**
+   * Get meta data for a specific version of a package from the repository
+   * 
+   * @param packageName the name of the package
+   * @param version the version to get meta data for
+   * @return the meta data for the package
+   * @throws Exception if a problem occurs
+   */
   public static Package getRepositoryPackageInfo(String packageName,
-      String version) throws Exception {
+    String version) throws Exception {
     useCacheOrOnlineRepository();
     return PACKAGE_MANAGER.getRepositoryPackageInfo(packageName, version);
   }
 
-  public static void installPackageFromRepository(String packageName,
-      String version, PrintStream... progress) throws Exception {
+  /**
+   * Install a named package by retrieving the location of the archive from the
+   * meta data stored in the repository
+   * 
+   * @param packageName the name of the package to install
+   * @param version the version of the package to install
+   * @param progress for reporting progress
+   * @return true if the package was installed successfully
+   * @throws Exception if a problem occurs
+   */
+  public static boolean installPackageFromRepository(String packageName,
+    String version, PrintStream... progress) throws Exception {
     useCacheOrOnlineRepository();
     Package toLoad = getRepositoryPackageInfo(packageName);
 
-    Object specialInstallMessage = toLoad
-        .getPackageMetaDataElement("MessageToDisplayOnInstallation");
+    // check to see if a version is already installed. If so, we
+    // wont load the updated version into the classpath immediately in
+    // order to avoid conflicts, class not found exceptions etc. The
+    // user is told to restart Weka for the changes to come into affect
+    // anyway, so there is no point in loading the updated package now.
+    boolean isAnUpgrade = toLoad.isInstalled();
+
+    Object specialInstallMessage =
+      toLoad.getPackageMetaDataElement("MessageToDisplayOnInstallation");
     if (specialInstallMessage != null
-        && specialInstallMessage.toString().length() > 0) {
+      && specialInstallMessage.toString().length() > 0) {
       String siM = specialInstallMessage.toString();
       try {
         siM = Environment.getSystemWide().substitute(siM);
@@ -1312,38 +1929,48 @@ public class WekaPackageManager {
         // quietly ignore
       }
       String message = "**** Special installation message ****\n" + siM
-          + "\n**** Special installation message ****";
+        + "\n**** Special installation message ****";
       for (PrintStream p : progress) {
         p.println(message);
       }
     }
 
-    PACKAGE_MANAGER
-        .installPackageFromRepository(packageName, version, progress);
+    PACKAGE_MANAGER.installPackageFromRepository(packageName, version,
+      progress);
     File packageDir = new File(PACKAGE_MANAGER.getPackageHome().toString()
-        + File.separator + packageName);
+      + File.separator + packageName);
 
     boolean loadIt = checkForMissingClasses(toLoad, progress);
-    if (loadIt) {
-      File packageRoot = new File(PACKAGE_MANAGER.getPackageHome()
-          + File.separator + packageName);
+    if (loadIt && !isAnUpgrade) {
+      File packageRoot = new File(
+        PACKAGE_MANAGER.getPackageHome() + File.separator + packageName);
       loadIt = checkForMissingFiles(toLoad, packageRoot, progress);
       if (loadIt) {
-        loadPackageDirectory(packageDir, false);
+        loadPackageDirectory(packageDir, false, null, false);
       }
     }
+
+    return isAnUpgrade;
   }
 
+  /**
+   * Install a package from an archive
+   * 
+   * @param packageArchivePath the path to the package archive file to install
+   * @param progress for reporting progress
+   * @return true if the package was installed successfully
+   * @throws Exception if a problem occurs
+   */
   public static String installPackageFromArchive(String packageArchivePath,
-      PrintStream... progress) throws Exception {
+    PrintStream... progress) throws Exception {
     useCacheOrOnlineRepository();
-    Package toInstall = PACKAGE_MANAGER
-        .getPackageArchiveInfo(packageArchivePath);
+    Package toInstall =
+      PACKAGE_MANAGER.getPackageArchiveInfo(packageArchivePath);
 
-    Object specialInstallMessage = toInstall
-        .getPackageMetaDataElement("MessageToDisplayOnInstallation");
+    Object specialInstallMessage =
+      toInstall.getPackageMetaDataElement("MessageToDisplayOnInstallation");
     if (specialInstallMessage != null
-        && specialInstallMessage.toString().length() > 0) {
+      && specialInstallMessage.toString().length() > 0) {
       String siM = specialInstallMessage.toString();
       try {
         siM = Environment.getSystemWide().substitute(siM);
@@ -1351,7 +1978,7 @@ public class WekaPackageManager {
         // quietly ignore
       }
       String message = "**** Special installation message ****\n" + siM
-          + "\n**** Special installation message ****";
+        + "\n**** Special installation message ****";
       for (PrintStream p : progress) {
         p.println(message);
       }
@@ -1362,31 +1989,39 @@ public class WekaPackageManager {
     boolean loadIt = checkForMissingClasses(toInstall, progress);
     if (loadIt) {
       File packageRoot = new File(PACKAGE_MANAGER.getPackageHome()
-          + File.separator + toInstall.getName());
+        + File.separator + toInstall.getName());
       loadIt = checkForMissingFiles(toInstall, packageRoot, progress);
       if (loadIt) {
-        loadPackageDirectory(packageRoot, false);
+        loadPackageDirectory(packageRoot, false, null, false);
       }
     }
 
     return toInstall.getName();
   }
 
+  /**
+   * Insstall a package from the supplied URL
+   * 
+   * @param packageURL the URL to the package archive to install
+   * @param progress for reporting progress
+   * @return true if the package was installed successfully
+   * @throws Exception if a problem occurs
+   */
   public static String installPackageFromURL(URL packageURL,
-      PrintStream... progress) throws Exception {
+    PrintStream... progress) throws Exception {
     useCacheOrOnlineRepository();
-    String packageName = PACKAGE_MANAGER.installPackageFromURL(packageURL,
-        progress);
+    String packageName =
+      PACKAGE_MANAGER.installPackageFromURL(packageURL, progress);
 
     Package installed = PACKAGE_MANAGER.getInstalledPackageInfo(packageName);
 
-    Object specialInstallMessage = installed
-        .getPackageMetaDataElement("MessageToDisplayOnInstallation");
+    Object specialInstallMessage =
+      installed.getPackageMetaDataElement("MessageToDisplayOnInstallation");
     if (specialInstallMessage != null
-        && specialInstallMessage.toString().length() > 0) {
+      && specialInstallMessage.toString().length() > 0) {
       String message = "**** Special installation message ****\n"
-          + specialInstallMessage.toString()
-          + "\n**** Special installation message ****";
+        + specialInstallMessage.toString()
+        + "\n**** Special installation message ****";
       for (PrintStream p : progress) {
         p.println(message);
       }
@@ -1395,33 +2030,41 @@ public class WekaPackageManager {
     boolean loadIt = checkForMissingClasses(installed, progress);
     if (loadIt) {
       File packageRoot = new File(PACKAGE_MANAGER.getPackageHome()
-          + File.separator + installed.getName());
+        + File.separator + installed.getName());
       loadIt = checkForMissingFiles(installed, packageRoot, progress);
       if (loadIt) {
-        loadPackageDirectory(packageRoot, false);
+        loadPackageDirectory(packageRoot, false, null, false);
       }
     }
     return packageName;
   }
 
+  /**
+   * Uninstall a named package
+   * 
+   * @param packageName the name of the package to remove
+   * @param updateKnowledgeFlow true if any Knowledge Flow beans provided by the
+   *          package should be deregistered from the KnoweledgeFlow
+   * @param progress for reporting progress
+   * @throws Exception if a problem occurs
+   */
   public static void uninstallPackage(String packageName,
-      boolean updateKnowledgeFlow, PrintStream... progress) throws Exception {
+    boolean updateKnowledgeFlow, PrintStream... progress) throws Exception {
 
     // check to see if this is a KnowledgeFlow package (presence of Beans.props
     // file)
     if (updateKnowledgeFlow) {
       File packageToDel = new File(PACKAGE_MANAGER.getPackageHome().toString()
-          + File.separator + packageName);
+        + File.separator + packageName);
       if (packageToDel.exists() && packageToDel.isDirectory()) {
         File[] contents = packageToDel.listFiles();
-        for (int i = 0; i < contents.length; i++) {
-          if (contents[i].isFile()
-              && contents[i].getPath().endsWith("Beans.props")) {
+        for (File content : contents) {
+          if (content.isFile() && content.getPath().endsWith("Beans.props")) {
             // KnowledgeFlow plugin -- remove this properties file from the list
             // of
             // bean plugin props
 
-            KnowledgeFlowApp.removeFromPluginBeanProps(contents[i]);
+            KnowledgeFlowApp.removeFromPluginBeanProps(content);
             KnowledgeFlowApp.disposeSingleton();
             break;
           }
@@ -1439,35 +2082,54 @@ public class WekaPackageManager {
     while (i.hasNext()) {
       Object key = i.next();
       Object value = packageProps.get(key);
-      System.out.println(Utils.padLeft(key.toString(), 11) + ":\t"
-          + value.toString());
+      System.out
+        .println(Utils.padLeft(key.toString(), 11) + ":\t" + value.toString());
     }
   }
 
+  /**
+   * Print meta data on a package
+   * 
+   * @param packagePath the path to the package to print meta data for
+   * @throws Exception if a problem occurs
+   */
   protected static void printPackageArchiveInfo(String packagePath)
-      throws Exception {
-    Map<?, ?> packageProps = getPackageArchiveInfo(packagePath)
-        .getPackageMetaData();
+    throws Exception {
+    Map<?, ?> packageProps =
+      getPackageArchiveInfo(packagePath).getPackageMetaData();
     printPackageInfo(packageProps);
   }
 
+  /**
+   * Print meta data for an installed package
+   * 
+   * @param packageName the name of the package to print meta data for
+   * @throws Exception if a problem occurs
+   */
   protected static void printInstalledPackageInfo(String packageName)
-      throws Exception {
-    Map<?, ?> packageProps = getInstalledPackageInfo(packageName)
-        .getPackageMetaData();
+    throws Exception {
+    Map<?, ?> packageProps =
+      getInstalledPackageInfo(packageName).getPackageMetaData();
     printPackageInfo(packageProps);
   }
 
+  /**
+   * Print meta data for a package listed in the repository
+   * 
+   * @param packageName the name of the package to print meta data for
+   * @param version the version of the package
+   * @throws Exception if a problem occurs
+   */
   protected static void printRepositoryPackageInfo(String packageName,
-      String version) throws Exception {
-    Map<?, ?> packageProps = getRepositoryPackageInfo(packageName, version)
-        .getPackageMetaData();
+    String version) throws Exception {
+    Map<?, ?> packageProps =
+      getRepositoryPackageInfo(packageName, version).getPackageMetaData();
     printPackageInfo(packageProps);
   }
 
   private static String queryUser() {
-    java.io.BufferedReader br = new java.io.BufferedReader(
-        new java.io.InputStreamReader(System.in));
+    java.io.BufferedReader br =
+      new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
 
     String result = null;
     try {
@@ -1480,7 +2142,7 @@ public class WekaPackageManager {
   }
 
   private static void removeInstalledPackage(String packageName, boolean force,
-      PrintStream... progress) throws Exception {
+    PrintStream... progress) throws Exception {
 
     List<Package> compromised = new ArrayList<Package>();
 
@@ -1501,17 +2163,16 @@ public class WekaPackageManager {
       }
 
       if (compromised.size() > 0) {
-        System.out.println("The following installed packages depend on "
-            + packageName + " :\n");
+        System.out.println(
+          "The following installed packages depend on " + packageName + " :\n");
         for (Package p : compromised) {
           System.out.println("\t" + p.getName());
         }
 
         System.out.println("\nDo you wish to proceed [y/n]?");
         String response = queryUser();
-        if (response != null
-            && (response.equalsIgnoreCase("n") || response
-                .equalsIgnoreCase("no"))) {
+        if (response != null && (response.equalsIgnoreCase("n")
+          || response.equalsIgnoreCase("no"))) {
           return; // bail out here
         }
       }
@@ -1528,14 +2189,14 @@ public class WekaPackageManager {
   }
 
   private static void installPackageFromRepository(String packageName,
-      String version, boolean force) throws Exception {
+    String version, boolean force) throws Exception {
 
     Package toInstall = null;
     try {
       toInstall = getRepositoryPackageInfo(packageName, version);
     } catch (Exception ex) {
       System.err.println("[WekaPackageManager] Package " + packageName
-          + " at version " + version + " doesn't seem to exist!");
+        + " at version " + version + " doesn't seem to exist!");
       // System.exit(1);
       return;
     }
@@ -1551,37 +2212,28 @@ public class WekaPackageManager {
           depList.append(bd.getTarget().toString() + " ");
         }
         System.err.println("Can't install package " + packageName
-            + " because it requires " + depList.toString());
+          + " because it requires " + depList.toString());
         return;
       }
 
-      // true if this package is already installed. In which case we need to
-      // check
-      // if changing this package will impact other already installed packages
-      boolean upOrDowngrading = false;
       if (toInstall.isInstalled()) {
         Package installedVersion = getInstalledPackageInfo(packageName);
         if (!toInstall.equals(installedVersion)) {
 
-          System.out
-              .println("Package " + packageName + "[" + installedVersion
-                  + "] is already installed. Replace with " + toInstall
-                  + " [y/n]?");
+          System.out.println("Package " + packageName + "[" + installedVersion
+            + "] is already installed. Replace with " + toInstall + " [y/n]?");
 
           String response = queryUser();
-          if (response != null
-              && (response.equalsIgnoreCase("n") || response
-                  .equalsIgnoreCase("no"))) {
+          if (response != null && (response.equalsIgnoreCase("n")
+            || response.equalsIgnoreCase("no"))) {
             return; // bail out here
           }
-          upOrDowngrading = true;
         } else {
           System.out.println("Package " + packageName + "[" + installedVersion
-              + "] is already installed. Install again [y/n]?");
+            + "] is already installed. Install again [y/n]?");
           String response = queryUser();
-          if (response != null
-              && (response.equalsIgnoreCase("n") || response
-                  .equalsIgnoreCase("no"))) {
+          if (response != null && (response.equalsIgnoreCase("n")
+            || response.equalsIgnoreCase("no"))) {
             return; // bail out here
           }
         }
@@ -1589,13 +2241,14 @@ public class WekaPackageManager {
 
       // Now get a full list of dependencies for this package and
       // check for any conflicts
-      Map<String, List<Dependency>> conflicts = new HashMap<String, List<Dependency>>();
-      List<Dependency> dependencies = getAllDependenciesForPackage(toInstall,
-          conflicts);
+      Map<String, List<Dependency>> conflicts =
+        new HashMap<String, List<Dependency>>();
+      List<Dependency> dependencies =
+        getAllDependenciesForPackage(toInstall, conflicts);
 
       if (conflicts.size() > 0) {
-        System.err.println("Package " + packageName
-            + " requires the following packages:\n");
+        System.err.println(
+          "Package " + packageName + " requires the following packages:\n");
         Iterator<Dependency> depI = dependencies.iterator();
         while (depI.hasNext()) {
           Dependency d = depI.next();
@@ -1632,32 +2285,34 @@ public class WekaPackageManager {
         Dependency toCheck = depI.next();
         if (toCheck.getTarget().getPackage().isInstalled()) {
           String toCheckName = toCheck.getTarget().getPackage()
-              .getPackageMetaDataElement("PackageName").toString();
-          Package installedVersion = PACKAGE_MANAGER
-              .getInstalledPackageInfo(toCheckName);
+            .getPackageMetaDataElement("PackageName").toString();
+          Package installedVersion =
+            PACKAGE_MANAGER.getInstalledPackageInfo(toCheckName);
           if (!toCheck.getTarget().checkConstraint(installedVersion)) {
             needsUpgrade.add(toCheck.getTarget());
             Package mostRecent = toCheck.getTarget().getPackage();
-            if (toCheck.getTarget() instanceof org.pentaho.packageManagement.VersionPackageConstraint) {
+            if (toCheck
+              .getTarget() instanceof weka.core.packageManagement.VersionPackageConstraint) {
               mostRecent = WekaPackageManager
-                  .mostRecentVersionWithRespectToConstraint(toCheck.getTarget());
+                .mostRecentVersionWithRespectToConstraint(toCheck.getTarget());
             }
             finalListToInstall.add(mostRecent);
           }
         } else {
           Package mostRecent = toCheck.getTarget().getPackage();
-          if (toCheck.getTarget() instanceof org.pentaho.packageManagement.VersionPackageConstraint) {
+          if (toCheck
+            .getTarget() instanceof weka.core.packageManagement.VersionPackageConstraint) {
             mostRecent = WekaPackageManager
-                .mostRecentVersionWithRespectToConstraint(toCheck.getTarget());
+              .mostRecentVersionWithRespectToConstraint(toCheck.getTarget());
           }
           finalListToInstall.add(mostRecent);
         }
       }
 
       if (needsUpgrade.size() > 0) {
-        System.out
-            .println("The following packages will be upgraded in order to install "
-                + packageName);
+        System.out.println(
+          "The following packages will be upgraded in order to install "
+            + packageName);
         Iterator<PackageConstraint> upI = needsUpgrade.iterator();
         while (upI.hasNext()) {
           PackageConstraint tempC = upI.next();
@@ -1666,9 +2321,8 @@ public class WekaPackageManager {
 
         System.out.print("\nOK to continue [y/n]? > ");
         String response = queryUser();
-        if (response != null
-            && (response.equalsIgnoreCase("n") || response
-                .equalsIgnoreCase("no"))) {
+        if (response != null && (response.equalsIgnoreCase("n")
+          || response.equalsIgnoreCase("no"))) {
           return; // bail out here
         }
 
@@ -1701,16 +2355,14 @@ public class WekaPackageManager {
           }
 
           if (checkIt) {
-            List<Dependency> problem = tempP
-                .getIncompatibleDependencies(toUpgrade);
+            List<Dependency> problem =
+              tempP.getIncompatibleDependencies(toUpgrade);
             if (problem.size() > 0) {
               conflictsAfterUpgrade = true;
 
-              System.err
-                  .println("Package "
-                      + tempP.getName()
-                      + " will have a compatibility"
-                      + "problem with the following packages after upgrading them:");
+              System.err.println("Package " + tempP.getName()
+                + " will have a compatibility"
+                + "problem with the following packages after upgrading them:");
               Iterator<Dependency> dI = problem.iterator();
               while (dI.hasNext()) {
                 System.err.println("\t" + dI.next().getTarget().getPackage());
@@ -1728,7 +2380,7 @@ public class WekaPackageManager {
 
       if (finalListToInstall.size() > 0) {
         System.out.println("To install " + packageName
-            + " the following packages will" + " be installed/upgraded:\n\n");
+          + " the following packages will" + " be installed/upgraded:\n\n");
         Iterator<Package> i = finalListToInstall.iterator();
         while (i.hasNext()) {
           System.out.println("\t" + i.next());
@@ -1736,9 +2388,8 @@ public class WekaPackageManager {
         System.out.print("\nOK to proceed [y/n]? > ");
         String response = queryUser();
 
-        if (response != null
-            && (response.equalsIgnoreCase("n") || response
-                .equalsIgnoreCase("no"))) {
+        if (response != null && (response.equalsIgnoreCase("n")
+          || response.equalsIgnoreCase("no"))) {
           return; // bail out here
         }
       }
@@ -1761,9 +2412,9 @@ public class WekaPackageManager {
   private static void listPackages(String arg) throws Exception {
 
     if (m_offline
-        && (arg.equalsIgnoreCase("all") || arg.equalsIgnoreCase("available"))) {
+      && (arg.equalsIgnoreCase("all") || arg.equalsIgnoreCase("available"))) {
       System.out.println("Running offline - unable to display "
-          + "available or all package information");
+        + "available or all package information");
       return;
     }
 
@@ -1784,34 +2435,49 @@ public class WekaPackageManager {
     }
 
     StringBuffer result = new StringBuffer();
-    result.append("Installed\tRepository\tPackage\n");
-    result.append("=========\t==========\t=======\n");
+    result.append("Installed\tRepository\tLoaded\tPackage\n");
+    result.append("=========\t==========\t======\t=======\n");
 
+    boolean userOptedNoLoad = false;
     Iterator<Package> i = packageList.iterator();
     while (i.hasNext()) {
       Package p = i.next();
       String installedV = "-----    ";
       String repositoryV = "-----     ";
+      String loaded = "No";
       if (p.isInstalled()) {
         Package installedP = getInstalledPackageInfo(p.getName());
-        installedV = installedP.getPackageMetaDataElement("Version").toString()
-            + "    ";
+        if (loadCheck(installedP,
+          new File(WekaPackageManager.getPackageHome().toString()
+            + File.separator + p.getName()))) {
+          loaded = "Yes";
+        } else {
+          if (m_doNotLoadList.contains(installedP.getName())) {
+            loaded = "No*";
+            userOptedNoLoad = true;
+          }
+        }
+        installedV =
+          installedP.getPackageMetaDataElement("Version").toString() + "    ";
         try {
           if (!m_offline) {
             Package repP = getRepositoryPackageInfo(p.getName());
-            repositoryV = repP.getPackageMetaDataElement("Version").toString()
-                + "     ";
+            repositoryV =
+              repP.getPackageMetaDataElement("Version").toString() + "     ";
           }
         } catch (Exception ex) {
           // not at the repository
         }
       } else {
-        repositoryV = p.getPackageMetaDataElement("Version").toString()
-            + "     ";
+        repositoryV =
+          p.getPackageMetaDataElement("Version").toString() + "     ";
       }
       String title = p.getPackageMetaDataElement("Title").toString();
-      result.append(installedV + "\t" + repositoryV + "\t" + p.getName() + ": "
-          + title + "\n");
+      result.append(installedV + "\t" + repositoryV + "\t" + loaded + "\t"
+        + p.getName() + ": " + title + "\n");
+    }
+    if (userOptedNoLoad) {
+      result.append("* User flagged as no load\n");
     }
 
     System.out.println(result.toString());
@@ -1819,18 +2485,24 @@ public class WekaPackageManager {
 
   private static void printUsage() {
     System.out
-        .println("Usage: weka.core.WekaPackageManager [-offline] [option]");
+      .println("Usage: weka.core.WekaPackageManager [-offline] [option]");
     System.out
-        .println("Options:\n"
-            + "\t-list-packages <all | installed | available>\n"
-            + "\t-package-info <repository | installed | archive> "
-            + "<packageName | packageZip>\n\t-install-package <packageName | packageZip | URL> [version]\n"
-            + "\t-uninstall-package packageName\n" + "\t-refresh-cache");
+      .println("Options:\n" + "\t-list-packages <all | installed | available>\n"
+        + "\t-package-info <repository | installed | archive> "
+        + "<packageName | packageZip>\n\t-install-package <packageName | packageZip | URL> [version]\n"
+        + "\t-uninstall-package packageName\n"
+        + "\t-toggle-load-status packageName [packageName packageName ...]\n"
+        + "\t-refresh-cache");
   }
 
+  /**
+   * Main method for using the package manager from the command line
+   * 
+   * @param args command line arguments
+   */
   public static void main(String[] args) {
     weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
-        "Logging started");
+      "Logging started");
     try {
 
       // scan for -offline
@@ -1850,7 +2522,7 @@ public class WekaPackageManager {
       checkForNewPackages(System.out);
 
       if (args.length == 0 || args[0].equalsIgnoreCase("-h")
-          || args[0].equalsIgnoreCase("-help")) {
+        || args[0].equalsIgnoreCase("-help")) {
         printUsage();
         // System.exit(1);
         return;
@@ -1877,12 +2549,12 @@ public class WekaPackageManager {
             // problem with getting info on package from repository?
             // Must not be an "official" repository package
             System.out
-                .println("[WekaPackageManager] Nothing known about package "
-                    + args[2] + " at the repository!");
+              .println("[WekaPackageManager] Nothing known about package "
+                + args[2] + " at the repository!");
           }
         } else {
           System.err
-              .println("[WekaPackageManager] Unknown argument " + args[2]);
+            .println("[WekaPackageManager] Unknown argument " + args[2]);
           printUsage();
           return;
           // System.exit(1);
@@ -1890,7 +2562,7 @@ public class WekaPackageManager {
       } else if (args[0].equals("-install-package")) {
         String targetLowerCase = args[1].toLowerCase();
         if (targetLowerCase.startsWith("http://")
-            || targetLowerCase.startsWith("https://")) {
+          || targetLowerCase.startsWith("https://")) {
           URL packageURL = new URL(args[1]);
           installPackageFromURL(packageURL, System.out);
         } else if (targetLowerCase.endsWith(".zip")) {
@@ -1928,6 +2600,18 @@ public class WekaPackageManager {
         }
         listPackages(args[1]);
 
+      } else if (args[0].equals("-toggle-load-status")) {
+        if (args.length == 1) {
+          printUsage();
+          return;
+        }
+        List<String> toToggle = new ArrayList<String>();
+        for (int i = 1; i < args.length; i++) {
+          toToggle.add(args[i].trim());
+        }
+        if (toToggle.size() >= 1) {
+          toggleLoadStatus(toToggle);
+        }
       } else if (args[0].equals("-refresh-cache")) {
         refreshCache(System.out);
       } else {

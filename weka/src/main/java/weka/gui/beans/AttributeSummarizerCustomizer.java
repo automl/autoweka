@@ -21,6 +21,17 @@
 
 package weka.gui.beans;
 
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.PluginManager;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -30,24 +41,13 @@ import java.awt.event.ActionListener;
 import java.util.Set;
 import java.util.Vector;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
-import javax.swing.SwingConstants;
-
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-
 /**
  * GUI customizer for attribute summarizer. Allows the customization of
  * options for offscreen chart rendering (i.e. the payload of "ImageEvent"
  * connections).
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 8034 $
+ * @version $Revision: 12409 $
  */
 public class AttributeSummarizerCustomizer extends JPanel implements
     BeanCustomizer, EnvironmentHandler, CustomizerClosingListener,

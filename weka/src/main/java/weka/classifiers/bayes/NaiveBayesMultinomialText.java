@@ -20,9 +20,9 @@
 
 package weka.classifiers.bayes;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,7 +33,9 @@ import java.util.Set;
 import java.util.Vector;
 
 import weka.classifiers.AbstractClassifier;
+import weka.classifiers.UpdateableBatchProcessor;
 import weka.classifiers.UpdateableClassifier;
+import weka.core.Aggregateable;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.Instance;
@@ -41,11 +43,12 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
-import weka.core.Stopwords;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.stemmers.NullStemmer;
 import weka.core.stemmers.Stemmer;
+import weka.core.stopwords.Null;
+import weka.core.stopwords.StopwordsHandler;
 import weka.core.tokenizers.Tokenizer;
 import weka.core.tokenizers.WordTokenizer;
 
@@ -54,59 +57,61 @@ import weka.core.tokenizers.WordTokenizer;
  * Multinomial naive bayes for text data. Operates directly (and only) on String attributes. Other types of input attributes are accepted but ignored during training and classification
  * <p/>
  <!-- globalinfo-end -->
- * 
+ *
  <!-- options-start -->
  * Valid options are: <p/>
- * 
+ *
  * <pre> -W
  *  Use word frequencies instead of binary bag of words.</pre>
- * 
+ *
  * <pre> -P &lt;# instances&gt;
  *  How often to prune the dictionary of low frequency words (default = 0, i.e. don't prune)</pre>
- * 
+ *
  * <pre> -M &lt;double&gt;
  *  Minimum word frequency. Words with less than this frequence are ignored.
  *  If periodic pruning is turned on then this is also used to determine which
  *  words to remove from the dictionary (default = 3).</pre>
- * 
+ *
  * <pre> -normalize
  *  Normalize document length (use in conjunction with -norm and -lnorm)</pre>
- * 
+ *
  * <pre> -norm &lt;num&gt;
  *  Specify the norm that each instance must have (default 1.0)</pre>
- * 
+ *
  * <pre> -lnorm &lt;num&gt;
  *  Specify L-norm to use (default 2.0)</pre>
- * 
+ *
  * <pre> -lowercase
  *  Convert all tokens to lowercase before adding to the dictionary.</pre>
- * 
- * <pre> -stoplist
- *  Ignore words that are in the stoplist.</pre>
- * 
- * <pre> -stopwords &lt;file&gt;
- *  A file containing stopwords to override the default ones.
- *  Using this option automatically sets the flag ('-stoplist') to use the
- *  stoplist if the file exists.
- *  Format: one stopword per line, lines starting with '#'
- *  are interpreted as comments and ignored.</pre>
- * 
+ *
+ * <pre> -stopwords-handler
+ *  The stopwords handler to use (default Null).</pre>
+ *
  * <pre> -tokenizer &lt;spec&gt;
  *  The tokenizing algorihtm (classname plus parameters) to use.
  *  (default: weka.core.tokenizers.WordTokenizer)</pre>
- * 
+ *
  * <pre> -stemmer &lt;spec&gt;
  *  The stemmering algorihtm (classname plus parameters) to use.</pre>
- * 
+ *
+ * <pre> -output-debug-info
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ *
+ * <pre> -do-not-check-capabilities
+ *  If set, classifier capabilities are not checked before classifier is built
+ *  (use with caution).</pre>
+ *
  <!-- options-end -->
- * 
+ *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * 
+ *
  */
 public class NaiveBayesMultinomialText extends AbstractClassifier implements
-    UpdateableClassifier, WeightedInstancesHandler {
+  UpdateableClassifier, UpdateableBatchProcessor, WeightedInstancesHandler,
+  Aggregateable<NaiveBayesMultinomialText> {
 
   /** For serialization */
   private static final long serialVersionUID = 2139025532014821394L;
@@ -138,13 +143,8 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
    */
   protected transient LinkedHashMap<String, Count> m_inputVector;
 
-  /** Default (rainbow) stopwords */
-  protected transient Stopwords m_stopwords;
-
-  /**
-   * a file containing stopwords for using others than the default Rainbow ones.
-   */
-  protected File m_stopwordsFile = new File(System.getProperty("user.dir"));
+  /** Stopword handler to use. */
+  protected StopwordsHandler m_StopwordsHandler = new Null();
 
   /** The tokenizer to use */
   protected Tokenizer m_tokenizer = new WordTokenizer();
@@ -154,9 +154,6 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /** The stemming algorithm. */
   protected Stemmer m_stemmer = new NullStemmer();
-
-  /** Whether or not to use a stop list */
-  protected boolean m_useStopList;
 
   /**
    * The number of training instances at which to periodically prune the
@@ -191,20 +188,20 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Returns a string describing classifier
-   * 
+   *
    * @return a description suitable for displaying in the explorer/experimenter
    *         gui
    */
   public String globalInfo() {
     return "Multinomial naive bayes for text data. Operates "
-        + "directly (and only) on String attributes. "
-        + "Other types of input attributes are accepted but "
-        + "ignored during training and classification";
+      + "directly (and only) on String attributes. "
+      + "Other types of input attributes are accepted but "
+      + "ignored during training and classification";
   }
 
   /**
    * Returns default capabilities of the classifier.
-   * 
+   *
    * @return the capabilities of this classifier
    */
   @Override
@@ -230,7 +227,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Generates the classifier.
-   * 
+   *
    * @param data set of instances serving as training data
    * @throws Exception if the classifier has not been generated successfully
    */
@@ -246,12 +243,13 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
     m_wordsPerClass = new double[data.numClasses()];
     m_probOfClass = new double[data.numClasses()];
-    m_probOfWordGivenClass = new HashMap<Integer, LinkedHashMap<String, Count>>();
+    m_probOfWordGivenClass =
+      new HashMap<Integer, LinkedHashMap<String, Count>>();
 
     double laplace = 1.0;
     for (int i = 0; i < data.numClasses(); i++) {
-      LinkedHashMap<String, Count> dict = new LinkedHashMap<String, Count>(
-          10000 / data.numClasses());
+      LinkedHashMap<String, Count> dict =
+        new LinkedHashMap<String, Count>(10000 / data.numClasses());
       m_probOfWordGivenClass.put(i, dict);
       m_probOfClass[i] = laplace;
 
@@ -263,11 +261,15 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
     for (int i = 0; i < data.numInstances(); i++) {
       updateClassifier(data.instance(i));
     }
+
+    if (data.numInstances() > 0) {
+      pruneDictionary(true);
+    }
   }
 
   /**
    * Updates the classifier with the given instance.
-   * 
+   *
    * @param instance the new training instance to include in the model
    * @throws Exception if the instance could not be incorporated in the model.
    */
@@ -277,7 +279,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
   }
 
   protected void updateClassifier(Instance instance, boolean updateDictionary)
-      throws Exception {
+    throws Exception {
 
     if (!instance.classIsMissing()) {
       int classIndex = (int) instance.classValue();
@@ -290,7 +292,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Calculates the class membership probabilities for the given test instance.
-   * 
+   *
    * @param instance the instance to be classified
    * @return predicted class probability distribution
    * @throws Exception if there is a problem generating the prediction
@@ -298,7 +300,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
   @Override
   public double[] distributionForInstance(Instance instance) throws Exception {
 
-    tokenizeInstance(instance, false);
+    tokenizeInstance( instance, false );
 
     double[] probOfClassGivenDoc = new double[m_data.numClasses()];
 
@@ -398,33 +400,20 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
       m_inputVector.clear();
     }
 
-    if (m_useStopList && m_stopwords == null) {
-      m_stopwords = new Stopwords();
-      try {
-        if (getStopwords().exists() && !getStopwords().isDirectory()) {
-          m_stopwords.read(getStopwords());
-        }
-      } catch (Exception ex) {
-        ex.printStackTrace();
-      }
-    }
-
     for (int i = 0; i < instance.numAttributes(); i++) {
       if (instance.attribute(i).isString() && !instance.isMissing(i)) {
         m_tokenizer.tokenize(instance.stringValue(i));
 
         while (m_tokenizer.hasMoreElements()) {
-          String word = (String) m_tokenizer.nextElement();
+          String word = m_tokenizer.nextElement();
           if (m_lowercaseTokens) {
             word = word.toLowerCase();
           }
 
           word = m_stemmer.stem(word);
 
-          if (m_useStopList) {
-            if (m_stopwords.is(word)) {
-              continue;
-            }
+          if (m_StopwordsHandler.isStopword(word)) {
+            continue;
           }
 
           Count docCount = m_inputVector.get(word);
@@ -439,8 +428,8 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
     if (updateDictionary) {
       int classValue = (int) instance.classValue();
-      LinkedHashMap<String, Count> dictForClass = m_probOfWordGivenClass
-          .get(classValue);
+      LinkedHashMap<String, Count> dictForClass =
+        m_probOfWordGivenClass.get(classValue);
 
       // document normalization
       double iNorm = 0;
@@ -483,22 +472,22 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
         // }
       }
 
-      pruneDictionary();
+      pruneDictionary(false);
     }
   }
 
-  protected void pruneDictionary() {
-    if (m_periodicP <= 0 || m_t % m_periodicP > 0) {
+  protected void pruneDictionary(boolean force) {
+    if ((m_periodicP <= 0 || m_t % m_periodicP > 0) && !force) {
       return;
     }
 
     Set<Integer> classesSet = m_probOfWordGivenClass.keySet();
     for (Integer classIndex : classesSet) {
-      LinkedHashMap<String, Count> dictForClass = m_probOfWordGivenClass
-          .get(classIndex);
+      LinkedHashMap<String, Count> dictForClass =
+        m_probOfWordGivenClass.get(classIndex);
 
-      Iterator<Map.Entry<String, Count>> entries = dictForClass.entrySet()
-          .iterator();
+      Iterator<Map.Entry<String, Count>> entries =
+        dictForClass.entrySet().iterator();
       while (entries.hasNext()) {
         Map.Entry<String, Count> entry = entries.next();
         if (entry.getValue().m_count < m_minWordP) {
@@ -522,20 +511,21 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
   /**
    * the stemming algorithm to use, null means no stemming at all (i.e., the
    * NullStemmer is used).
-   * 
+   *
    * @param value the configured stemming algorithm, or null
    * @see NullStemmer
    */
   public void setStemmer(Stemmer value) {
-    if (value != null)
+    if (value != null) {
       m_stemmer = value;
-    else
+    } else {
       m_stemmer = new NullStemmer();
+    }
   }
 
   /**
    * Returns the current stemming algorithm, null if none is used.
-   * 
+   *
    * @return the current stemming algorithm, null if none set
    */
   public Stemmer getStemmer() {
@@ -544,7 +534,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -554,7 +544,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * the tokenizer algorithm to use.
-   * 
+   *
    * @param value the configured tokenizing algorithm
    */
   public void setTokenizer(Tokenizer value) {
@@ -563,7 +553,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Returns the current tokenizer algorithm.
-   * 
+   *
    * @return the current tokenizer algorithm
    */
   public Tokenizer getTokenizer() {
@@ -572,7 +562,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -582,19 +572,19 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
   public String useWordFrequenciesTipText() {
     return "Use word frequencies rather than binary "
-        + "bag of words representation";
+      + "bag of words representation";
   }
 
   /**
    * Set whether to use word frequencies rather than binary bag of words
    * representation.
-   * 
+   *
    * @param u true if word frequencies are to be used.
    */
   public void setUseWordFrequencies(boolean u) {
@@ -604,7 +594,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
   /**
    * Get whether to use word frequencies rather than binary bag of words
    * representation.
-   * 
+   *
    * @return true if word frequencies are to be used.
    */
   public boolean getUseWordFrequencies() {
@@ -613,7 +603,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -623,7 +613,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Set whether to convert all tokens to lowercase
-   * 
+   *
    * @param l true if all tokens are to be converted to lowercase
    */
   public void setLowercaseTokens(boolean l) {
@@ -632,7 +622,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Get whether to convert all tokens to lowercase
-   * 
+   *
    * @return true true if all tokens are to be converted to lowercase
    */
   public boolean getLowercaseTokens() {
@@ -641,20 +631,20 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
   public String periodicPruningTipText() {
     return "How often (number of instances) to prune "
-        + "the dictionary of low frequency terms. "
-        + "0 means don't prune. Setting a positive "
-        + "integer n means prune after every n instances";
+      + "the dictionary of low frequency terms. "
+      + "0 means don't prune. Setting a positive "
+      + "integer n means prune after every n instances";
   }
 
   /**
    * Set how often to prune the dictionary
-   * 
+   *
    * @param p how often to prune
    */
   public void setPeriodicPruning(int p) {
@@ -663,7 +653,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Get how often to prune the dictionary
-   * 
+   *
    * @return how often to prune the dictionary
    */
   public int getPeriodicPruning() {
@@ -672,15 +662,15 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
   public String minWordFrequencyTipText() {
     return "Ignore any words that don't occur at least "
-        + "min frequency times in the training data. If periodic "
-        + "pruning is turned on, then the dictionary is pruned "
-        + "according to this value";
+      + "min frequency times in the training data. If periodic "
+      + "pruning is turned on, then the dictionary is pruned "
+      + "according to this value";
 
   }
 
@@ -688,7 +678,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
    * Set the minimum word frequency. Words that don't occur at least min freq
    * times are ignored when updating weights. If periodic pruning is turned on,
    * then min frequency is used when removing words from the dictionary.
-   * 
+   *
    * @param minFreq the minimum word frequency to use
    */
   public void setMinWordFrequency(double minFreq) {
@@ -699,7 +689,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
    * Get the minimum word frequency. Words that don't occur at least min freq
    * times are ignored when updating weights. If periodic pruning is turned on,
    * then min frequency is used when removing words from the dictionary.
-   * 
+   *
    * @return the minimum word frequency to use
    */
   public double getMinWordFrequency() {
@@ -708,18 +698,18 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
   public String normalizeDocLengthTipText() {
     return "If true then document length is normalized according "
-        + "to the settings for norm and lnorm";
+      + "to the settings for norm and lnorm";
   }
 
   /**
    * Set whether to normalize the length of each document
-   * 
+   *
    * @param norm true if document lengths is to be normalized
    */
   public void setNormalizeDocLength(boolean norm) {
@@ -728,7 +718,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Get whether to normalize the length of each document
-   * 
+   *
    * @return true if document lengths is to be normalized
    */
   public boolean getNormalizeDocLength() {
@@ -737,7 +727,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -747,7 +737,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Get the instance's Norm.
-   * 
+   *
    * @return the Norm
    */
   public double getNorm() {
@@ -756,7 +746,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Set the norm of the instances
-   * 
+   *
    * @param newNorm the norm to wich the instances must be set
    */
   public void setNorm(double newNorm) {
@@ -765,7 +755,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -775,7 +765,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Get the L Norm used.
-   * 
+   *
    * @return the L-norm used
    */
   public double getLNorm() {
@@ -784,7 +774,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Set the L-norm to used
-   * 
+   *
    * @param newLNorm the L-norm
    */
   public void setLNorm(double newLNorm) {
@@ -792,72 +782,40 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
   }
 
   /**
-   * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
+   * Sets the stopwords handler to use.
+   *
+   * @param value the stopwords handler, if null, Null is used
    */
-  public String useStopListTipText() {
-    return "If true, ignores all words that are on the stoplist.";
+  public void setStopwordsHandler(StopwordsHandler value) {
+    if (value != null) {
+      m_StopwordsHandler = value;
+    } else {
+      m_StopwordsHandler = new Null();
+    }
   }
 
   /**
-   * Set whether to ignore all words that are on the stoplist.
-   * 
-   * @param u true to ignore all words on the stoplist.
+   * Gets the stopwords handler.
+   *
+   * @return the stopwords handler
    */
-  public void setUseStopList(boolean u) {
-    m_useStopList = u;
-  }
-
-  /**
-   * Get whether to ignore all words that are on the stoplist.
-   * 
-   * @return true to ignore all words on the stoplist.
-   */
-  public boolean getUseStopList() {
-    return m_useStopList;
-  }
-
-  /**
-   * sets the file containing the stopwords, null or a directory unset the
-   * stopwords. If the file exists, it automatically turns on the flag to use
-   * the stoplist.
-   * 
-   * @param value the file containing the stopwords
-   */
-  public void setStopwords(File value) {
-    if (value == null)
-      value = new File(System.getProperty("user.dir"));
-
-    m_stopwordsFile = value;
-    if (value.exists() && value.isFile())
-      setUseStopList(true);
-  }
-
-  /**
-   * returns the file used for obtaining the stopwords, if the file represents a
-   * directory then the default ones are used.
-   * 
-   * @return the file containing the stopwords
-   */
-  public File getStopwords() {
-    return m_stopwordsFile;
+  public StopwordsHandler getStopwordsHandler() {
+    return m_StopwordsHandler;
   }
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
-  public String stopwordsTipText() {
-    return "The file containing the stopwords (if this is a directory then the default ones are used).";
+  public String stopwordsHandlerTipText() {
+    return "The stopwords handler to use (Null means no stopwords are used).";
   }
 
   /**
    * Returns an enumeration describing the available options.
-   * 
+   *
    * @return an enumeration of all the available options.
    */
   @Override
@@ -866,42 +824,38 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
     Vector<Option> newVector = new Vector<Option>();
 
     newVector.add(new Option("\tUse word frequencies instead of "
-        + "binary bag of words.", "W", 0, "-W"));
+      + "binary bag of words.", "W", 0, "-W"));
     newVector.add(new Option("\tHow often to prune the dictionary "
-        + "of low frequency words (default = 0, i.e. don't prune)", "P", 1,
-        "-P <# instances>"));
+      + "of low frequency words (default = 0, i.e. don't prune)", "P", 1,
+      "-P <# instances>"));
     newVector.add(new Option("\tMinimum word frequency. Words with less "
-        + "than this frequence are ignored.\n\tIf periodic pruning "
-        + "is turned on then this is also used to determine which\n\t"
-        + "words to remove from the dictionary (default = 3).", "M", 1,
-        "-M <double>"));
+      + "than this frequence are ignored.\n\tIf periodic pruning "
+      + "is turned on then this is also used to determine which\n\t"
+      + "words to remove from the dictionary (default = 3).", "M", 1,
+      "-M <double>"));
     newVector.addElement(new Option(
-        "\tNormalize document length (use in conjunction with -norm and "
-            + "-lnorm)", "normalize", 0, "-normalize"));
+      "\tNormalize document length (use in conjunction with -norm and "
+        + "-lnorm)", "normalize", 0, "-normalize"));
     newVector.addElement(new Option(
-        "\tSpecify the norm that each instance must have (default 1.0)",
-        "norm", 1, "-norm <num>"));
-    newVector.addElement(new Option("\tSpecify L-norm to use (default 2.0)",
-        "lnorm", 1, "-lnorm <num>"));
+      "\tSpecify the norm that each instance must have (default 1.0)", "norm",
+      1, "-norm <num>"));
+    newVector.addElement(
+      new Option("\tSpecify L-norm to use (default 2.0)", "lnorm", 1,
+        "-lnorm <num>"));
     newVector.addElement(new Option("\tConvert all tokens to lowercase "
-        + "before adding to the dictionary.", "lowercase", 0, "-lowercase"));
-    newVector.addElement(new Option("\tIgnore words that are in the stoplist.",
-        "stoplist", 0, "-stoplist"));
-    newVector
-        .addElement(new Option(
-            "\tA file containing stopwords to override the default ones.\n"
-                + "\tUsing this option automatically sets the flag ('-stoplist') to use the\n"
-                + "\tstoplist if the file exists.\n"
-                + "\tFormat: one stopword per line, lines starting with '#'\n"
-                + "\tare interpreted as comments and ignored.", "stopwords", 1,
-            "-stopwords <file>"));
+      + "before adding to the dictionary.", "lowercase", 0, "-lowercase"));
+    newVector.addElement(
+      new Option("\tThe stopwords handler to use (default Null).",
+        "-stopwords-handler", 1, "-stopwords-handler"));
     newVector.addElement(new Option(
-        "\tThe tokenizing algorihtm (classname plus parameters) to use.\n"
-            + "\t(default: " + WordTokenizer.class.getName() + ")",
-        "tokenizer", 1, "-tokenizer <spec>"));
+      "\tThe tokenizing algorihtm (classname plus parameters) to use.\n"
+        + "\t(default: " + WordTokenizer.class.getName() + ")", "tokenizer", 1,
+      "-tokenizer <spec>"));
     newVector.addElement(new Option(
-        "\tThe stemmering algorihtm (classname plus parameters) to use.",
-        "stemmer", 1, "-stemmer <spec>"));
+      "\tThe stemmering algorihtm (classname plus parameters) to use.",
+      "stemmer", 1, "-stemmer <spec>"));
+
+    newVector.addAll(Collections.list(super.listOptions()));
 
     return newVector.elements();
   }
@@ -909,52 +863,53 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
   /**
    * Parses a given list of options.
    * <p/>
-   * 
+   *
    <!-- options-start -->
    * Valid options are: <p/>
-   * 
+   *
    * <pre> -W
    *  Use word frequencies instead of binary bag of words.</pre>
-   * 
+   *
    * <pre> -P &lt;# instances&gt;
    *  How often to prune the dictionary of low frequency words (default = 0, i.e. don't prune)</pre>
-   * 
+   *
    * <pre> -M &lt;double&gt;
    *  Minimum word frequency. Words with less than this frequence are ignored.
    *  If periodic pruning is turned on then this is also used to determine which
    *  words to remove from the dictionary (default = 3).</pre>
-   * 
+   *
    * <pre> -normalize
    *  Normalize document length (use in conjunction with -norm and -lnorm)</pre>
-   * 
+   *
    * <pre> -norm &lt;num&gt;
    *  Specify the norm that each instance must have (default 1.0)</pre>
-   * 
+   *
    * <pre> -lnorm &lt;num&gt;
    *  Specify L-norm to use (default 2.0)</pre>
-   * 
+   *
    * <pre> -lowercase
    *  Convert all tokens to lowercase before adding to the dictionary.</pre>
-   * 
-   * <pre> -stoplist
-   *  Ignore words that are in the stoplist.</pre>
-   * 
-   * <pre> -stopwords &lt;file&gt;
-   *  A file containing stopwords to override the default ones.
-   *  Using this option automatically sets the flag ('-stoplist') to use the
-   *  stoplist if the file exists.
-   *  Format: one stopword per line, lines starting with '#'
-   *  are interpreted as comments and ignored.</pre>
-   * 
+   *
+   * <pre> -stopwords-handler
+   *  The stopwords handler to use (default Null).</pre>
+   *
    * <pre> -tokenizer &lt;spec&gt;
    *  The tokenizing algorihtm (classname plus parameters) to use.
    *  (default: weka.core.tokenizers.WordTokenizer)</pre>
-   * 
+   *
    * <pre> -stemmer &lt;spec&gt;
    *  The stemmering algorihtm (classname plus parameters) to use.</pre>
-   * 
+   *
+   * <pre> -output-debug-info
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   *
+   * <pre> -do-not-check-capabilities
+   *  If set, classifier capabilities are not checked before classifier is built
+   *  (use with caution).</pre>
+   *
    <!-- options-end -->
-   * 
+   *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
@@ -987,13 +942,35 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
     }
 
     setLowercaseTokens(Utils.getFlag("lowercase", options));
-    setUseStopList(Utils.getFlag("stoplist", options));
 
-    String stopwordsS = Utils.getOption("stopwords", options);
-    if (stopwordsS.length() > 0) {
-      setStopwords(new File(stopwordsS));
+    String stemmerString = Utils.getOption("stemmer", options);
+    if (stemmerString.length() == 0) {
+      setStemmer(null);
     } else {
-      setStopwords(null);
+      String[] stemmerSpec = Utils.splitOptions(stemmerString);
+      if (stemmerSpec.length == 0) {
+        throw new Exception("Invalid stemmer specification string");
+      }
+      String stemmerName = stemmerSpec[0];
+      stemmerSpec[0] = "";
+      Stemmer stemmer = (Stemmer) Utils.forName(Class.forName("weka.core.stemmers.Stemmer"), stemmerName, stemmerSpec);
+      setStemmer(stemmer);
+    }
+
+    String stopwordsHandlerString = Utils.getOption("stopwords-handler", options);
+    if (stopwordsHandlerString.length() == 0) {
+      setStopwordsHandler(null);
+    } else {
+      String[] stopwordsHandlerSpec = Utils.splitOptions(stopwordsHandlerString);
+      if (stopwordsHandlerSpec.length == 0) {
+        throw new Exception("Invalid StopwordsHandler specification string");
+      }
+      String stopwordsHandlerName = stopwordsHandlerSpec[0];
+      stopwordsHandlerSpec[0] = "";
+      StopwordsHandler stopwordsHandler =
+              (StopwordsHandler) Utils.forName(Class.forName("weka.core.stopwords.StopwordsHandler"),
+                      stopwordsHandlerName, stopwordsHandlerSpec);
+      setStopwordsHandler(stopwordsHandler);
     }
 
     String tokenizerString = Utils.getOption("tokenizer", options);
@@ -1001,36 +978,22 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
       setTokenizer(new WordTokenizer());
     } else {
       String[] tokenizerSpec = Utils.splitOptions(tokenizerString);
-      if (tokenizerSpec.length == 0)
+      if (tokenizerSpec.length == 0) {
         throw new Exception("Invalid tokenizer specification string");
+      }
       String tokenizerName = tokenizerSpec[0];
       tokenizerSpec[0] = "";
-      Tokenizer tokenizer = (Tokenizer) Class.forName(tokenizerName)
-          .newInstance();
-      if (tokenizer instanceof OptionHandler)
-        ((OptionHandler) tokenizer).setOptions(tokenizerSpec);
+      Tokenizer tokenizer = (Tokenizer) Utils.forName(Class.forName("weka.core.tokenizers.Tokenizer"), tokenizerName,
+              tokenizerSpec);
       setTokenizer(tokenizer);
     }
 
-    String stemmerString = Utils.getOption("stemmer", options);
-    if (stemmerString.length() == 0) {
-      setStemmer(null);
-    } else {
-      String[] stemmerSpec = Utils.splitOptions(stemmerString);
-      if (stemmerSpec.length == 0)
-        throw new Exception("Invalid stemmer specification string");
-      String stemmerName = stemmerSpec[0];
-      stemmerSpec[0] = "";
-      Stemmer stemmer = (Stemmer) Class.forName(stemmerName).newInstance();
-      if (stemmer instanceof OptionHandler)
-        ((OptionHandler) stemmer).setOptions(stemmerSpec);
-      setStemmer(stemmer);
-    }
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of the classifier.
-   * 
+   *
    * @return an array of strings suitable for passing to setOptions
    */
   @Override
@@ -1055,38 +1018,46 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
     if (getLowercaseTokens()) {
       options.add("-lowercase");
     }
-    if (getUseStopList()) {
-      options.add("-stoplist");
-    }
-    if (!getStopwords().isDirectory()) {
-      options.add("-stopwords");
-      options.add(getStopwords().getAbsolutePath());
+
+    if (getStopwordsHandler() != null) {
+      options.add("-stopwords-handler");
+      String spec = getStopwordsHandler().getClass().getName();
+      if (getStopwordsHandler() instanceof OptionHandler) {
+        spec +=
+          " "
+            + Utils.joinOptions(((OptionHandler) getStopwordsHandler())
+              .getOptions());
+      }
+      options.add(spec.trim());
     }
 
     options.add("-tokenizer");
     String spec = getTokenizer().getClass().getName();
-    if (getTokenizer() instanceof OptionHandler)
-      spec += " "
-          + Utils.joinOptions(((OptionHandler) getTokenizer()).getOptions());
+    if (getTokenizer() instanceof OptionHandler) {
+      spec +=
+        " " + Utils.joinOptions(((OptionHandler) getTokenizer()).getOptions());
+    }
     options.add(spec.trim());
 
     if (getStemmer() != null) {
       options.add("-stemmer");
       spec = getStemmer().getClass().getName();
       if (getStemmer() instanceof OptionHandler) {
-        spec += " "
-            + Utils.joinOptions(((OptionHandler) getStemmer()).getOptions());
+        spec +=
+          " " + Utils.joinOptions(((OptionHandler) getStemmer()).getOptions());
       }
 
       options.add(spec.trim());
     }
+
+    Collections.addAll(options, super.getOptions());
 
     return options.toArray(new String[1]);
   }
 
   /**
    * Returns a textual description of this classifier.
-   * 
+   *
    * @return a textual description of this classifier.
    */
   @Override
@@ -1108,19 +1079,27 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
       }
     }
 
-    result.append("The independent probability of a class\n");
+    result.append("Dictionary size: " + master.size()).append("\n\n");
+
+    result.append("The independent frequency of a class\n");
     result.append("--------------------------------------\n");
 
     for (int i = 0; i < m_data.numClasses(); i++) {
       result.append(m_data.classAttribute().value(i)).append("\t")
-          .append(Double.toString(m_probOfClass[i])).append("\n");
+        .append(Double.toString(m_probOfClass[i])).append("\n");
     }
 
-    result.append("\nThe probability of a word given the class\n");
-    result.append("-----------------------------------------\n\t");
+    if (master.size() > 150000) {
+      result.append("\nFrequency table ommitted due to size\n");
+      return result.toString();
+    }
+
+    result.append("\nThe frequency of a word given the class\n");
+    result.append("-----------------------------------------\n");
 
     for (int i = 0; i < m_data.numClasses(); i++) {
-      result.append(m_data.classAttribute().value(i)).append("\t");
+      result.append(Utils.padLeft(m_data.classAttribute().value(i), 11))
+        .append("\t");
     }
 
     result.append("\n");
@@ -1129,16 +1108,17 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
     while (masterIter.hasNext()) {
       String word = masterIter.next();
 
-      result.append(word + "\t");
       for (int i = 0; i < m_data.numClasses(); i++) {
         LinkedHashMap<String, Count> classDict = m_probOfWordGivenClass.get(i);
         Count c = classDict.get(word);
         if (c == null) {
-          result.append("-------------\t");
+          result.append("<laplace=1>\t");
         } else {
-          result.append(Double.toString(Math.exp(c.m_count))).append("\t");
+          result.append(Utils.padLeft(Double.toString(c.m_count), 11)).append(
+            "\t");
         }
       }
+      result.append(word);
       result.append("\n");
     }
 
@@ -1147,17 +1127,107 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /**
    * Returns the revision string.
-   * 
+   *
    * @return the revision
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 9210 $");
+    return RevisionUtils.extract("$Revision: 11973 $");
+  }
+
+  protected int m_numModels = 0;
+
+  @Override
+  public NaiveBayesMultinomialText aggregate(
+    NaiveBayesMultinomialText toAggregate) throws Exception {
+    if (m_numModels == Integer.MIN_VALUE) {
+      throw new Exception("Can't aggregate further - model has already been "
+        + "aggregated and finalized");
+    }
+
+    if (m_probOfClass == null) {
+      throw new Exception("No model built yet, can't aggregate");
+    }
+
+    // just check the class attribute for compatibility as we will be
+    // merging dictionaries
+    if (!m_data.classAttribute().equals(toAggregate.m_data.classAttribute())) {
+      throw new Exception("Can't aggregate - class attribute in data headers "
+        + "does not match: "
+        + m_data.classAttribute()
+          .equalsMsg(toAggregate.m_data.classAttribute()));
+    }
+
+    for (int i = 0; i < m_probOfClass.length; i++) {
+      // we already have a laplace correction, so -1
+      m_probOfClass[i] += toAggregate.m_probOfClass[i] - 1;
+
+      m_wordsPerClass[i] += toAggregate.m_wordsPerClass[i];
+    }
+
+    Map<Integer, LinkedHashMap<String, Count>> dicts =
+      toAggregate.m_probOfWordGivenClass;
+    Iterator<Map.Entry<Integer, LinkedHashMap<String, Count>>> perClass =
+      dicts.entrySet().iterator();
+    while (perClass.hasNext()) {
+      Map.Entry<Integer, LinkedHashMap<String, Count>> currentClassDict =
+        perClass.next();
+
+      LinkedHashMap<String, Count> masterDict =
+        m_probOfWordGivenClass.get(currentClassDict.getKey());
+
+      if (masterDict == null) {
+        // we haven't seen this class during our training
+        masterDict = new LinkedHashMap<String, Count>();
+        m_probOfWordGivenClass.put(currentClassDict.getKey(), masterDict);
+      }
+
+      // now process words seen for this class
+      Iterator<Map.Entry<String, Count>> perClassEntries =
+        currentClassDict.getValue().entrySet().iterator();
+      while (perClassEntries.hasNext()) {
+        Map.Entry<String, Count> entry = perClassEntries.next();
+
+        Count masterCount = masterDict.get(entry.getKey());
+
+        if (masterCount == null) {
+          // we haven't seen this entry (or its been pruned)
+          masterCount = new Count(entry.getValue().m_count);
+          masterDict.put(entry.getKey(), masterCount);
+        } else {
+          // add up
+          masterCount.m_count += entry.getValue().m_count - 1;
+        }
+      }
+    }
+
+    m_t += toAggregate.m_t;
+    m_numModels++;
+
+    return this;
+  }
+
+  @Override
+  public void finalizeAggregation() throws Exception {
+    if (m_numModels == 0) {
+      throw new Exception("Unable to finalize aggregation - "
+        + "haven't seen any models to aggregate");
+    }
+
+    if (m_periodicP > 0 && m_t > m_periodicP) {
+      pruneDictionary(true);
+      m_t = 0;
+    }
+  }
+
+  @Override
+  public void batchFinished() throws Exception {
+    pruneDictionary(true);
   }
 
   /**
    * Main method for testing this class.
-   * 
+   *
    * @param args the options
    */
   public static void main(String[] args) {

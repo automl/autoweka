@@ -539,6 +539,13 @@ weka.estimators.Estimator=\
  weka.estimators.NormalEstimator,\
  weka.estimators.PoissonEstimator
  
+# Lists the Univariate Density Estimators I want to choose from
+weka.estimators.UnivariateDensityEstimator= \
+ weka.estimators.UnivariateNormalEstimator,\
+ weka.estimators.UnivariateKernelDensityEstimator,\
+ weka.estimators.UnivariateEqualFrequencyHistogramEstimator,\
+ weka.estimators.UnivariateMixtureEstimator
+
 # Lists the BallSplitters I want to choose from
 weka.core.neighboursearch.balltrees.BallSplitter=\
  weka.core.neighboursearch.balltrees.MedianDistanceFromArbitraryPoint,\
@@ -549,3 +556,12 @@ weka.core.neighboursearch.balltrees.BallSplitter=\
 weka.core.PartitionGenerator=\
  weka.classifiers.trees.J48,\
  weka.classifiers.meta.FilteredClassifier
+
+# stopword algorithms
+weka.core.stopwords.StopwordsHandler=\
+  weka.core.stopwords.MultiStopwords,\
+  weka.core.stopwords.Null,\
+  weka.core.stopwords.Rainbow,\
+  weka.core.stopwords.RegExpFromFile,\
+  weka.core.stopwords.WordsFromFile
+ 

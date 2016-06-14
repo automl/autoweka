@@ -25,13 +25,26 @@ package weka.core;
  * Class implementing some statistical routines for contingency tables.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 8925 $
+ * @version $Revision: 10057 $
  */
 public class ContingencyTables
   implements RevisionHandler {
 
   /** The natural logarithm of 2 */
-  private static double log2 = Math.log(2);
+  public static final double log2 = Math.log(2);
+
+  /** Cache of integer logs */
+  private static final double MAX_INT_FOR_CACHE_PLUS_ONE = 10000;
+  private static final double[] INT_N_LOG_N_CACHE = new double[(int)MAX_INT_FOR_CACHE_PLUS_ONE];
+
+  /** Initialize cache */
+  static {
+    for (int i = 1; i < MAX_INT_FOR_CACHE_PLUS_ONE; i++) {
+      double d = (double)i;
+      INT_N_LOG_N_CACHE[i] = d * Math.log(d);
+    }
+  }
+
 
   /**
    * Returns chi-squared probability for a given matrix.
@@ -528,11 +541,19 @@ public class ContingencyTables
   /**
    * Help method for computing entropy.
    */
-  private static double lnFunc(double num){
+  public static double lnFunc(double num){
     
     if (num <= 0) {
       return 0;
     } else {
+
+      // Use cache if we have a sufficiently small integer
+      if (num < MAX_INT_FOR_CACHE_PLUS_ONE) {
+        int n = (int)num;
+        if ((double)n == num) {
+          return INT_N_LOG_N_CACHE[n];
+        }
+      }
       return num * Math.log(num);
     }
   }
@@ -576,7 +597,7 @@ public class ContingencyTables
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8925 $");
+    return RevisionUtils.extract("$Revision: 10057 $");
   }
 
   /**

@@ -44,7 +44,7 @@ import weka.experiment.RemoteExperiment;
  * it also allows remote host names to be specified.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 12590 $
  */
 public class DistributeExperimentPanel
   extends JPanel {
@@ -77,6 +77,11 @@ public class DistributeExperimentPanel
    */
   protected JRadioButton m_splitByRun = new JRadioButton("By run");
 
+  /**
+   * Split experiment up by algorithm.
+   */
+  protected JRadioButton m_splitByProperty = new JRadioButton("By property");
+
   /** Handle radio buttons */
   ActionListener m_radioListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -103,8 +108,9 @@ public class DistributeExperimentPanel
 					  isSelected());
 	  m_splitByRun.setEnabled(m_enableDistributedExperiment.
 					  isSelected());
-	  
-	}
+    m_splitByProperty.setEnabled(m_enableDistributedExperiment.
+            isSelected());
+  }
       });
 
     m_configureHostNames.addActionListener(new ActionListener() {
@@ -115,20 +121,25 @@ public class DistributeExperimentPanel
 
     m_splitByDataSet.setToolTipText("Distribute experiment by data set");
     m_splitByRun.setToolTipText("Distribute experiment by run number");
+    m_splitByProperty.setToolTipText("Distribute experiment by property");
     m_splitByDataSet.setSelected(true);
     m_splitByDataSet.setEnabled(false);
     m_splitByRun.setEnabled(false);
+    m_splitByProperty.setEnabled(false);
     m_splitByDataSet.addActionListener(m_radioListener);
     m_splitByRun.addActionListener(m_radioListener);
+    m_splitByProperty.addActionListener(m_radioListener);
 
     ButtonGroup bg = new ButtonGroup();
     bg.add(m_splitByDataSet);
     bg.add(m_splitByRun);
+    bg.add(m_splitByProperty);
 
     JPanel rbuts = new JPanel();
     rbuts.setLayout(new GridLayout(1, 2));
     rbuts.add(m_splitByDataSet);
     rbuts.add(m_splitByRun);
+    rbuts.add(m_splitByProperty);
 
     setLayout(new BorderLayout());
     setBorder(BorderFactory.createTitledBorder("Distribute experiment"));
@@ -163,8 +174,10 @@ public class DistributeExperimentPanel
       m_hostList.setExperiment(m_Exp);
       m_splitByDataSet.setEnabled(true);
       m_splitByRun.setEnabled(true);
+      m_splitByProperty.setEnabled(true);
       m_splitByDataSet.setSelected(m_Exp.getSplitByDataSet());
-      m_splitByRun.setSelected(!m_Exp.getSplitByDataSet());
+      m_splitByRun.setSelected(!m_Exp.getSplitByDataSet() && !m_Exp.getSplitByProperty());
+      m_splitByProperty.setSelected(m_Exp.getSplitByProperty());
     }
   }
 
@@ -213,6 +226,7 @@ public class DistributeExperimentPanel
   private void updateRadioLinks() {
     if (m_Exp != null) {
       m_Exp.setSplitByDataSet(m_splitByDataSet.isSelected());
+      m_Exp.setSplitByProperty(m_splitByProperty.isSelected());
     }
   }
 

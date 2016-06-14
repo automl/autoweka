@@ -1,7 +1,7 @@
 # Customises the list of options given by the GenericObjectEditor
 # for various superclasses.
 #
-# Version: $Revision: 9117 $
+# Version: $Revision: 11944 $
 
 # Whether to use the dynamic approach or not (true|false). In case of
 # "false" the old GenericObjectEditor.props file is used:
@@ -32,6 +32,11 @@ weka.classifiers.Classifier=\
  weka.classifiers.trees,\
  weka.classifiers.rules
 
+# Lists the IterativeClassifier objects I want to choose from
+weka.classifiers.IterativeClassifier=\
+ weka.classifiers.meta,\
+ weka.classifiers.trees
+ 
 # Lists the AbstractClassificationOutput-packages I want to choose from
 weka.classifiers.evaluation.output.prediction.AbstractOutput=\
   weka.classifiers.evaluation.output.prediction
@@ -126,6 +131,10 @@ weka.core.stemmers.Stemmer=\
 weka.estimators.Estimator= \
  weka.estimators
 
+# Lists the Univariate Density Estimator packages I want to choose from
+weka.estimators.UnivariateDensityEstimator= \
+ weka.estimators
+
 # Lists of Kernels I want to choose from
 weka.classifiers.functions.supportVector.Kernel=\
  weka.classifiers.functions.supportVector,\
@@ -178,6 +187,10 @@ weka.experiment.ResultMatrix=\
 weka.experiment.Tester=\
  weka.experiment
 
+# List of Experimenter setup panels
+weka.gui.experiment.AbstractSetupPanel=\
+  weka.gui.experiment
+
 # List of file loaders
 weka.core.converters.AbstractFileLoader=\
  weka.core.converters
@@ -210,3 +223,7 @@ weka.core.PartitionGenerator=\
 
 #weka.classifiers.meta.generators.NominalAttributeGenerator=\
 # weka.classifiers.meta.generators
+
+# stopword algorithms
+weka.core.stopwords.StopwordsHandler=\
+  weka.core.stopwords

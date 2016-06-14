@@ -24,68 +24,68 @@ package weka.gui.boundaryvisualizer;
 import java.io.Serializable;
 
 /**
- * Class that encapsulates a result (and progress info) for part
- * of a distributed boundary visualization. The result of a sub-task
- * is the probabilities necessary to display one row of the final 
- * visualization.
- *
+ * Class that encapsulates a result (and progress info) for part of a
+ * distributed boundary visualization. The result of a sub-task is the
+ * probabilities necessary to display one row of the final visualization.
+ * 
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 8034 $
+ * @version $Revision: 10222 $
  * @since 1.0
  * @see Serializable
  */
-public class RemoteResult
-  implements Serializable {
+public class RemoteResult implements Serializable {
 
   /** for serialization */
   private static final long serialVersionUID = 1873271280044633808L;
 
   /** the row number that this result corresponds to */
-  private int m_rowNumber;
+  // private int m_rowNumber; NOT USED
 
   /** how many pixels in a row */
-  private int m_rowLength;
+  // private int m_rowLength; NOT USED
 
-  /** the result - ie. the probability distributions produced by the
-   * classifier for this row in the visualization */
-  private double [][] m_probabilities;
+  /**
+   * the result - ie. the probability distributions produced by the classifier
+   * for this row in the visualization
+   */
+  private final double[][] m_probabilities;
 
   /** progress on computing this row */
   private int m_percentCompleted;
 
   /**
    * Creates a new <code>RemoteResult</code> instance.
-   *
+   * 
    * @param rowNum the row number
    * @param rowLength the number of pixels in the row
    */
   public RemoteResult(int rowNum, int rowLength) {
     m_probabilities = new double[rowLength][0];
   }
-  
+
   /**
    * Store the classifier's distribution for a particular pixel in the
    * visualization
-   *
+   * 
    * @param index the pixel
    * @param distribution the probability distribution from the classifier
    */
-  public void setLocationProbs(int index, double [] distribution) {
+  public void setLocationProbs(int index, double[] distribution) {
     m_probabilities[index] = distribution;
   }
 
   /**
-   * Return the probability distributions  for this row in the visualization
-   *
+   * Return the probability distributions for this row in the visualization
+   * 
    * @return the probability distributions
    */
-  public double [][] getProbabilities() {
+  public double[][] getProbabilities() {
     return m_probabilities;
   }
 
   /**
    * Set the progress for this row so far
-   *
+   * 
    * @param pc a percent completed value
    */
   public void setPercentCompleted(int pc) {
@@ -94,7 +94,7 @@ public class RemoteResult
 
   /**
    * Return the progress for this row
-   *
+   * 
    * @return a percent completed value
    */
   public int getPercentCompleted() {

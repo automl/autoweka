@@ -21,25 +21,25 @@
 
 package weka.associations;
 
-import weka.core.Capabilities;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+
 /**
- * Abstract utility class for handling settings common to meta
- * associators that use a single base associator.  
- *
+ * Abstract utility class for handling settings common to meta associators that
+ * use a single base associator.
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 10172 $
  */
-public abstract class SingleAssociatorEnhancer
-  extends AbstractAssociator
+public abstract class SingleAssociatorEnhancer extends AbstractAssociator
   implements OptionHandler {
 
   /** for serialization */
@@ -51,7 +51,7 @@ public abstract class SingleAssociatorEnhancer
   /**
    * String describing default Associator.
    * 
-   * @return		default classname
+   * @return default classname
    */
   protected String defaultAssociatorString() {
     return Apriori.class.getName();
@@ -59,70 +59,73 @@ public abstract class SingleAssociatorEnhancer
 
   /**
    * Returns an enumeration describing the available options.
-   *
-   * @return 		an enumeration of all the available options.
+   * 
+   * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
-    Vector result = new Vector();
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> result = new Vector<Option>();
 
-    result.addElement(new Option(
-	      "\tFull name of base associator.\n"
-	      + "\t(default: " + defaultAssociatorString() +")",
-	      "W", 1, "-W"));
+    result.addElement(new Option("\tFull name of base associator.\n"
+      + "\t(default: " + defaultAssociatorString() + ")", "W", 1, "-W"));
 
     if (m_Associator instanceof OptionHandler) {
-      result.addElement(new Option(
-	  "",
-	  "", 0, "\nOptions specific to associator "
-	  + m_Associator.getClass().getName() + ":"));
+      result.addElement(new Option("", "", 0,
+        "\nOptions specific to associator " + m_Associator.getClass().getName()
+          + ":"));
 
-      Enumeration enm = ((OptionHandler) m_Associator).listOptions();
-      while (enm.hasMoreElements())
-	result.addElement(enm.nextElement());
+      result.addAll(Collections.list(((OptionHandler) m_Associator)
+        .listOptions()));
     }
 
     return result.elements();
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
-   *
+   * Parses a given list of options. Valid options are:
+   * <p>
+   * 
    * -W classname <br>
-   * Specify the full class name of the base associator.<p>
-   *
-   * Options after -- are passed to the designated associator.<p>
-   *
-   * @param options 	the list of options as an array of strings
-   * @throws Exception 	if an option is not supported
+   * Specify the full class name of the base associator.
+   * <p>
+   * 
+   * Options after -- are passed to the designated associator.
+   * <p>
+   * 
+   * @param options the list of options as an array of strings
+   * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    String	tmpStr;
-    
+    String tmpStr;
+
     tmpStr = Utils.getOption('W', options);
-    if (tmpStr.length() > 0) { 
-      // This is just to set the associator in case the option 
+    if (tmpStr.length() > 0) {
+      // This is just to set the associator in case the option
       // parsing fails.
       setAssociator(AbstractAssociator.forName(tmpStr, null));
-      setAssociator(AbstractAssociator.forName(tmpStr, Utils.partitionOptions(options)));
-    }
-    else {
-      // This is just to set the associator in case the option 
+      setAssociator(AbstractAssociator.forName(tmpStr,
+        Utils.partitionOptions(options)));
+    } else {
+      // This is just to set the associator in case the option
       // parsing fails.
       setAssociator(AbstractAssociator.forName(defaultAssociatorString(), null));
-      setAssociator(AbstractAssociator.forName(defaultAssociatorString(), Utils.partitionOptions(options)));
+      setAssociator(AbstractAssociator.forName(defaultAssociatorString(),
+        Utils.partitionOptions(options)));
     }
   }
 
   /**
    * Gets the current settings of the associator.
-   *
-   * @return 		an array of strings suitable for passing to setOptions
+   * 
+   * @return an array of strings suitable for passing to setOptions
    */
+  @Override
   public String[] getOptions() {
-    int       		i;
-    Vector<String>    	result;
-    String[]		options;
-    
+    int i;
+    Vector<String> result;
+    String[] options;
+
     result = new Vector<String>();
 
     result.add("-W");
@@ -131,18 +134,19 @@ public abstract class SingleAssociatorEnhancer
     if (getAssociator() instanceof OptionHandler) {
       options = ((OptionHandler) getAssociator()).getOptions();
       result.add("--");
-      for (i = 0; i < options.length; i++)
-	result.add(options[i]);
+      for (i = 0; i < options.length; i++) {
+        result.add(options[i]);
+      }
     }
 
     return result.toArray(new String[result.size()]);
   }
-  
+
   /**
    * Returns the tip text for this property
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String associatorTipText() {
     return "The base associator to be used.";
@@ -150,8 +154,8 @@ public abstract class SingleAssociatorEnhancer
 
   /**
    * Set the base associator.
-   *
-   * @param value 	the associator to use.
+   * 
+   * @param value the associator to use.
    */
   public void setAssociator(Associator value) {
     m_Associator = value;
@@ -159,44 +163,47 @@ public abstract class SingleAssociatorEnhancer
 
   /**
    * Get the associator used as the base associator.
-   *
-   * @return 		the currently used associator
+   * 
+   * @return the currently used associator
    */
   public Associator getAssociator() {
     return m_Associator;
   }
-  
+
   /**
    * Gets the associator specification string, which contains the class name of
    * the associator and any options to the associator
-   *
+   * 
    * @return the associator string
    */
   protected String getAssociatorSpec() {
     Associator c = getAssociator();
     return c.getClass().getName() + " "
-      + Utils.joinOptions(((OptionHandler)c).getOptions());
+      + Utils.joinOptions(((OptionHandler) c).getOptions());
   }
 
   /**
    * Returns default capabilities of the base associator.
-   *
-   * @return      the capabilities of the base associator
+   * 
+   * @return the capabilities of the base associator
    */
+  @Override
   public Capabilities getCapabilities() {
-    Capabilities        result;
+    Capabilities result;
 
-    if (getAssociator() != null)
+    if (getAssociator() != null) {
       result = getAssociator().getCapabilities();
-    else
+    } else {
       result = new Capabilities(this);
-    
+    }
+
     // set dependencies
-    for (Capability cap: Capability.values())
+    for (Capability cap : Capability.values()) {
       result.enableDependency(cap);
-    
+    }
+
     result.setOwner(this);
-    
+
     return result;
   }
 }

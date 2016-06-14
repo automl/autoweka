@@ -29,6 +29,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -39,86 +40,71 @@ import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
- * A helper class for using the stemmers. Run with option '-h' to list
- * all the available options.
- *
- * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8034 $
+ * A helper class for using the stemmers. Run with option '-h' to list all the
+ * available options.
+ * 
+ * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 10203 $
  */
-public class Stemming
-  implements RevisionHandler {
+public class Stemming implements RevisionHandler {
 
   /**
    * lists all the options on the command line
-   *
-   * @param stemmer     the stemmer to list the parameters for
-   * @return 		the option string
+   * 
+   * @param stemmer the stemmer to list the parameters for
+   * @return the option string
    */
   protected static String makeOptionsString(Stemmer stemmer) {
-    Vector<Option>          options;
-    Enumeration     enm;
-    StringBuffer    result;
+    Vector<Option> options = new Vector<Option>();
 
-    options = new Vector<Option>();
-    
     // general options
-    options.add(
-        new Option(
-          "\tDisplays this help.",
-          "h", 0, "-h"));
+    options.add(new Option("\tDisplays this help.", "h", 0, "-h"));
 
-    options.add(
-        new Option(
-          "\tThe file to process.",
-          "i", 1, "-i <input-file>"));
+    options
+      .add(new Option("\tThe file to process.", "i", 1, "-i <input-file>"));
 
-    options.add(
-        new Option(
-          "\tThe file to output the processed data to (default stdout).",
-          "o", 1, "-o <output-file>"));
+    options.add(new Option(
+      "\tThe file to output the processed data to (default stdout).", "o", 1,
+      "-o <output-file>"));
 
-    options.add(
-        new Option(
-          "\tUses lowercase strings.",
-          "l", 0, "-l"));
+    options.add(new Option("\tUses lowercase strings.", "l", 0, "-l"));
 
     // stemmer options?
     if (stemmer instanceof OptionHandler) {
-      enm = ((OptionHandler) stemmer).listOptions();
-      while (enm.hasMoreElements())
-        options.add((Option)enm.nextElement());
+      options.addAll(Collections.list(((OptionHandler) stemmer).listOptions()));
+
     }
 
     // print options
-    result = new StringBuffer();
+    StringBuffer result = new StringBuffer();
     result.append("\nStemmer options:\n\n");
-    enm = options.elements();
+    Enumeration<Option> enm = options.elements();
     while (enm.hasMoreElements()) {
-      Option option = (Option) enm.nextElement();
+      Option option = enm.nextElement();
       result.append(option.synopsis() + "\n");
       result.append(option.description() + "\n");
     }
 
     return result.toString();
   }
-  
+
   /**
-   * Applies the given stemmer according to the given options. '-h' lists
-   * all the available options for the given stemmer.
-   *
-   * @param stemmer     the stemmer to use
-   * @param options     the options for the stemmer
-   * @throws Exception	if something goes wrong
+   * Applies the given stemmer according to the given options. '-h' lists all
+   * the available options for the given stemmer.
+   * 
+   * @param stemmer the stemmer to use
+   * @param options the options for the stemmer
+   * @throws Exception if something goes wrong
    */
-  public static void useStemmer(Stemmer stemmer, String[] options) 
+  public static void useStemmer(Stemmer stemmer, String[] options)
     throws Exception {
 
-    Reader          reader;
-    StringBuffer    input;
-    Writer          output;
-    String          tmpStr;
-    boolean         lowerCase;
-    
+    Reader reader;
+    StringBuffer input;
+    Writer output;
+    String tmpStr;
+    boolean lowerCase;
+
     // help?
     if (Utils.getFlag('h', options)) {
       System.out.println(makeOptionsString(stemmer));
@@ -127,68 +113,72 @@ public class Stemming
 
     // input file
     tmpStr = Utils.getOption('i', options);
-    if (tmpStr.length() == 0)
-      throw new IllegalArgumentException(
-          "No input file defined!" + makeOptionsString(stemmer));
-    else
-      reader = new BufferedReader(
-                  new InputStreamReader(new FileInputStream(tmpStr)));
+    if (tmpStr.length() == 0) {
+      throw new IllegalArgumentException("No input file defined!"
+        + makeOptionsString(stemmer));
+    } else {
+      reader = new BufferedReader(new InputStreamReader(new FileInputStream(
+        tmpStr)));
+    }
 
     input = new StringBuffer();
 
     // output file?
     tmpStr = Utils.getOption('o', options);
-    if (tmpStr.length() == 0)
-      output = new BufferedWriter(
-                  new OutputStreamWriter(System.out));
-    else
-      output = new BufferedWriter(
-                  new OutputStreamWriter(new FileOutputStream(tmpStr)));
+    if (tmpStr.length() == 0) {
+      output = new BufferedWriter(new OutputStreamWriter(System.out));
+    } else {
+      output = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+        tmpStr)));
+    }
 
     // lowercase?
     lowerCase = Utils.getFlag('l', options);
 
     // stemmer options
-    if (stemmer instanceof OptionHandler)
+    if (stemmer instanceof OptionHandler) {
       ((OptionHandler) stemmer).setOptions(options);
-    
+    }
+
     // unknown options?
     try {
       Utils.checkForRemainingOptions(options);
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       System.out.println(e.getMessage());
       System.out.println(makeOptionsString(stemmer));
+      reader.close();
       return;
     }
-    
+
     // process file
     int character;
     while ((character = reader.read()) != -1) {
       char ch = (char) character;
-      if (Character.isWhitespace((char) ch)) {
+      if (Character.isWhitespace(ch)) {
         if (input.length() > 0) {
           output.write(stemmer.stem(input.toString()));
           input = new StringBuffer();
         }
         output.write(ch);
-      } 
-      else {
-        if (lowerCase)
+      } else {
+        if (lowerCase) {
           input.append(Character.toLowerCase(ch));
-        else
+        } else {
           input.append(ch);
+        }
       }
     }
     output.flush();
+    reader.close();
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 10203 $");
   }
 }

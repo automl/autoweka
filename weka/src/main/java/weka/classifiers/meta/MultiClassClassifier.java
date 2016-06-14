@@ -22,9 +22,7 @@
 package weka.classifiers.meta;
 
 import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import java.util.*;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -33,7 +31,6 @@ import weka.classifiers.rules.ZeroR;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -67,7 +64,10 @@ import weka.filters.unsupervised.instance.RemoveWithValues;
  * 
  * <pre> -P
  *  Use pairwise coupling (only has an effect for 1-against1)</pre>
- * 
+ *
+ * <pre> -L
+ *  Use log loss decoding for random and exhaustive codes.</pre>
+ *
  * <pre> -S &lt;num&gt;
  *  Random number seed.
  *  (default 1)</pre>
@@ -98,7 +98,7 @@ import weka.filters.unsupervised.instance.RemoveWithValues;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 11889 $
  */
 public class MultiClassClassifier 
   extends RandomizableSingleClassifierEnhancer 
@@ -133,6 +133,9 @@ public class MultiClassClassifier
    * numClasses * m_RandomWidthFactor codes
    */
   private double m_RandomWidthFactor = 2.0;
+
+  /** True if log loss decoding is to be used for random and exhaustive codes. */
+  protected boolean m_logLossDecoding = false;
 
   /** The multiclass method to use */
   protected int m_Method = METHOD_1_AGAINST_ALL;
@@ -236,7 +239,7 @@ public class MultiClassClassifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 8034 $");
+      return RevisionUtils.extract("$Revision: 11889 $");
     }
   }
 
@@ -268,7 +271,7 @@ public class MultiClassClassifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 8034 $");
+      return RevisionUtils.extract("$Revision: 11889 $");
     }
   }
 
@@ -350,7 +353,7 @@ public class MultiClassClassifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 8034 $");
+      return RevisionUtils.extract("$Revision: 11889 $");
     }
   }
 
@@ -395,7 +398,7 @@ public class MultiClassClassifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 8034 $");
+      return RevisionUtils.extract("$Revision: 11889 $");
     }
   }
 
@@ -453,13 +456,13 @@ public class MultiClassClassifier
 
     } else if (m_Method == METHOD_1_AGAINST_1) {
       // generate fastvector of pairs
-      FastVector pairs = new FastVector();
+      ArrayList<int[] >pairs = new ArrayList<int[]>();
       for (int i=0; i<insts.numClasses(); i++) {
 	for (int j=0; j<insts.numClasses(); j++) {
 	  if (j<=i) continue;
 	  int[] pair = new int[2];
 	  pair[0] = i; pair[1] = j;
-	  pairs.addElement(pair);
+	  pairs.add(pair);
 	}
       }
 
@@ -474,7 +477,7 @@ public class MultiClassClassifier
 	classFilter.setAttributeIndex("" + (insts.classIndex() + 1));
 	classFilter.setModifyHeader(true);
 	classFilter.setInvertSelection(true);
-	classFilter.setNominalIndicesArr((int[])pairs.elementAt(i));
+	classFilter.setNominalIndicesArr((int[])pairs.get(i));
 	Instances tempInstances = new Instances(insts, 0);
 	tempInstances.setClassIndex(-1);
 	classFilter.setInputFormat(tempInstances);
@@ -494,11 +497,10 @@ public class MultiClassClassifier
       m_TwoClassDataset = new Instances(insts, 0);
       int classIndex = m_TwoClassDataset.classIndex();
       m_TwoClassDataset.setClassIndex(-1);
-      m_TwoClassDataset.deleteAttributeAt(classIndex);
-      FastVector classLabels = new FastVector();
-      classLabels.addElement("class0");
-      classLabels.addElement("class1");
-      m_TwoClassDataset.insertAttributeAt(new Attribute("class", classLabels),
+      ArrayList<String> classLabels = new ArrayList<String>();
+      classLabels.add("class0");
+      classLabels.add("class1");
+      m_TwoClassDataset.replaceAttributeAt(new Attribute("class", classLabels),
 					  classIndex);
       m_TwoClassDataset.setClassIndex(classIndex);
 
@@ -593,14 +595,13 @@ public class MultiClassClassifier
       double[][] n = new double[inst.numClasses()][inst.numClasses()];
 
       for(int i = 0; i < m_ClassFilters.length; i++) {
-	if (m_Classifiers[i] != null) {
-	  Instance tempInst = (Instance)inst.copy(); 
-	  tempInst.setDataset(m_TwoClassDataset);
-	  double [] current = m_Classifiers[i].distributionForInstance(tempInst);  
-	  Range range = new Range(((RemoveWithValues)m_ClassFilters[i])
-				  .getNominalIndices());
-	  range.setUpper(m_ClassAttribute.numValues());
-	  int[] pair = range.getSelection();
+	    if (m_Classifiers[i] != null) {
+          Instance tempInst = (Instance)inst.copy();
+	      tempInst.setDataset(m_TwoClassDataset);
+	      double [] current = m_Classifiers[i].distributionForInstance(tempInst);
+	      Range range = new Range(((RemoveWithValues)m_ClassFilters[i]).getNominalIndices());
+	      range.setUpper(m_ClassAttribute.numValues());
+	      int[] pair = range.getSelection();
           if (m_pairwiseCoupling && inst.numClasses() > 2) {
             r[pair[0]][pair[1]] = current[0];
             n[pair[0]][pair[1]] = m_SumOfWeights[i];
@@ -616,20 +617,43 @@ public class MultiClassClassifier
       if (m_pairwiseCoupling && inst.numClasses() > 2) {
         return pairwiseCoupling(n, r);
       }
+    } else if (m_Method == METHOD_1_AGAINST_ALL) {
+       for(int i = 0; i < m_ClassFilters.length; i++) {
+        m_ClassFilters[i].input(inst);
+        m_ClassFilters[i].batchFinished();
+        probs[i] = m_Classifiers[i].distributionForInstance(m_ClassFilters[i].output())[1];
+      }
     } else {
-      // error correcting style methods
-      for(int i = 0; i < m_ClassFilters.length; i++) {
-	m_ClassFilters[i].input(inst);
-	m_ClassFilters[i].batchFinished();
-	double [] current = m_Classifiers[i].
-	  distributionForInstance(m_ClassFilters[i].output());
-	for (int j = 0; j < m_ClassAttribute.numValues(); j++) {
-	  if (((MakeIndicator)m_ClassFilters[i]).getValueRange().isInRange(j)) {
-	    probs[j] += current[1];
-	  } else {
-	    probs[j] += current[0];
-	  }
-	}
+      if (getLogLossDecoding()) {
+        Arrays.fill(probs, 1.0);
+        for (int i = 0; i < m_ClassFilters.length; i++) {
+          m_ClassFilters[i].input(inst);
+          m_ClassFilters[i].batchFinished();
+          double[] current = m_Classifiers[i].distributionForInstance(m_ClassFilters[i].output());
+          for (int j = 0; j < m_ClassAttribute.numValues(); j++) {
+            if (((MakeIndicator) m_ClassFilters[i]).getValueRange().isInRange(j)) {
+              probs[j] += Math.log(Utils.SMALL + (1.0 - 2 * Utils.SMALL) * current[1]);
+            } else {
+              probs[j] += Math.log(Utils.SMALL + (1.0 - 2 * Utils.SMALL) * current[0]);
+            }
+          }
+        }
+        probs = Utils.logs2probs(probs);
+      } else {
+
+        // Use old-style decoding
+        for (int i = 0; i < m_ClassFilters.length; i++) {
+          m_ClassFilters[i].input(inst);
+          m_ClassFilters[i].batchFinished();
+          double[] current = m_Classifiers[i].distributionForInstance(m_ClassFilters[i].output());
+          for (int j = 0; j < m_ClassAttribute.numValues(); j++) {
+            if (((MakeIndicator) m_ClassFilters[i]).getValueRange().isInRange(j)) {
+              probs[j] += current[1];
+            } else {
+              probs[j] += current[0];
+            }
+          }
+        }
       }
     }
     
@@ -683,9 +707,9 @@ public class MultiClassClassifier
    *
    * @return an enumeration of all the available options
    */
-  public Enumeration listOptions()  {
+  public Enumeration<Option> listOptions()  {
 
-    Vector vec = new Vector(4);
+    Vector<Option> vec = new Vector<Option>(3);
     
     vec.addElement(new Option(
        "\tSets the method to use. Valid values are 0 (1-against-all),\n"
@@ -697,11 +721,10 @@ public class MultiClassClassifier
     vec.addElement(new Option(
         "\tUse pairwise coupling (only has an effect for 1-against1)",
         "P", 0, "-P"));
+    vec.addElement(new Option("\tUse log loss decoding for random and exhaustive codes", "L", 0, "-L"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      vec.addElement(enu.nextElement());
-    }
+    vec.addAll(Collections.list(super.listOptions()));
+    
     return vec.elements();
   }
 
@@ -721,7 +744,10 @@ public class MultiClassClassifier
    * 
    * <pre> -P
    *  Use pairwise coupling (only has an effect for 1-against1)</pre>
-   * 
+   *
+   * <pre> -L
+   *  Use log loss decoding for random and exhaustive codes.</pre>
+   *
    * <pre> -S &lt;num&gt;
    *  Random number seed.
    *  (default 1)</pre>
@@ -771,7 +797,11 @@ public class MultiClassClassifier
 
     setUsePairwiseCoupling(Utils.getFlag('P', options));
 
+    setLogLossDecoding(Utils.getFlag('L', options));
+
     super.setOptions(options);
+    
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -781,30 +811,25 @@ public class MultiClassClassifier
    */
   public String [] getOptions() {
 
-    String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 5];
-
-    int current = 0;
-
-
-    options[current++] = "-M";
-    options[current++] = "" + m_Method;
+    Vector<String> options = new Vector<String>();
+    
+    options.add("-M");
+    options.add("" + m_Method);
 
     if (getUsePairwiseCoupling()) {
-      options[current++] = "-P";
+        options.add("-P");
     }
+
+    if (getLogLossDecoding()) {
+      options.add("-L");
+    }
+
+    options.add("-R");
+    options.add("" + m_RandomWidthFactor);
+
+    Collections.addAll(options, super.getOptions());
     
-    options[current++] = "-R";
-    options[current++] = "" + m_RandomWidthFactor;
-
-    System.arraycopy(superOptions, 0, options, current, 
-		     superOptions.length);
-
-    current += superOptions.length;
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    return options.toArray(new String[0]);
   }
 
   /**
@@ -816,6 +841,35 @@ public class MultiClassClassifier
     return "A metaclassifier for handling multi-class datasets with 2-class "
       + "classifiers. This classifier is also capable of "
       + "applying error correcting output codes for increased accuracy.";
+  }
+
+  /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String logLossDecodingTipText() {
+
+    return "Use log loss decoding for random or exhaustive codes.";
+  }
+
+  /**
+   * Whether log loss decoding is used for random or exhaustive codes.
+   *
+   * @return true if log loss is used
+   */
+  public boolean getLogLossDecoding() {
+
+    return m_logLossDecoding;
+  }
+
+  /**
+   * Sets whether log loss decoding is used for random or exhaustive codes.
+   *
+   * @param newlogLossDecoding true if log loss is to be used
+   */
+  public void setLogLossDecoding(boolean newlogLossDecoding) {
+
+    m_logLossDecoding = newlogLossDecoding;
   }
 
   /**
@@ -984,7 +1038,7 @@ public class MultiClassClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision: 11889 $");
   }
 
   /**

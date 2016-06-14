@@ -21,21 +21,21 @@
 
 package weka.gui.arffviewer;
 
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.TableModel;
-
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.Undoable;
 import weka.core.converters.AbstractFileLoader;
 import weka.gui.SortedTableModel;
 
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
+
 /**
  * A sorter for the ARFF-Viewer - necessary because of the custom CellRenderer.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 8604 $ 
+ * @version $Revision: 12697 $ 
  */
 
 public class ArffSortedTableModel 
@@ -167,7 +167,7 @@ public class ArffSortedTableModel
    * @return			the attribute type
    */
   public int getType(int columnIndex) {
-    return ((ArffTableModel) getModel()).getType(mIndices[0], columnIndex);
+    return ((ArffTableModel) getModel()).getType(mIndices.length > 0 ? mIndices[0] : -1, columnIndex);
   }
   
   /**
@@ -226,6 +226,16 @@ public class ArffSortedTableModel
   public void deleteInstanceAt(int rowIndex) {
     ((ArffTableModel) getModel()).deleteInstanceAt(mIndices[rowIndex]);
   }
+
+  /**
+   * Insert a new instance (all values 0) at the given index. If index is < 0,
+   * then inserts at the end of the dataset
+   *
+   * @param index the index to insert at
+   */
+  public void insertInstance(int index) {
+    ((ArffTableModel) getModel()).insertInstance(index);
+  }
   
   /**
    * deletes the instances at the given positions
@@ -250,6 +260,26 @@ public class ArffSortedTableModel
    */
   public void sortInstances(int columnIndex) {
     ((ArffTableModel) getModel()).sortInstances(columnIndex);
+  }
+  
+  /**
+   * sorts the instances via the given attribute
+   * 
+   * @param columnIndex         the index of the column
+   * @param ascending ascending if true, otherwise descending
+   */
+  public void sortInstances(int columnIndex, boolean ascending) {
+    ((ArffTableModel) getModel()).sortInstances(columnIndex, ascending);
+  }
+
+  /**
+   * sorts the table over the given column, either ascending or descending
+   * 
+   * @param columnIndex the column to sort over
+   * @param ascending ascending if true, otherwise descending
+   */
+  public void sort(int columnIndex, boolean ascending) {
+    sortInstances(columnIndex, ascending);
   }
   
   /**

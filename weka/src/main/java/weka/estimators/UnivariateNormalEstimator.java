@@ -21,19 +21,25 @@
 
 package weka.estimators;
 
+import java.io.Serializable;
 import java.util.Random;
 
+import weka.core.RevisionUtils;
 import weka.core.Statistics;
 
 /**
  * Simple weighted normal density estimator.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision: 11318 $
  */
 public class UnivariateNormalEstimator implements UnivariateDensityEstimator,
                                                   UnivariateIntervalEstimator,
-                                                  UnivariateQuantileEstimator {
+                                                  UnivariateQuantileEstimator,
+                                                  Serializable {
+
+  /** For serialization */
+  private static final long serialVersionUID = -1669009817825826548L;
 
   /** The weighted sum of values */
   protected double m_WeightedSum = 0;
@@ -56,6 +62,12 @@ public class UnivariateNormalEstimator implements UnivariateDensityEstimator,
   /** Constant for Gaussian density */
   public static final double CONST = Math.log(2 * Math.PI);
 
+  /**
+   * Returns a string describing the estimator.
+   */
+  public String globalInfo() {
+    return "Estimates a univariate normal density.";
+  }
   /**
    * Adds a value to the density estimator.
    *
@@ -154,6 +166,16 @@ public class UnivariateNormalEstimator implements UnivariateDensityEstimator,
     updateMeanAndVariance();
 
     return "Mean: " + m_Mean + "\t" + "Variance: " + m_Variance;
+  }
+
+  /**
+   * Returns the revision string.
+   * 
+   * @return the revision
+   */
+  @Override
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 11318 $");
   }
 
   /**

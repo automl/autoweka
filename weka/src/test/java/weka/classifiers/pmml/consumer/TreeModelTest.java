@@ -19,16 +19,16 @@
 
 package weka.classifiers.pmml.consumer;
 
-import weka.core.FastVector;
+import java.util.ArrayList;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
  * Tests the pmml TreeModel classifier.
- *
+ * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 8034 $
+ * @version $Revision: 10160 $
  */
 public class TreeModelTest extends AbstractPMMLClassifierTest {
 
@@ -36,13 +36,14 @@ public class TreeModelTest extends AbstractPMMLClassifierTest {
     super(name);
   }
 
+  @Override
   protected void setUp() throws Exception {
-    m_modelNames = new FastVector();
-    m_dataSetNames = new FastVector();
-    m_modelNames.addElement("IRIS_TREE.xml");
-    m_modelNames.addElement("HEART_TREE.xml");
-    m_dataSetNames.addElement("iris.arff");
-    m_dataSetNames.addElement("heart-c2.arff");
+    m_modelNames = new ArrayList<String>();
+    m_dataSetNames = new ArrayList<String>();
+    m_modelNames.add("IRIS_TREE.xml");
+    m_modelNames.add("HEART_TREE.xml");
+    m_dataSetNames.add("iris.arff");
+    m_dataSetNames.add("heart-c2.arff");
   }
 
   public static Test suite() {
