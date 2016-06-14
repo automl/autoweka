@@ -209,14 +209,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         props.setProperty("javax.xml.parsers.SAXParserFactory", "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl");
     }
 
-    public static String getResamplingType(){
-        if(DEFAULT_RESAMPLING==Resampling.CrossValidation || DEFAULT_RESAMPLING==Resampling.MultiLevel || DEFAULT_RESAMPLING==Resampling.RandomSubSampling ){
-          return "examineFolds";
-        }else{
-          return "parseTrajectory";
-        }
-    }
-
     /**
     * Find the best classifier, arguments, and attribute selection for the data.
     *
@@ -796,9 +788,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             res += "\n";
             res += eval.toClassDetailsString();
         } catch(Exception e) { }
-
         res += "\n\nFor better performance, try giving Auto-WEKA more time.";
-
         return res;
     }
 
