@@ -97,8 +97,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     static final int DEFAULT_TIME_LIMIT = 15;
     /** Default memory limit for classifiers. */
     static final int DEFAULT_MEM_LIMIT = 1024;
-    /** Default */
-    static final int DEFAULT_N_BEST = 1;
 
     /** Internal evaluation method. */
     static enum Resampling {
@@ -149,10 +147,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     protected static String msExperimentPath;
     /** The internal name of the experiment. */
     protected static String expName = "Auto-WEKA";
-    /** The path for the sorted best configurations */
-    protected static String sortedConfigurationLog="SortedConfigurationLog.xml";
-    /** The path for the log where the unsorted configurations are held, relative to the temporary directory in msExperimentPath */
-    protected static String temporaryConfigurationLog="TemporaryConfigurationLog.xml";
 
     /** The random seed. */
     protected int seed = 123;
