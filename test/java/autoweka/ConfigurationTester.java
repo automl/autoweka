@@ -39,11 +39,13 @@ public class ConfigurationTester{
     for(int i = 0; i < 5; i++){
       scores[i]=rg.nextDouble()%20;
       sum+=scores[i];
+      System.out.println(sum);
       c1.setEvaluationValues(scores[i],i);
     }
     for(int i = 5; i < 10; i++){
       scores[i]=rg.nextDouble()%20;
       sum+=scores[i];
+      System.out.println(sum);
       c3.setEvaluationValues(scores[i],i);
     }
 
