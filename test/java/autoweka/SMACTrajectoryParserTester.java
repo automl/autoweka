@@ -18,7 +18,7 @@ public class SMACTrajectoryParserTester{
 
   @Test
   public void parseTrajectoryTest(){
-    File folderFile = new File("test/experiment_folder");
+    File folderFile = new File("test/experiment_folder/Auto-WEKA");
     Experiment e = Experiment.createFromFolder(folderFile);
 
 

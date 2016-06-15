@@ -48,7 +48,7 @@ public class ConfigurationTester{
 
     //Tests averaging
     c1.mergeWith(c3);
-    assertEquals(c1.getAverageScore(),sum/10);
+    assertEquals(c1.getAverageScore(),sum/10,0.1);
 
     //Tests fold counting
     List<String> strC1Folds = c1.getFolds();
@@ -119,7 +119,7 @@ public class ConfigurationTester{
       sum+=score;
     }
 
-    assertEquals(sum/amtIterations, c1.getAverageScore());
+    assertEquals(sum/amtIterations, c1.getAverageScore(), 0.1);
 
   }
 
