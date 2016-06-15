@@ -16,6 +16,7 @@ import static org.junit.Assert.*;
 
 public class ConfigurationTester{
 
+  @Test
   public static void mergeTest(){
 
     //Tests exception for when args are different
@@ -64,6 +65,7 @@ public class ConfigurationTester{
     }
   }
 
+  @Test
   public static void compareToTest(){
 
     //Tests exception for when types are different
@@ -102,6 +104,7 @@ public class ConfigurationTester{
     assertTrue(c2.compareTo(c3)>0);
   }
 
+  @Test
   public static void settersAndAveragerTest(){
     Configuration c1 = new Configuration("args_placeholder");
 
@@ -120,6 +123,7 @@ public class ConfigurationTester{
 
   }
 
+  @Test
   public static void rankerTest(){
     String temporaryTestLog = "test/ranker_test/temporaryTestLog.xml";
     String sortedTestLog = "test/ranker_test/sortedTestLog.xml" ;
@@ -153,6 +157,7 @@ public class ConfigurationTester{
     }
 
   }
+
 
   public static void main(String args[]){
 
