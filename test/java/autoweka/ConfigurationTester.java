@@ -43,6 +43,7 @@ public class ConfigurationTester{
     }
     for(int i = 5; i < 10; i++){
       scores[i]=rg.nextDouble()%20;
+      sum+=scores[i];
       c3.setEvaluationValues(scores[i],i);
     }
 
