@@ -159,14 +159,7 @@ public class ConfigurationTester{
   }
 
 
-  public static void main(String args[]){
 
-    settersAndAveragerTest();
-    compareToTest();
-    mergeTest();
-    rankerTest();
-
-  }
 
 
 }
