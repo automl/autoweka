@@ -148,7 +148,7 @@ public class ConfigurationTester{
     }
     cc.toXML(temporaryTestLog);
 
-    ConfigurationRanker.rank(100,temporaryTestLog,sortedTestLog);
+    ConfigurationRanker.rank(100,temporaryTestLog,sortedTestLog,"IGNORE");
 
     cc = ConfigurationCollection.fromXML(sortedTestLog, ConfigurationCollection.class);
     double currentscore = cc.get(0).getAverageScore();
