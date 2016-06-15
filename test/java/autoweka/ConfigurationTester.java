@@ -98,7 +98,7 @@ public class ConfigurationTester{
     c3.setEvaluationValues(0,0);
     c3.setEvaluationValues(0,1);
     c3.setEvaluationValues(0,2);
-    assertTrue(c2.compareTo(c1)==0);
+    assertTrue(c2.compareTo(c3)==0);
 
     c2.setEvaluationValues(0,3);
     c3.setEvaluationValues(1000,3);
