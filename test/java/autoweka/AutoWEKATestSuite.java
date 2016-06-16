@@ -8,7 +8,8 @@ import autoweka.instancegenerators.*;
 @Suite.SuiteClasses({
     UtilTester.class,
     MultiLevelTester.class,
-    WekaArgumentConverterTester.class
+    WekaArgumentConverterTester.class,
+    SMACTrajectoryParserTester.class
 })
 
 public class AutoWEKATestSuite

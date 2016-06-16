@@ -16,8 +16,9 @@ import static org.junit.Assert.*;
 
 public class SMACTrajectoryParserTester{
 
-  public static void parseTrajectoryTest(){
-    File folderFile = new File("test/experiment_folder");
+  @Test
+  public void parseTrajectoryTest(){
+    File folderFile = new File("test/experiment_folder/Auto-WEKA");
     Experiment e = Experiment.createFromFolder(folderFile);
 
 
@@ -28,8 +29,6 @@ public class SMACTrajectoryParserTester{
 
   }
 
-  public static void main(String args[]){
-    parseTrajectoryTest();
-  }
+
 
 }
