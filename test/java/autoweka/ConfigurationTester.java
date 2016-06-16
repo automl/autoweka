@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
 public class ConfigurationTester{
 
   @Test
-  public static void mergeTest(){
+  public void mergeTest(){
 
     //Tests exception for when args are different
     Configuration c1 = new Configuration("args_placeholder");
@@ -43,12 +43,13 @@ public class ConfigurationTester{
     }
     for(int i = 5; i < 10; i++){
       scores[i]=rg.nextDouble()%20;
+      sum+=scores[i];
       c3.setEvaluationValues(scores[i],i);
     }
 
     //Tests averaging
     c1.mergeWith(c3);
-    assertEquals(c1.getAverageScore(),sum/10);
+    assertEquals(c1.getAverageScore(),sum/10,0.1);
 
     //Tests fold counting
     List<String> strC1Folds = c1.getFolds();
@@ -66,7 +67,7 @@ public class ConfigurationTester{
   }
 
   @Test
-  public static void compareToTest(){
+  public void compareToTest(){
 
     //Tests exception for when types are different
     Configuration c1 = new Configuration("args_placeholder");
@@ -97,7 +98,8 @@ public class ConfigurationTester{
     c3.setEvaluationValues(0,0);
     c3.setEvaluationValues(0,1);
     c3.setEvaluationValues(0,2);
-    assertTrue(c2.compareTo(c1)==0);
+
+    assertTrue(c2.compareTo(c3)==0);
 
     c2.setEvaluationValues(0,3);
     c3.setEvaluationValues(1000,3);
@@ -105,7 +107,8 @@ public class ConfigurationTester{
   }
 
   @Test
-  public static void settersAndAveragerTest(){
+  public void settersAndAveragerTest(){
+
     Configuration c1 = new Configuration("args_placeholder");
 
     Random rg = new Random();
@@ -119,12 +122,13 @@ public class ConfigurationTester{
       sum+=score;
     }
 
-    assertEquals(sum/amtIterations, c1.getAverageScore());
+    assertEquals(sum/amtIterations, c1.getAverageScore(), 0.1);
 
   }
 
   @Test
-  public static void rankerTest(){
+  public void rankerTest(){
+
     String temporaryTestLog = "test/ranker_test/temporaryTestLog.xml";
     String sortedTestLog = "test/ranker_test/sortedTestLog.xml" ;
 
@@ -158,15 +162,6 @@ public class ConfigurationTester{
 
   }
 
-
-  public static void main(String args[]){
-
-    settersAndAveragerTest();
-    compareToTest();
-    mergeTest();
-    rankerTest();
-
-  }
 
 
 }
