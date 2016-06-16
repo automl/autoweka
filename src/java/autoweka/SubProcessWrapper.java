@@ -90,7 +90,7 @@ public class SubProcessWrapper extends Wrapper
 
     /**
      * Small class that just encapsulates the error and time of a sub process run
-     * TODO: Should really be changed to use a ClassifierResult instead
+     * @TODO: Should really be changed to use a ClassifierResult instead
      */
     static public class ErrorAndTime
     {
@@ -103,6 +103,9 @@ public class SubProcessWrapper extends Wrapper
         public float time;
     }
     
+    /**
+     * ErrorAndTime versions for ListExperiment
+    */
     public static ErrorAndTime getErrorAndTime(File runDir, ListExperiment exp, String instance, String args, String autowekaSeed)
     {
         return getErrorAndTime(runDir, exp, instance, args, autowekaSeed, new Properties());
@@ -119,6 +122,9 @@ public class SubProcessWrapper extends Wrapper
         return getErrorAndTime(runDir, exp.memory, props, exp.trainTimeout, instance, args, autowekaSeed);
     }
     
+    /**
+     * ErrorAndTime versions for Experiment
+    */
     public static ErrorAndTime getErrorAndTime(File runDir, Experiment exp, String instance, String args, String autowekaSeed)
     {
         return getErrorAndTime(runDir, exp, instance, args, autowekaSeed, new Properties());

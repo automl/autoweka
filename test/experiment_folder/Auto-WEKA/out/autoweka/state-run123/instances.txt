@@ -1,0 +1,10 @@
+seed=123:terminationPercent=30[$]autoweka.instancegenerators.CrossValidation[$]seed=123:numFolds=10:fold=0
+seed=123:terminationPercent=30[$]autoweka.instancegenerators.CrossValidation[$]seed=123:numFolds=10:fold=1
+seed=123:terminationPercent=30[$]autoweka.instancegenerators.CrossValidation[$]seed=123:numFolds=10:fold=2
+seed=123:terminationPercent=30[$]autoweka.instancegenerators.CrossValidation[$]seed=123:numFolds=10:fold=3
+seed=123:terminationPercent=30[$]autoweka.instancegenerators.CrossValidation[$]seed=123:numFolds=10:fold=4
+seed=123:terminationPercent=30[$]autoweka.instancegenerators.CrossValidation[$]seed=123:numFolds=10:fold=5
+seed=123:terminationPercent=30[$]autoweka.instancegenerators.CrossValidation[$]seed=123:numFolds=10:fold=6
+seed=123:terminationPercent=30[$]autoweka.instancegenerators.CrossValidation[$]seed=123:numFolds=10:fold=7
+seed=123:terminationPercent=30[$]autoweka.instancegenerators.CrossValidation[$]seed=123:numFolds=10:fold=8
+seed=123:terminationPercent=30[$]autoweka.instancegenerators.CrossValidation[$]seed=123:numFolds=10:fold=9

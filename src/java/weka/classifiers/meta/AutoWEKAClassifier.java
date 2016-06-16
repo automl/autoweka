@@ -79,11 +79,13 @@ import autoweka.tools.GetBestFromTrajectoryGroup;
 
 /**
  * Auto-WEKA interface for WEKA.
- *
- * @author Lars Kotthoff
+
+* * @author Lars Kotthoff
  */
 
 public class AutoWEKAClassifier extends AbstractClassifier implements AdditionalMeasureProducer {
+
+
 
     /** For serialization. */
     static final long serialVersionUID = 2907034203562786373L;
@@ -121,6 +123,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     /** Default additional arguments for Auto-WEKA. */
     static final String DEFAULT_EXTRA_ARGS = "initialIncumbent=RANDOM:acq-func=EI";
 
+
+
     /** The chosen classifier. */
     protected Classifier classifier;
     /** The chosen attribute selection method. */
@@ -139,7 +143,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     /** The arguments of the chosen attribute evaluation method. */
     protected String[] attributeEvalArgs;
 
-    /** The path to the internal Auto-WEKA files. */
+    /** The path to the internal Auto-WEKA files.*/
     protected static String msExperimentPath;
     /** The internal name of the experiment. */
     protected static String expName = "Auto-WEKA";
@@ -201,6 +205,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     * @throws Exception if the classifier could not be built successfully.
     */
     public void buildClassifier(Instances is) throws Exception {
+
         msExperimentPath = Files.createTempDirectory("autoweka").toString() + File.separator;
         getCapabilities().testWithFail(is);
 
@@ -242,6 +247,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         //Make the thing
         ExperimentConstructor.buildSingle("autoweka.smac.SMACExperimentConstructor", exp, args);
+
 
         // run experiment
         Thread worker = new Thread(new Runnable() {
@@ -315,11 +321,17 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         // print trajectory information
         log.debug("Optimization trajectory:");
+
         for(Trajectory t: group.getTrajectories()) {
             log.debug("{}", t);
         }
 
         GetBestFromTrajectoryGroup mBest = new GetBestFromTrajectoryGroup(group);
+
+        //@TODO
+        //Get best from rank. Check if its argstr matches mBest's. If it doesnt, check if you can find mBest tying with the best from rank. If not, its a problem. If yes, switch
+        //the best in the rank to mbest for consistency. Maybe term holdout etc will need a diff behavior regarding that.
+
         if(mBest.errorEstimate == autoweka.ClassifierResult.INFINITY) {
             throw new Exception("All runs timed out, unable to find good configuration. Please allow more time and rerun.");
         }
@@ -337,6 +349,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         log.info("classifier: {}, arguments: {}, attribute search: {}, attribute search arguments: {}, attribute evaluation: {}, attribute evaluation arguments: {}",
             classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
+
 
         // train model on entire dataset and save
         as = new AttributeSelection();
@@ -480,6 +493,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             memLimit = DEFAULT_MEM_LIMIT;
         }
 
+
         //tmpStr = Utils.getOption("resampling", options);
         //if (tmpStr.length() != 0) {
         //    resampling = Resampling.valueOf(tmpStr);
@@ -575,6 +589,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     public String memLimitTipText() {
         return "the memory limit for runs (in MiB)";
     }
+
+
 
     //public void setResampling(Resampling r) {
     //    resampling = r;
@@ -699,7 +715,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             "attribute search arguments: " + (attributeSearchArgs != null ? Arrays.toString(attributeSearchArgs) : "[]") + "\n" +
             "attribute evaluation: " + attributeEvalClass + "\n" +
             "attribute evaluation arguments: " + (attributeEvalArgs != null ? Arrays.toString(attributeEvalArgs) : "[]") + "\n" +
-            "estimated error: " + estimatedError + "\n\n";
+            "estimated error: " + estimatedError + "\n\n"; //@TODO looks like this error is printing the wrong value
         try {
             res += eval.toSummaryString();
             res += "\n";

@@ -110,7 +110,7 @@ public class Util
     {
         parseCommandLineProperties(props, Arrays.asList(cmdLineArgs));
     }
-    
+
     /**
      * Looks for command line arguments of the form -prop PROPERTYSTRING and adds them to the given properties object
      */
@@ -120,10 +120,27 @@ public class Util
         {
             if(cmdLineArgs.get(i).startsWith("-prop"))
             {
-                parsePropertyString(props, cmdLineArgs.get(++i)); 
+                parsePropertyString(props, cmdLineArgs.get(++i));
             }
         }
     }
+
+    /**
+     * Initializes an empty file at the given path if it doesnt already exists
+     */
+
+   	public static void initializeFile(String aLogPath){
+
+   		try{
+   			File logFile = new File(aLogPath);
+   			if(!logFile.exists()){
+   				logFile.createNewFile();
+   			}
+   		}catch(Exception e){
+   			System.out.println("Couldn't initialize file at this path: "+aLogPath);
+   		}
+
+   	}
 
     /**
      * Makes folders along the specified path
@@ -156,7 +173,7 @@ public class Util
     {
         return System.getProperty("java.class.path") + java.io.File.pathSeparatorChar + URLDecoder.decode(Util.class.getProtectionDomain().getCodeSource().getLocation().getPath());
     }
-    
+
     /**
      * Tries to get the full path to the Java Executable that we're running
      */
@@ -278,7 +295,7 @@ public class Util
 
                 java.io.BufferedReader reader = new java.io.BufferedReader( new java.io.InputStreamReader(shellExec.getInputStream()));
                 String expandedPath = reader.readLine();
-                
+
                 // Only return a new value if expansion worked.
                 // We're reading from stdin. If there was a problem, it was written
                 // to stderr and our result will be null.
@@ -304,7 +321,7 @@ public class Util
 
                 java.io.BufferedReader reader = new java.io.BufferedReader( new java.io.InputStreamReader(shellExec.getInputStream()));
                 String expandedPath = reader.readLine();
-                
+
 
                 // Only return a new value if expansion worked.
                 // We're reading from stdin. If there was a problem, it was written
@@ -432,7 +449,7 @@ public class Util
         sb.append(strs[strs.length-1]);
         return sb.toString();
     }
-    
+
     /**
      * Joins a collection of strings together sepeated by a delim in the middle
      */
@@ -450,7 +467,7 @@ public class Util
         }
         return sb.toString();
     }
-    
+
     /**
      * Looks for any strings that have spaces in them, and surrounds them with quotes
      */
@@ -485,7 +502,7 @@ public class Util
             startIndex = endIndex+delimStr.length();
         }
         int middleStart = startIndex;
-        
+
         //Now go find stuff on the right
         endIndex = params.length();
         startIndex = endIndex;
@@ -549,7 +566,7 @@ public class Util
         for(int j = 0; j < numInstances; j++){
             double[] features = new double[attInfo.size()];
             int classValue = j % numClasses;
-        
+
             int index = 0;
             for(int i = 0; i < numUsefulNumeric; i++){
                 features[index++] = classValue * (i+1);
@@ -604,7 +621,7 @@ public class Util
         }
         return ".";
     }
-    
+
     /** Splits a string based on spaces, grouping atoms if they are inside non escaped double quotes.
      */
     static public List<String> splitQuotedString(String str)

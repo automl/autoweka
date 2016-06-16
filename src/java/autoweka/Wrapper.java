@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  *
  *  The command line arguments for these wrappers consist of two portions, a number of options that specify seeds/properties that relate to the wrapper itself,
  *  followed by the -wrapper argument. Depending on the SMBO method, this is where you specify the datasetString that you want to pass off to the InstanceGenerator,
- *  along with any other options that are required. The remainder of the arguments after the sub classes have processed the -wrapper are going to be passed off to the classifier 
+ *  along with any other options that are required. The remainder of the arguments after the sub classes have processed the -wrapper are going to be passed off to the classifier
  *  runner for evaluation.
  *
  *  There are a number of 'events' that occur during the run of a wrapper - if you need to do something special here you should just be able to override these and inject the correct
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 public class Wrapper
 {
     protected String mExperimentSeed = null;
-    protected String mInstance = null;
+    protected String mInstance = null; //instance string
     protected float mTimeout = 0;
     protected ClassifierRunner mRunner;
     protected Properties mProperties;
@@ -65,10 +65,12 @@ public class Wrapper
             else if(inWrapper)
             {
                 //Strip out the single quotes if they are there
-                if(arg.startsWith("'") && arg.endsWith("'"))
+                if(arg.startsWith("'") && arg.endsWith("'")){
                     wrapperArgs.add(arg.substring(1, arg.length()-1));
-                else
+                }
+                else{
                     wrapperArgs.add(arg);
+                }
             }
             else
             {
@@ -153,12 +155,14 @@ public class Wrapper
     protected ClassifierResult _doRun(List<String> runnerArgs)
     {
         //Run it
+
         ClassifierResult res = new ClassifierResult(mResultMetric);
         res.setCompleted(false);
         com.sun.management.OperatingSystemMXBean OSBean = (com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory.getOperatingSystemMXBean();
         long startTime = OSBean.getProcessCpuTime();
-        for(String s: runnerArgs)
+        for(String s: runnerArgs){
             log.trace("Adding arg {}", s);
+        }
 
         try {
             res = mRunner.run(mInstance, mResultMetric, mTimeout, mExperimentSeed, runnerArgs);

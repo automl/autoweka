@@ -36,6 +36,10 @@ public class WekaArgumentConverter
          * Contains up to three elements, 'attributesearch' for all params related to the search process, 'attributeeval' for the evaluators, and 'classifier' which has all the arguments for the classifier
          */
         public Map<String, List<String>> argMap;
+
+        public String toString(){
+            return "Property Map:"+this.propertyMap.toString()+" ||| Arg Map:"+this.argMap.toString();
+        }
     }
     
     private static Arguments processArgs(List<ArgumentPair> argList)

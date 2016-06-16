@@ -125,13 +125,13 @@ public class SMACExperimentConstructor extends ExperimentConstructor
             args.add("--deterministicInstanceOrdering");
             args.add(props.getProperty("deterministicInstanceOrdering"));
         }
-        
+
         if(props.containsKey("initialIncumbent"))
         {
             args.add("--initialIncumbent");
             args.add(props.getProperty("initialIncumbent"));
         }
-        
+
         if(props.containsKey("initialIncumbentRuns"))
         {
             args.add("--initialIncumbentRuns");
@@ -143,7 +143,7 @@ public class SMACExperimentConstructor extends ExperimentConstructor
             args.add("--initialN");
             args.add(props.getProperty("initialN"));
         }
-        
+
         if(props.containsKey("initialChallenge"))
         {
             args.add("--initialChallenge");
@@ -155,7 +155,7 @@ public class SMACExperimentConstructor extends ExperimentConstructor
             args.add("--stateSerializer");
             args.add(props.getProperty("stateSerializer"));
         }
-        
+
         if(props.containsKey("acq-func"))
         {
             args.add("--acq-func");
@@ -187,7 +187,7 @@ public class SMACExperimentConstructor extends ExperimentConstructor
         String instancesOverride = props.getProperty("instancesOverride", null);
         if(instancesOverride != null)
         {
-            out.println(instancesOverride); 
+            out.println(instancesOverride);
         }
         else
         {

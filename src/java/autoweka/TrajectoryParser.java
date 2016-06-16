@@ -20,6 +20,9 @@ public abstract class TrajectoryParser
     /** Call this on a specific experiment to automatically create the correct trajectory parser that will
      *  be used to extract the data
      */
+
+    public TrajectoryParser(){};
+
     public static void main(String[] args)
     {
         String targetSeed = null;
