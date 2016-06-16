@@ -79,24 +79,26 @@ public class Configuration extends XmlSerializable implements Comparable{
 		this.mArgStrings=args;
 	}
 
-	//Merges two instances of the same configuration (i.e. same argument string), while keeping track of scores and folds id's
+	//Merges two instances of the same configuration (i.e. same argument string), while keeping track of scores and folds id's. Merging is done on caller configuration only.
 	public void mergeWith(Configuration c){
 
 		if(c.hashCode()!=this.hashCode()){
 			throw new RuntimeException("Not equivalent configurations!");
 		}
-
 		//@TODO optimize those to Integer and Double later
-		String wNewFold = Integer.toString(c.getEvaluatedFold()); // new Integer(c.getEvaluatedFold());
-		String wMyFold = Integer.toString(mEvaluatedFold);
-		mFolds.add(wNewFold);
-		mAmtFolds++;
-
-		String wNewScore = Double.toString(c.getEvaluatedScore()); //new Double(c.getEvaluatedScore());
-		String wMyScore = Double.toString(mEvaluatedScore);
-		averagedFlag=false;
-		mScores.add(wNewScore);
-		mAmtScores++;
+		if(c.mFolds!=null){
+			for(String fold : c.mFolds){
+				this.mFolds.add(fold);
+				this.mAmtFolds++;
+			}
+		}
+		if(c.mFolds!=null){
+			for(String score : c.mScores){
+				this.mScores.add(score);
+				averagedFlag=false;
+				this.mAmtScores++;
+			}
+		}
 
 	}
 
@@ -113,7 +115,7 @@ public class Configuration extends XmlSerializable implements Comparable{
 
 	public void forceUpdateAverage(){
 		mAverageScore=average(mScores);
-		averagedFlag=true; 
+		averagedFlag=true;
 	}
 
 	private double average(List<String> l){ //Apparently theres no standard java method for that. @TODO Check if thats true
