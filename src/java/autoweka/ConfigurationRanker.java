@@ -5,9 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import weka.classifiers.meta.AutoWEKAClassifier;
-
-import java.io.File;
 
 
 
@@ -19,14 +16,13 @@ public class ConfigurationRanker{
 
 		List<Configuration> mergedConfigurations = mergeConfigurations(aTemporaryLogPath);
 
-
 		ArrayList<Configuration> choppedList = chopList(mergedConfigurations,n);
 
-		forceFirst(choppedList,smacBest);
-
+		if(!smacBest.equals("IGNORE")){ //We might want to ignore this just for testing purposes. @TODO find a more elegant way to test
+			forceFirst(choppedList,smacBest);
+		}
 
 		ConfigurationCollection spit = new ConfigurationCollection(choppedList);
-
 
 		spit.toXML(aSortedLogPath);// ba dum tss
 	}

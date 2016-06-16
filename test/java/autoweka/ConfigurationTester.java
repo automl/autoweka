@@ -49,7 +49,9 @@ public class ConfigurationTester{
 
     //Tests averaging
     c1.mergeWith(c3);
+
     assertEquals(c1.getAverageScore(),sum/10,0.1);
+
 
     //Tests fold counting
     List<String> strC1Folds = c1.getFolds();
@@ -98,6 +100,7 @@ public class ConfigurationTester{
     c3.setEvaluationValues(0,0);
     c3.setEvaluationValues(0,1);
     c3.setEvaluationValues(0,2);
+
     assertTrue(c2.compareTo(c3)==0);
 
     c2.setEvaluationValues(0,3);
@@ -107,6 +110,7 @@ public class ConfigurationTester{
 
   @Test
   public void settersAndAveragerTest(){
+
     Configuration c1 = new Configuration("args_placeholder");
 
     Random rg = new Random();
@@ -126,6 +130,7 @@ public class ConfigurationTester{
 
   @Test
   public void rankerTest(){
+
     String temporaryTestLog = "test/ranker_test/temporaryTestLog.xml";
     String sortedTestLog = "test/ranker_test/sortedTestLog.xml" ;
 
@@ -158,8 +163,6 @@ public class ConfigurationTester{
     }
 
   }
-
-
 
 
 

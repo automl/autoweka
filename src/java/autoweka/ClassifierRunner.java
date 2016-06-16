@@ -5,9 +5,6 @@ import weka.classifiers.AbstractClassifier;
 import weka.classifiers.evaluation.output.prediction.CSV;
 import weka.core.Instances;
 import weka.core.Instance;
-import weka.classifiers.meta.AutoWEKAClassifier;
-import autoweka.instancegenerators.CrossValidation;
-import autoweka.instancegenerators.TerminationHoldout;
 
 import java.io.File;
 import java.io.BufferedWriter;
