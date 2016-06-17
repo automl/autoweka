@@ -65,18 +65,18 @@ public class ConfigurationRanker{
 	//Helper method for the above
 	private static ArrayList<Configuration> mergeConfigurations(String aTemporaryLogPath){
 
-		Integer ciKey;
+		String ciKey;
 		ConfigurationCollection loadedCC = ConfigurationCollection.fromXML(aTemporaryLogPath,ConfigurationCollection.class);
 
-		HashMap<Integer,Configuration> configurationsMap = new HashMap<Integer,Configuration>();
+		HashMap<String,Configuration> configurationsMap = new HashMap<String,Configuration>();
 		ArrayList<Configuration> configurationsArrayList= loadedCC.asArrayList(); //@TODO make configurationcollection iterable later
 
 		for(Configuration ciConfig : configurationsArrayList){
-			ciKey = ciConfig.hashCode();
+			ciKey = ciConfig.getArgStrings();
 			if(configurationsMap.containsKey(ciKey)){
 				configurationsMap.get(ciKey).mergeWith(ciConfig);
 			}else{
-				configurationsMap.put(new Integer(ciKey),ciConfig);
+				configurationsMap.put(ciKey,ciConfig);
 			}
 		}
 
