@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Utility class for determining what kind of methods can be applied to a set of instances.
  *
- * Goes through a folder looking for .param files, and trys to instantiate the class to see if 
- * it can be used with the given set of instances 
+ * Goes through a folder looking for .param files, and trys to instantiate the class to see if
+ * it can be used with the given set of instances
  */
 public class ApplicabilityTester
 {
@@ -72,7 +72,7 @@ public class ApplicabilityTester
 
         return app;
     }
-    
+
     /**
      * Looks inside a folder for .param files that are WEKA ASEvals
      *
@@ -83,7 +83,7 @@ public class ApplicabilityTester
     {
         return getApplicable(instances, paramDirName + File.separator + "attribselection" + File.separator + "eval" + File.separator, Testable.ATTRIBUTE_EVAL, null, null);
     }
-    
+
     /**
      * Looks inside a folder for .param files that are WEKA ASSearches
      *
@@ -144,10 +144,10 @@ public class ApplicabilityTester
                 return false;
         }
     }
-    
+
     private static boolean isApplicableClassifier(String method, Instances instances, List<String> options)
     {
-        //Go get ourselves a classifier, and get some 
+        //Go get ourselves a classifier, and get some
         try
         {
             Class<?> cls = Class.forName(method);
@@ -198,7 +198,7 @@ public class ApplicabilityTester
         }
         return true;
     }
-    
+
     private static boolean isApplicableAttributeEvaluator(String method, Instances instances) {
         //Build an ASE and see if it can handle the instances
         try {

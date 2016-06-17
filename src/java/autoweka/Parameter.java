@@ -292,7 +292,7 @@ public class Parameter
      */
     public int defaultCategoricalIndex = -1;
     /**
-     * The list containing the default categorical value - only valid if type == CATEGORICAL
+     * The list containing all the possible values of the parameter - only valid if type == CATEGORICAL
      */
     public List<String> categoricalInnards = null;
     /**
