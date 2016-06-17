@@ -68,7 +68,10 @@ public class SMACTrajectoryParser extends TrajectoryParser
                     log.debug("Time: {}, score: {}", time, score);
                     argString = filterArgString(params, matcher.group(3));
                     traj.addPoint(new Trajectory.Point(time, score, argString));
+<<<<<<< HEAD
 
+=======
+>>>>>>> b1a0e2521eef6c276e67d60fdcd87f9860be7983
                 }
                 else
                 {

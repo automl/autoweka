@@ -407,6 +407,7 @@ public class ClassifierRunner
       configurations.toXML(tempConfigLog);
     }
 
+
     protected void disableOutput()
     {
         if(!mDisableOutput) return;

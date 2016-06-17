@@ -91,6 +91,8 @@ pblic class AutoWEKAClassifier extends AbstractClassifier implements AdditionalM
 
 
 
+
+
     /** For serialization. */
     static final long serialVersionUID = 2907034203562786373L;
 
@@ -259,6 +261,7 @@ pblic class AutoWEKAClassifier extends AbstractClassifier implements AdditionalM
         //Make the thing
         ExperimentConstructor.buildSingle("autoweka.smac.SMACExperimentConstructor", exp, args);
 
+<<<<<<< HEAD
         //Initializing logs
         if(nBestConfigs>1){
           try{
@@ -272,6 +275,8 @@ pblic class AutoWEKAClassifier extends AbstractClassifier implements AdditionalM
             log.debug("Couldn't initialize log at: "+msExperimentPath+expName+"/"+sortedConfigurationLog);
           }
         }
+=======
+>>>>>>> b1a0e2521eef6c276e67d60fdcd87f9860be7983
 
         // run experiment
         Thread worker = new Thread(new Runnable() {
@@ -374,10 +379,13 @@ pblic class AutoWEKAClassifier extends AbstractClassifier implements AdditionalM
         log.info("classifier: {}, arguments: {}, attribute search: {}, attribute search arguments: {}, attribute evaluation: {}, attribute evaluation arguments: {}",
             classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
 
+<<<<<<< HEAD
         //Print log of best configurations
         if (nBestConfigs>1){
           ConfigurationRanker.rank(nBestConfigs,msExperimentPath+expName+"/"+temporaryConfigurationLog,msExperimentPath+expName+"/"+sortedConfigurationLog,mBest.rawArgs);
         }
+=======
+>>>>>>> b1a0e2521eef6c276e67d60fdcd87f9860be7983
 
         // train model on entire dataset and save
         as = new AttributeSelection();
@@ -526,12 +534,15 @@ pblic class AutoWEKAClassifier extends AbstractClassifier implements AdditionalM
             memLimit = DEFAULT_MEM_LIMIT;
         }
 
+<<<<<<< HEAD
         tmpStr = Utils.getOption("nBestConfigs", options);
         if (tmpStr.length() != 0) {
             nBestConfigs = Integer.parseInt(tmpStr);
         } else {
             nBestConfigs = DEFAULT_N_BEST;
         }
+=======
+>>>>>>> b1a0e2521eef6c276e67d60fdcd87f9860be7983
 
         //tmpStr = Utils.getOption("resampling", options);
         //if (tmpStr.length() != 0) {
@@ -629,6 +640,7 @@ pblic class AutoWEKAClassifier extends AbstractClassifier implements AdditionalM
         return "the memory limit for runs (in MiB)";
     }
 
+<<<<<<< HEAD
    /**
     * Set the amount of configurations that will be given as output
     * @param The amount of best configurations desired by the user
@@ -652,6 +664,9 @@ pblic class AutoWEKAClassifier extends AbstractClassifier implements AdditionalM
    public String nBestConfigsTipText() {
        return "How many of the best configurations should be returned as output";
    }
+=======
+
+>>>>>>> b1a0e2521eef6c276e67d60fdcd87f9860be7983
 
     //public void setResampling(Resampling r) {
     //    resampling = r;
