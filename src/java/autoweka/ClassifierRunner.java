@@ -354,6 +354,7 @@ public class ClassifierRunner
             {
                 //We're good, we can safely report this value
                 res.setScoreFromEval(eval, instances);
+                saveConfiguration(res,args,instanceStr);
             }
         } catch(Exception e) {
             log.debug("Evaluating classifier failed: {}", e.getMessage(), e);
@@ -374,6 +375,37 @@ public class ClassifierRunner
         return true;
     }
 
+    protected void saveConfiguration(ClassifierResult res,List<String> args, String instanceStr){
+      String tempConfigLog = "TemporaryConfigurationLog.xml"; //TODO unhardcode this somehow?
+      File log = new File(tempConfigLog);
+      if (!log.exists()){ //We're not returning more than 1 config so this is pointless
+        return;
+      }
+
+      String sortedConfigLog = "SortedConfigurationLog.xml";
+      double score = res.getScore();
+      ConfigurationCollection configurations;
+
+      Configuration currentConfig = new Configuration(args);
+
+      Properties pInstanceString = Util.parsePropertyString(instanceStr);
+      int currentFold = Integer.parseInt(pInstanceString.getProperty("fold", "-1"));
+
+      currentConfig.setEvaluationValues(score,currentFold);
+
+      //Get the temporary log
+      try{
+        configurations = ConfigurationCollection.fromXML(tempConfigLog,ConfigurationCollection.class);
+      }catch(Exception e){
+        //This will be the first configuration to be logged.
+        Util.initializeFile(sortedConfigLog);
+        Util.initializeFile(tempConfigLog);
+        configurations = new ConfigurationCollection();
+      }
+      //Adding the new guy and spiting the updated log out
+      configurations.add(currentConfig);
+      configurations.toXML(tempConfigLog);
+    }
 
 
     protected void disableOutput()
