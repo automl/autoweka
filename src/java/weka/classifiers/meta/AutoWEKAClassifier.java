@@ -87,7 +87,7 @@ import autoweka.ConfigurationRanker;
 
 * * @author Lars Kotthoff
  */
-pblic class AutoWEKAClassifier extends AbstractClassifier implements AdditionalMeasureProducer {
+public class AutoWEKAClassifier extends AbstractClassifier implements AdditionalMeasureProducer {
 
 
 
