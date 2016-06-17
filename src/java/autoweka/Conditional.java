@@ -52,6 +52,7 @@ public class Conditional
 
     /**
      * The name of the 'child' parameter that is conditional on the parent taking on a particular value
+     * (This class encodes the condition from the child param's perspective. @TODO rename to child rather than parameter)
      */
     public Parameter parameter;
     /**
