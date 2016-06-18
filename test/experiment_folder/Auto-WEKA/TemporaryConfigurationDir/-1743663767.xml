@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersbayesbayesnet_00_D REMOVED -_0__wekaclassifiersbayesbayesnet_01_Q weka.classifiers.bayes.net.search.local.LAGDHillClimber -aseval__wekaattributeselectioncfssubseteval_00_0_M REMOVED -aseval__wekaattributeselectioncfssubseteval_01_1_L REMOVED -assearch__wekaattributeselectiongreedystepwise_00_0_C REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_01_1_B REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_02_2_R REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_03_4_INT_N 397 -attributeeval weka.attributeSelection.CfsSubsetEval -attributesearch weka.attributeSelection.GreedyStepwise -attributetime 5.0 -targetclass weka.classifiers.bayes.BayesNet </argStrings>
+    <evaluatedScore>1.893939393939391</evaluatedScore>
+    <evaluatedFold>3</evaluatedFold>
+    <folds>3</folds>
+    <scores>1.893939393939391</scores>
+    <avgScore>1.893939393939391</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+</configuration>

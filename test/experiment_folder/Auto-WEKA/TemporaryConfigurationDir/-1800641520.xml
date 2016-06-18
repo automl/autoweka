@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersmetarandomsubspace_00_INT_I 5 -_0__wekaclassifiersmetarandomsubspace_01_P 0.4741261215318032 -_0__wekaclassifiersmetarandomsubspace_02_S 1 -_1_W weka.classifiers.lazy.IBk -_1_W_0_DASHDASH REMOVED -_1_W_1__wekaclassifierslazyibk_00_E REMOVE_PREV -_1_W_1__wekaclassifierslazyibk_01_INT_K 2 -_1_W_1__wekaclassifierslazyibk_02_X REMOVE_PREV -_1_W_1__wekaclassifierslazyibk_04_I REMOVED -aseval__wekaattributeselectioncfssubseteval_00_0_M REMOVE_PREV -aseval__wekaattributeselectioncfssubseteval_01_1_L REMOVE_PREV -assearch__wekaattributeselectionbestfirst_00_0_D 0 -assearch__wekaattributeselectionbestfirst_01_1_INT_N 7 -attributeeval weka.attributeSelection.CfsSubsetEval -attributesearch weka.attributeSelection.BestFirst -attributetime 5.0 -targetclass weka.classifiers.meta.RandomSubSpace </argStrings>
+    <evaluatedScore>6.439393939393938</evaluatedScore>
+    <evaluatedFold>3</evaluatedFold>
+    <folds>3</folds>
+    <scores>6.439393939393938</scores>
+    <avgScore>6.439393939393938</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+</configuration>

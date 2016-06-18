@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersmetaattributeselectedclassifier_00_S weka.attributeSelection.BestFirst -_0__wekaclassifiersmetaattributeselectedclassifier_01_E weka.attributeSelection.CfsSubsetEval -_1_W weka.classifiers.lazy.IBk -_1_W_0_DASHDASH REMOVED -_1_W_1__wekaclassifierslazyibk_00_E REMOVED -_1_W_1__wekaclassifierslazyibk_01_INT_K 42 -_1_W_1__wekaclassifierslazyibk_02_X REMOVE_PREV -_1_W_1__wekaclassifierslazyibk_04_I REMOVED -attributesearch NONE -attributetime 5.0 -targetclass weka.classifiers.meta.AttributeSelectedClassifier </argStrings>
+    <evaluatedScore>5.681818181818187</evaluatedScore>
+    <evaluatedFold>6</evaluatedFold>
+    <folds>6</folds>
+    <scores>5.681818181818187</scores>
+    <avgScore>5.681818181818187</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+</configuration>

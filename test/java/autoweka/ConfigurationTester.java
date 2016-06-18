@@ -129,11 +129,11 @@ public class ConfigurationTester{
   @Test
   public void rankerTest(){
 
-    String temporaryTestLog = "test/ranker_test/temporaryTestLog.xml";
-    String sortedTestLog = "test/ranker_test/sortedTestLog.xml" ;
+    String configIndex = "test/experiment_folder/Auto-WEKA/configIndex.txt";
+    String sortedTestLog = "test/experiment_folder/Auto-WEKA/sortedTestLog.xml" ;
 
     try{
-      Util.initializeFile(temporaryTestLog);
+      Util.initializeFile(configIndex);
     }catch(Exception e){
       System.out.println("Couldn't initialize temporaryTestLog.xml");
     }
@@ -143,16 +143,8 @@ public class ConfigurationTester{
       System.out.println("Couldn't initialize sortedTestLog.xml");
     }
 
-    ConfigurationCollection cc = new ConfigurationCollection();
-    Random rg = new Random();
-    for(int i=0;i<100;i++){
-      Configuration c = new Configuration("config_no_"+i%10);
-      c.setEvaluationValues(rg.nextDouble()%20,rg.nextInt(10));
-      cc.add(c);
-    }
-    cc.toXML(temporaryTestLog);
-
-    ConfigurationRanker.rank(100,temporaryTestLog,sortedTestLog,"IGNORE");
+    
+    ConfigurationRanker.rank(100,"test/experiment_folder/Auto-WEKA",sortedTestLog,configIndex,"IGNORE");
 
     cc = ConfigurationCollection.fromXML(sortedTestLog, ConfigurationCollection.class);
     double currentscore = cc.get(0).getAverageScore();

@@ -698,7 +698,7 @@ assearch__wekaattributeselectiongreedystepwise_02_2_R {REMOVED, REMOVE_PREV} [RE
 assearch__wekaattributeselectiongreedystepwise_03_4_INT_N [10, 1000] [30]il
 attributeeval {weka.attributeSelection.CfsSubsetEval} [weka.attributeSelection.CfsSubsetEval]
 attributesearch {NONE, weka.attributeSelection.BestFirst, weka.attributeSelection.GreedyStepwise} [NONE]
-attributetime {50.0} [50.0]
+attributetime {5.0} [5.0]
 targetclass {weka.classifiers.bayes.BayesNet, weka.classifiers.bayes.NaiveBayes, weka.classifiers.functions.Logistic, weka.classifiers.functions.MultilayerPerceptron, weka.classifiers.functions.SMO, weka.classifiers.functions.SimpleLogistic, weka.classifiers.lazy.IBk, weka.classifiers.lazy.KStar, weka.classifiers.rules.DecisionTable, weka.classifiers.rules.JRip, weka.classifiers.rules.OneR, weka.classifiers.rules.PART, weka.classifiers.rules.ZeroR, weka.classifiers.trees.DecisionStump, weka.classifiers.trees.J48, weka.classifiers.trees.LMT, weka.classifiers.trees.REPTree, weka.classifiers.trees.RandomForest, weka.classifiers.trees.RandomTree, weka.classifiers.lazy.LWL, weka.classifiers.meta.AdaBoostM1, weka.classifiers.meta.AttributeSelectedClassifier, weka.classifiers.meta.Bagging, weka.classifiers.meta.RandomCommittee, weka.classifiers.meta.RandomSubSpace, weka.classifiers.meta.Stacking, weka.classifiers.meta.Vote} [weka.classifiers.bayes.BayesNet]
 Conditionals:
 _0__wekaclassifiersbayesbayesnet_00_D | targetclass in {weka.classifiers.bayes.BayesNet}
