@@ -129,7 +129,7 @@ public class ConfigurationTester{
   @Test
   public void rankerTest(){
 
-    String configIndex = "test/experiment_folder/Auto-WEKA/configIndex.txt";
+    String configIndex   = "test/experiment_folder/Auto-WEKA/configIndex.txt";
     String sortedTestLog = "test/experiment_folder/Auto-WEKA/SortedConfigurationLog.xml" ;
 
     try{
@@ -144,7 +144,7 @@ public class ConfigurationTester{
     }
 
 
-    ConfigurationRanker.rank(100,"test/experiment_folder/Auto-WEKA",sortedTestLog,configIndex,"IGNORE");
+    ConfigurationRanker.rank(1000,"test/experiment_folder/Auto-WEKA",sortedTestLog,configIndex,"IGNORE");
 
     ConfigurationCollection cc = ConfigurationCollection.fromXML(sortedTestLog, ConfigurationCollection.class);
     double currentscore = cc.get(0).getAverageScore();
