@@ -130,7 +130,7 @@ public class ConfigurationTester{
   public void rankerTest(){
 
     String configIndex = "test/experiment_folder/Auto-WEKA/configIndex.txt";
-    String sortedTestLog = "test/experiment_folder/Auto-WEKA/sortedTestLog.xml" ;
+    String sortedTestLog = "test/experiment_folder/Auto-WEKA/SortedConfigurationLog.xml" ;
 
     try{
       Util.initializeFile(configIndex);
