@@ -376,35 +376,47 @@ public class ClassifierRunner
     }
 
     protected void saveConfiguration(ClassifierResult res,List<String> args, String instanceStr){
-      String tempConfigLog = "TemporaryConfigurationLog.xml"; //TODO unhardcode this somehow?
-      File log = new File(tempConfigLog);
-      if (!log.exists()){ //We're not returning more than 1 config so this is pointless
+      //Checking if we're doing this logging for this run of autoweka
+      //TODO unhardcode this somehow/ find a more elegant workaorund for this check
+      File sortedLog = new File("SortedConfigurationLog.xml");
+      if (!sortedLog.exists()){
         return;
       }
 
-      String sortedConfigLog = "SortedConfigurationLog.xml";
-      double score = res.getScore();
-      ConfigurationCollection configurations;
+      //Setting up some basic stuff
+      Configuration ciConfig = new Configuration(args);
+      int ciHash             = ciConfig.hashCode();
+      String ciFilename      = "TemporaryConfigurationDir/"+ciHash+".xml";
+      File ciFile            = new File(ciFilename);
+      String configIndex     = "configIndex.txt";
 
-      Configuration currentConfig = new Configuration(args);
-
+      //Computing Score and fold ID
       Properties pInstanceString = Util.parsePropertyString(instanceStr);
-      int currentFold = Integer.parseInt(pInstanceString.getProperty("fold", "-1"));
+      int ciFold     = Integer.parseInt(pInstanceString.getProperty("fold", "-1"));
+      double ciScore = res.getScore();
 
-      currentConfig.setEvaluationValues(score,currentFold);
+      //Updating the configuration data
+      ciConfig.setEvaluationValues(ciScore,ciFold);
 
-      //Get the temporary log
-      try{
-        configurations = ConfigurationCollection.fromXML(tempConfigLog,ConfigurationCollection.class);
-      }catch(Exception e){
-        //This will be the first configuration to be logged.
-        Util.initializeFile(sortedConfigLog);
-        Util.initializeFile(tempConfigLog);
-        configurations = new ConfigurationCollection();
+      if (ciFile.exists()){
+        Configuration ciConfigFull = Configuration.fromXML(ciFilename,Configuration.class); //Find a faster way w/o IOs?
+        ciConfigFull.mergeWith(ciConfig);
+        ciConfigFull.toXML(ciFilename);
+      }else{
+        Util.initializeFile(ciFilename);
+        ciConfig.toXML(ciFilename);
       }
-      //Adding the new guy and spiting the updated log out
-      configurations.add(currentConfig);
-      configurations.toXML(tempConfigLog);
+
+      //Updating the configuration list
+      try{
+          BufferedWriter fp = new BufferedWriter(new FileWriter(configIndex,true));//true for appending
+          fp.write(ciHash+",");
+          fp.flush();
+          fp.close();
+      }catch(IOException e){
+          throw new RuntimeException("Couldn't write to configIndex");
+      }
+
     }
 
 

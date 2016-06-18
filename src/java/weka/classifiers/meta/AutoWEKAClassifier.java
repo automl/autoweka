@@ -89,10 +89,6 @@ import autoweka.ConfigurationRanker;
  */
 public class AutoWEKAClassifier extends AbstractClassifier implements AdditionalMeasureProducer {
 
-
-
-
-
     /** For serialization. */
     static final long serialVersionUID = 2907034203562786373L;
 
@@ -158,6 +154,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     protected static String sortedConfigurationLog="SortedConfigurationLog.xml";
     /** The path for the log where the unsorted configurations are held, relative to the temporary directory in msExperimentPath */
     protected static String temporaryConfigurationLog="TemporaryConfigurationLog.xml";
+    /** The path for the log with the hashcodes for the configs we have**/
+    protected static String configIndexLog = "configIndex.txt";
     /** The random seed. */
     protected int seed = 123;
     /** The time limit for running Auto-WEKA. */
@@ -257,23 +255,17 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         List<String> args = new LinkedList<String>();
         args.add("-experimentpath");
         args.add(msExperimentPath);
-
         //Make the thing
+
         ExperimentConstructor.buildSingle("autoweka.smac.SMACExperimentConstructor", exp, args);
 
 
         //Initializing logs
         if(nBestConfigs>1){
-          try{
             Util.initializeFile(msExperimentPath+expName+"/"+temporaryConfigurationLog);
-          }catch(Exception e){
-            log.debug("Couldn't initialize log at: "+msExperimentPath+expName+"/"+temporaryConfigurationLog);
-          }
-          try{
+            Util.initializeFile(msExperimentPath+expName+"/"+configIndexLog); //TODO unhardcode-ish
             Util.initializeFile(msExperimentPath+expName+"/"+sortedConfigurationLog);
-          }catch(Exception e){
-            log.debug("Couldn't initialize log at: "+msExperimentPath+expName+"/"+sortedConfigurationLog);
-          }
+            Util.makePath(msExperimentPath+expName+"/TemporaryConfigurationDir");
         }
 
 
@@ -356,10 +348,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         GetBestFromTrajectoryGroup mBest = new GetBestFromTrajectoryGroup(group);
 
-        //@TODO
-        //Get best from rank. Check if its argstr matches mBest's. If it doesnt, check if you can find mBest tying with the best from rank. If not, its a problem. If yes, switch
-        //the best in the rank to mbest for consistency. Maybe term holdout etc will need a diff behavior regarding that.
-
         if(mBest.errorEstimate == autoweka.ClassifierResult.INFINITY) {
             throw new Exception("All runs timed out, unable to find good configuration. Please allow more time and rerun.");
         }
@@ -381,7 +369,11 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         //Print log of best configurations
         if (nBestConfigs>1){
-          ConfigurationRanker.rank(nBestConfigs,msExperimentPath+expName+"/"+temporaryConfigurationLog,msExperimentPath+expName+"/"+sortedConfigurationLog,mBest.rawArgs);
+          ConfigurationRanker.rank( nBestConfigs,
+                                    msExperimentPath+expName,
+                                    msExperimentPath+expName+"/"+sortedConfigurationLog,
+                                    msExperimentPath+expName+"/"+configIndexLog,
+                                    mBest.rawArgs);
         }
 
 
