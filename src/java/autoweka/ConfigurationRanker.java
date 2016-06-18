@@ -46,7 +46,9 @@ public class ConfigurationRanker{
 		Collections.reverse(configs); //TODO invert definition in compareto rather than using this?
 
 		//Forcing the last incumbent to be the best configuration, in case of a tie
-		forceFirst(configs,smacBest); //gotta do this before slicing, otherwise smacBest might be lost in the slice
+		if (!smacBest.equals("IGNORE")){
+			forceFirst(configs,smacBest); //gotta do this before slicing, otherwise smacBest might be lost in the slice
+		}
 
 		//Slicing the list to size n
 		configs = configs.subList(0,  (n<configs.size())?(n):(configs.size())  );
