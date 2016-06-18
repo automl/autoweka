@@ -143,10 +143,10 @@ public class ConfigurationTester{
       System.out.println("Couldn't initialize sortedTestLog.xml");
     }
 
-    
+
     ConfigurationRanker.rank(100,"test/experiment_folder/Auto-WEKA",sortedTestLog,configIndex,"IGNORE");
 
-    cc = ConfigurationCollection.fromXML(sortedTestLog, ConfigurationCollection.class);
+    ConfigurationCollection cc = ConfigurationCollection.fromXML(sortedTestLog, ConfigurationCollection.class);
     double currentscore = cc.get(0).getAverageScore();
     for(int i=0;i<cc.size();i++){
       assertTrue(currentscore <= cc.get(i).getAverageScore());
