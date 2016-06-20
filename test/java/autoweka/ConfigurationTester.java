@@ -150,7 +150,7 @@ public class ConfigurationTester{
     double currentscore = cc.get(0).getAverageScore();
     for(int i=0;i<cc.size();i++){
       System.out.println("current "+i);
-      System.out.println("args+"(cc.get(i).getArgStrings()));
+      System.out.println("args"+(cc.get(i).getArgStrings()));
       assertTrue(currentscore <= cc.get(i).getAverageScore());
     }
 
