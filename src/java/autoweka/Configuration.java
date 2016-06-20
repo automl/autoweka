@@ -51,6 +51,7 @@ public class Configuration extends XmlSerializable implements Comparable{
 	@XmlElement(name="amtFolds")
 	private int mAmtFolds;
 
+	@XmlElement(name="avgFlag")
 	private boolean averagedFlag;
 
 	public Configuration(){
@@ -61,8 +62,6 @@ public class Configuration extends XmlSerializable implements Comparable{
 		this.mAverageScore=0;
 		this.mAmtFolds=0;
 		this.mAmtScores=0;
-		this.mFolds=null;
-		this.mScores=null;
 		this.averagedFlag=false;
 	}
 
