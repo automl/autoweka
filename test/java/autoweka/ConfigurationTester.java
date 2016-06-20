@@ -149,8 +149,12 @@ public class ConfigurationTester{
     ConfigurationCollection cc = ConfigurationCollection.fromXML(sortedTestLog, ConfigurationCollection.class);
     double currentscore = cc.get(0).getAverageScore();
     for(int i=0;i<cc.size();i++){
-      System.out.println("current "+i);
+      
       System.out.println("args"+(cc.get(i).getArgStrings()));
+
+    }
+    for(int i=0;i<cc.size();i++){
+      System.out.println("current "+i);
       assertTrue(currentscore <= cc.get(i).getAverageScore());
     }
 
