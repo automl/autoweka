@@ -149,8 +149,10 @@ public class ConfigurationTester{
     ConfigurationCollection cc = ConfigurationCollection.fromXML(sortedTestLog, ConfigurationCollection.class);
     double currentscore = cc.get(0).getAverageScore();
     for(int i=0;i<cc.size();i++){
-      
+
       System.out.println("args"+(cc.get(i).getArgStrings()));
+      if(cc.get(i).getScores()==null) System.out.println("scores is null!");
+      if(cc.get(i).getFolds() ==null) System.out.println("folds is null!");
 
     }
     for(int i=0;i<cc.size();i++){
