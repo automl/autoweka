@@ -158,7 +158,7 @@ public class ConfigurationTester{
     }
     for(int i=0;i<cc.size();i++){
       System.out.println("current "+i);
-      assertTrue(amtFolds >= cc.get(i).getFolds.size());
+      assertTrue(amtFolds >= cc.get(i).getFolds().size());
       if(amtFolds==cc.get(i).getFolds().size()){
         assertTrue(bestScore <= cc.get(i).getAverageScore());
       }
