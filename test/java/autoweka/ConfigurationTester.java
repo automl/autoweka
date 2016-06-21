@@ -147,7 +147,8 @@ public class ConfigurationTester{
     ConfigurationRanker.rank(1000,"test/experiment_folder/Auto-WEKA",sortedTestLog,configIndex,"IGNORE");
 
     ConfigurationCollection cc = ConfigurationCollection.fromXML(sortedTestLog, ConfigurationCollection.class);
-    double currentscore = cc.get(0).getAverageScore();
+    double bestScore = cc.get(0).getAverageScore();
+    int    amtFolds  = cc.get(0).getFolds().size();
     for(int i=0;i<cc.size();i++){
 
       System.out.println("args"+(cc.get(i).getArgStrings()));
@@ -157,7 +158,10 @@ public class ConfigurationTester{
     }
     for(int i=0;i<cc.size();i++){
       System.out.println("current "+i);
-      assertTrue(currentscore <= cc.get(i).getAverageScore());
+      assertTrue(amtFolds >= cc.get(i).getFolds.size());
+      if(amtFolds==cc.get(i).getFolds().size()){
+        assertTrue(bestScore <= cc.get(i).getAverageScore());
+      }
     }
 
   }
