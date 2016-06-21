@@ -149,23 +149,13 @@ public class ConfigurationTester{
     ConfigurationCollection cc = ConfigurationCollection.fromXML(sortedTestLog, ConfigurationCollection.class);
     double bestScore = cc.get(0).getAverageScore();
     int    amtFolds  = cc.get(0).getFolds().size();
-    for(int i=0;i<cc.size();i++){
 
-      System.out.println("args"+(cc.get(i).getArgStrings()));
-      if(cc.get(i).getScores()==null) System.out.println("scores is null!");
-      if(cc.get(i).getFolds() ==null) System.out.println("folds is null!");
-
-    }
     for(int i=0;i<cc.size();i++){
-      System.out.println("current "+i);
       assertTrue(amtFolds >= cc.get(i).getFolds().size());
       if(amtFolds==cc.get(i).getFolds().size()){
         assertTrue(bestScore <= cc.get(i).getAverageScore());
       }
     }
-
   }
-
-
 
 }
