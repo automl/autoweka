@@ -118,6 +118,7 @@ public class Configuration extends XmlSerializable implements Comparable{
 	}
 
 	private double average(List<String> l){ //Apparently theres no standard java method for that. @TODO Check if thats true
+		System.out.println("@avging");
 		double sum = 0;
 		for (String d: l){
 			sum+=Double.parseDouble(d);
