@@ -74,6 +74,7 @@ import autoweka.Util;
 import autoweka.Trajectory;
 import autoweka.TrajectoryGroup;
 import autoweka.TrajectoryMerger;
+import autoweka.Ensembler;
 
 import autoweka.tools.GetBestFromTrajectoryGroup;
 
@@ -265,7 +266,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             Util.initializeFile(msExperimentPath+expName+"/"+temporaryConfigurationLog);
             Util.initializeFile(msExperimentPath+expName+"/"+configIndexLog); //TODO unhardcode-ish
             Util.initializeFile(msExperimentPath+expName+"/"+sortedConfigurationLog);
-            Util.makePath(msExperimentPath+expName+"/TemporaryConfigurationDir");
+            Util.makePath(msExperimentPath+expName+"/EnsemblerLogging/instancewise");
         }
 
 
@@ -389,6 +390,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             as.setEvaluator(asEval);
         }
         as.SelectAttributes(is);
+
+        Ensembler e = new Ensembler(msExperimentPath+expName);
 
         classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
 

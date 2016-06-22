@@ -14,6 +14,7 @@ import java.util.List;
 
 
 public class ConfigurationRanker{
+	//@TODO Make this a non-static thing just like the ensembler 
 	//@TODO maybe integrate this class to ConfigurationCollection
 
 	//Loads configurations from temporary log, merges identical while merging the folds in which they were analyzed, sorts them and spits n of them to a xml
@@ -35,7 +36,7 @@ public class ConfigurationRanker{
 			return;
 		}
 		for(String hash : configHashes){
-			configs.add(Configuration.fromXML(experimentPath+"/TemporaryConfigurationDir/"+hash+".xml",Configuration.class));
+			configs.add(Configuration.fromXML(experimentPath+"/EnsemblerLogging/"+hash+".xml",Configuration.class)); //TODO unhardcode
 		}
 
 		//Sorting the configurations

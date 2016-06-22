@@ -325,8 +325,14 @@ public class ClassifierRunner
         Evaluation eval = null;
         try
         {
+            Configuration tempConfig = new Configuration(args);
+            Properties pInstanceString = Util.parsePropertyString(instanceStr);
+            int ciFold = Integer.parseInt(pInstanceString.getProperty("fold", "-1"));
+
+            String ciPredictionsLog = "EnsemblerLogging/instancewise/instancewise_predictions_hash:"+tempConfig.hashCode()+"_fold:"+ciFold+".txt";
+
             eval = new Evaluation(instances);
-            EvaluatorThread evalThread = new EvaluatorThread(eval, classifier, instances, mPredictionsFileName);
+            EvaluatorThread evalThread = new EvaluatorThread(eval, classifier, instances, ciPredictionsLog );
 
             disableOutput();
             float evalTime = evalThread.runWorker(timeout);
@@ -354,6 +360,8 @@ public class ClassifierRunner
             {
                 //We're good, we can safely report this value
                 res.setScoreFromEval(eval, instances);
+                System.out.println("@predictionsFileName"+mPredictionsFileName);
+                System.out.println("@instancestr"+instanceStr);
                 saveConfiguration(res,args,instanceStr);
             }
         } catch(Exception e) {
@@ -386,7 +394,7 @@ public class ClassifierRunner
       //Setting up some basic stuff
       Configuration ciConfig = new Configuration(args);
       int ciHash             = ciConfig.hashCode();
-      String ciFilename      = "TemporaryConfigurationDir/"+ciHash+".xml";
+      String ciFilename      = "EnsemblerLogging/"+ciHash+".xml";
       File ciFile            = new File(ciFilename);
       String configIndex     = "configIndex.txt";
 

@@ -54,14 +54,11 @@ public class Configuration extends XmlSerializable implements Comparable{
 	@XmlElement(name="avgFlag")
 	private boolean averagedFlag;
 
+	private int [] mPredictions; //For using by the ensembler. It is logged somewhere else, so we wont log it on Configuration XMLs.
+
 	public Configuration(){
 		this.mFolds  = new ArrayList<String>();
 		this.mScores = new ArrayList<String>();
-		// this.mEvaluatedScore=0;
-		// this.mEvaluatedFold=0;
-		// this.mAverageScore=0;
-		// this.mAmtFolds=0;
-		// this.mAmtScores=0;
 		this.averagedFlag=false;
 	}
 
@@ -201,9 +198,17 @@ public class Configuration extends XmlSerializable implements Comparable{
 		return mAverageScore;
 	}
 
-	//@TODO I think im not longer using those, check this later.
-	public double getEvaluatedScore() { return mEvaluatedScore;}
+
+
+	public int getInstanceAmt(){
+		return mPredictions.length; //TODO make this robust to int size. Maybe Integer? Is there a big integer class in java?
+	}
+	public int getPrediction(int instnaceNum){
+		return mPredictions[instanceNum];
+	}
 	public int getEvaluatedFold()   	{ return mEvaluatedFold;}
+	public int getAmtFolds()          { return mAmtFolds;}
+	public double getEvaluatedScore() { return mEvaluatedScore;}
 	public String getArgStrings() 		{ return mArgStrings;}
 	public List<String> getFolds() 	  { return mFolds;}
 	public List<String> getScores()   { return mScores;}
