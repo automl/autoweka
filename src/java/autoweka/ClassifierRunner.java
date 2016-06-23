@@ -22,6 +22,10 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static weka.classifiers.meta.AutoWEKAClassifier.configurationRankingPath;
+import static weka.classifiers.meta.AutoWEKAClassifier.configurationInfoDirPath;
+import static weka.classifiers.meta.AutoWEKAClassifier.configurationHashSetPath;
+
 /**
  * Class that is responsible for actually running a WEKA classifier from start to finish using the Auto-WEKA argument format.
  *
@@ -377,8 +381,7 @@ public class ClassifierRunner
 
     protected void saveConfiguration(ClassifierResult res,List<String> args, String instanceStr){
       //Checking if we're doing this logging for this run of autoweka
-      //TODO unhardcode this somehow/ find a more elegant workaorund for this check
-      File sortedLog = new File("SortedConfigurationLog.xml");
+      File sortedLog = new File(configurationRankingPath);
       if (!sortedLog.exists()){
         return;
       }
@@ -386,9 +389,9 @@ public class ClassifierRunner
       //Setting up some basic stuff
       Configuration ciConfig = new Configuration(args);
       int ciHash             = ciConfig.hashCode();
-      String ciFilename      = "TemporaryConfigurationDir/"+ciHash+".xml";
+      String ciFilename      = configurationInfoDirPath+ciHash+".xml";
       File ciFile            = new File(ciFilename);
-      String configIndex     = "configIndex.txt";
+      String configIndex     = configurationHashSetPath;
 
       //Computing Score and fold ID
       Properties pInstanceString = Util.parsePropertyString(instanceStr);
@@ -409,7 +412,7 @@ public class ClassifierRunner
 
       //Updating the configuration list
       try{
-          BufferedWriter fp = new BufferedWriter(new FileWriter(configIndex,true));//true for appending
+          BufferedWriter fp = new BufferedWriter(new FileWriter(configurationHashSetPath,true));//true for appending
           fp.write(ciHash+",");
           fp.flush();
           fp.close();

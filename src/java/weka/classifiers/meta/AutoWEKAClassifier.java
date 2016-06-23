@@ -126,6 +126,12 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     /** Default additional arguments for Auto-WEKA. */
     static final String DEFAULT_EXTRA_ARGS = "initialIncumbent=RANDOM:acq-func=EI";
 
+    /** The path for the sorted best configurations **/
+    public static final String configurationRankingPath = "ConfigurationLogging/configuration_ranking.xml";
+    /** The path for the log with the hashcodes for the configs we have **/
+    public static final String configurationHashSetPath = "ConfigurationLogging/configuration_hashes.txt";
+    /** The path for the directory with the configuration data and score **/
+    public static final String configurationInfoDirPath = "ConfigurationLogging/configurations/";
 
 
     /** The chosen classifier. */
@@ -150,12 +156,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     protected static String msExperimentPath;
     /** The internal name of the experiment. */
     protected static String expName = "Auto-WEKA";
-    /** The path for the sorted best configurations */
-    protected static String sortedConfigurationLog="SortedConfigurationLog.xml";
-    /** The path for the log where the unsorted configurations are held, relative to the temporary directory in msExperimentPath */
-    protected static String temporaryConfigurationLog="TemporaryConfigurationLog.xml";
-    /** The path for the log with the hashcodes for the configs we have**/
-    protected static String configIndexLog = "configIndex.txt";
+
     /** The random seed. */
     protected int seed = 123;
     /** The time limit for running Auto-WEKA. */
@@ -262,10 +263,10 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         //Initializing logs
         if(nBestConfigs>1){
-            Util.initializeFile(msExperimentPath+expName+"/"+temporaryConfigurationLog);
-            Util.initializeFile(msExperimentPath+expName+"/"+configIndexLog); //TODO unhardcode-ish
-            Util.initializeFile(msExperimentPath+expName+"/"+sortedConfigurationLog);
-            Util.makePath(msExperimentPath+expName+"/TemporaryConfigurationDir");
+            String temporaryDirPath = msExperimentPath+expName+"/";
+            Util.makePath(temporaryDirPath+configurationInfoDirPath);
+            Util.initializeFile(temporaryDirPath+configurationRankingPath);
+            Util.initializeFile(temporaryDirPath+configurationHashSetPath);
         }
 
 
@@ -369,11 +370,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         //Print log of best configurations
         if (nBestConfigs>1){
-          ConfigurationRanker.rank( nBestConfigs,
-                                    msExperimentPath+expName,
-                                    msExperimentPath+expName+"/"+sortedConfigurationLog,
-                                    msExperimentPath+expName+"/"+configIndexLog,
-                                    mBest.rawArgs);
+          ConfigurationRanker.rank( nBestConfigs , msExperimentPath+expName+"/", mBest.rawArgs);
         }
 
 

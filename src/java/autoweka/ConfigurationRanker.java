@@ -11,31 +11,37 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-
+import static weka.classifiers.meta.AutoWEKAClassifier.configurationRankingPath;
+import static weka.classifiers.meta.AutoWEKAClassifier.configurationInfoDirPath;
+import static weka.classifiers.meta.AutoWEKAClassifier.configurationHashSetPath;
 
 public class ConfigurationRanker{
 	//@TODO maybe integrate this class to ConfigurationCollection
 
 	//Loads configurations from temporary log, merges identical while merging the folds in which they were analyzed, sorts them and spits n of them to a xml
 
-	public static void rank(int n, String experimentPath, String sortedLogPath, String configIndexFilename, String smacBest){
+	public static void rank(int n, String temporaryDirPath, String smacBest){
 
 		//Declaring some basic stuff
+		String hsPath = temporaryDirPath+configurationHashSetPath;
+		String cdPath = temporaryDirPath+configurationInfoDirPath;
+		String rPath  = temporaryDirPath+configurationRankingPath;
+
 		List<Configuration> configs = new ArrayList<Configuration>();
-		File configIndexFile = new File(configIndexFilename);
+		File hashSetFile = new File(hsPath);
 		String [] redundantConfigHashes;
 		Set<String> configHashes;
 
 		//Reading the hashes and removing duplicates
 		try{
-			redundantConfigHashes = (new Scanner(configIndexFile)).nextLine().split(",");
+			redundantConfigHashes = (new Scanner(hashSetFile)).nextLine().split(",");
 			configHashes = new HashSet<String>(Arrays.asList(redundantConfigHashes));
 		}catch(Exception e){
 			System.out.println("Couldn't find config hash list file");
 			return;
 		}
 		for(String hash : configHashes){
-			configs.add(Configuration.fromXML(experimentPath+"/TemporaryConfigurationDir/"+hash+".xml",Configuration.class));
+			configs.add(Configuration.fromXML(cdPath+hash+".xml",Configuration.class));
 		}
 
 		//Sorting the configurations
@@ -54,9 +60,9 @@ public class ConfigurationRanker{
 		configs = configs.subList(0,  (n<configs.size())?(n):(configs.size())  );
 
 		//Spit to xml
-		Util.initializeFile(sortedLogPath);
+		Util.initializeFile(rPath);
 		ConfigurationCollection spitMe = new ConfigurationCollection(configs);
-		spitMe.toXML(sortedLogPath); //ba dum tss
+		spitMe.toXML(rPath); //ba dum tss
 	}
 
 	private static void forceFirst(List<Configuration> configs, String smacBest){
