@@ -129,24 +129,24 @@ public class ConfigurationTester{
   @Test
   public void rankerTest(){
 
-    String configIndex   = "test/experiment_folder/Auto-WEKA/configIndex.txt";
-    String sortedTestLog = "test/experiment_folder/Auto-WEKA/SortedConfigurationLog.xml" ;
+    String hashSetFilename   = "test/experiment_folder/Auto-WEKA/ConfigurationLogging/configuration_hashes.txt";
+    String rankFilename = "test/experiment_folder/Auto-WEKA/ConfigurationLogging/configuration_ranking.xml" ;
 
     try{
-      Util.initializeFile(configIndex);
+      Util.initializeFile(hashSetFilename);
     }catch(Exception e){
       System.out.println("Couldn't initialize temporaryTestLog.xml");
     }
     try{
-      Util.initializeFile(sortedTestLog);
+      Util.initializeFile(rankFilename);
     }catch(Exception e){
-      System.out.println("Couldn't initialize sortedTestLog.xml");
+      System.out.println("Couldn't initialize rankFilename.xml");
     }
 
 
-    ConfigurationRanker.rank(1000,"test/experiment_folder/Auto-WEKA",sortedTestLog,configIndex,"IGNORE");
+    ConfigurationRanker.rank(1000,"test/experiment_folder/Auto-WEKA","IGNORE");
 
-    ConfigurationCollection cc = ConfigurationCollection.fromXML(sortedTestLog, ConfigurationCollection.class);
+    ConfigurationCollection cc = ConfigurationCollection.fromXML(rankFilename, ConfigurationCollection.class);
     double bestScore = cc.get(0).getAverageScore();
     int    amtFolds  = cc.get(0).getFolds().size();
 

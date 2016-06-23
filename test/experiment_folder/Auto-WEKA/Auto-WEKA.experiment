@@ -5,7 +5,7 @@
     <resultMetric>errorRate</resultMetric>
     <instanceGenerator>autoweka.instancegenerators.TerminationHoldout</instanceGenerator>
     <instanceGeneratorArgs>seed=123:terminationPercent=30[$]autoweka.instancegenerators.CrossValidation[$]numFolds=10:seed=123</instanceGeneratorArgs>
-    <datasetString>testArff=__dummy__:type=trainTestArff:trainArff=/tmp/autoweka6306700823476768264/Auto-WEKA/Auto-WEKA.arff</datasetString>
+    <datasetString>testArff=__dummy__:type=trainTestArff:trainArff=/tmp/autoweka5410162143011150280/Auto-WEKA/Auto-WEKA.arff</datasetString>
     <attributeSelection>true</attributeSelection>
     <attributeSelectionTimeout>5.0</attributeSelectionTimeout>
     <trajectoryParserClass>autoweka.smac.SMACTrajectoryParser</trajectoryParserClass>
@@ -27,9 +27,9 @@
     <callString>--runGroupName</callString>
     <callString>autoweka</callString>
     <callString>--terminate-on-delete</callString>
-    <callString>/tmp/autoweka6306700823476768264/Auto-WEKA//out/runstamps/{SEED}.stamp</callString>
+    <callString>/tmp/autoweka5410162143011150280/Auto-WEKA//out/runstamps/{SEED}.stamp</callString>
     <callString>--kill-runs-on-file-delete</callString>
-    <callString>/tmp/autoweka6306700823476768264/Auto-WEKA//out/runstamps/{SEED}.stamp</callString>
+    <callString>/tmp/autoweka5410162143011150280/Auto-WEKA//out/runstamps/{SEED}.stamp</callString>
     <callString>--algo-cutoff-time</callString>
     <callString>25.0</callString>
     <callString>--wallclock-limit</callString>

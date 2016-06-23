@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifierslazykstar_00_INT_B 47 -_0__wekaclassifierslazykstar_01_E REMOVE_PREV -_0__wekaclassifierslazykstar_02_M d -aseval__wekaattributeselectioncfssubseteval_00_0_M REMOVED -aseval__wekaattributeselectioncfssubseteval_01_1_L REMOVE_PREV -assearch__wekaattributeselectionbestfirst_00_0_D 0 -assearch__wekaattributeselectionbestfirst_01_1_INT_N 3 -attributeeval weka.attributeSelection.CfsSubsetEval -attributesearch weka.attributeSelection.BestFirst -attributetime 5.0 -targetclass weka.classifiers.lazy.KStar </argStrings>
+    <evaluatedScore>10.606060606060609</evaluatedScore>
+    <evaluatedFold>4</evaluatedFold>
+    <folds>4</folds>
+    <scores>10.606060606060609</scores>
+    <avgScore>10.606060606060609</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

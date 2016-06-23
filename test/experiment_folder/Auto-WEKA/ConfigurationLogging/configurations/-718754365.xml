@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersrulespart_00_INT_N 3 -_0__wekaclassifiersrulespart_01_INT_M 13 -_0__wekaclassifiersrulespart_02_R REMOVED -_0__wekaclassifiersrulespart_03_B REMOVED -aseval__wekaattributeselectioncfssubseteval_00_0_M REMOVE_PREV -aseval__wekaattributeselectioncfssubseteval_01_1_L REMOVED -assearch__wekaattributeselectionbestfirst_00_0_D 2 -assearch__wekaattributeselectionbestfirst_01_1_INT_N 3 -attributeeval weka.attributeSelection.CfsSubsetEval -attributesearch weka.attributeSelection.BestFirst -attributetime 5.0 -targetclass weka.classifiers.rules.PART </argStrings>
+    <evaluatedScore>4.166666666666671</evaluatedScore>
+    <evaluatedFold>2</evaluatedFold>
+    <folds>2</folds>
+    <scores>4.166666666666671</scores>
+    <avgScore>4.166666666666671</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersmetabagging_00_INT_P 25 -_0__wekaclassifiersmetabagging_01_INT_I 2 -_0__wekaclassifiersmetabagging_02_S 1 -_1_W weka.classifiers.functions.SMO -_1_W_0_DASHDASH REMOVED -_1_W_1__wekaclassifiersfunctionssmo_00_0_C 1.1006501735309164 -_1_W_1__wekaclassifiersfunctionssmo_01_1_N 1 -_1_W_1__wekaclassifiersfunctionssmo_02_2_M REMOVED -_1_W_1__wekaclassifiersfunctionssmo_03_3_REG_IGNORE_QUOTE_START_K weka.classifiers.functions.supportVector.RBFKernel -_1_W_1__wekaclassifiersfunctionssmo_10_4_rbf_G 0.4770154907931254 -_1_W_1__wekaclassifiersfunctionssmo_11_5_QUOTE_END REMOVED -aseval__wekaattributeselectioncfssubseteval_00_0_M REMOVED -aseval__wekaattributeselectioncfssubseteval_01_1_L REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_00_0_C REMOVED -assearch__wekaattributeselectiongreedystepwise_01_1_B REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_02_2_R REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_03_4_INT_N 37 -attributeeval weka.attributeSelection.CfsSubsetEval -attributesearch weka.attributeSelection.GreedyStepwise -attributetime 5.0 -targetclass weka.classifiers.meta.Bagging </argStrings>
+    <evaluatedScore>1.1363636363636402</evaluatedScore>
+    <evaluatedFold>5</evaluatedFold>
+    <folds>5</folds>
+    <scores>1.1363636363636402</scores>
+    <avgScore>1.1363636363636402</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-attributesearch NONE -attributetime 5.0 -targetclass weka.classifiers.rules.ZeroR </argStrings>
+    <evaluatedScore>6.439393939393938</evaluatedScore>
+    <evaluatedFold>7</evaluatedFold>
+    <folds>7</folds>
+    <folds>3</folds>
+    <scores>6.439393939393938</scores>
+    <scores>7.575757575757578</scores>
+    <avgScore>6.439393939393938</avgScore>
+    <amtScores>2</amtScores>
+    <amtFolds>2</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

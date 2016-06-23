@@ -6,7 +6,7 @@
         <resultMetric>errorRate</resultMetric>
         <instanceGenerator>autoweka.instancegenerators.TerminationHoldout</instanceGenerator>
         <instanceGeneratorArgs>seed=123:terminationPercent=30[$]autoweka.instancegenerators.CrossValidation[$]numFolds=10:seed=123</instanceGeneratorArgs>
-        <datasetString>testArff=__dummy__:type=trainTestArff:trainArff=/tmp/autoweka6306700823476768264/Auto-WEKA/Auto-WEKA.arff</datasetString>
+        <datasetString>testArff=__dummy__:type=trainTestArff:trainArff=/tmp/autoweka5410162143011150280/Auto-WEKA/Auto-WEKA.arff</datasetString>
         <attributeSelection>true</attributeSelection>
         <attributeSelectionTimeout>5.0</attributeSelectionTimeout>
         <trajectoryParserClass>autoweka.smac.SMACTrajectoryParser</trajectoryParserClass>
@@ -28,9 +28,9 @@
         <callString>--runGroupName</callString>
         <callString>autoweka</callString>
         <callString>--terminate-on-delete</callString>
-        <callString>/tmp/autoweka6306700823476768264/Auto-WEKA//out/runstamps/{SEED}.stamp</callString>
+        <callString>/tmp/autoweka5410162143011150280/Auto-WEKA//out/runstamps/{SEED}.stamp</callString>
         <callString>--kill-runs-on-file-delete</callString>
-        <callString>/tmp/autoweka6306700823476768264/Auto-WEKA//out/runstamps/{SEED}.stamp</callString>
+        <callString>/tmp/autoweka5410162143011150280/Auto-WEKA//out/runstamps/{SEED}.stamp</callString>
         <callString>--algo-cutoff-time</callString>
         <callString>25.0</callString>
         <callString>--wallclock-limit</callString>
@@ -82,72 +82,72 @@
             <args>-attributesearch NONE -attributetime 5.0 -targetclass weka.classifiers.rules.ZeroR </args>
         </point>
         <point>
-            <time>0.6210286021232605</time>
+            <time>0.704956591129303</time>
             <errorEstimate>6.439393997192383</errorEstimate>
             <args>-attributesearch NONE -attributetime 5.0 -targetclass weka.classifiers.rules.ZeroR </args>
         </point>
         <point>
-            <time>4.181083679199219</time>
+            <time>4.060315132141113</time>
             <errorEstimate>7.007575988769531</errorEstimate>
             <args>-attributesearch NONE -attributetime 5.0 -targetclass weka.classifiers.rules.ZeroR </args>
         </point>
         <point>
-            <time>6.821646213531494</time>
+            <time>7.105966091156006</time>
             <errorEstimate>1.8939393758773804</errorEstimate>
             <args>-_0__wekaclassifierstreesreptree_00_INT_M 9 -_0__wekaclassifierstreesreptree_01_V 0.0032399393731372215 -_0__wekaclassifierstreesreptree_02_depth_HIDDEN 0 -_0__wekaclassifierstreesreptree_03_1_INT_L -1 -_0__wekaclassifierstreesreptree_05_P REMOVED -aseval__wekaattributeselectioncfssubseteval_00_0_M REMOVE_PREV -aseval__wekaattributeselectioncfssubseteval_01_1_L REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_00_0_C REMOVED -assearch__wekaattributeselectiongreedystepwise_01_1_B REMOVED -assearch__wekaattributeselectiongreedystepwise_02_2_R REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_03_4_INT_N 841 -attributeeval weka.attributeSelection.CfsSubsetEval -attributesearch weka.attributeSelection.GreedyStepwise -attributetime 5.0 -targetclass weka.classifiers.trees.REPTree </args>
         </point>
         <point>
-            <time>8.290462493896484</time>
+            <time>8.718697547912598</time>
             <errorEstimate>2.3989899158477783</errorEstimate>
             <args>-_0__wekaclassifierstreesreptree_00_INT_M 9 -_0__wekaclassifierstreesreptree_01_V 0.0032399393731372215 -_0__wekaclassifierstreesreptree_02_depth_HIDDEN 0 -_0__wekaclassifierstreesreptree_03_1_INT_L -1 -_0__wekaclassifierstreesreptree_05_P REMOVED -aseval__wekaattributeselectioncfssubseteval_00_0_M REMOVE_PREV -aseval__wekaattributeselectioncfssubseteval_01_1_L REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_00_0_C REMOVED -assearch__wekaattributeselectiongreedystepwise_01_1_B REMOVED -assearch__wekaattributeselectiongreedystepwise_02_2_R REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_03_4_INT_N 841 -attributeeval weka.attributeSelection.CfsSubsetEval -attributesearch weka.attributeSelection.GreedyStepwise -attributetime 5.0 -targetclass weka.classifiers.trees.REPTree </args>
         </point>
         <point>
-            <time>15.439793586730957</time>
+            <time>18.603757858276367</time>
             <errorEstimate>2.4621212482452393</errorEstimate>
             <args>-_0__wekaclassifierstreesreptree_00_INT_M 9 -_0__wekaclassifierstreesreptree_01_V 0.0032399393731372215 -_0__wekaclassifierstreesreptree_02_depth_HIDDEN 0 -_0__wekaclassifierstreesreptree_03_1_INT_L -1 -_0__wekaclassifierstreesreptree_05_P REMOVED -aseval__wekaattributeselectioncfssubseteval_00_0_M REMOVE_PREV -aseval__wekaattributeselectioncfssubseteval_01_1_L REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_00_0_C REMOVED -assearch__wekaattributeselectiongreedystepwise_01_1_B REMOVED -assearch__wekaattributeselectiongreedystepwise_02_2_R REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_03_4_INT_N 841 -attributeeval weka.attributeSelection.CfsSubsetEval -attributesearch weka.attributeSelection.GreedyStepwise -attributetime 5.0 -targetclass weka.classifiers.trees.REPTree </args>
         </point>
         <point>
-            <time>18.328535079956055</time>
+            <time>21.618711471557617</time>
             <errorEstimate>2.8787879943847656</errorEstimate>
             <args>-_0__wekaclassifierstreesreptree_00_INT_M 9 -_0__wekaclassifierstreesreptree_01_V 0.0032399393731372215 -_0__wekaclassifierstreesreptree_02_depth_HIDDEN 0 -_0__wekaclassifierstreesreptree_03_1_INT_L -1 -_0__wekaclassifierstreesreptree_05_P REMOVED -aseval__wekaattributeselectioncfssubseteval_00_0_M REMOVE_PREV -aseval__wekaattributeselectioncfssubseteval_01_1_L REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_00_0_C REMOVED -assearch__wekaattributeselectiongreedystepwise_01_1_B REMOVED -assearch__wekaattributeselectiongreedystepwise_02_2_R REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_03_4_INT_N 841 -attributeeval weka.attributeSelection.CfsSubsetEval -attributesearch weka.attributeSelection.GreedyStepwise -attributetime 5.0 -targetclass weka.classifiers.trees.REPTree </args>
         </point>
         <point>
-            <time>25.61591911315918</time>
+            <time>29.05238151550293</time>
             <errorEstimate>0.7575757503509521</errorEstimate>
             <args>-_0__wekaclassifiersrulesjrip_00_N 2.7548438425170856 -_0__wekaclassifiersrulesjrip_01_E REMOVE_PREV -_0__wekaclassifiersrulesjrip_02_P REMOVE_PREV -_0__wekaclassifiersrulesjrip_03_INT_O 3 -attributesearch NONE -attributetime 5.0 -targetclass weka.classifiers.rules.JRip </args>
         </point>
         <point>
-            <time>30.457637786865234</time>
+            <time>40.565616607666016</time>
             <errorEstimate>0.6942062377929688</errorEstimate>
             <args>-_0__wekaclassifiersrulesjrip_00_N 2.7548438425170856 -_0__wekaclassifiersrulesjrip_01_E REMOVE_PREV -_0__wekaclassifiersrulesjrip_02_P REMOVE_PREV -_0__wekaclassifiersrulesjrip_03_INT_O 3 -attributesearch NONE -attributetime 5.0 -targetclass weka.classifiers.rules.JRip </args>
         </point>
         <point>
-            <time>72.2947006225586</time>
+            <time>84.78512573242188</time>
             <errorEstimate>0.7032589912414551</errorEstimate>
             <args>-_0__wekaclassifiersrulesjrip_00_N 2.7548438425170856 -_0__wekaclassifiersrulesjrip_01_E REMOVE_PREV -_0__wekaclassifiersrulesjrip_02_P REMOVE_PREV -_0__wekaclassifiersrulesjrip_03_INT_O 3 -attributesearch NONE -attributetime 5.0 -targetclass weka.classifiers.rules.JRip </args>
         </point>
         <point>
-            <time>77.90115356445312</time>
+            <time>92.32964324951172</time>
             <errorEstimate>0.8040308952331543</errorEstimate>
             <args>-_0__wekaclassifiersrulesjrip_00_N 2.7548438425170856 -_0__wekaclassifiersrulesjrip_01_E REMOVE_PREV -_0__wekaclassifiersrulesjrip_02_P REMOVE_PREV -_0__wekaclassifiersrulesjrip_03_INT_O 3 -attributesearch NONE -attributetime 5.0 -targetclass weka.classifiers.rules.JRip </args>
         </point>
         <point>
-            <time>82.5277328491211</time>
+            <time>100.68279266357422</time>
             <errorEstimate>0.7567816376686096</errorEstimate>
             <args>-_0__wekaclassifiersrulesjrip_00_N 2.7548438425170856 -_0__wekaclassifiersrulesjrip_01_E REMOVE_PREV -_0__wekaclassifiersrulesjrip_02_P REMOVE_PREV -_0__wekaclassifiersrulesjrip_03_INT_O 3 -attributesearch NONE -attributetime 5.0 -targetclass weka.classifiers.rules.JRip </args>
         </point>
         <point>
-            <time>87.10185241699219</time>
+            <time>108.91143035888672</time>
             <errorEstimate>0.8326186537742615</errorEstimate>
             <args>-_0__wekaclassifiersrulesjrip_00_N 2.7548438425170856 -_0__wekaclassifiersrulesjrip_01_E REMOVE_PREV -_0__wekaclassifiersrulesjrip_02_P REMOVE_PREV -_0__wekaclassifiersrulesjrip_03_INT_O 3 -attributesearch NONE -attributetime 5.0 -targetclass weka.classifiers.rules.JRip </args>
         </point>
         <point>
-            <time>239.98550415039062</time>
+            <time>241.296630859375</time>
             <errorEstimate>0.8326186537742615</errorEstimate>
             <args>-_0__wekaclassifiersrulesjrip_00_N 2.7548438425170856 -_0__wekaclassifiersrulesjrip_01_E REMOVE_PREV -_0__wekaclassifiersrulesjrip_02_P REMOVE_PREV -_0__wekaclassifiersrulesjrip_03_INT_O 3 -attributesearch NONE -attributetime 5.0 -targetclass weka.classifiers.rules.JRip </args>
         </point>
         <seed>123</seed>
-        <numEvaluatedEvaluations>67</numEvaluatedEvaluations>
+        <numEvaluatedEvaluations>44</numEvaluatedEvaluations>
         <numMemOutEvaluations>0</numMemOutEvaluations>
         <numTimeOutEvaluations>2</numTimeOutEvaluations>
     </trajectories>

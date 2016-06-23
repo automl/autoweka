@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifierstreeslmt_00_B REMOVED -_0__wekaclassifierstreeslmt_01_R REMOVE_PREV -_0__wekaclassifierstreeslmt_02_C REMOVED -_0__wekaclassifierstreeslmt_03_P REMOVED -_0__wekaclassifierstreeslmt_04_INT_M 38 -_0__wekaclassifierstreeslmt_05_W_HIDDEN 1 -_0__wekaclassifierstreeslmt_07_2_W 0.05652536267146491 -_0__wekaclassifierstreeslmt_08_A REMOVED -aseval__wekaattributeselectioncfssubseteval_00_0_M REMOVED -aseval__wekaattributeselectioncfssubseteval_01_1_L REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_00_0_C REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_01_1_B REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_02_2_R REMOVED -attributeeval weka.attributeSelection.CfsSubsetEval -attributesearch weka.attributeSelection.GreedyStepwise -attributetime 5.0 -targetclass weka.classifiers.trees.LMT </argStrings>
+    <evaluatedScore>0.37878787878787534</evaluatedScore>
+    <evaluatedFold>8</evaluatedFold>
+    <folds>8</folds>
+    <folds>1</folds>
+    <scores>0.37878787878787534</scores>
+    <scores>1.5094339622641542</scores>
+    <avgScore>0.37878787878787534</avgScore>
+    <amtScores>2</amtScores>
+    <amtFolds>2</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>
