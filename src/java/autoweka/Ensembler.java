@@ -12,48 +12,58 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.BufferedReader;
 
+import weka.classifiers.meta.AutoWEKAClassifier.temporaryDirPath;
+import weka.classifiers.meta.AutoWEKAClassifier.configurationRankingPath;
+import weka.classifiers.meta.AutoWEKAClassifier.configurationInfoDirPath;
+import weka.classifiers.meta.AutoWEKAClassifier.configurationHashSetPath;
+import weka.classifiers.meta.AutoWEKAClassifier.instancewiseInfoDirPath;
+
 public class Ensembler{
-  private List<EnsembleElement> mCurrentEnsemble;
-  private Map<Integer,Integer> mFoldMetadata; //TODO rename to something more clever. TODO discuss if this is needed (i.e. if we will use models with missing predictions)
+  private List<Configuration> cfgList;
 
-  private String mExperimentDir;
-  private String mConfigurationLoggingDir;
-  private String mInstancewiseLoggingDir;
-  private int    mfoldAmt;
+  //private List<EnsembleElement> mCurrentEnsemble;
+  private int [] mFoldSizes;
+  private Integer [] mCorrectClasses;
+  private int    mAmtFolds;
 
-  public Ensembler(String aExperimentDir){
-    mExperimentDir = aExperimentDir;
-    mConfigurationLoggingDir = mExperimentDir+"/EnsemblerLogging";
-    mInstancewiseLoggingDir  = mConfigurationLoggingDir+"/instancewise";
-    mFoldMetadata = new HashMap<Integer,Integer>();
-    parseFoldMetadata();
+  public String iwpPath; //i
+
+  public Ensembler(String iwpPath,String rPath){ //TODO grab fold amt form winner then treat for exceptions in case u cant parse them all
+    this.cfgList = ConfigurationCollection.fromXML(rPath,ConfigurationCollection.class).asArrayList();
+    mAmtFolds = cfgList.get(0).getAmtFolds();
+    parseFoldData(iwpPath);
   }
 
-  private void parseFoldMetadata(){ //This might take a while, but is only done once. For reasonably sized runs, this seems to be pretty fast
-    String [] files = new File(mInstancewiseLoggingDir).list();
-    for (String ciFilename : files){
-      String [] gambiarraTemp = ciFilename.split("fold:"); //TODO Use regex instead of this lol
-      String [] gambiarra = gambiarraTemp[1].split(".txt");
-      int foldNumber = Integer.parseInt(gambiarra[0]);
-
-      if (!mFoldMetadata.containsKey(foldNumber)){
-        try{
-          int instanceAmt; //TODO optimize this to skipping to eof and parsing last line's 1st number
-          FileReader ciFileReader = new FileReader(mInstancewiseLoggingDir+"/"+ciFilename);
-          BufferedReader ciBufferedReader = new BufferedReader(ciFileReader);
-          for(instanceAmt=0;ciBufferedReader.readLine()!=null;instanceAmt++);
-          mFoldMetadata.put(foldNumber,instanceAmt);
-        }catch (Exception e){
-          log.debug("Couldn't compute instance amount for fold "+foldNumber);
-        }
+  private void parseFoldData(String iwpPath){
+    List<Integer> correctClassesList = new ArrayList<Integer>();
+    mFoldSizes = new int[mAmtFolds];
+    String winnerHash = cfgList.get(0).hashCode();
+    for(i=0;i<mAmtFolds;i++){
+      try{
+        FileReader ciFileReader = new FileReader(iwpPath+"/hash:"+winnerHash+"_fold:"+i+".txt");
+        BufferedReader ciBufferedReader = new BufferedReader(ciFileReader);
+      }catch(Exception e){
+        System.out.println("Couldn't find instancewise predictions for final incument on "+i+"-th fold");
       }
+      String currentLine = ciBufferedReader.readLine();//skip first line
+      int foldSize = 0;
+      while(currentLine!=null){
+        correctClassesList = ciBufferedReader.readLine()
+        String [] gambiarra1 = currentLine.split(","); //TODO use regex
+        String [] gambiarra2 = gambiarra1[1].split(":");
+        predictions.add(Integer.valueOf(gambiarra2[0]));
+        foldSize++;
+      }
+      mFoldSizes[i]=foldSize;
     }
+    mCorrectClasses = new Integer[correctClassesList.size()];
+    correctClassesList.toArray(mCorrectClasses); //TODO optimize this into int array
   }
+
 
   public void hillclimb(boolean onlyFullyPredicted){ //Doing it the straightforward way. Gonna try a faster way later, just wanna get this working.
 
-    ConfigurationCollection sortedCC = ConfigurationCollection.fromXML(mExperimentDir+"/SortedConfigurationLog.xml",ConfigurationCollection.class);
-    List<Configuration> configBatch = sortedCC.asArrayList();
+    List<Configuration> configBatch = (List<Configuration>) cfgList.clone(); //shallow copying
 
     if(onlyFullyPredicted){
       for(int i = configBatch.size()-1; i>=0 ; i--) if(configBatch.get(i)!=mFoldAmt) configBatch.remove(i);
@@ -62,12 +72,12 @@ public class Ensembler{
     List<EnsembleElement> eeBatch = new List<EnsembleElement>();
     for (Configuration c: configBatch){
       EnsembleElement ciEE = new EnsembleElement(c);
-      ciEE.parseInstancewiseInfo(mInstancewiseLoggingDir,mFoldMetadata);
+      ciEE.parseInstancewiseInfo(iwpPath,mFoldSizes); //TODO review this
       eeBatch.add(ciEE);
     }
 
     int [] partialEnsembleScores = new int [eeBatch.size()];
-    int
+    //int
     List<EnsembleElement> currentPartialEnsemble = new ArrayList<EnsembleElement>();
 
     bestPartialEnsembleScore = 0;
@@ -90,13 +100,13 @@ public class Ensembler{
         bestPartialEnsembleIndex = i;
       }
     }
-
+    //TODO:
     //Slice models that make it worse
     //return currentPE
   }
 
   private int _evaluateModelChoice(List<EnsembleElement> currentPartialEnsemble, EnsembleElement modelChoice){
-    
+
   }
 
   private int _majorityVote(int instanceNum, List<EnsembleElement> currentPartialEnsemble){

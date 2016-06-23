@@ -11,72 +11,90 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import weka.classifiers.meta.AutoWEKAClassifier.temporaryDirPath;
+import weka.classifiers.meta.AutoWEKAClassifier.configurationRankingPath;
+import weka.classifiers.meta.AutoWEKAClassifier.configurationInfoDirPath;
+import weka.classifiers.meta.AutoWEKAClassifier.configurationHashSetPath;
 
 
 public class ConfigurationRanker{
-	//@TODO Make this a non-static thing just like the ensembler 
-	//@TODO maybe integrate this class to ConfigurationCollection
+
+	//Aliasing for readability
+	public String cdPath; //configuration directory path
+	public String rPath;  //configuration ranking path (xml file)
+	public String hsPath; //hash set path (txt file)
 
 	//Loads configurations from temporary log, merges identical while merging the folds in which they were analyzed, sorts them and spits n of them to a xml
+	public ConfigurationRanker(){
+		this.cdPath = temporaryDirPath+configurationInfoDirPath;
+		this.rPath  = rankingPath+configurationRankingPath;
+		this.hsPath = temporaryDirPath+configurationHashSetPath;
+	}
 
-	public static void rank(int n, String experimentPath, String sortedLogPath, String configIndexFilename, String smacBest){
+	public List<Configuration> rank(int n){
+		return rank(n, "IGNORE");
+	}
+
+	public List<Configuration> rank(int n, String smacFinalIncumbent){
 
 		//Declaring some basic stuff
-		List<Configuration> configs = new ArrayList<Configuration>();
-		File configIndexFile = new File(configIndexFilename);
-		String [] redundantConfigHashes;
-		Set<String> configHashes;
+		List<Configuration> configurationList = new ArrayList<Configuration>();
+		File hsFile = new File(hsPath);
+		String [] hashArray;
+		Set<String> hashSet;
 
-		//Reading the hashes and removing duplicates
+		//Reading the hashSet and removing duplicates
 		try{
-			redundantConfigHashes = (new Scanner(configIndexFile)).nextLine().split(",");
-			configHashes = new HashSet<String>(Arrays.asList(redundantConfigHashes));
+			hashArray = (new Scanner(hsFile)).nextLine().split(",");
+			hashSet = new HashSet<String>(Arrays.asList(hashArray));
 		}catch(Exception e){
 			System.out.println("Couldn't find config hash list file");
 			return;
 		}
-		for(String hash : configHashes){
-			configs.add(Configuration.fromXML(experimentPath+"/EnsemblerLogging/"+hash+".xml",Configuration.class)); //TODO unhardcode
+		for(String hash : hashSet){
+			configurationList.add(Configuration.fromXML(cdPath+hash+".xml",Configuration.class)); //TODO unhardcode
 		}
 
 		//Sorting the configurations
-		for(Configuration c: configs){
+		for(Configuration c: configurationList){
 			c.forceUpdateAverage();
 		}
-		Collections.sort(configs);
-		Collections.reverse(configs); //TODO invert definition in compareto rather than using this?
+		Collections.sort(configurationList);
+		Collections.reverse(configurationList); //TODO invert definition in compareto rather than using this?
 
 		//Forcing the last incumbent to be the best configuration, in case of a tie
-		if (!smacBest.equals("IGNORE")){
-			forceFirst(configs,smacBest); //gotta do this before slicing, otherwise smacBest might be lost in the slice
+		if (!smacFinalIncumbent.equals("IGNORE")){
+			forceFirst(configurationList,smacFinalIncumbent); //gotta do this before slicing, otherwise smacFinalIncumbent might be lost in the slice
 		}
 
 		//Slicing the list to size n
-		configs = configs.subList(0,  (n<configs.size())?(n):(configs.size())  );
+		configurationList = configurationList.subList(0,  (n<configurationList.size())?(n):(configurationList.size())  );
 
 		//Spit to xml
-		Util.initializeFile(sortedLogPath);
-		ConfigurationCollection spitMe = new ConfigurationCollection(configs);
-		spitMe.toXML(sortedLogPath); //ba dum tss
+		Util.initializeFile(rPath);
+		ConfigurationCollection spitMe = new ConfigurationCollection(configurationList);
+		spitMe.toXML(rPath); //ba dum tss
+
+		return configurationList;
 	}
 
-	private static void forceFirst(List<Configuration> configs, String smacBest){
+	private static void forceFirst(List<Configuration> configurationList, String smacFinalIncumbent){
 
-		Configuration bestConfig = configs.get(0);
-		if (bestConfig.getArgStrings().equals(smacBest)) {
+		Configuration bestConfig = configurationList.get(0);
+		if (bestConfig.getArgStrings().equals(smacFinalIncumbent)) {
 			return;
 		}
 
 		double bestScore = bestConfig.getAverageScore();
 
-		for(int i = 1; i<configs.size(); i++){
-			Configuration temp, c = configs.get(i);
-			if(c.getArgStrings().equals(smacBest)){
+		for(int i = 1; i<configurationList.size(); i++){
+			Configuration temp, c = configurationList.get(i);
+			if(c.getArgStrings().equals(smacFinalIncumbent)){
 				if(c.getAverageScore()!=bestScore){
 					throw new RuntimeException("Final incumbent doesn't have the best score");
 				}else{
-					configs.set(0,c);
-					configs.set(i,bestConfig);
+					configurationList.set(0,c);
+					configurationList.set(i,bestConfig);
 					return;
 				}
 			}

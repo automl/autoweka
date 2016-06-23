@@ -329,7 +329,7 @@ public class ClassifierRunner
             Properties pInstanceString = Util.parsePropertyString(instanceStr);
             int ciFold = Integer.parseInt(pInstanceString.getProperty("fold", "-1"));
 
-            String ciPredictionsLog = "EnsemblerLogging/instancewise/instancewise_predictions_hash:"+tempConfig.hashCode()+"_fold:"+ciFold+".txt";
+            String ciPredictionsLog = "EnsemblerLogging/instancewisePredictions/hash:"+tempConfig.hashCode()+"_fold:"+ciFold+".txt";
 
             eval = new Evaluation(instances);
             EvaluatorThread evalThread = new EvaluatorThread(eval, classifier, instances, ciPredictionsLog );
@@ -384,9 +384,10 @@ public class ClassifierRunner
     }
 
     protected void saveConfiguration(ClassifierResult res,List<String> args, String instanceStr){
-      //Checking if we're doing this logging for this run of autoweka
       //TODO unhardcode this somehow/ find a more elegant workaorund for this check
-      File sortedLog = new File("SortedConfigurationLog.xml");
+      String configurationRankingFilename = "EnsemblerLogging/configuration_ranking.xml"
+      //Checking if we're doing this logging for this run of autoweka TODO make this on the caller of this method?
+      File sortedLog = new File(configurationRankingFilename);
       if (!sortedLog.exists()){
         return;
       }
@@ -394,9 +395,11 @@ public class ClassifierRunner
       //Setting up some basic stuff
       Configuration ciConfig = new Configuration(args);
       int ciHash             = ciConfig.hashCode();
-      String ciFilename      = "EnsemblerLogging/"+ciHash+".xml";
-      File ciFile            = new File(ciFilename);
-      String configIndex     = "configIndex.txt";
+
+      String ciConfigFilename = "EnsemblerLogging/configurations/"+ciHash+".xml";
+      File ciFile             = new File(ciConfigFilename);
+
+      String hashSetFilename = "EnsemblerLogging/configuration_hash_set.txt";
 
       //Computing Score and fold ID
       Properties pInstanceString = Util.parsePropertyString(instanceStr);
@@ -407,22 +410,22 @@ public class ClassifierRunner
       ciConfig.setEvaluationValues(ciScore,ciFold);
 
       if (ciFile.exists()){
-        Configuration ciConfigFull = Configuration.fromXML(ciFilename,Configuration.class); //Find a faster way w/o IOs?
+        Configuration ciConfigFull = Configuration.fromXML(ciConfigFilename,Configuration.class); //Find a faster way w/o IOs?
         ciConfigFull.mergeWith(ciConfig);
-        ciConfigFull.toXML(ciFilename);
+        ciConfigFull.toXML(ciConfigFilename);
       }else{
-        Util.initializeFile(ciFilename);
-        ciConfig.toXML(ciFilename);
+        Util.initializeFile(ciConfigFilename);
+        ciConfig.toXML(ciConfigFilename);
       }
 
       //Updating the configuration list
       try{
-          BufferedWriter fp = new BufferedWriter(new FileWriter(configIndex,true));//true for appending
+          BufferedWriter fp = new BufferedWriter(new FileWriter(hashSetFilename,true));//true for appending
           fp.write(ciHash+",");
           fp.flush();
           fp.close();
       }catch(IOException e){
-          throw new RuntimeException("Couldn't write to configIndex");
+          throw new RuntimeException("Couldn't write to hash set");
       }
 
     }
