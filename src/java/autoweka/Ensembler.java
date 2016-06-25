@@ -20,8 +20,6 @@ import weka.classifiers.meta.AutoWEKAClassifier.instancewiseInfoDirPath;
 
 public class Ensembler{
   private List<Configuration> mCfgList;
-
-  //private List<EnsembleElement> mCurrentEnsemble;
   private int [] mFoldSizes;
   private Integer [] mCorrectClasses;
   private int    mAmtFolds;
@@ -29,7 +27,7 @@ public class Ensembler{
 
   private String iwpPath; //Aliasing for readability
   private String rPath;
-  public Ensembler(){ //TODO grab fold amt form winner then treat for exceptions in case u cant parse them all
+  public Ensembler(){
     this.iwpPath = instancewiseInfoDirPath;
     this.rPath   = configurationRankingPath;
     mCfgList = ConfigurationCollection.fromXML(rPath,ConfigurationCollection.class).asArrayList();
@@ -68,7 +66,6 @@ public class Ensembler{
     correctClassesList.toArray(mCorrectClasses); //TODO optimize this into int array
   }
 
-
   public void hillclimb(boolean onlyFullyPredicted){ //Doing it the straightforward way. Gonna try a faster way later, just wanna get this working.
 
     List<Configuration> configBatch = (List<Configuration>) mCfgList.clone(); //shallow copying
@@ -88,37 +85,24 @@ public class Ensembler{
 
     //Building the ensemble
     List<EnsembleElement> currentPartialEnsemble = new ArrayList<EnsembleElement>();
-    int [] partialEnsembleScores = new int[eeBatch.size()];
-    int index = 0;
-    while(!eeBatch.isEmpty()){//Iterating over available ensemble slots. TODO make the initialization batch flexible.
+    int [] partialEnsembleErrorCounts = new int[eeBatch.size()];
 
-      int leastErrorsThisSlot = mInstanceAmt;
-      EnsembleElement chosenModel = null;
-      for(EnsembleElement ee : eeBatch){//Iterating over remaining ensembles in the batch
-        int scoreWithThisModel= _evaluateModelChoice(currentPartialEnsemble,ee);
-        if (scoreWithThisModel<leastErrorsThisSlot){
-          leastErrorsThisSlot = scoreWithThisModel;
-          partialEnsembleScores[index] = scoreWithThisModel;
-          chosenModel = ee;
-        }
+    for(int i = 0; !eeBatch.isEmpty() ;i++){//Iterating over available ensemble slots. TODO make the initialization batch flexible.
+
+      int [] modelChoiceErrorCounts = int[eeBatch.size()];
+      for(int j = 0; j<eeBatch.size(); j++){//Iterating over remaining ensembles in the batch
+        modelChoiceErrorCounts[j] = evaluateModelChoice(currentPartialEnsemble,eeBatch.get(j));
       }
-      if (chosenModel==null) throw new RuntimeException(); //TODO write message
-      currentPartialEnsemble.add(chosenModel);
-      eeBatch.remove(chosenModel);
-      index++;
-    } //TODO have something that evaluates that its likely not climbing anymore
+
+      int indexWithSmallestError = Util.indexMin(errorCounts);
+      partialEnsembleErrorCounts[i]= indexWithSmallestError
+      currentPartialEnsemble.add(eeBatch.get(indexWithSmallestError));
+      eeBatch.remove(indexWithSmallestError);
+    } //TODO have something that evaluates that its likely not climbing anymore to stop earlier
 
     //Slicing it at best place
-    int errorAmtPE=mAmtInstances;
-    int bestIndex=0;
-    for(int i=0;i<partialEnsembleScores.length;i++){
-      if(partialEnsembleScores i < errorAmtPE){
-        bestIndex = i;
-      }
-    }
-    for(int i = currentPartialEnsemble.size()-1;i>bestIndex;i--){
-      currentPartialEnsemble.remove(i);
-    }
+    int bestIndex = Util.indexMin(partialEnsembleErrorCounts);
+    currentPartialEnsemble = Util.sliceList(currentPartialEnsemble,0,bestIndex);
 
     List<Configuration> rv = new List<Configuration>();
     for(EnsembleElement ee : currentPartialEnsemble){
@@ -127,7 +111,7 @@ public class Ensembler{
     return rv;
   }
 
-  private int _evaluateModelChoice(List<EnsembleElement> currentPartialEnsemble, EnsembleElement modelChoice){
+  private int evaluateModelChoice(List<EnsembleElement> currentPartialEnsemble, EnsembleElement modelChoice){
     currentPartialEnsemble.add(modelChoice);
     int amtErrors = 0;
     for (int i = 0; i < mInstanceAmt ; i++){
@@ -153,7 +137,6 @@ public class Ensembler{
     }
     //TODO treat duplicate max indexes?
   }
-
 
   private class EnsembleElement{ //TODO make this separate?
 
@@ -186,10 +169,8 @@ public class Ensembler{
     public void parseInstancewiseInfo(int [] foldMetadata){ //TODO get instancewiseLogPath from global, maybe have foldmetadata globally too
       String iwpPath = instancewiseInfoDirPath; // aliasing for readability
 
-      mPredictions = new int[max];
-
       int totalInstanceIndex=0;
-      for(int i = 0; i< max;i++){ //iterating over instancewise logs for each fold
+      for(int i = 0; i<foldMetadata.length;i++){ //iterating over instancewise logs for each fold
         File ciFile = new File(iwpPath+"hash:"+mModel.hashCode()+"_fold:"+i+".txt");
 
         if(ciFile.exists()){
@@ -198,7 +179,7 @@ public class Ensembler{
           BufferedReader ciBR = new BufferedReader(ciFR); //hue
           ciBR.nextLine(); //skipping first line of csv file
 
-          for(int j=0;j<foldSizes.length;j++,totalInstanceIndex++){ //iterating over lines
+          for(int j=0;j<foldMetadata[i];j++,totalInstanceIndex++){ //iterating over lines
             String instanceLine = ciBR.nextLine(); //TODO use regex
             String [] gambiarraTemp = instanceLine.split(",");
             String [] gambiarra = gambiarraTemp[2].split(":");
@@ -206,7 +187,7 @@ public class Ensembler{
           }
 
         }else{
-          for(int j=0;j<foldMetaData.get(i);j++,totalInstanceIndex++){ //TODO define standard behaviour for this case
+          for(int j=0;j<foldMetaData[i];j++,totalInstanceIndex++){ //TODO define standard behaviour for this case
               mPredictions[totalInstanceIndex]=-1;
           }
         }

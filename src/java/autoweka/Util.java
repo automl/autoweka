@@ -43,6 +43,16 @@ public class Util
        return (new Radom()).nextInt(1+(start-end))+start);
      }
 
+     static public List<T> sliceList(List<T> l, int first, int last){
+       if(first>last || last>= l.size() || first>=l.size() || first<0 || last<0) throw new RuntimeException();
+       for(int i = l.size()-1;i>=last;i--){
+         l.remove(i);
+       }
+       for(int i = first-1;i>=0;i--){
+         l.remove(i);
+       }
+     }
+     
      static public int indexMin(int[] a){ //returns first one
        int min = Integer.INT_MAX;
        int index_min=0;
