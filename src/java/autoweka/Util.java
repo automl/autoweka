@@ -37,6 +37,63 @@ public class Util
     final static Logger log = LoggerFactory.getLogger(Util.class);
 
     /**
+     *Returns random int between start and end, inclusive
+     */
+     static public int randomIntInRange(int start, int end){
+       return (new Radom()).nextInt(1+(start-end))+start);
+     }
+
+     static public int indexMin(int[] a){ //returns first one
+       int min = Integer.INT_MAX;
+       int index_min=0;
+       for(int i=0; i<a.length ;i++){
+         if(a[i]<min){
+           min=a[i];
+           index_min=i;
+         }
+       }
+       return index_min;
+     }
+
+     static public int indexMin(double[] a){
+         double min = Double.DOUBLE_MAX;
+         int index_min=0;
+         for(int i=0; i<a.length ;i++){
+           if(a[i]<min){
+             min=a[i];
+             index_min=i;
+           }
+         }
+         return index_min;
+      }
+
+
+     static public int indexMax(int[] a){
+       int max = 0;
+       int index_max=0;
+       for(int i=0; i<a.length ;i++){
+         if(a[i]>max){
+           max=a[i];
+           index_max=i;
+         }
+       }
+       return index_max;
+     }
+
+     static public int indexMax(double[] a){
+       double max = 0;
+       int index_max=0;
+       for(int i=0; i<a.length ;i++){
+         if(a[i]>max){
+           max=a[i];
+           index_max=i;
+         }
+       }
+       return index_max;
+     }
+
+
+    /**
      * Given a property string (var1=val1:var2=val2:....) convert it to a property object.
      *
      * Note that this honours escaped colons

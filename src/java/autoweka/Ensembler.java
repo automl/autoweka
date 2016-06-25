@@ -19,35 +19,42 @@ import weka.classifiers.meta.AutoWEKAClassifier.configurationHashSetPath;
 import weka.classifiers.meta.AutoWEKAClassifier.instancewiseInfoDirPath;
 
 public class Ensembler{
-  private List<Configuration> cfgList;
+  private List<Configuration> mCfgList;
 
   //private List<EnsembleElement> mCurrentEnsemble;
   private int [] mFoldSizes;
   private Integer [] mCorrectClasses;
   private int    mAmtFolds;
+  private int    mAmtInstances;
 
-  public String iwpPath; //i
-
-  public Ensembler(String iwpPath,String rPath){ //TODO grab fold amt form winner then treat for exceptions in case u cant parse them all
-    this.cfgList = ConfigurationCollection.fromXML(rPath,ConfigurationCollection.class).asArrayList();
-    mAmtFolds = cfgList.get(0).getAmtFolds();
-    parseFoldData(iwpPath);
+  private String iwpPath; //Aliasing for readability
+  private String rPath;
+  public Ensembler(){ //TODO grab fold amt form winner then treat for exceptions in case u cant parse them all
+    this.iwpPath = instancewiseInfoDirPath;
+    this.rPath   = configurationRankingPath;
+    mCfgList = ConfigurationCollection.fromXML(rPath,ConfigurationCollection.class).asArrayList();
+    mAmtFolds = mCfgList.get(0).getAmtFolds();
+    parseFoldData();
   }
 
-  private void parseFoldData(String iwpPath){
+  private void parseFoldData(){
+
     List<Integer> correctClassesList = new ArrayList<Integer>();
     mFoldSizes = new int[mAmtFolds];
-    String winnerHash = cfgList.get(0).hashCode();
-    for(i=0;i<mAmtFolds;i++){
+    String winnerHash = mCfgList.get(0).hashCode();
+
+    for(i=0;i<mAmtFolds;i++){//iterating over folds
+
       try{
-        FileReader ciFileReader = new FileReader(iwpPath+"/hash:"+winnerHash+"_fold:"+i+".txt");
+        FileReader     ciFileReader = new FileReader(iwpPath+"hash:"+winnerHash+"_fold:"+i+".txt");
         BufferedReader ciBufferedReader = new BufferedReader(ciFileReader);
       }catch(Exception e){
         System.out.println("Couldn't find instancewise predictions for final incument on "+i+"-th fold");
       }
+
       String currentLine = ciBufferedReader.readLine();//skip first line
       int foldSize = 0;
-      while(currentLine!=null){
+      while(currentLine!=null){//iterating over instances
         correctClassesList = ciBufferedReader.readLine()
         String [] gambiarra1 = currentLine.split(","); //TODO use regex
         String [] gambiarra2 = gambiarra1[1].split(":");
@@ -56,6 +63,7 @@ public class Ensembler{
       }
       mFoldSizes[i]=foldSize;
     }
+
     mCorrectClasses = new Integer[correctClassesList.size()];
     correctClassesList.toArray(mCorrectClasses); //TODO optimize this into int array
   }
@@ -63,50 +71,71 @@ public class Ensembler{
 
   public void hillclimb(boolean onlyFullyPredicted){ //Doing it the straightforward way. Gonna try a faster way later, just wanna get this working.
 
-    List<Configuration> configBatch = (List<Configuration>) cfgList.clone(); //shallow copying
+    List<Configuration> configBatch = (List<Configuration>) mCfgList.clone(); //shallow copying
 
+    //Removing configurations not evaluated on all folds
     if(onlyFullyPredicted){
       for(int i = configBatch.size()-1; i>=0 ; i--) if(configBatch.get(i)!=mFoldAmt) configBatch.remove(i);
     }
 
+    //Parsing the predictions made by each configuration
     List<EnsembleElement> eeBatch = new List<EnsembleElement>();
     for (Configuration c: configBatch){
-      EnsembleElement ciEE = new EnsembleElement(c);
-      ciEE.parseInstancewiseInfo(iwpPath,mFoldSizes); //TODO review this
-      eeBatch.add(ciEE);
+      EnsembleElement ee = new EnsembleElement(c);
+      ee.parseInstancewiseInfo(mFoldSizes); //TODO review this
+      eeBatch.add(ee);
     }
 
-    int [] partialEnsembleScores = new int [eeBatch.size()];
-    //int
+    //Building the ensemble
     List<EnsembleElement> currentPartialEnsemble = new ArrayList<EnsembleElement>();
+    int [] partialEnsembleScores = new int[eeBatch.size()];
+    int index = 0;
+    while(!eeBatch.isEmpty()){//Iterating over available ensemble slots. TODO make the initialization batch flexible.
 
-    bestPartialEnsembleScore = 0;
-    bestPartialEnsembleIndex = 0;
-    for(i = 0; !eeBatch.isEmpty(); i++){ //Iterating over available ensemble slots. Starts at 1 cause we have the best one in already. TODO make the initialization batch flexible.
-
-      int bestChoiceScore = 0;
+      int leastErrorsThisSlot = mInstanceAmt;
       EnsembleElement chosenModel = null;
-      for( EnsembleElement ee : eeBatch){
-        int scoreWithThisModel = _evaluateModelChoice(currentPartialEnsemble,ee);
-        if (scoreWithThisModel>bestChoiceScore){
-          bestChoiceScore = scoreWithThisModel;
-          chosenModel=ee;
+      for(EnsembleElement ee : eeBatch){//Iterating over remaining ensembles in the batch
+        int scoreWithThisModel= _evaluateModelChoice(currentPartialEnsemble,ee);
+        if (scoreWithThisModel<leastErrorsThisSlot){
+          leastErrorsThisSlot = scoreWithThisModel;
+          partialEnsembleScores[index] = scoreWithThisModel;
+          chosenModel = ee;
         }
       }
+      if (chosenModel==null) throw new RuntimeException(); //TODO write message
       currentPartialEnsemble.add(chosenModel);
       eeBatch.remove(chosenModel);
-      if(bestChoiceScore>bestPartialEnsembleScore){
-        bestPartialEnsembleScore = bestChoiceScore;
-        bestPartialEnsembleIndex = i;
+      index++;
+    } //TODO have something that evaluates that its likely not climbing anymore
+
+    //Slicing it at best place
+    int errorAmtPE=mAmtInstances;
+    int bestIndex=0;
+    for(int i=0;i<partialEnsembleScores.length;i++){
+      if(partialEnsembleScores i < errorAmtPE){
+        bestIndex = i;
       }
     }
-    //TODO:
-    //Slice models that make it worse
-    //return currentPE
+    for(int i = currentPartialEnsemble.size()-1;i>bestIndex;i--){
+      currentPartialEnsemble.remove(i);
+    }
+
+    List<Configuration> rv = new List<Configuration>();
+    for(EnsembleElement ee : currentPartialEnsemble){
+      rv.add(ee.getModel());
+    }
+    return rv;
   }
 
   private int _evaluateModelChoice(List<EnsembleElement> currentPartialEnsemble, EnsembleElement modelChoice){
-
+    currentPartialEnsemble.add(modelChoice);
+    int amtErrors = 0;
+    for (int i = 0; i < mInstanceAmt ; i++){
+      if(_majorityVote(i,currentPartialEnsemble) != mCorrectClasses[i]){
+        amtErrors++
+      }
+    }
+    return amtErrors;
   }
 
   private int _majorityVote(int instanceNum, List<EnsembleElement> currentPartialEnsemble){
@@ -130,48 +159,60 @@ public class Ensembler{
 
     private double mWeight;
     private Configuration mModel;
-    private int[] mPredictions; //TODO bring that here from configuration
+    private int [] mPredictions;
+    private int [] mfoldSizes;
+    private int mInstanceAmt;
 
-    public EnsembleElement(Configuration model, double weight){
-      this(model);
+    public EnsembleElement(Configuration model, int instanceAmt, int[] foldSizes, double weight){
+      this(model,instanceAmt,foldSizes);
       mWeight = weight;
     }
 
-    public EnsembleElement(Configuration model){
+    public EnsembleElement(Configuration model, int instanceAmt, int[] foldSizes){
       mModel = model;
-      mPredictions = new int[model.getInstanceAmt()];
+      mFoldSizes = foldSizes;
+      mInstanceAmt = instanceAmt;
+      mPredictions = new int[instanceAmt];
       mWeight=1;
     }
 
     public int getPrediction(int instanceNum){
       return mPredictions[instanceNum];
     }
+    public Configuration getModel(){
+      return mModel;
+    }
 
-    public void parseInstancewiseInfo(String instancewiseLogPath, Map <Integer,Integer> foldMetadata){ //TODO get instancewiseLogPath from global, maybe have foldmetadata globally too
-      int max = Collections.max(foldMetadata.keySet());
-      int currentInstanceIndex=0;
+    public void parseInstancewiseInfo(int [] foldMetadata){ //TODO get instancewiseLogPath from global, maybe have foldmetadata globally too
+      String iwpPath = instancewiseInfoDirPath; // aliasing for readability
+
       mPredictions = new int[max];
 
-      for(int i = 0; i< max;i++){
-        File ciFile = new File(instancewiseLogPath+"/"+"instancewise_predictions_hash:"+mModel.hashCode()+"_fold:"+i+".txt");
-        FileReader ciFR = new FileReader(ciFile);
-        BufferedReader ciBR = new BufferedReader(ciFR); //hue
+      int totalInstanceIndex=0;
+      for(int i = 0; i< max;i++){ //iterating over instancewise logs for each fold
+        File ciFile = new File(iwpPath+"hash:"+mModel.hashCode()+"_fold:"+i+".txt");
+
         if(ciFile.exists()){
+
+          FileReader ciFR = new FileReader(ciFile);
+          BufferedReader ciBR = new BufferedReader(ciFR); //hue
           ciBR.nextLine(); //skipping first line of csv file
-          for(int j=0;j<foldMetadata.get(i);j++,currentInstanceIndex++){
-            String instanceLine = ciBR.nextLine();
+
+          for(int j=0;j<foldSizes.length;j++,totalInstanceIndex++){ //iterating over lines
+            String instanceLine = ciBR.nextLine(); //TODO use regex
             String [] gambiarraTemp = instanceLine.split(",");
             String [] gambiarra = gambiarraTemp[2].split(":");
-            mPredictions[currentInstanceIndex]=Integer.parseInt(gambiarra[0]);
+            mPredictions[totalInstanceIndex]=Integer.parseInt(gambiarra[0]);
           }
+
         }else{
-          for(int j=0;j<foldMetaData.get(i);j++,currentInstanceIndex++){
-              mPredictions[currentInstanceIndex]=-1;
+          for(int j=0;j<foldMetaData.get(i);j++,totalInstanceIndex++){ //TODO define standard behaviour for this case
+              mPredictions[totalInstanceIndex]=-1;
           }
         }
       }
-    }
+    }//method
 
-  }
+  }//EE class
 
 }
