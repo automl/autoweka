@@ -11,10 +11,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import weka.classifiers.meta.AutoWEKAClassifier.temporaryDirPath;
-import weka.classifiers.meta.AutoWEKAClassifier.configurationRankingPath;
-import weka.classifiers.meta.AutoWEKAClassifier.configurationInfoDirPath;
-import weka.classifiers.meta.AutoWEKAClassifier.configurationHashSetPath;
+import static weka.classifiers.meta.AutoWEKAClassifier.configurationRankingPath;
+import static weka.classifiers.meta.AutoWEKAClassifier.configurationInfoDirPath;
+import static weka.classifiers.meta.AutoWEKAClassifier.configurationHashSetPath;
 
 
 public class ConfigurationRanker{
@@ -25,9 +24,9 @@ public class ConfigurationRanker{
 	public String hsPath; //hash set path (txt file)
 
 	//Loads configurations from temporary log, merges identical while merging the folds in which they were analyzed, sorts them and spits n of them to a xml
-	public ConfigurationRanker(){
+	public ConfigurationRanker(String temporaryDirPath){
 		this.cdPath = temporaryDirPath+configurationInfoDirPath;
-		this.rPath  = rankingPath+configurationRankingPath;
+		this.rPath  = temporaryDirPath+configurationRankingPath;
 		this.hsPath = temporaryDirPath+configurationHashSetPath;
 	}
 
@@ -49,7 +48,7 @@ public class ConfigurationRanker{
 			hashSet = new HashSet<String>(Arrays.asList(hashArray));
 		}catch(Exception e){
 			System.out.println("Couldn't find config hash list file");
-			return;
+			return null;
 		}
 		for(String hash : hashSet){
 			configurationList.add(Configuration.fromXML(cdPath+hash+".xml",Configuration.class)); //TODO unhardcode
@@ -67,7 +66,7 @@ public class ConfigurationRanker{
 			forceFirst(configurationList,smacFinalIncumbent); //gotta do this before slicing, otherwise smacFinalIncumbent might be lost in the slice
 		}
 
-		//Slicing the list to size n
+		//If the list is larger than N, slicing it to size N
 		configurationList = configurationList.subList(0,  (n<configurationList.size())?(n):(configurationList.size())  );
 
 		//Spit to xml

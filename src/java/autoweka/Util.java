@@ -40,21 +40,25 @@ public class Util
      *Returns random int between start and end, inclusive
      */
      static public int randomIntInRange(int start, int end){
-       return (new Radom()).nextInt(1+(start-end))+start);
+       return ((new Random()).nextInt(1+(start-end))+start);
      }
 
-     static public List<T> sliceList(List<T> l, int first, int last){
+     static public <T> List<T> getSlicedList(List<T> l, int first, int last){
        if(first>last || last>= l.size() || first>=l.size() || first<0 || last<0) throw new RuntimeException();
-       for(int i = l.size()-1;i>=last;i--){
-         l.remove(i);
+
+       List<T> clone = (List<T>) ((ArrayList<T>)l).clone(); //I know it's ugly, but it works ¯\_(ツ)_/¯
+
+       for(int i = clone.size()-1;i>=last;i--){
+         clone.remove(i);
        }
        for(int i = first-1;i>=0;i--){
-         l.remove(i);
+         clone.remove(i);
        }
+       return clone;
      }
-     
+
      static public int indexMin(int[] a){ //returns first one
-       int min = Integer.INT_MAX;
+       int min = Integer.MAX_VALUE;
        int index_min=0;
        for(int i=0; i<a.length ;i++){
          if(a[i]<min){
@@ -66,7 +70,7 @@ public class Util
      }
 
      static public int indexMin(double[] a){
-         double min = Double.DOUBLE_MAX;
+         double min = Double.MAX_VALUE;
          int index_min=0;
          for(int i=0; i<a.length ;i++){
            if(a[i]<min){

@@ -22,6 +22,10 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static weka.classifiers.meta.AutoWEKAClassifier.configurationRankingPath;
+import static weka.classifiers.meta.AutoWEKAClassifier.configurationInfoDirPath;
+import static weka.classifiers.meta.AutoWEKAClassifier.configurationHashSetPath;
+
 /**
  * Class that is responsible for actually running a WEKA classifier from start to finish using the Auto-WEKA argument format.
  *
@@ -384,10 +388,8 @@ public class ClassifierRunner
     }
 
     protected void saveConfiguration(ClassifierResult res,List<String> args, String instanceStr){
-      //TODO unhardcode this somehow/ find a more elegant workaorund for this check
-      String configurationRankingFilename = "EnsemblerLogging/configuration_ranking.xml"
       //Checking if we're doing this logging for this run of autoweka TODO make this on the caller of this method?
-      File sortedLog = new File(configurationRankingFilename);
+      File sortedLog = new File(configurationRankingPath);
       if (!sortedLog.exists()){
         return;
       }
@@ -396,10 +398,8 @@ public class ClassifierRunner
       Configuration ciConfig = new Configuration(args);
       int ciHash             = ciConfig.hashCode();
 
-      String ciConfigFilename = "EnsemblerLogging/configurations/"+ciHash+".xml";
+      String ciConfigFilename = configurationInfoDirPath+ciHash+".xml";
       File ciFile             = new File(ciConfigFilename);
-
-      String hashSetFilename = "EnsemblerLogging/configuration_hash_set.txt";
 
       //Computing Score and fold ID
       Properties pInstanceString = Util.parsePropertyString(instanceStr);
@@ -420,10 +420,8 @@ public class ClassifierRunner
 
       //Updating the configuration list
       try{
-          BufferedWriter fp = new BufferedWriter(new FileWriter(hashSetFilename,true));//true for appending
-          fp.write(ciHash+",");
-          fp.flush();
-          fp.close();
+          BufferedWriter br = new BufferedWriter(new FileWriter(configurationHashSetPath,true));//true for appending
+          br.write(ciHash+",");
       }catch(IOException e){
           throw new RuntimeException("Couldn't write to hash set");
       }

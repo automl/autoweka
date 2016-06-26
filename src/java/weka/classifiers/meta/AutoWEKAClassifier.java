@@ -128,7 +128,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     static final String DEFAULT_EXTRA_ARGS = "initialIncumbent=RANDOM:acq-func=EI";
 
     /** The full path for the temporary Auto-WEKA folder **/
-    public static final String temporaryDirPath = msExperimentPath+expName+"/";
+    //public static final String temporaryDirPath = msExperimentPath+expName+"/";
     /** The path for the sorted best configurations **/
     public static final String configurationRankingPath = "EnsemblerLogging/configuration_ranking.xml";
     /** The path for the log with the hashcodes for the configs we have **/
@@ -265,6 +265,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         //Initializing logs
         if(nBestConfigs>1){
+            String temporaryDirPath = msExperimentPath+expName+"/";
             Util.initializeFile(temporaryDirPath+configurationRankingPath);
             Util.initializeFile(temporaryDirPath+configurationHashSetPath);
             Util.makePath(temporaryDirPath+configurationInfoDirPath);
@@ -372,11 +373,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         //Print log of best configurations
         if (nBestConfigs>1){
-          ConfigurationRanker.rank( nBestConfigs,
-                                    msExperimentPath+expName,
-                                    msExperimentPath+expName+"/"+sortedConfigurationLog,
-                                    msExperimentPath+expName+"/"+configIndexLog,
-                                    mBest.rawArgs);
+          ConfigurationRanker cr = new ConfigurationRanker(msExperimentPath+expName+"/");
+          List<Configuration> lc = cr.rank( nBestConfigs , mBest.rawArgs);
         }
 
 
