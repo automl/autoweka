@@ -7,12 +7,13 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-
+import java.util.Set;
+import java.util.HashSet;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.BufferedReader;
-
+import java.io.FileNotFoundException;
 
 import static weka.classifiers.meta.AutoWEKAClassifier.configurationRankingPath;
 import static weka.classifiers.meta.AutoWEKAClassifier.configurationInfoDirPath;
@@ -20,194 +21,250 @@ import static weka.classifiers.meta.AutoWEKAClassifier.configurationHashSetPath;
 import static weka.classifiers.meta.AutoWEKAClassifier.instancewiseInfoDirPath;
 
 public class Ensembler{
-  private List<Configuration> mCfgList;
-  private Integer [] mCorrectClasses;
-  private int [] mFoldSizes;
-  private int    mAmtFolds;
-  private int    mAmtInstances;
-  private int    mAmtClasses;
+	private List<Configuration> mCfgList;   //List of configurations given as input via the configuration ranking
+	private Map<Integer,Integer> mLabelMap; //Maps class identifiers to ints 0-n where n is the number of classes
+	private int [] mCorrectLabels;     //
+	private int [] mFoldSizes;
+	private int    mAmtFolds;
+	private int    mAmtInstances;
+	private int    mAmtLabels;
 
-  private String iwpPath; //Aliasing for readability
-  private String rPath;
+	private String iwpPath; //Aliasing for readability
+	private String rPath;
 
-  public Ensembler(String temporaryDirPath) throws Exception{
-    this.iwpPath = temporaryDirPath+instancewiseInfoDirPath;
-    this.rPath   = temporaryDirPath+configurationRankingPath;
-    mCfgList = ConfigurationCollection.fromXML(rPath,ConfigurationCollection.class).asArrayList();
-    mAmtFolds = mCfgList.get(0).getAmtFolds();
-    parseFoldData();
-  }
+	public Ensembler(String temporaryDirPath) throws Exception{
+		this.iwpPath = temporaryDirPath+instancewiseInfoDirPath;
+		this.rPath   = temporaryDirPath+configurationRankingPath;
+		mCfgList = ConfigurationCollection.fromXML(rPath,ConfigurationCollection.class).asArrayList();
+		mLabelMap = new HashMap<Integer,Integer>();
+		mAmtFolds = mCfgList.get(0).getAmtFolds(); //TODO compute it from some global
+		mFoldSizes = new int[mAmtFolds];
+		parseFoldData();
+	}
 
-  private void parseFoldData() throws Exception{ //TODO merge this with the similar method in EE somehow.
+	private void parseFoldData() throws Exception{ //TODO merge this with the similar method in EE somehow.
 
-    List<Integer> correctClassesList = new ArrayList<Integer>();
-    mFoldSizes = new int[mAmtFolds];
-    String winnerHash = Integer.toString(mCfgList.get(0).hashCode());
-    int i=0;
-    try{
-      for(i=0;i<mAmtFolds;i++){//iterating over folds
-        FileReader     ciFR;
-        BufferedReader ciBR;
-          ciFR = new FileReader(iwpPath+"hash:"+winnerHash+"_fold:"+i+".txt");
-          ciBR = new BufferedReader(ciFR);
 
-        String currentLine = ciBR.readLine();//skip first line
-        int foldSize = 0;
-        while(currentLine!=null){//iterating over instances
-          currentLine = ciBR.readLine();
-          String [] gambiarra1 = currentLine.split(","); //TODO use regex
-          String [] gambiarra2 = gambiarra1[1].split(":");
-          correctClassesList.add(Integer.valueOf(gambiarra2[0])); //TODO FIXME PLEASE
-          foldSize++;
-        }
-        mFoldSizes[i]=foldSize;
-      }
-    }catch(Exception e){
-      System.out.println("Couldn't find instancewise predictions for final incument on "+i+"-th fold"); //TODO make this more fine grained
-      throw e;
-    }
+		String winnerHash = Integer.toString(mCfgList.get(0).hashCode());
+		int i = 0,instanceCounter=0;
+		FileReader ciFR = null;
+		BufferedReader ciBR = null;
 
-    mCorrectClasses = new Integer[correctClassesList.size()];
-    correctClassesList.toArray(mCorrectClasses); //TODO optimize this into int array
-  }
+		//Counting instances
+		for(i=0;i<mAmtFolds;i++){
+			//opening buffers
+			String path = iwpPath+"hash:"+winnerHash+"_fold:"+i+".txt";
+			try{
+				ciFR = new FileReader(path);
+				ciBR = new BufferedReader(ciFR);
+			}catch (FileNotFoundException e){
+				System.out.println("Couldn't find file: "+ path);
+				throw e;
+			}
 
-  public List<Configuration> hillclimb(boolean onlyFullyPredicted) throws Exception{ //Doing it the straightforward way. Gonna try a faster way later, just wanna get this working.
+			//Counting
+			String currentLine = ciBR.readLine();//skip first line
+			int foldSize=0;
+			while(currentLine!=null){
+				currentLine = ciBR.readLine();
+				foldSize++;
+			}
 
-    List<Configuration> configBatch = (ArrayList<Configuration>)((ArrayList<Configuration>) mCfgList).clone(); //shallow copying. Ugly trick but works.
+			//Saving
+			mFoldSizes[i]=foldSize;
+			mAmtInstances+=foldSize;
+			ciBR.close();
+		}
 
-    //Removing configurations not evaluated on all folds
-    if(onlyFullyPredicted){
-      for(int i = configBatch.size()-1; i>=0 ; i--) if(configBatch.get(i).getAmtFolds()!=mAmtFolds) configBatch.remove(i);
-    }
+		//Parsing the actual labels for every instance
+		mCorrectLabels = new int[mAmtInstances];
+		for(i=0;i<mAmtFolds;i++){//iterating over folds
+			//Setting up the buffers
+			try{
+				ciFR = new FileReader(iwpPath+"hash:"+winnerHash+"_fold:"+i+".txt");
+				ciBR = new BufferedReader(ciFR);
+			}catch(FileNotFoundException e){
+				System.out.println("Couldn't find instancewise predictions for final incument on "+i+"-th fold"); //TODO make this more fine grained
+				throw e;
+			}
 
-    //Parsing the predictions made by each configuration
-    List<EnsembleElement> eeBatch = new ArrayList<EnsembleElement>();
-    for (Configuration c: configBatch){
-      EnsembleElement ee = new EnsembleElement(c,mAmtInstances,mFoldSizes);
-      ee.parseInstancewiseInfo(); //TODO  maybe put a call to this in the EE constructor
-      eeBatch.add(ee);
-    }
+			//Looking at every instance
+			ciBR.readLine();//skip first line
+			for(String currentLine = ciBR.readLine() ; currentLine!=null ; currentLine = ciBR.readLine()){
+				int ciActualLabelNumber = Integer.parseInt(Util.parseInstancewiseLine(currentLine,"ACTUAL_CODE"));
+				mCorrectLabels[instanceCounter]=ciActualLabelNumber;
+				if(!mLabelMap.containsKey(ciActualLabelNumber)){ //Labels can have crazy formats and values, lets map that to tame sequential ints.
+					mLabelMap.put(ciActualLabelNumber,mLabelMap.size()); //using the size as a counter type of thing ^_^
+				}
+				instanceCounter++;
+			}
+			ciBR.close();
+		}
+		mAmtLabels=mLabelMap.size();
+	}
 
-    //Building the ensemble
-    List<EnsembleElement> currentPartialEnsemble = new ArrayList<EnsembleElement>();
-    int [] partialEnsembleErrorCounts = new int[eeBatch.size()];
+	//Greedy ensemble selection hillclimbing process
+	public List<Configuration> hillclimb(boolean onlyFullyPredicted) throws Exception{ //Doing it the straightforward way. Gonna try a faster way later, just wanna get this working.
 
-    for(int i = 0; !eeBatch.isEmpty() ;i++){//Iterating over available ensemble slots. TODO make the initialization batch flexible.
+		//Shallow copying mCfg list. Trick is ugly but works.
+		List<Configuration> configBatch = (ArrayList<Configuration>)((ArrayList<Configuration>) mCfgList).clone();
 
-      int [] modelChoiceErrorCounts = new int[eeBatch.size()];
-      for(int j = 0; j<eeBatch.size(); j++){//Iterating over remaining ensembles in the batch
-        modelChoiceErrorCounts[j] = evaluateModelChoice(currentPartialEnsemble,eeBatch.get(j));
-      }
+		//Removing configurations not evaluated on all folds
+		if(onlyFullyPredicted){
+			for(int i = configBatch.size()-1; i>=0 ; i--) if(configBatch.get(i).getAmtFolds()!=mAmtFolds){ System.out.println("@removin':"+configBatch.get(i).getArgStrings());configBatch.remove(i);}
+		}
 
-      int indexWithSmallestError = Util.indexMin(partialEnsembleErrorCounts);
-      partialEnsembleErrorCounts[i]= indexWithSmallestError;
-      currentPartialEnsemble.add(eeBatch.get(indexWithSmallestError));
-      eeBatch.remove(indexWithSmallestError);
-    } //TODO have something that evaluates that its likely not climbing anymore to stop earlier
+		//Parsing the predictions made by each configuration
+		List<EnsembleElement> eeBatch = new ArrayList<EnsembleElement>();
+		for (Configuration c: configBatch){
+			EnsembleElement ee = new EnsembleElement(c,mAmtInstances,mFoldSizes);
+			ee.parseInstancewiseInfo(iwpPath); //TODO  maybe put a call to this in the EE constructor
+			eeBatch.add(ee);
+		}
 
-    //Slicing it at best place
-    int bestIndex = Util.indexMin(partialEnsembleErrorCounts);
-    currentPartialEnsemble = Util.getSlicedList(currentPartialEnsemble,0,bestIndex);
+		System.out.println("@eebatch");
+		for(EnsembleElement ee : eeBatch){
+			System.out.println("hash: "+ee.hashCode());
+		}
 
-    List<Configuration> rv = new ArrayList<Configuration>();
-    for(EnsembleElement ee : currentPartialEnsemble){
-      rv.add(ee.getModel());
-    }
-    return rv;
-  }
+		//Building the ensemble
+		List<EnsembleElement> currentPartialEnsemble = new ArrayList<EnsembleElement>();
+		int [] hillclimbingStepPerformances = new int[eeBatch.size()]; //So far, error count TODO make it general
 
-  private int evaluateModelChoice( List<EnsembleElement> currentPartialEnsemble, EnsembleElement modelChoice){
-    currentPartialEnsemble.add(modelChoice);
-    int amtErrors = 0;
-    for (int i = 0; i < mAmtInstances ; i++){
-      if(_majorityVote(i, currentPartialEnsemble) != mCorrectClasses[i]){
-        amtErrors++;
-      }
-    }
-    return amtErrors;
-  }
+		for(int i = 0; !eeBatch.isEmpty() ;i++){//Iterating over available ensemble slots. TODO make the initialization batch flexible.
 
-  private int _majorityVote(int instanceNum, List<EnsembleElement> currentPartialEnsemble){
-    int [] votes = new int [mAmtClasses];
-    for (EnsembleElement ee : currentPartialEnsemble){
-      votes[ee.getPrediction(instanceNum)]++;
-    }
+			int[] performanceAndIndex = chooseModel(eeBatch,currentPartialEnsemble);
+			EnsembleElement ciChosenModel = eeBatch.get(performanceAndIndex[1]);
+			currentPartialEnsemble.add(ciChosenModel);
+			eeBatch.remove(ciChosenModel);  //TODO just save bools right/wrong and then use logical ops ^o^
+			hillclimbingStepPerformances[i]=performanceAndIndex[0];
 
-    return Util.indexMax(votes);
+			System.out.println("@currentPartialEnsemble on iteration i="+i);
+			System.out.println("score: "+hillclimbingStepPerformances[i]);
+			for(int k=0; k<currentPartialEnsemble.size();k++){
+				System.out.println("hash: "+currentPartialEnsemble.get(k).getModel().hashCode());
+			}
+		} //TODO have something that evaluates that its likely not climbing anymore to stop earlier
 
-    //TODO treat duplicate max indexes differently than returning first one?
-  }
+		//Slicing it at best place
+		int bestIndex = Util.indexMin(hillclimbingStepPerformances);
+		currentPartialEnsemble = Util.getSlicedList(currentPartialEnsemble,0,bestIndex);
 
-  private class EnsembleElement{ //TODO make this separate?
+		List<Configuration> rv = new ArrayList<Configuration>();
+		for(EnsembleElement ee : currentPartialEnsemble){
+			rv.add(ee.getModel());
+		}
+		return rv;
+	}
 
-    private double mWeight;
-    private Configuration mModel;
-    private int [] mPredictions;
-    private int [] mfoldSizes;
-    private int mAmtInstances;
+	private int[] chooseModel(List<EnsembleElement> eeBatch, List<EnsembleElement> currentPartialEnsemble){
+		int [] possibleChoicePerformances = new int[eeBatch.size()];
 
-    public EnsembleElement(Configuration model, int amtInstances, int[] foldSizes, double weight){
-      this(model,amtInstances,foldSizes);
-      mWeight = weight;
-    }
+		//Iterating over possible choices in the batch
+		for(int i = 0; i<eeBatch.size(); i++){
+			currentPartialEnsemble.add(eeBatch.get(i));
+			//Iterating over {CPE + i-th choice} to compute the CPE performance with this choice.
+			for (int j = 0; j < mAmtInstances ; j++){
+				if(_majorityVote(j, currentPartialEnsemble) != mCorrectLabels[j]){
+					possibleChoicePerformances[i]++;
+				}
+			}
+			currentPartialEnsemble.remove(eeBatch.get(i));
+		}
 
-    public EnsembleElement(Configuration model, int amtInstances, int[] foldSizes){
-      mModel = model;
-      mFoldSizes = foldSizes;
-      mAmtInstances = amtInstances;
-      mPredictions = new int[amtInstances];
-      mWeight=1;
-    }
+		int bestIndex = Util.indexMin(possibleChoicePerformances);
+		int [] output = {possibleChoicePerformances[bestIndex],bestIndex};
+		return output; //Curse java and it's lack of native tuples
+	}
 
-    public int getPrediction(int instanceNum){
-      return mPredictions[instanceNum];
-    }
-    public Configuration getModel(){
-      return mModel;
-    }
+	private int _majorityVote(int instanceNum, List<EnsembleElement> currentPartialEnsemble){
+		int [] votes = new int [mAmtLabels]; //TODO compute amtclasses correctly
+		//System.out.println("@amtClasses in _mv:"+mAmtLabels);
+		for (EnsembleElement ee : currentPartialEnsemble){
+			int vote = ee.getPrediction(instanceNum);
+			Integer index = mLabelMap.get(vote);
+			System.out.println("@wasmapped: "+vote+ " to "+ index);
+			votes[index]++;
+		}
 
-    public void parseInstancewiseInfo() throws Exception{ //TODO get instancewiseLogPath from global, maybe have foldSizes globally too
-      //TODO make a custom Exception
-      String iwpPath = instancewiseInfoDirPath; // aliasing for readability
+		return Util.indexMax(votes);
 
-      int totalInstanceIndex=0;
-      for(int i = 0; i<mFoldSizes.length;i++){ //iterating over instancewise logs for each fold
-        File ciFile = new File(iwpPath+"hash:"+mModel.hashCode()+"_fold:"+i+".txt");
+		//TODO treat duplicate max indexes differently than returning first one?
+	}
 
-        if(ciFile.exists()){
-          FileReader ciFR;
-          BufferedReader ciBR;
-          try{
-            ciFR = new FileReader(ciFile);
-            ciBR = new BufferedReader(ciFR); //hue
-            ciBR.readLine(); //skipping first line of csv file
-          }catch (Exception e){
-            System.out.println("Couldn't initialize ciBR");
-            throw e;
-          }
+	private class EnsembleElement{ //TODO make this separate?
 
-          for(int j=0;j<mFoldSizes[i];j++,totalInstanceIndex++){ //iterating over lines
-            String instanceLine;
-            if(ciBR==null) throw new RuntimeException();//TODO fix this trick
-            try{
-              instanceLine = ciBR.readLine();
-            }catch (Exception e){
-              System.out.println("couldn't read the line"); //TODO use loggers etc
-              throw e;
-            }
-            String [] gambiarraTemp = instanceLine.split(",");
-            String [] gambiarra = gambiarraTemp[2].split(":");
-            mPredictions[totalInstanceIndex]=Integer.parseInt(gambiarra[0]);
-          }
 
-        }else{
-          for(int j=0;j<mFoldSizes[i];j++,totalInstanceIndex++){ //TODO define standard behaviour for this case
-              mPredictions[totalInstanceIndex]=-1;
-          }
-        }
-      }
-    }//method
 
-  }//EE class
+		private Configuration mModel;
+		private double mWeight;
+
+		private int [] mPredictions;
+		private int [] mfoldSizes;
+		private int mAmtInstances;
+
+		public EnsembleElement(Configuration model, int amtInstances, int[] foldSizes, double weight){
+			this(model,amtInstances,foldSizes);
+			mWeight = weight;
+		}
+
+		public EnsembleElement(Configuration model, int amtInstances, int[] foldSizes){
+			mModel = model;
+			mFoldSizes = foldSizes;
+			mAmtInstances = amtInstances;
+			mPredictions = new int[amtInstances];
+			mWeight=1;
+		}
+
+		public int getPrediction(int instanceNum){
+			return mPredictions[instanceNum];
+		}
+		public Configuration getModel(){
+			return mModel;
+		}
+
+		public String toString(){
+			return mModel.getArgStrings();
+		}
+		public int hashCode(){
+			return mModel.hashCode();
+		}
+
+		public void parseInstancewiseInfo(String iwpPath) throws Exception{ //TODO get instancewiseLogPath from global, maybe have foldSizes globally too
+			//TODO make a custom Exception
+			//TODO change the way iwpPath is provided
+
+			//Iterating over folds
+			int totalInstanceIndex=0;
+			for(int i = 0; i<mFoldSizes.length;i++){ //iterating over instancewise logs for each fold
+				String path = iwpPath+"hash:"+mModel.hashCode()+"_fold:"+i+".txt";
+				File ciFile = new File(path);
+				FileReader ciFR = null;
+				BufferedReader ciBR = null ;
+
+				if(ciFile.exists()){
+					try{
+						ciFR = new FileReader(ciFile);
+						ciBR = new BufferedReader(ciFR); //hue
+					}catch (Exception e){
+						System.out.println("Couldn't initialize ciBR");
+						throw e;
+					}
+
+					//Iterating over lines
+					ciBR.readLine(); //skipping first line of csv file
+					for( String currentLine = ciBR.readLine() ; currentLine!=null ; currentLine = ciBR.readLine()){ //iterating over lines
+						mPredictions[totalInstanceIndex]= Integer.parseInt(Util.parseInstancewiseLine(currentLine,"PREDICT_CODE"));
+						totalInstanceIndex++;
+						System.out.println("@prediction for hash "+mModel.hashCode()+" on instance "+totalInstanceIndex+" is "+mPredictions[totalInstanceIndex]);
+					}
+
+				}else{ //TODO define standard behaviour for this case
+					for(int j=0;j<mFoldSizes[i];j++,totalInstanceIndex++)	mPredictions[totalInstanceIndex]=-1;
+				}
+			}
+		}
+
+	}//EE class
 
 }

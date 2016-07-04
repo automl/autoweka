@@ -266,10 +266,12 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         //Initializing logs
         if(nBestConfigs>1){
             String temporaryDirPath = msExperimentPath+expName+"/";
-            Util.initializeFile(temporaryDirPath+configurationRankingPath);
-            Util.initializeFile(temporaryDirPath+configurationHashSetPath);
+          //  Util.makePath(temporaryDirPath+"EnsemblerLogging");
             Util.makePath(temporaryDirPath+configurationInfoDirPath);
             Util.makePath(temporaryDirPath+instancewiseInfoDirPath);
+
+            Util.initializeFile(temporaryDirPath+configurationRankingPath);
+            Util.initializeFile(temporaryDirPath+configurationHashSetPath);
         }
 
 
@@ -374,9 +376,15 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         //Print log of best configurations
         if (nBestConfigs>1){
           ConfigurationRanker cr = new ConfigurationRanker(msExperimentPath+expName+"/");
-          List<Configuration> lc = cr.rank( nBestConfigs , mBest.rawArgs);
-        }
+          cr.rank( nBestConfigs , mBest.rawArgs);
 
+          Ensembler e = new Ensembler(msExperimentPath+expName+"/");
+          List<Configuration> lc = e.hillclimb(true);
+          System.out.println("@the ensemble \n\n");
+          for (Configuration c: lc){
+            System.out.println("hash: "+c.hashCode()+"\nargs: "+c.getArgStrings());
+          }
+        }
 
         // train model on entire dataset and save
         as = new AttributeSelection();
@@ -391,7 +399,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         }
         as.SelectAttributes(is);
 
-        Ensembler e = new Ensembler(msExperimentPath+expName);
 
         classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
 

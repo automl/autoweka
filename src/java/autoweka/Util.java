@@ -14,11 +14,13 @@ import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -48,14 +50,48 @@ public class Util
 
        List<T> clone = (List<T>) ((ArrayList<T>)l).clone(); //I know it's ugly, but it works ¯\_(ツ)_/¯
 
-       for(int i = clone.size()-1;i>=last;i--){
+       for(int i = clone.size()-1;i>last;i--){
          clone.remove(i);
        }
        for(int i = first-1;i>=0;i--){
          clone.remove(i);
        }
+       System.out.println("@origlist_size"+l.size());
+       for(T t : l){
+         System.out.println("@originallist "+t.hashCode());
+       }
+       for(T t : clone){
+         System.out.println("@slicedlist "+t.hashCode());
+       }
        return clone;
      }
+
+    static public String parseInstancewiseLine(String line, String info){
+        /* Yes, I know I should use regex for these things, and I know this method is overly specific.
+        * Thing is, the instancewise lines ALWAYS follow the pattern a,b:c,d:e,(other info) I'm parsing below.
+        * Therefore, this is a fast, efficient and simple solution, albeit not elegant nor generalized.
+        * So let's just leave the elegantization as a low priority task for later ^_^
+        */
+        //TODO Upgrade this to use regex whenever you see a blue moon.
+
+        String [] separatedByComma = line.split(",");
+
+        //stupid java 6 without strings in switches
+        if      (info.equals("INST_NUMBER")){
+          return separatedByComma[0];              //instance number
+        }else if(info.equals("ACTUAL_CODE")){
+          return separatedByComma[1].split(":")[0];//correct class   (class code)
+        }else if(info.equals("ACTUAL_NAME")){
+          return separatedByComma[1].split(":")[1];//correct class   (class name)
+        }else if(info.equals("PREDICT_CODE")){
+          return separatedByComma[2].split(":")[0];//predicted class (class code)
+        }else if(info.equals("PREDICT_NAME")){
+          return separatedByComma[2].split(":")[1];//predicted class (class name)
+        }else{
+          return null;
+        }
+
+      }
 
      static public int indexMin(int[] a){ //returns first one
        int min = Integer.MAX_VALUE;
@@ -105,7 +141,6 @@ public class Util
        }
        return index_max;
      }
-
 
     /**
      * Given a property string (var1=val1:var2=val2:....) convert it to a property object.

@@ -364,8 +364,6 @@ public class ClassifierRunner
             {
                 //We're good, we can safely report this value
                 res.setScoreFromEval(eval, instances);
-                System.out.println("@predictionsFileName"+mPredictionsFileName);
-                System.out.println("@instancestr"+instanceStr);
                 saveConfiguration(res,args,instanceStr);
             }
         } catch(Exception e) {
@@ -420,8 +418,10 @@ public class ClassifierRunner
 
       //Updating the configuration list
       try{
+          System.out.println("@Hashsetpath:"+configurationHashSetPath);
           BufferedWriter br = new BufferedWriter(new FileWriter(configurationHashSetPath,true));//true for appending
           br.write(ciHash+",");
+          br.close();
       }catch(IOException e){
           throw new RuntimeException("Couldn't write to hash set");
       }

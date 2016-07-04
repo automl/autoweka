@@ -28,6 +28,10 @@ public class ConfigurationRanker{
 		this.cdPath = temporaryDirPath+configurationInfoDirPath;
 		this.rPath  = temporaryDirPath+configurationRankingPath;
 		this.hsPath = temporaryDirPath+configurationHashSetPath;
+		System.out.println("@rankerstrings");
+		System.out.println(cdPath);
+		System.out.println(rPath);
+		System.out.println(hsPath);
 	}
 
 	public List<Configuration> rank(int n){
@@ -45,6 +49,8 @@ public class ConfigurationRanker{
 		//Reading the hashSet and removing duplicates
 		try{
 			hashArray = (new Scanner(hsFile)).nextLine().split(",");
+			System.out.println("@the strings");
+			for(String s: hashArray) System.out.println(s);
 			hashSet = new HashSet<String>(Arrays.asList(hashArray));
 		}catch(Exception e){
 			System.out.println("Couldn't find config hash list file");
@@ -70,7 +76,8 @@ public class ConfigurationRanker{
 		configurationList = configurationList.subList(0,  (n<configurationList.size())?(n):(configurationList.size())  );
 
 		//Spit to xml
-		Util.initializeFile(rPath);
+		//Util.initializeFile(rPath);
+		System.out.println("spitting to: "+rPath);
 		ConfigurationCollection spitMe = new ConfigurationCollection(configurationList);
 		spitMe.toXML(rPath); //ba dum tss
 
