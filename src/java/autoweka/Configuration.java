@@ -57,11 +57,6 @@ public class Configuration extends XmlSerializable implements Comparable{
 	public Configuration(){
 		this.mFolds  = new ArrayList<String>();
 		this.mScores = new ArrayList<String>();
-		// this.mEvaluatedScore=0;
-		// this.mEvaluatedFold=0;
-		// this.mAverageScore=0;
-		// this.mAmtFolds=0;
-		// this.mAmtScores=0;
 		this.averagedFlag=false;
 	}
 
@@ -203,9 +198,9 @@ public class Configuration extends XmlSerializable implements Comparable{
 
 	//@TODO I think im not longer using those, check this later.
 	public double getEvaluatedScore() { return mEvaluatedScore;}
-	public int getEvaluatedFold()   	{ return mEvaluatedFold;}
-	public String getArgStrings() 		{ return mArgStrings;}
-	public List<String> getFolds() 	  { return mFolds;}
+	public int getEvaluatedFold()     { return mEvaluatedFold;}
+	public String getArgStrings()     { return mArgStrings;}
+	public List<String> getFolds()    { return mFolds;}
 	public List<String> getScores()   { return mScores;}
 
 }

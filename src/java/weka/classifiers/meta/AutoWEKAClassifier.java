@@ -775,14 +775,22 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             "attribute search arguments: " + (attributeSearchArgs != null ? Arrays.toString(attributeSearchArgs) : "[]") + "\n" +
             "attribute evaluation: " + attributeEvalClass + "\n" +
             "attribute evaluation arguments: " + (attributeEvalArgs != null ? Arrays.toString(attributeEvalArgs) : "[]") + "\n" +
-            "estimated error: " + estimatedError + "\n\n"; //@TODO looks like this error is printing the wrong value
+            "estimated error: " + estimatedError + "\n\n";
         try {
             res += eval.toSummaryString();
             res += "\n";
             res += eval.toMatrixString();
             res += "\n";
             res += eval.toClassDetailsString();
-        } catch(Exception e) { }
+        } catch(Exception e) { /*TODO treat*/ }
+
+		  ConfigurationCollection cc = ConfigurationCollection.fromXML(temporaryDirPath+"/"+configurationRankingPath);
+		  List<Configuration> ccAL = cc.asArrayList();
+
+		  res+= "\n\nOther good configurations are:"
+		  for(Configuration c : ccAL){
+			  res+= c.getArgStrings();
+		  }
 
         res += "\n\nFor better performance, try giving Auto-WEKA more time.";
         return res;
