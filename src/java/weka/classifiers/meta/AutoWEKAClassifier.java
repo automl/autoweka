@@ -263,7 +263,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         //Initializing logs
         if(nBestConfigs>1){
-            String temporaryDirPath = msExperimentPath+expName+"/";
+            String temporaryDirPath = msExperimentPath+expName+"/"; //TODO make this a global
             Util.makePath(temporaryDirPath+configurationInfoDirPath);
             Util.initializeFile(temporaryDirPath+configurationRankingPath);
             Util.initializeFile(temporaryDirPath+configurationHashSetPath);
@@ -784,12 +784,15 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             res += eval.toClassDetailsString();
         } catch(Exception e) { /*TODO treat*/ }
 
-		  ConfigurationCollection cc = ConfigurationCollection.fromXML(temporaryDirPath+"/"+configurationRankingPath);
+		  ConfigurationCollection cc = ConfigurationCollection.fromXML(msExperimentPath+expName+"/"+configurationRankingPath,ConfigurationCollection.class);
 		  List<Configuration> ccAL = cc.asArrayList();
 
-		  res+= "\n\nOther good configurations are:"
-		  for(Configuration c : ccAL){
-			  res+= c.getArgStrings();
+		  //check if theres >1 with enough folds before printing
+		  res+= "\n\nOther good configurations are:";
+		  for(int i = 1;i<ccAL.size();i++){
+			  if(ccAL.get(i).getAmtFolds()==ccAL.get(0).getAmtFolds()){
+				  res+= "\n"+(i+1)+":\n"+ccAL.get(i).getArgStrings();
+			  }
 		  }
 
         res += "\n\nFor better performance, try giving Auto-WEKA more time.";

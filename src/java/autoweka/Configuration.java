@@ -199,6 +199,7 @@ public class Configuration extends XmlSerializable implements Comparable{
 	//@TODO I think im not longer using those, check this later.
 	public double getEvaluatedScore() { return mEvaluatedScore;}
 	public int getEvaluatedFold()     { return mEvaluatedFold;}
+	public int getAmtFolds()          { return mAmtFolds;}
 	public String getArgStrings()     { return mArgStrings;}
 	public List<String> getFolds()    { return mFolds;}
 	public List<String> getScores()   { return mScores;}
