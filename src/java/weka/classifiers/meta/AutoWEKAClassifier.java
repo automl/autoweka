@@ -785,7 +785,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         } catch(Exception e) { /*TODO treat*/ }
 
 		  if(nBestConfigs>1){
-
+			  
 			  ConfigurationCollection cc = ConfigurationCollection.fromXML(msExperimentPath+expName+"/"+configurationRankingPath,ConfigurationCollection.class);
 			  List<Configuration> ccAL = cc.asArrayList();
 			  int fullyEvaluatedAmt = cc.getFullyEvaluatedAmt();
