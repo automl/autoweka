@@ -38,6 +38,16 @@ public class ConfigurationCollection extends XmlSerializable{
 		return mConfigurations.size();
 	}
 
+	//Returns the amount of configurations evaluated on all folds. Assumes the thing is sorted. TODO check if it is
+	public int getFullyEvaluatedAmt() {
+		int largestFoldAmt = mConfigurations.get(0).getAmtFolds();
+		int counter = 0;
+		for (Configuration c : mConfigurations){
+			if(c.getAmtFolds()==largestFoldAmt) counter++;
+		}
+		 return counter;
+	 }
+
 	public ArrayList<Configuration> asArrayList(){
 		return mConfigurations;
 	}

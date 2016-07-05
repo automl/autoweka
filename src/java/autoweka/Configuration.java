@@ -195,6 +195,7 @@ public class Configuration extends XmlSerializable implements Comparable{
 		lazyUpdateAverage();
 		return mAverageScore;
 	}
+	
 
 	//@TODO I think im not longer using those, check this later.
 	public double getEvaluatedScore() { return mEvaluatedScore;}
