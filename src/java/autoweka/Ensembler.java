@@ -183,7 +183,7 @@ public class Ensembler{
 		for (EnsembleElement ee : currentPartialEnsemble){
 			int vote = ee.getPrediction(instanceNum);
 			Integer index = mLabelMap.get(vote);
-			System.out.println("@wasmapped: "+vote+ " to "+ index);
+			System.out.println("@wasmapped: instance:"+instanceNum+" vote:"+vote+ " to label index:"+ index);
 			votes[index]++;
 		}
 
