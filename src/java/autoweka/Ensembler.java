@@ -255,8 +255,8 @@ public class Ensembler{
 					ciBR.readLine(); //skipping first line of csv file
 					for( String currentLine = ciBR.readLine() ; currentLine!=null ; currentLine = ciBR.readLine()){ //iterating over lines
 						mPredictions[totalInstanceIndex]= Integer.parseInt(Util.parseInstancewiseLine(currentLine,"PREDICT_CODE"));
-						totalInstanceIndex++;
 						System.out.println("@prediction for hash "+mModel.hashCode()+" on instance "+totalInstanceIndex+" is "+mPredictions[totalInstanceIndex]);
+						totalInstanceIndex++;
 					}
 
 				}else{ //TODO define standard behaviour for this case
