@@ -65,8 +65,7 @@ public class Ensembler{
 			//Counting
 			String currentLine = ciBR.readLine();//skip first line
 			int foldSize=0;
-			while(currentLine!=null){
-				currentLine = ciBR.readLine();
+			for(currentLine = ciBR.readLine();currentLine!=null; currentLine = ciBR.readLine()){
 				foldSize++;
 			}
 
@@ -111,7 +110,10 @@ public class Ensembler{
 
 		//Removing configurations not evaluated on all folds
 		if(onlyFullyPredicted){
-			for(int i = configBatch.size()-1; i>=0 ; i--) if(configBatch.get(i).getAmtFolds()!=mAmtFolds){ System.out.println("@removin':"+configBatch.get(i).getArgStrings());configBatch.remove(i);}
+			for(int i = configBatch.size()-1; i>=0 ; i--) if(configBatch.get(i).getAmtFolds()!=mAmtFolds){
+				System.out.println("@removin':"+configBatch.get(i).getArgStrings());
+				configBatch.remove(i);
+			}
 		}
 
 		//Parsing the predictions made by each configuration
@@ -163,8 +165,10 @@ public class Ensembler{
 		//Iterating over possible choices in the batch
 		for(int i = 0; i<eeBatch.size(); i++){
 			currentPartialEnsemble.add(eeBatch.get(i));
+		//	System.out.println("@ amt instances is"+mAmtInstances);
 			//Iterating over {CPE + i-th choice} to compute the CPE performance with this choice.
 			for (int j = 0; j < mAmtInstances ; j++){
+			//	System.out.println("@j is"+ j);
 				if(_majorityVote(j, currentPartialEnsemble) != mCorrectLabels[j]){
 					possibleChoicePerformances[i]++;
 				}
@@ -183,7 +187,7 @@ public class Ensembler{
 		for (EnsembleElement ee : currentPartialEnsemble){
 			int vote = ee.getPrediction(instanceNum);
 			Integer index = mLabelMap.get(vote);
-			System.out.println("@wasmapped: instance:"+instanceNum+" vote:"+vote+ " to label index:"+ index);
+		//	System.out.println("@wasmapped: instance:"+instanceNum+" vote:"+vote+ " to label index:"+ index);
 			votes[index]++;
 		}
 
@@ -255,7 +259,7 @@ public class Ensembler{
 					ciBR.readLine(); //skipping first line of csv file
 					for( String currentLine = ciBR.readLine() ; currentLine!=null ; currentLine = ciBR.readLine()){ //iterating over lines
 						mPredictions[totalInstanceIndex]= Integer.parseInt(Util.parseInstancewiseLine(currentLine,"PREDICT_CODE"));
-						System.out.println("@prediction for hash "+mModel.hashCode()+" on instance "+totalInstanceIndex+" is "+mPredictions[totalInstanceIndex]);
+			//			System.out.println("@prediction for hash "+mModel.hashCode()+" on instance "+totalInstanceIndex+" is "+mPredictions[totalInstanceIndex]);
 						totalInstanceIndex++;
 					}
 
