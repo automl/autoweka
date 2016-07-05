@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersbayesbayesnet_00_D REMOVE_PREV -_0__wekaclassifiersbayesbayesnet_01_Q weka.classifiers.bayes.net.search.local.SimulatedAnnealing -aseval__wekaattributeselectioncfssubseteval_00_0_M REMOVED -aseval__wekaattributeselectioncfssubseteval_01_1_L REMOVE_PREV -assearch__wekaattributeselectionbestfirst_00_0_D 1 -assearch__wekaattributeselectionbestfirst_01_1_INT_N 2 -attributeeval weka.attributeSelection.CfsSubsetEval -attributesearch weka.attributeSelection.BestFirst -attributetime 15.0 -targetclass weka.classifiers.bayes.BayesNet </argStrings>
+    <evaluatedScore>2.2727272727272663</evaluatedScore>
+    <evaluatedFold>8</evaluatedFold>
+    <folds>8</folds>
+    <scores>2.2727272727272663</scores>
+    <avgScore>2.2727272727272663</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

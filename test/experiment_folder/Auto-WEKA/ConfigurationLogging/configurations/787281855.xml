@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifierstreesrandomtree_00_INT_M 1 -_0__wekaclassifierstreesrandomtree_01_features_HIDDEN 1 -_0__wekaclassifierstreesrandomtree_03_2_INT_K 2 -_0__wekaclassifierstreesrandomtree_04_depth_HIDDEN 0 -_0__wekaclassifierstreesrandomtree_05_1_INT_depth 0 -_0__wekaclassifierstreesrandomtree_07_back_HIDDEN 0 -_0__wekaclassifierstreesrandomtree_08_1_INT_N 0 -_0__wekaclassifierstreesrandomtree_10_U REMOVE_PREV -aseval__wekaattributeselectioncfssubseteval_00_0_M REMOVE_PREV -aseval__wekaattributeselectioncfssubseteval_01_1_L REMOVED -assearch__wekaattributeselectiongreedystepwise_00_0_C REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_01_1_B REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_02_2_R REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_03_4_INT_N 358 -attributeeval weka.attributeSelection.CfsSubsetEval -attributesearch weka.attributeSelection.GreedyStepwise -attributetime 15.0 -targetclass weka.classifiers.trees.RandomTree </argStrings>
+    <evaluatedScore>4.545454545454547</evaluatedScore>
+    <evaluatedFold>6</evaluatedFold>
+    <folds>6</folds>
+    <scores>4.545454545454547</scores>
+    <avgScore>4.545454545454547</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

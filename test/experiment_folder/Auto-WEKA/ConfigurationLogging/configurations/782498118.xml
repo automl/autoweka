@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifierslazylwl_00_K_HIDDEN 0 -_0__wekaclassifierslazylwl_02_U_HIDDEN 0 -_0__wekaclassifierslazylwl_04_A weka.core.neighboursearch.LinearNNSearch -_1_W weka.classifiers.trees.J48 -_1_W_0_DASHDASH REMOVED -_1_W_1__wekaclassifierstreesj48_00_O REMOVE_PREV -_1_W_1__wekaclassifierstreesj48_02_B REMOVE_PREV -_1_W_1__wekaclassifierstreesj48_03_J REMOVED -_1_W_1__wekaclassifierstreesj48_04_A REMOVE_PREV -_1_W_1__wekaclassifierstreesj48_05_S REMOVE_PREV -_1_W_1__wekaclassifierstreesj48_06_INT_M 1 -_1_W_1__wekaclassifierstreesj48_07_C_HIDDEN 1 -_1_W_1__wekaclassifierstreesj48_08_C 0.7769055812352691 -attributesearch NONE -attributetime 15.0 -targetclass weka.classifiers.lazy.LWL </argStrings>
+    <evaluatedScore>0.0</evaluatedScore>
+    <evaluatedFold>9</evaluatedFold>
+    <folds>9</folds>
+    <folds>3</folds>
+    <folds>6</folds>
+    <folds>5</folds>
+    <folds>8</folds>
+    <folds>7</folds>
+    <folds>2</folds>
+    <folds>1</folds>
+    <folds>0</folds>
+    <folds>4</folds>
+    <scores>0.0</scores>
+    <scores>1.1363636363636402</scores>
+    <scores>0.37878787878787534</scores>
+    <scores>1.1363636363636402</scores>
+    <scores>0.0</scores>
+    <scores>0.0</scores>
+    <scores>0.37878787878787534</scores>
+    <scores>0.0</scores>
+    <scores>0.37735849056603854</scores>
+    <scores>1.1363636363636402</scores>
+    <avgScore>0.0</avgScore>
+    <amtScores>10</amtScores>
+    <amtFolds>10</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersrulesoner_00_INT_B 32 -attributesearch NONE -attributetime 15.0 -targetclass weka.classifiers.rules.OneR </argStrings>
+    <evaluatedScore>3.4090909090909065</evaluatedScore>
+    <evaluatedFold>3</evaluatedFold>
+    <folds>3</folds>
+    <scores>3.4090909090909065</scores>
+    <avgScore>3.4090909090909065</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

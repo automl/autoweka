@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersmetaadaboostm1_00_p_HIDDEN 1 -_0__wekaclassifiersmetaadaboostm1_02_2_INT_P 55 -_0__wekaclassifiersmetaadaboostm1_03_INT_I 4 -_0__wekaclassifiersmetaadaboostm1_04_Q REMOVED -_0__wekaclassifiersmetaadaboostm1_05_S 1 -_1_W weka.classifiers.trees.REPTree -_1_W_0_DASHDASH REMOVED -_1_W_1__wekaclassifierstreesreptree_00_INT_M 5 -_1_W_1__wekaclassifierstreesreptree_01_V 0.00786875007122063 -_1_W_1__wekaclassifierstreesreptree_02_depth_HIDDEN 0 -_1_W_1__wekaclassifierstreesreptree_03_1_INT_L -1 -_1_W_1__wekaclassifierstreesreptree_05_P REMOVE_PREV -attributesearch NONE -attributetime 15.0 -targetclass weka.classifiers.meta.AdaBoostM1 </argStrings>
+    <evaluatedScore>1.5151515151515156</evaluatedScore>
+    <evaluatedFold>4</evaluatedFold>
+    <folds>4</folds>
+    <scores>1.5151515151515156</scores>
+    <avgScore>1.5151515151515156</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

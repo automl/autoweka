@@ -784,15 +784,20 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             res += eval.toClassDetailsString();
         } catch(Exception e) { /*TODO treat*/ }
 
-		  ConfigurationCollection cc = ConfigurationCollection.fromXML(msExperimentPath+expName+"/"+configurationRankingPath,ConfigurationCollection.class);
-		  List<Configuration> ccAL = cc.asArrayList();
+		  if(nBestConfigs>1){
 
-		  //check if theres >1 with enough folds before printing
-		  res+= "\n\nOther good configurations are:";
-		  for(int i = 1;i<ccAL.size();i++){
-			  if(ccAL.get(i).getAmtFolds()==ccAL.get(0).getAmtFolds()){
-				  res+= "\n"+(i+1)+":\n"+ccAL.get(i).getArgStrings();
+			  ConfigurationCollection cc = ConfigurationCollection.fromXML(msExperimentPath+expName+"/"+configurationRankingPath,ConfigurationCollection.class);
+			  List<Configuration> ccAL = cc.asArrayList();
+			  int fullyEvaluatedAmt = cc.getFullyEvaluatedAmt();
+
+			  res+= "\n\n------- "+fullyEvaluatedAmt+" BEST CONFIGURATIONS -------";
+			  res+= "\n\nThese are the "+fullyEvaluatedAmt+" best configurations, as ranked by SMAC";
+			  res+= "\nPlease note that this list only contains configurations evaluated on every fold.";
+			  res+= "\nIf you need more configurations, consider running Auto-WEKA for a longer time.";
+			  for(int i = 0;i<fullyEvaluatedAmt ;i++){
+				 res+= "\n\nConfiguration #"+(i+1)+":\nSMAC Score: "+ccAL.get(i).getAverageScore()+"\nArgument String:\n"+ccAL.get(i).getArgStrings();
 			  }
+			  res+="\n\n----END OF CONFIGURATION RANKING----";
 		  }
 
         res += "\n\nFor better performance, try giving Auto-WEKA more time.";

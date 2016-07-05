@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersfunctionssmo_00_0_C 0.9610222986503687 -_0__wekaclassifiersfunctionssmo_01_1_N 2 -_0__wekaclassifiersfunctionssmo_02_2_M REMOVED -_0__wekaclassifiersfunctionssmo_03_3_REG_IGNORE_QUOTE_START_K weka.classifiers.functions.supportVector.NormalizedPolyKernel -_0__wekaclassifiersfunctionssmo_04_4_npoly_E 1.2486138095860797 -_0__wekaclassifiersfunctionssmo_05_4_npoly_L REMOVE_PREV -_0__wekaclassifiersfunctionssmo_11_5_QUOTE_END REMOVED -attributesearch NONE -attributetime 15.0 -targetclass weka.classifiers.functions.SMO </argStrings>
+    <evaluatedScore>6.439393939393938</evaluatedScore>
+    <evaluatedFold>7</evaluatedFold>
+    <folds>7</folds>
+    <scores>6.439393939393938</scores>
+    <avgScore>6.439393939393938</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

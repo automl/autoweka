@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersmetabagging_00_INT_P 85 -_0__wekaclassifiersmetabagging_01_INT_I 2 -_0__wekaclassifiersmetabagging_02_S 1 -_1_W weka.classifiers.rules.OneR -_1_W_0_DASHDASH REMOVED -_1_W_1__wekaclassifiersrulesoner_00_INT_B 11 -attributesearch NONE -attributetime 15.0 -targetclass weka.classifiers.meta.Bagging </argStrings>
+    <evaluatedScore>3.4090909090909065</evaluatedScore>
+    <evaluatedFold>6</evaluatedFold>
+    <folds>6</folds>
+    <scores>3.4090909090909065</scores>
+    <avgScore>3.4090909090909065</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

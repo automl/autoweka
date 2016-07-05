@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersfunctionslogistic_00_R 9.106349176675566E-6 -attributesearch NONE -attributetime 15.0 -targetclass weka.classifiers.functions.Logistic </argStrings>
+    <evaluatedScore>4.545454545454547</evaluatedScore>
+    <evaluatedFold>7</evaluatedFold>
+    <folds>7</folds>
+    <scores>4.545454545454547</scores>
+    <avgScore>4.545454545454547</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

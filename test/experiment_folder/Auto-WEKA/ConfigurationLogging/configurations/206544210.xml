@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersmetastacking_00_X 10 -_0__wekaclassifiersmetastacking_01_S 1 -_1_00_0_QUOTE_START_B weka.classifiers.trees.RandomForest -_1_00_1__wekaclassifierstreesrandomforest_00_INT_I 104 -_1_00_1__wekaclassifierstreesrandomforest_01_features_HIDDEN 0 -_1_00_1__wekaclassifierstreesrandomforest_02_1_INT_K 0 -_1_00_1__wekaclassifierstreesrandomforest_04_depth_HIDDEN 0 -_1_00_1__wekaclassifierstreesrandomforest_05_1_INT_depth 0 -_1_00_2_QUOTE_END REMOVED -_1_01_0_QUOTE_START_B weka.classifiers.functions.SimpleLogistic -_1_01_1__wekaclassifiersfunctionssimplelogistic_00_S REMOVE_PREV -_1_01_1__wekaclassifiersfunctionssimplelogistic_01_W_HIDDEN 1 -_1_01_1__wekaclassifiersfunctionssimplelogistic_03_2_W 0.8431561377407097 -_1_01_1__wekaclassifiersfunctionssimplelogistic_04_A REMOVED -_1_01_2_QUOTE_END REMOVED -_1_02_0_QUOTE_START_B weka.classifiers.rules.DecisionTable -_1_02_1__wekaclassifiersrulesdecisiontable_00_E acc -_1_02_1__wekaclassifiersrulesdecisiontable_01_I REMOVE_PREV -_1_02_1__wekaclassifiersrulesdecisiontable_02_S weka.attributeSelection.GreedyStepwise -_1_02_1__wekaclassifiersrulesdecisiontable_03_X 1 -_1_02_2_QUOTE_END REMOVED -_HIDDEN_ensemble_depth 2 -attributesearch NONE -attributetime 15.0 -targetclass weka.classifiers.meta.Stacking </argStrings>
+    <evaluatedScore>7.575757575757578</evaluatedScore>
+    <evaluatedFold>5</evaluatedFold>
+    <folds>5</folds>
+    <scores>7.575757575757578</scores>
+    <avgScore>7.575757575757578</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>
