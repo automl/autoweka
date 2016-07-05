@@ -68,6 +68,7 @@ public class SMACTrajectoryParser extends TrajectoryParser
                     log.debug("Time: {}, score: {}", time, score);
                     argString = filterArgString(params, matcher.group(3));
                     traj.addPoint(new Trajectory.Point(time, score, argString));
+
                 }
                 else
                 {

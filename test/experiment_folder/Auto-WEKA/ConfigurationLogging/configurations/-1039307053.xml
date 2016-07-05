@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-attributesearch NONE -attributetime 15.0 -targetclass weka.classifiers.trees.DecisionStump </argStrings>
+    <evaluatedScore>3.787878787878782</evaluatedScore>
+    <evaluatedFold>9</evaluatedFold>
+    <folds>9</folds>
+    <scores>3.787878787878782</scores>
+    <avgScore>3.787878787878782</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

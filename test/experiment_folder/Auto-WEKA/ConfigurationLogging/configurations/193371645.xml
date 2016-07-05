@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersmetarandomsubspace_00_INT_I 2 -_0__wekaclassifiersmetarandomsubspace_01_P 0.8302360948391098 -_0__wekaclassifiersmetarandomsubspace_02_S 1 -_1_W weka.classifiers.functions.SMO -_1_W_0_DASHDASH REMOVED -_1_W_1__wekaclassifiersfunctionssmo_00_0_C 0.7724956127950232 -_1_W_1__wekaclassifiersfunctionssmo_01_1_N 0 -_1_W_1__wekaclassifiersfunctionssmo_02_2_M REMOVED -_1_W_1__wekaclassifiersfunctionssmo_03_3_REG_IGNORE_QUOTE_START_K weka.classifiers.functions.supportVector.PolyKernel -_1_W_1__wekaclassifiersfunctionssmo_06_4_poly_E 0.4236875531715436 -_1_W_1__wekaclassifiersfunctionssmo_07_4_poly_L REMOVED -_1_W_1__wekaclassifiersfunctionssmo_11_5_QUOTE_END REMOVED -attributesearch NONE -attributetime 15.0 -targetclass weka.classifiers.meta.RandomSubSpace </argStrings>
+    <evaluatedScore>6.818181818181813</evaluatedScore>
+    <evaluatedFold>5</evaluatedFold>
+    <folds>5</folds>
+    <scores>6.818181818181813</scores>
+    <avgScore>6.818181818181813</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

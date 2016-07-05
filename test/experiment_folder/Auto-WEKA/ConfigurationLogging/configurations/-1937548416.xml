@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersrulesjrip_00_N 2.114684972207634 -_0__wekaclassifiersrulesjrip_01_E REMOVED -_0__wekaclassifiersrulesjrip_02_P REMOVE_PREV -_0__wekaclassifiersrulesjrip_03_INT_O 2 -aseval__wekaattributeselectioncfssubseteval_00_0_M REMOVED -aseval__wekaattributeselectioncfssubseteval_01_1_L REMOVED -assearch__wekaattributeselectiongreedystepwise_00_0_C REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_01_1_B REMOVED -assearch__wekaattributeselectiongreedystepwise_02_2_R REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_03_4_INT_N 30 -attributeeval weka.attributeSelection.CfsSubsetEval -attributesearch weka.attributeSelection.GreedyStepwise -attributetime 15.0 -targetclass weka.classifiers.rules.JRip </argStrings>
+    <evaluatedScore>4.166666666666671</evaluatedScore>
+    <evaluatedFold>8</evaluatedFold>
+    <folds>8</folds>
+    <scores>4.166666666666671</scores>
+    <avgScore>4.166666666666671</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

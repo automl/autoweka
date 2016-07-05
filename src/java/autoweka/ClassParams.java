@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.io.File;
 
 /**
- * Captures all the Parameters and Conditionals for a specific class that Auto-WEKA will search over
+ * Captures all the Parameters and Conditionals for a specific classifier that Auto-WEKA will search over
  */
 public class ClassParams
 {

@@ -44,7 +44,7 @@ public class Conditional
         for(String s: _domain)
             domain.add(s);
     }
-    
+
     public Conditional(Parameter _param, Parameter _parent, Conditional previous)
     {
         this(_param, _parent, previous.domain);
@@ -52,6 +52,7 @@ public class Conditional
 
     /**
      * The name of the 'child' parameter that is conditional on the parent taking on a particular value
+     * (This class encodes the condition from the child param's perspective. @TODO rename to child rather than parameter, for clarity)
      */
     public Parameter parameter;
     /**

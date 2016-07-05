@@ -22,6 +22,10 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static weka.classifiers.meta.AutoWEKAClassifier.configurationRankingPath;
+import static weka.classifiers.meta.AutoWEKAClassifier.configurationInfoDirPath;
+import static weka.classifiers.meta.AutoWEKAClassifier.configurationHashSetPath;
+
 /**
  * Class that is responsible for actually running a WEKA classifier from start to finish using the Auto-WEKA argument format.
  *
@@ -354,6 +358,7 @@ public class ClassifierRunner
             {
                 //We're good, we can safely report this value
                 res.setScoreFromEval(eval, instances);
+                saveConfiguration(res,args,instanceStr);
             }
         } catch(Exception e) {
             log.debug("Evaluating classifier failed: {}", e.getMessage(), e);
@@ -374,6 +379,48 @@ public class ClassifierRunner
         return true;
     }
 
+    protected void saveConfiguration(ClassifierResult res,List<String> args, String instanceStr){
+      //Checking if we're doing this logging for this run of autoweka
+      File sortedLog = new File(configurationRankingPath);
+      if (!sortedLog.exists()){
+        return;
+      }
+
+      //Setting up some basic stuff
+      Configuration ciConfig = new Configuration(args);
+      int ciHash             = ciConfig.hashCode();
+      String ciFilename      = configurationInfoDirPath+ciHash+".xml";
+      File ciFile            = new File(ciFilename);
+      String configIndex     = configurationHashSetPath;
+
+      //Computing Score and fold ID
+      Properties pInstanceString = Util.parsePropertyString(instanceStr);
+      int ciFold     = Integer.parseInt(pInstanceString.getProperty("fold", "-1"));
+      double ciScore = res.getScore();
+
+      //Updating the configuration data
+      ciConfig.setEvaluationValues(ciScore,ciFold);
+
+      if (ciFile.exists()){
+        Configuration ciConfigFull = Configuration.fromXML(ciFilename,Configuration.class); //Find a faster way w/o IOs?
+        ciConfigFull.mergeWith(ciConfig);
+        ciConfigFull.toXML(ciFilename);
+      }else{
+        Util.initializeFile(ciFilename);
+        ciConfig.toXML(ciFilename);
+      }
+
+      //Updating the configuration list
+      try{
+          BufferedWriter fp = new BufferedWriter(new FileWriter(configurationHashSetPath,true));//true for appending
+          fp.write(ciHash+",");
+          fp.flush();
+          fp.close();
+      }catch(IOException e){
+          throw new RuntimeException("Couldn't write to configIndex");
+      }
+
+    }
 
 
     protected void disableOutput()

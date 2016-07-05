@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersrulespart_01_INT_M 1 -_0__wekaclassifiersrulespart_02_R REMOVE_PREV -_0__wekaclassifiersrulespart_03_B REMOVE_PREV -attributesearch NONE -attributetime 15.0 -targetclass weka.classifiers.rules.PART </argStrings>
+    <evaluatedScore>1.1363636363636402</evaluatedScore>
+    <evaluatedFold>5</evaluatedFold>
+    <folds>5</folds>
+    <folds>7</folds>
+    <folds>0</folds>
+    <scores>1.1363636363636402</scores>
+    <scores>0.0</scores>
+    <scores>0.7547169811320771</scores>
+    <avgScore>1.1363636363636402</avgScore>
+    <amtScores>3</amtScores>
+    <amtFolds>3</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifierslazylwl_00_K_HIDDEN 1 -_0__wekaclassifierslazylwl_01_1_K -1 -_0__wekaclassifierslazylwl_02_U_HIDDEN 0 -_0__wekaclassifierslazylwl_04_A weka.core.neighboursearch.LinearNNSearch -_1_W weka.classifiers.trees.RandomForest -_1_W_0_DASHDASH REMOVED -_1_W_1__wekaclassifierstreesrandomforest_00_INT_I 113 -_1_W_1__wekaclassifierstreesrandomforest_01_features_HIDDEN 0 -_1_W_1__wekaclassifierstreesrandomforest_02_1_INT_K 0 -_1_W_1__wekaclassifierstreesrandomforest_04_depth_HIDDEN 1 -_1_W_1__wekaclassifierstreesrandomforest_06_2_INT_depth 5 -aseval__wekaattributeselectioncfssubseteval_00_0_M REMOVED -aseval__wekaattributeselectioncfssubseteval_01_1_L REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_00_0_C REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_01_1_B REMOVED -assearch__wekaattributeselectiongreedystepwise_02_2_R REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_03_4_INT_N 50 -attributeeval weka.attributeSelection.CfsSubsetEval -attributesearch weka.attributeSelection.GreedyStepwise -attributetime 15.0 -targetclass weka.classifiers.lazy.LWL </argStrings>
+    <evaluatedScore>1.1320754716981156</evaluatedScore>
+    <evaluatedFold>1</evaluatedFold>
+    <folds>1</folds>
+    <scores>1.1320754716981156</scores>
+    <avgScore>1.1320754716981156</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

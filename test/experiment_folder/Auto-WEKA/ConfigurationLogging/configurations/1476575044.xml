@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifierstreesrandomforest_00_INT_I 13 -_0__wekaclassifierstreesrandomforest_01_features_HIDDEN 1 -_0__wekaclassifierstreesrandomforest_03_2_INT_K 3 -_0__wekaclassifierstreesrandomforest_04_depth_HIDDEN 1 -_0__wekaclassifierstreesrandomforest_06_2_INT_depth 7 -attributesearch NONE -attributetime 15.0 -targetclass weka.classifiers.trees.RandomForest </argStrings>
+    <evaluatedScore>1.8867924528301927</evaluatedScore>
+    <evaluatedFold>0</evaluatedFold>
+    <folds>0</folds>
+    <scores>1.8867924528301927</scores>
+    <avgScore>1.8867924528301927</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

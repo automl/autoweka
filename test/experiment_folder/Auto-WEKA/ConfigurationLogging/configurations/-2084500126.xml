@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersmetabagging_00_INT_P 88 -_0__wekaclassifiersmetabagging_01_INT_I 14 -_0__wekaclassifiersmetabagging_02_S 1 -_1_W weka.classifiers.trees.REPTree -_1_W_0_DASHDASH REMOVED -_1_W_1__wekaclassifierstreesreptree_00_INT_M 36 -_1_W_1__wekaclassifierstreesreptree_01_V 1.6839347751163955E-4 -_1_W_1__wekaclassifierstreesreptree_02_depth_HIDDEN 1 -_1_W_1__wekaclassifierstreesreptree_04_2_INT_L 2 -_1_W_1__wekaclassifierstreesreptree_05_P REMOVED -attributesearch NONE -attributetime 15.0 -targetclass weka.classifiers.meta.Bagging </argStrings>
+    <evaluatedScore>2.2641509433962312</evaluatedScore>
+    <evaluatedFold>1</evaluatedFold>
+    <folds>1</folds>
+    <scores>2.2641509433962312</scores>
+    <avgScore>2.2641509433962312</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

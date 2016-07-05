@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifierstreesreptree_00_INT_M 64 -_0__wekaclassifierstreesreptree_01_V 7.9673390785823E-4 -_0__wekaclassifierstreesreptree_02_depth_HIDDEN 1 -_0__wekaclassifierstreesreptree_04_2_INT_L 8 -_0__wekaclassifierstreesreptree_05_P REMOVED -attributesearch NONE -attributetime 15.0 -targetclass weka.classifiers.trees.REPTree </argStrings>
+    <evaluatedScore>3.4090909090909065</evaluatedScore>
+    <evaluatedFold>7</evaluatedFold>
+    <folds>7</folds>
+    <scores>3.4090909090909065</scores>
+    <avgScore>3.4090909090909065</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

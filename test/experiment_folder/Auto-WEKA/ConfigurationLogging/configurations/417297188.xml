@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-aseval__wekaattributeselectioncfssubseteval_00_0_M REMOVED -aseval__wekaattributeselectioncfssubseteval_01_1_L REMOVE_PREV -assearch__wekaattributeselectionbestfirst_00_0_D 1 -assearch__wekaattributeselectionbestfirst_01_1_INT_N 3 -attributeeval weka.attributeSelection.CfsSubsetEval -attributesearch weka.attributeSelection.BestFirst -attributetime 15.0 -targetclass weka.classifiers.rules.ZeroR </argStrings>
+    <evaluatedScore>6.060606060606062</evaluatedScore>
+    <evaluatedFold>2</evaluatedFold>
+    <folds>2</folds>
+    <scores>6.060606060606062</scores>
+    <avgScore>6.060606060606062</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

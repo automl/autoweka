@@ -77,15 +77,17 @@ import autoweka.TrajectoryMerger;
 
 import autoweka.tools.GetBestFromTrajectoryGroup;
 
+
+import autoweka.Configuration;
+import autoweka.ConfigurationCollection;
+import autoweka.ConfigurationRanker;
+
 /**
  * Auto-WEKA interface for WEKA.
 
 * * @author Lars Kotthoff
  */
-
 public class AutoWEKAClassifier extends AbstractClassifier implements AdditionalMeasureProducer {
-
-
 
     /** For serialization. */
     static final long serialVersionUID = 2907034203562786373L;
@@ -97,7 +99,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     static final int DEFAULT_TIME_LIMIT = 15;
     /** Default memory limit for classifiers. */
     static final int DEFAULT_MEM_LIMIT = 1024;
-
+    /** Default */
+    static final int DEFAULT_N_BEST = 1;
     /** Internal evaluation method. */
     static enum Resampling {
         CrossValidation,
@@ -123,6 +126,12 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     /** Default additional arguments for Auto-WEKA. */
     static final String DEFAULT_EXTRA_ARGS = "initialIncumbent=RANDOM:acq-func=EI";
 
+    /** The path for the sorted best configurations **/
+    public static final String configurationRankingPath = "ConfigurationLogging/configuration_ranking.xml";
+    /** The path for the log with the hashcodes for the configs we have **/
+    public static final String configurationHashSetPath = "ConfigurationLogging/configuration_hashes.txt";
+    /** The path for the directory with the configuration data and score **/
+    public static final String configurationInfoDirPath = "ConfigurationLogging/configurations/";
 
 
     /** The chosen classifier. */
@@ -154,6 +163,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     protected int timeLimit = DEFAULT_TIME_LIMIT;
     /** The memory limit for running classifiers. */
     protected int memLimit = DEFAULT_MEM_LIMIT;
+    /** The amout of best configurations to return as output*/
+    protected int nBestConfigs = DEFAULT_N_BEST;
     /** The internal evaluation method. */
     protected Resampling resampling = DEFAULT_RESAMPLING;
     /** The arguments to the evaluation method. */
@@ -196,6 +207,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         props.setProperty("javax.xml.parsers.DocumentBuilderFactory", "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
         props.setProperty("javax.xml.parsers.SAXParserFactory", "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl");
     }
+
 
     /**
     * Find the best classifier, arguments, and attribute selection for the data.
@@ -244,9 +256,18 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         List<String> args = new LinkedList<String>();
         args.add("-experimentpath");
         args.add(msExperimentPath);
-
         //Make the thing
+
         ExperimentConstructor.buildSingle("autoweka.smac.SMACExperimentConstructor", exp, args);
+
+
+        //Initializing logs
+        if(nBestConfigs>1){
+            String temporaryDirPath = msExperimentPath+expName+"/"; //TODO make this a global
+            Util.makePath(temporaryDirPath+configurationInfoDirPath);
+            Util.initializeFile(temporaryDirPath+configurationRankingPath);
+            Util.initializeFile(temporaryDirPath+configurationHashSetPath);
+        }
 
 
         // run experiment
@@ -328,10 +349,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         GetBestFromTrajectoryGroup mBest = new GetBestFromTrajectoryGroup(group);
 
-        //@TODO
-        //Get best from rank. Check if its argstr matches mBest's. If it doesnt, check if you can find mBest tying with the best from rank. If not, its a problem. If yes, switch
-        //the best in the rank to mbest for consistency. Maybe term holdout etc will need a diff behavior regarding that.
-
         if(mBest.errorEstimate == autoweka.ClassifierResult.INFINITY) {
             throw new Exception("All runs timed out, unable to find good configuration. Please allow more time and rerun.");
         }
@@ -349,6 +366,12 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         log.info("classifier: {}, arguments: {}, attribute search: {}, attribute search arguments: {}, attribute evaluation: {}, attribute evaluation arguments: {}",
             classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
+
+
+        //Print log of best configurations
+        if (nBestConfigs>1){
+          ConfigurationRanker.rank( nBestConfigs , msExperimentPath+expName+"/", mBest.rawArgs);
+        }
 
 
         // train model on entire dataset and save
@@ -420,6 +443,9 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.addElement(
             new Option("\tThe memory limit for runs in MiB.\n" + "\t(default: " + DEFAULT_MEM_LIMIT + ")",
                 "memLimit", 1, "-memLimit <limit>"));
+        result.addElement(
+            new Option("\tThe amount of best configurations to return.\n" + "\t(default: " + DEFAULT_MEM_LIMIT + ")",
+                "nBestConfigs", 1, "-nBestConfigs <limit>"));
         //result.addElement(
         //    new Option("\tThe type of resampling used.\n" + "\t(default: " + String.valueOf(DEFAULT_RESAMPLING) + ")",
         //        "resampling", 1, "-resampling <resampling>"));
@@ -453,6 +479,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.add("" + timeLimit);
         result.add("-memLimit");
         result.add("" + memLimit);
+        result.add("-nBestConfigs");
+        result.add("" + nBestConfigs);
         //result.add("-resampling");
         //result.add("" + resampling);
         //result.add("-resamplingArgs");
@@ -491,6 +519,14 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             memLimit = Integer.parseInt(tmpStr);
         } else {
             memLimit = DEFAULT_MEM_LIMIT;
+        }
+
+
+        tmpStr = Utils.getOption("nBestConfigs", options);
+        if (tmpStr.length() != 0) {
+            nBestConfigs = Integer.parseInt(tmpStr);
+        } else {
+            nBestConfigs = DEFAULT_N_BEST;
         }
 
 
@@ -590,6 +626,30 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         return "the memory limit for runs (in MiB)";
     }
 
+
+   /**
+    * Set the amount of configurations that will be given as output
+    * @param The amount of best configurations desired by the user
+    */
+   public void setNBestConfigs(int nbc) {
+       nBestConfigs = nbc;
+   }
+
+   /**
+    * Get the memory limit.
+    * @return The amount of best configurations that will be given as output
+    */
+   public int getNBestConfigs() {
+       return nBestConfigs;
+   }
+
+   /**
+    * Returns the tip text for this property.
+    * @return tip text for this property
+    */
+   public String nBestConfigsTipText() {
+       return "How many of the best configurations should be returned as output";
+   }
 
 
     //public void setResampling(Resampling r) {
@@ -715,14 +775,31 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             "attribute search arguments: " + (attributeSearchArgs != null ? Arrays.toString(attributeSearchArgs) : "[]") + "\n" +
             "attribute evaluation: " + attributeEvalClass + "\n" +
             "attribute evaluation arguments: " + (attributeEvalArgs != null ? Arrays.toString(attributeEvalArgs) : "[]") + "\n" +
-            "estimated error: " + estimatedError + "\n\n"; //@TODO looks like this error is printing the wrong value
+            "estimated error: " + estimatedError + "\n\n";
         try {
             res += eval.toSummaryString();
             res += "\n";
             res += eval.toMatrixString();
             res += "\n";
             res += eval.toClassDetailsString();
-        } catch(Exception e) { }
+        } catch(Exception e) { /*TODO treat*/ }
+
+		  if(nBestConfigs>1){
+			  
+			  ConfigurationCollection cc = ConfigurationCollection.fromXML(msExperimentPath+expName+"/"+configurationRankingPath,ConfigurationCollection.class);
+			  List<Configuration> ccAL = cc.asArrayList();
+			  int fullyEvaluatedAmt = cc.getFullyEvaluatedAmt();
+
+			  res+= "\n\n------- "+fullyEvaluatedAmt+" BEST CONFIGURATIONS -------";
+			  res+= "\n\nThese are the "+fullyEvaluatedAmt+" best configurations, as ranked by SMAC";
+			  res+= "\nPlease note that this list only contains configurations evaluated on every fold.";
+			  res+= "\nIf you need more configurations, consider running Auto-WEKA for a longer time.";
+			  for(int i = 0;i<fullyEvaluatedAmt ;i++){
+				 res+= "\n\nConfiguration #"+(i+1)+":\nSMAC Score: "+ccAL.get(i).getAverageScore()+"\nArgument String:\n"+ccAL.get(i).getArgStrings();
+			  }
+			  res+="\n\n----END OF CONFIGURATION RANKING----";
+		  }
+
         res += "\n\nFor better performance, try giving Auto-WEKA more time.";
         return res;
     }
@@ -758,5 +835,5 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             throw new IllegalArgumentException(additionalMeasureName
                     + " not supported (Auto-WEKA)");
         }
-    }
+  }
 }

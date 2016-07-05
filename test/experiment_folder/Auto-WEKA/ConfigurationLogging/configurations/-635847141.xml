@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifierslazykstar_00_INT_B 25 -_0__wekaclassifierslazykstar_01_E REMOVE_PREV -_0__wekaclassifierslazykstar_02_M n -attributesearch NONE -attributetime 15.0 -targetclass weka.classifiers.lazy.KStar </argStrings>
+    <evaluatedScore>11.36363636363636</evaluatedScore>
+    <evaluatedFold>6</evaluatedFold>
+    <folds>6</folds>
+    <scores>11.36363636363636</scores>
+    <avgScore>11.36363636363636</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersrulesdecisiontable_00_E mae -_0__wekaclassifiersrulesdecisiontable_01_I REMOVE_PREV -_0__wekaclassifiersrulesdecisiontable_02_S weka.attributeSelection.BestFirst -_0__wekaclassifiersrulesdecisiontable_03_X 3 -aseval__wekaattributeselectioncfssubseteval_00_0_M REMOVED -aseval__wekaattributeselectioncfssubseteval_01_1_L REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_00_0_C REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_01_1_B REMOVED -assearch__wekaattributeselectiongreedystepwise_02_2_R REMOVE_PREV -assearch__wekaattributeselectiongreedystepwise_03_4_INT_N 500 -attributeeval weka.attributeSelection.CfsSubsetEval -attributesearch weka.attributeSelection.GreedyStepwise -attributetime 15.0 -targetclass weka.classifiers.rules.DecisionTable </argStrings>
+    <evaluatedScore>2.2727272727272663</evaluatedScore>
+    <evaluatedFold>7</evaluatedFold>
+    <folds>7</folds>
+    <scores>2.2727272727272663</scores>
+    <avgScore>2.2727272727272663</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

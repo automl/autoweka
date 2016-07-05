@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersbayesnaivebayes_01_D REMOVED -attributesearch NONE -attributetime 15.0 -targetclass weka.classifiers.bayes.NaiveBayes </argStrings>
+    <evaluatedScore>1.893939393939391</evaluatedScore>
+    <evaluatedFold>7</evaluatedFold>
+    <folds>7</folds>
+    <folds>8</folds>
+    <folds>0</folds>
+    <scores>1.893939393939391</scores>
+    <scores>3.4090909090909065</scores>
+    <scores>2.2641509433962312</scores>
+    <avgScore>1.893939393939391</avgScore>
+    <amtScores>3</amtScores>
+    <amtFolds>3</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>
