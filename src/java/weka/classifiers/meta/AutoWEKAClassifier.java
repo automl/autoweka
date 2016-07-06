@@ -631,7 +631,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     * Set the amount of configurations that will be given as output
     * @param The amount of best configurations desired by the user
     */
-   public void setNBestConfigs(int nbc) {
+   public void setnBestConfigs(int nbc) {
        nBestConfigs = nbc;
    }
 
@@ -639,7 +639,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     * Get the memory limit.
     * @return The amount of best configurations that will be given as output
     */
-   public int getNBestConfigs() {
+   public int getnBestConfigs() {
        return nBestConfigs;
    }
 
