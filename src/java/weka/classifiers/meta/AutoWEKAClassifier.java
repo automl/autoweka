@@ -385,7 +385,10 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
           for (Configuration c: lc){
             System.out.println("hash: "+c.hashCode()+"\nargs: "+c.getArgStrings());
           }
-			 System.out.println("@end time: "+ (System.nanoTime()-startTime)/1000000000);
+			 long endTime = System.nanoTime();
+			 long totalTime = endTime-startTime;
+			 long totalTimeSeconds = totalTime/1000000000;
+			 System.out.println("@end time in nanosecs: "+totalTime+" end time in secs: "+totalTimeSeconds;
         }
 
         // train model on entire dataset and save
