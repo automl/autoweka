@@ -167,6 +167,16 @@ public class Ensembler{
 		return rv;
 	}
 
+	public void printArray(int [] array){
+
+		System.out.print("\n[");
+		for(int i = 0; i < array.length; i++){
+			System.out.print(array[i]+",");
+		}
+		System.out.print("]\n");
+
+	}
+
 	private int[] chooseModel(List<EnsembleElement> eeBatch, List<EnsembleElement> currentPartialEnsemble){
 		int [] possibleChoicePerformances = new int[eeBatch.size()];
 
@@ -182,11 +192,15 @@ public class Ensembler{
 			}
 			currentPartialEnsemble.remove(eeBatch.get(i));
 		}
-
+		System.out.println("@[choice performances], [best,index]\n");
+		printArray(possibleChoicePerformances);
 		int bestIndex = Util.indexMin(possibleChoicePerformances);
 		int [] output = {possibleChoicePerformances[bestIndex],bestIndex};
+		printArray(output);
 		return output; //Curse java and it's lack of native tuples
 	}
+
+
 
 	private int _majorityVote(int instanceNum, List<EnsembleElement> currentPartialEnsemble){
 		int [] votes = new int [mAmtLabels];
@@ -197,11 +211,7 @@ public class Ensembler{
 		   //	System.out.println("@wasmapped: instance:"+instanceNum+" vote:"+vote+ " to label index:"+ index);
 			votes[index]++;
 		}
-		System.out.print("\n[");
-		for(int i = 0; i < votes.length; i++){
-			System.out.print(votes[i]+",");
-		}
-		System.out.print("]");
+		printArray(votes);
 		return Util.indexMax(votes);
 
 		//TODO treat duplicate max indexes differently than returning first one?
