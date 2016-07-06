@@ -388,7 +388,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 			 long endTime = System.nanoTime();
 			 long totalTime = endTime-startTime;
 			 long totalTimeSeconds = totalTime/1000000000;
-			 System.out.println("@end time in nanosecs: "+totalTime+" end time in secs: "+totalTimeSeconds;
+			 System.out.println("@end time in nanosecs: "+totalTime+" end time in secs: "+totalTimeSeconds);
         }
 
         // train model on entire dataset and save
