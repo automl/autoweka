@@ -8,11 +8,12 @@ import autoweka.smac.SMACTrajectoryParserTester;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    UtilTester.class,
-    MultiLevelTester.class,
-    WekaArgumentConverterTester.class,
-    ConfigurationTester.class,
-    SMACTrajectoryParserTester.class
+   //  UtilTester.class,
+   //  MultiLevelTester.class,
+   //  WekaArgumentConverterTester.class,
+   //  ConfigurationTester.class,
+   //  SMACTrajectoryParserTester.class,
+	 EnsemblerTester.class
 })
 
 public class AutoWEKATestSuite

@@ -23,7 +23,7 @@ public class Ensembler{
 	final static Logger log = LoggerFactory.getLogger(Ensembler.class);
 
 	private List<Configuration> mCfgList;   //List of configurations given as input via the configuration ranking
-	private Map<Integer,Integer> mLabelMap; //Maps class identifiers to ints 0-n where n is the number of classes
+	private Map<Integer,Integer> mLabelMap; //Maps labels to ints 0-n where n is the number of classes
 	private int [] mCorrectLabels;
 	private int [] mFoldSizes;
 	private int    mAmtFolds;
@@ -33,7 +33,7 @@ public class Ensembler{
 	private String iwpPath; //Aliasing for readability
 	private String rPath;
 
-	public Ensembler(String temporaryDirPath) throws FileNotFoundException,IOException{
+	public Ensembler(String temporaryDirPath) throws FileNotFoundException,IOException{ //TODO make some sort of factory for the many options
 		this.iwpPath = temporaryDirPath+instancewiseInfoDirPath;
 		this.rPath   = temporaryDirPath+configurationRankingPath;
 		mCfgList     = ConfigurationCollection.fromXML(rPath,ConfigurationCollection.class).asArrayList();
@@ -47,7 +47,7 @@ public class Ensembler{
 
 		String winnerHash = Integer.toString(mCfgList.get(0).hashCode());
 		int i = 0,instanceCounter=0;
-		FileReader ciFR = null;
+		FileReader     ciFR = null;
 		BufferedReader ciBR = null;
 
 		//Counting instances
@@ -135,6 +135,8 @@ public class Ensembler{
 			System.out.println("@model_hash: "+ee.hashCode());
 		}
 
+		System.out.println(mLabelMap.toString());
+
 		//Building the ensemble
 		List<EnsembleElement> currentPartialEnsemble = new ArrayList<EnsembleElement>();
 		int [] hillclimbingStepPerformances = new int[eeBatch.size()]; //So far, error count TODO make it general
@@ -187,15 +189,19 @@ public class Ensembler{
 	}
 
 	private int _majorityVote(int instanceNum, List<EnsembleElement> currentPartialEnsemble){
-		int [] votes = new int [mAmtLabels]; //TODO compute amtclasses correctly
-		//System.out.println("@amtClasses in _mv:"+mAmtLabels);
+		int [] votes = new int [mAmtLabels];
+
 		for (EnsembleElement ee : currentPartialEnsemble){
 			int vote = ee.getPrediction(instanceNum);
-			Integer index = mLabelMap.get(vote);
-		//	System.out.println("@wasmapped: instance:"+instanceNum+" vote:"+vote+ " to label index:"+ index);
+			Integer index = mLabelMap.get(new Integer(vote));
+		   //	System.out.println("@wasmapped: instance:"+instanceNum+" vote:"+vote+ " to label index:"+ index);
 			votes[index]++;
 		}
-
+		System.out.print("\n[");
+		for(int i = 0; i < votes.length; i++){
+			System.out.print(votes[i]+",");
+		}
+		System.out.print("]");
 		return Util.indexMax(votes);
 
 		//TODO treat duplicate max indexes differently than returning first one?
