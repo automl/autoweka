@@ -378,14 +378,14 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
           ConfigurationRanker cr = new ConfigurationRanker(msExperimentPath+expName+"/");
           cr.rank( nBestConfigs , mBest.rawArgs);
 
-			 System.out.println("@start time: "+ System.nanoTime());
+			 System.out.println("@start time: "+ System.nanoTime()/1000000000);
           Ensembler e = new Ensembler(msExperimentPath+expName+"/");
           List<Configuration> lc = e.hillclimb(true);
           System.out.println("@the ensemble \n\n");
           for (Configuration c: lc){
             System.out.println("hash: "+c.hashCode()+"\nargs: "+c.getArgStrings());
           }
-			 System.out.println("@end time: "+ System.nanoTime());
+			 System.out.println("@end time: "+ System.nanoTime()/1000000000);
         }
 
         // train model on entire dataset and save
