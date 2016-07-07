@@ -23,8 +23,10 @@ public class Ensembler{
 	final static Logger log = LoggerFactory.getLogger(Ensembler.class);
 
 	private List<Configuration> mCfgList;   //List of configurations given as input via the configuration ranking
-	private Map<Integer,Integer> mLabelMap; //Maps labels to ints 0-n where n is the number of classes
-	private int [] mCorrectLabels;
+	private Map<String,Integer> mLabelMap; //Maps labels to ints 0-n where n is the number of classes
+	private Map<Integer,String> mInverseLabelMap; //Maps ints 0-n to the labels
+
+	private int [] mCorrectLabels; //Correct labels as ints defined by mLabelMap
 	private int [] mFoldSizes;
 	private int    mAmtFolds;
 	private int    mAmtInstances;
@@ -34,12 +36,13 @@ public class Ensembler{
 	private String rPath;
 
 	public Ensembler(String temporaryDirPath) throws FileNotFoundException,IOException{ //TODO make some sort of factory for the many options
-		this.iwpPath = temporaryDirPath+instancewiseInfoDirPath;
-		this.rPath   = temporaryDirPath+configurationRankingPath;
-		mCfgList     = ConfigurationCollection.fromXML(rPath,ConfigurationCollection.class).asArrayList();
-		mLabelMap    = new HashMap<Integer,Integer>();
-		mAmtFolds    = mCfgList.get(0).getAmtFolds(); //TODO compute it from some global
-		mFoldSizes   = new int[mAmtFolds];
+		this.iwpPath     = temporaryDirPath+instancewiseInfoDirPath;
+		this.rPath       = temporaryDirPath+configurationRankingPath;
+		mCfgList         = ConfigurationCollection.fromXML(rPath,ConfigurationCollection.class).asArrayList();
+		mLabelMap        = new HashMap<String,Integer>();
+		mInverseLabelMap = new HashMap<Integer,String>();
+		mAmtFolds        = mCfgList.get(0).getAmtFolds(); //TODO compute it from some global
+		mFoldSizes       = new int[mAmtFolds];
 		parseFoldDataFromLogs();
 	}
 
@@ -94,13 +97,16 @@ public class Ensembler{
 			}
 
 			//Looking at every instance
+			int labelCounter=0;
 			ciBR.readLine();//skip first line
 			for(String currentLine = ciBR.readLine() ; currentLine!=null ; currentLine = ciBR.readLine()){
-				int ciActualLabelNumber = Integer.parseInt(Util.parseInstancewiseLine(currentLine,"ACTUAL_CODE"));
-				mCorrectLabels[instanceCounter]=ciActualLabelNumber;
-				if(!mLabelMap.containsKey(ciActualLabelNumber)){ //Labels can have crazy formats and values, lets map that to tame sequential ints.
-					mLabelMap.put(ciActualLabelNumber,mLabelMap.size()); //using the size as a counter type of thing ^_^
+				String correctLabel = Util.parseInstancewiseLine(currentLine,"ACTUAL_FULL");
+				if(!mLabelMap.containsKey(correctLabel)){ //Labels can have crazy formats and values, lets map that to tame sequential ints.
+					mLabelMap.put( correctLabel, labelCounter );
+					mInverseLabelMap.put( labelCounter , correctLabel );
+					labelCounter++;
 				}
+				mCorrectLabels[instanceCounter]=mLabelMap.get(correctLabel);
 				instanceCounter++;
 			}
 			ciBR.close();
@@ -108,8 +114,19 @@ public class Ensembler{
 		mAmtLabels=mLabelMap.size();
 	}
 
+	public void printArray(int [] array){
+		String s =("\n[");
+		for(int i = 0; i < array.length; i++){
+			s+=(array[i]+",");
+		}
+		s+=("]\n");
+		System.out.println(s);
+	}
+
 	//Greedy ensemble selection hillclimbing process
 	public List<Configuration> hillclimb(boolean onlyFullyPredicted) throws FileNotFoundException,IOException{ //Doing it the straightforward way. Gonna try a faster way later, just wanna get this working.
+		System.out.println("@mCorrectLabels");
+		printArray(mCorrectLabels);
 
 		int ensemble_size=50;
 
@@ -128,7 +145,7 @@ public class Ensembler{
 		//Parsing the predictions made by each configuration
 		List<EnsembleElement> eeBatch = new ArrayList<EnsembleElement>();
 		for (Configuration c: configBatch){
-			EnsembleElement ee = new EnsembleElement(c,mAmtInstances,mFoldSizes);
+			EnsembleElement ee = new EnsembleElement(c);
 			ee.parseInstancewiseInfo(iwpPath); //TODO  maybe put a call to this in the EE constructor
 			eeBatch.add(ee);
 		}
@@ -165,14 +182,6 @@ public class Ensembler{
 		return rv;
 	}
 
-	public void printArray(int [] array){
-		String s =("\n[");
-		for(int i = 0; i < array.length; i++){
-			s+=(array[i]+",");
-		}
-		s+=("]\n");
-		System.out.println(s);
-	}
 
 	private int[] chooseModel(List<EnsembleElement> eeBatch, List<EnsembleElement> currentPartialEnsemble){
 		int [] possibleChoicePerformances = new int[eeBatch.size()];
@@ -183,7 +192,10 @@ public class Ensembler{
 
 			//Iterating over {CPE + i-th choice} to compute the CPE performance with this choice.
 			for (int j = 0; j < mAmtInstances ; j++){
-				if(_majorityVote(j, currentPartialEnsemble) != mCorrectLabels[j]){
+				int vote = _majorityVote(j, currentPartialEnsemble);
+				// System.out.print("@ vote,real: "+vote+","+mCorrectLabels[j]);
+				// System.out.println( (vote != mCorrectLabels[j])? "WRONG": "");
+				if( vote != mCorrectLabels[j]){
 					possibleChoicePerformances[i]++;
 				}
 			}
@@ -201,24 +213,83 @@ public class Ensembler{
 
 	private int _majorityVote(int instanceNum, List<EnsembleElement> currentPartialEnsemble){
 		int [] votes = new int [mAmtLabels];
-		// int [] votes = new int [9];
-		// mLabelMap.put(new Integer(4),new Integer(3));
-		// mLabelMap.put(new Integer(8),new Integer(4));
-		// mLabelMap.put(new Integer(15),new Integer(5));
-		// mLabelMap.put(new Integer(16),new Integer(6));
-		// mLabelMap.put(new Integer(23),new Integer(7));
-		// mLabelMap.put(new Integer(42),new Integer(8));
 		for (EnsembleElement ee : currentPartialEnsemble){
-			int vote = ee.getPrediction(instanceNum);
+			int vote_index = ee.getPrediction(instanceNum);
 			//System.out.println(vote);
-			Integer index = mLabelMap.get(new Integer(vote));
 		   //System.out.println("@wasmapped: instance:"+instanceNum+" vote:"+vote+ " to label index:"+ index);
-			votes[index]++;
+			votes[vote_index]++;
 		}
 		//printArray(votes);
-		return Util.randomizedIndexMax(votes);
-
+		//return mInverseLabelMap.get(Util.indexMax(votes)); //TODO not randomized
+		return Util.indexMax(votes);
 		//TODO treat duplicate max indexes differently than returning first one?
+	}
+
+	private class EnsembleElement{
+
+		private Configuration mModel;
+		private double mWeight;
+		private int [] mPredictions;
+
+		public EnsembleElement(Configuration model, double weight){
+			this(model);
+			mWeight = weight;
+		}
+
+		public EnsembleElement(Configuration model){
+			mModel = model;
+			mPredictions = new int[mAmtInstances];
+			mWeight=1;
+		}
+
+		public void parseInstancewiseInfo(String iwpPath) throws FileNotFoundException,IOException{ //TODO get instancewiseLogPath from global, maybe have foldSizes globally too
+			//TODO change the way iwpPath is provided
+
+			//Iterating over folds
+			int totalInstanceIndex=0;
+
+			for(int i = 0; i<mFoldSizes.length;i++){ //iterating over instancewise logs for each fold
+
+				String path = iwpPath+"hash:"+mModel.hashCode()+"_fold:"+i+".txt";
+				File ciFile = new File(path);
+
+				FileReader 	   ciFR = null;
+				BufferedReader ciBR = null ;
+
+				if(ciFile.exists()){
+					try{
+						ciFR = new FileReader(path);
+						ciBR = new BufferedReader(ciFR); //hue
+					}catch (FileNotFoundException e){
+						System.out.println("Couldn't initialize ciBR");
+						throw e;
+					}
+
+					//Iterating over lines
+					try{
+							ciBR.readLine(); //skipping first line of csv file
+						for( String currentLine = ciBR.readLine() ; currentLine!=null ; currentLine = ciBR.readLine()){ //iterating over lines
+							mPredictions[totalInstanceIndex]= mLabelMap.get(Util.parseInstancewiseLine(currentLine,"PREDICT_FULL"));
+							//			System.out.println("@prediction for hash "+mModel.hashCode()+" on instance "+totalInstanceIndex+" is "+mPredictions[totalInstanceIndex]);
+							totalInstanceIndex++;
+						}
+					}catch(IOException e){
+						log.debug("Couldn't read a line in file "+path);
+						throw e;
+					}
+
+				}else{ //TODO define standard behaviour for this case
+					for(int j=0;j<mFoldSizes[i];j++,totalInstanceIndex++)	mPredictions[totalInstanceIndex]=-1;
+				}
+			}
+		}
+
+		public String toString()                  {  return mModel.getArgStrings();}
+		public int hashCode()                     {	return mModel.hashCode();}
+
+		public int getPrediction(int instanceNum) {  return mPredictions[instanceNum];}
+		public Configuration getModel()           {	return mModel;}
+
 	}
 
 }

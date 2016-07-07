@@ -76,17 +76,23 @@ public class Util
 
         String [] separatedByComma = line.split(",");
 
-        //stupid java 6 without strings in switches
+        //Stupid java 6 without strings in switches
         if      (info.equals("INST_NUMBER")){
-          return separatedByComma[0];              //instance number
-        }else if(info.equals("ACTUAL_CODE")){
-          return separatedByComma[1].split(":")[0];//correct class   (class code)
+         return separatedByComma[0];              //instance number
+
+		  }else if(info.equals("ACTUAL_FULL")){
+			return separatedByComma[1];					//correct label   (full entry)
+		  }else if(info.equals("ACTUAL_CODE")){
+          return separatedByComma[1].split(":")[0];//correct label   (label code)
         }else if(info.equals("ACTUAL_NAME")){
-          return separatedByComma[1].split(":")[1];//correct class   (class name)
+          return separatedByComma[1].split(":")[1];//correct label   (label name)
+
+		  }else if(info.equals("PREDICT_FULL")){
+		    return separatedByComma[2];					//predicted label (full entry)
         }else if(info.equals("PREDICT_CODE")){
-          return separatedByComma[2].split(":")[0];//predicted class (class code)
+          return separatedByComma[2].split(":")[0];//predicted label (label code)
         }else if(info.equals("PREDICT_NAME")){
-          return separatedByComma[2].split(":")[1];//predicted class (class name)
+          return separatedByComma[2].split(":")[1];//predicted label (label name)
         }else{
           return null;
         }
@@ -133,20 +139,32 @@ public class Util
 	  static public int randomizedIndexMax(int[] a){
        int max = 0;
        int index_max=0;
+
 		 int [] index_max_array = new int[a.length];
 		 int i,j;
-		 for(i=0,j=0; i<a.length ;i++){
+		 for(i=0,j=0; i<a.length;i++){
+			 if(a[i]>=max){
+			 	max=a[i];
+				index_max_array[j]=i;
+				index_max=i;
+				j++;
+			 }
+		 }
+
+		 /*for(i=0,j=0; i<a.length ;i++){
          if(a[i]>=max){
 			  max=a[i];
 			  index_max=i;
 			  index_max_array[j]=a[i];
 			  j++;
          }
-       }
+		}*/
+
 		 if (j==1){
 		 	return index_max;
 		 }else{
-		   int return_index = (new Random()).nextInt(j);
+			Random r = new Random();
+		   int return_index = r.nextInt(j);
 			return index_max_array[return_index];
 		 }
 
