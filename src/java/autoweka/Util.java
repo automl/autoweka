@@ -150,25 +150,50 @@ public class Util
 				j++;
 			 }
 		 }
-
-		 /*for(i=0,j=0; i<a.length ;i++){
-         if(a[i]>=max){
-			  max=a[i];
-			  index_max=i;
-			  index_max_array[j]=a[i];
-			  j++;
-         }
-		}*/
+				 /*for(i=0,j=0; i<a.length ;i++){
+				 if(a[i]>=max){
+				 max=a[i];
+				 index_max=i;
+				 index_max_array[j]=a[i];
+				 j++;
+			 }
+		 }*/
 
 		 if (j==1){
-		 	return index_max;
+			 return index_max;
 		 }else{
-			Random r = new Random();
-		   int return_index = r.nextInt(j);
-			return index_max_array[return_index];
+			 Random r = new Random();
+			 int return_index = r.nextInt(j);
+			 return index_max_array[return_index];
 		 }
 
-     }
+	}
+
+	 static public int randomizedIndexMin(int[] a){
+       int min = 0;
+       int index_min=Integer.MAX_VALUE;
+
+  		 int [] index_min_array = new int[a.length];
+  		 int i,j;
+  		 for(i=0,j=0; i<a.length;i++){
+  			 if(a[i]<=min){
+  			 	min=a[i];
+  				index_min_array[j]=i;
+  				index_min=i;
+  				j++;
+  			 }
+  		 }
+
+		 if (j==1){
+			return index_min;
+		 }else{
+			Random r = new Random();
+			int return_index = r.nextInt(j);
+			return index_min_array[return_index];
+		 }
+	 }
+
+
 
      static public int indexMax(double[] a){
        double max = 0;
