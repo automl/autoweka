@@ -111,13 +111,16 @@ public class Ensembler{
 	//Greedy ensemble selection hillclimbing process
 	public List<Configuration> hillclimb(boolean onlyFullyPredicted) throws FileNotFoundException,IOException{ //Doing it the straightforward way. Gonna try a faster way later, just wanna get this working.
 
+		int ensemble_size=50;
+
 		//Shallow copying mCfg list. Trick is ugly but works.
 		List<Configuration> configBatch = (ArrayList<Configuration>)((ArrayList<Configuration>) mCfgList).clone();
 
 		//Removing configurations not evaluated on all folds
+		System.out.print("\n");
 		if(onlyFullyPredicted){
 			for(int i = configBatch.size()-1; i>=0 ; i--) if(configBatch.get(i).getAmtFolds()!=mAmtFolds){
-				System.out.println("@removing: "+configBatch.get(i).getArgStrings());
+				System.out.print(", @removing: "+configBatch.get(i).hashCode());
 				configBatch.remove(i);
 			}
 		}
@@ -130,36 +133,31 @@ public class Ensembler{
 			eeBatch.add(ee);
 		}
 
-		System.out.println("@eebatch:");
-		for(EnsembleElement ee : eeBatch){
-			System.out.println("@model_hash: "+ee.hashCode());
-		}
-
-		System.out.println(mLabelMap.toString());
-
-		//Building the ensemble
+		//Initializing the ensemble
 		List<EnsembleElement> currentPartialEnsemble = new ArrayList<EnsembleElement>();
-		int [] hillclimbingStepPerformances = new int[eeBatch.size()]; //So far, error count TODO make it general
+		int [] hillclimbingStepPerformances = new int[ensemble_size]; //So far, error count TODO make it general
 
-		for(int i = 0; !eeBatch.isEmpty() ;i++){//Iterating over available ensemble slots. TODO make the initialization batch flexible.
+		//Iterating over available ensemble slots. TODO make the initialization batch flexible.
+		for(int i = 0; i<ensemble_size ;i++){
 
-			int[] performanceAndIndex = chooseModel(eeBatch,currentPartialEnsemble);
+			int [] performanceAndIndex = chooseModel(eeBatch,currentPartialEnsemble); //this is a "tuple"
 			EnsembleElement ciChosenModel = eeBatch.get(performanceAndIndex[1]);
 			currentPartialEnsemble.add(ciChosenModel);
-			eeBatch.remove(ciChosenModel);  //TODO just save bools right/wrong and then use logical ops ^o^
+			//eeBatch.remove(ciChosenModel);
 			hillclimbingStepPerformances[i]=performanceAndIndex[0];
 
 			System.out.println("@currentPartialEnsemble on iteration i="+i);
 			System.out.println("score: "+hillclimbingStepPerformances[i]);
-			for(int k=0; k<currentPartialEnsemble.size();k++){
-				System.out.println("hash: "+currentPartialEnsemble.get(k).getModel().hashCode());
-			}
+			//for(int k=0; k<currentPartialEnsemble.size();k++) System.out.println("hash: "+currentPartialEnsemble.get(k).getModel().hashCode());
+
 		} //TODO have something that evaluates that its likely not climbing anymore to stop earlier
 
-		//Slicing it at best place
+
+		//Slicing it at highest hillclimbing performance
 		int bestIndex = Util.indexMin(hillclimbingStepPerformances);
 		currentPartialEnsemble = Util.getSlicedList(currentPartialEnsemble,0,bestIndex);
 
+		//Setting up method output
 		List<Configuration> rv = new ArrayList<Configuration>();
 		for(EnsembleElement ee : currentPartialEnsemble){
 			rv.add(ee.getModel());
