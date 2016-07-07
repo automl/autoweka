@@ -168,13 +168,12 @@ public class Ensembler{
 	}
 
 	public void printArray(int [] array){
-
-		System.out.print("\n[");
+		String s =("\n[");
 		for(int i = 0; i < array.length; i++){
-			System.out.print(array[i]+",");
+			s+=(array[i]+",");
 		}
-		System.out.print("]\n");
-
+		s+=("]\n");
+		System.out.println(s);
 	}
 
 	private int[] chooseModel(List<EnsembleElement> eeBatch, List<EnsembleElement> currentPartialEnsemble){
@@ -204,15 +203,22 @@ public class Ensembler{
 
 	private int _majorityVote(int instanceNum, List<EnsembleElement> currentPartialEnsemble){
 		int [] votes = new int [mAmtLabels];
-
+		// int [] votes = new int [9];
+		// mLabelMap.put(new Integer(4),new Integer(3));
+		// mLabelMap.put(new Integer(8),new Integer(4));
+		// mLabelMap.put(new Integer(15),new Integer(5));
+		// mLabelMap.put(new Integer(16),new Integer(6));
+		// mLabelMap.put(new Integer(23),new Integer(7));
+		// mLabelMap.put(new Integer(42),new Integer(8));
 		for (EnsembleElement ee : currentPartialEnsemble){
 			int vote = ee.getPrediction(instanceNum);
+			//System.out.println(vote);
 			Integer index = mLabelMap.get(new Integer(vote));
-		   //	System.out.println("@wasmapped: instance:"+instanceNum+" vote:"+vote+ " to label index:"+ index);
+		   //System.out.println("@wasmapped: instance:"+instanceNum+" vote:"+vote+ " to label index:"+ index);
 			votes[index]++;
 		}
-		printArray(votes);
-		return Util.indexMax(votes);
+		//printArray(votes);
+		return Util.randomizedIndexMax(votes);
 
 		//TODO treat duplicate max indexes differently than returning first one?
 	}
