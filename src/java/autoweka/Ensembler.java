@@ -114,6 +114,14 @@ public class Ensembler{
 		mAmtLabels=mLabelMap.size();
 	}
 
+	public void println(String s){ //Because i'm tired of typing it all
+		System.out.println(s); //TODO erase that later
+	}
+
+	public void print(String s){
+		System.out.print(s);
+	}
+
 	public void printArray(int [] array){
 		String s =("\n[");
 		for(int i = 0; i < array.length; i++){
@@ -154,6 +162,10 @@ public class Ensembler{
 		List<EnsembleElement> currentPartialEnsemble = new ArrayList<EnsembleElement>();
 		int [] hillclimbingStepPerformances = new int[ensemble_size]; //So far, error count TODO make it general
 
+		println("@eebatch");
+		for( int i=0 ; i<eeBatch.size(); i++){
+			print(eeBatch.get(i));
+		}
 		for( int i=0 ; i<3 ; i++ ){
 			currentPartialEnsemble.add(eeBatch.get(i)); //They should be sorted, right?
 		}
