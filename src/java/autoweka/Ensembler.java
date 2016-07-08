@@ -154,6 +154,10 @@ public class Ensembler{
 		List<EnsembleElement> currentPartialEnsemble = new ArrayList<EnsembleElement>();
 		int [] hillclimbingStepPerformances = new int[ensemble_size]; //So far, error count TODO make it general
 
+		for( int i=0 ; i<3 ; i++ ){
+			currentPartialEnsemble.add(eeBatch.get(i)); //They should be sorted, right?
+		}
+
 		//Iterating over available ensemble slots. TODO make the initialization batch flexible.
 		for(int i = 0; i<ensemble_size ;i++){
 
@@ -203,7 +207,7 @@ public class Ensembler{
 		}
 		System.out.println("@[choice performances], [best,index]\n");
 		printArray(possibleChoicePerformances);
-		int bestIndex = Util.indexMin(possibleChoicePerformances);//Util.randomizedIndexMin(possibleChoicePerformances);
+		int bestIndex = Util.randomizedIndexMin(possibleChoicePerformances);
 		int [] output = {possibleChoicePerformances[bestIndex],bestIndex};
 		printArray(output);
 		return output; //Curse java and it's lack of native tuples
@@ -221,7 +225,7 @@ public class Ensembler{
 		}
 		//printArray(votes);
 		//return mInverseLabelMap.get(Util.indexMax(votes)); //TODO not randomized
-		return Util.indexMax(votes);//Util.randomizedIndexMax(votes);
+		return Util.randomizedIndexMax(votes);
 		//TODO treat duplicate max indexes differently than returning first one?
 	}
 
