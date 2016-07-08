@@ -187,7 +187,6 @@ public class Util
 			return index_min;
 		 }else{
 			Random r = new Random();
-			System.out.println(j);
 			int return_index = r.nextInt(j);
 			return index_min_array[return_index];
 		 }
