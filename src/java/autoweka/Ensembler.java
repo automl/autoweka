@@ -169,7 +169,8 @@ public class Ensembler{
 
 			System.out.println("@currentPartialEnsemble on iteration i="+i);
 			System.out.println("score: "+hillclimbingStepPerformances[i]);
-			//for(int k=0; k<currentPartialEnsemble.size();k++) System.out.println("hash: "+currentPartialEnsemble.get(k).getModel().hashCode());
+			for(int k=0; k<currentPartialEnsemble.size();k++) System.out.print(","+currentPartialEnsemble.get(k).getModel().hashCode());
+			System.out.println("\n");
 
 		} //TODO have something that evaluates that its likely not climbing anymore to stop earlier
 
