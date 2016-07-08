@@ -164,7 +164,7 @@ public class Ensembler{
 
 		println("@eebatch");
 		for( int i=0 ; i<eeBatch.size(); i++){
-			print(eeBatch.get(i).hashCode().toString());
+			print(eeBatch.get(i).hashString());
 		}
 		for( int i=0 ; i<3 ; i++ ){
 			currentPartialEnsemble.add(eeBatch.get(i)); //They should be sorted, right?
@@ -303,6 +303,7 @@ public class Ensembler{
 
 		public String toString()                  {  return mModel.getArgStrings();}
 		public int hashCode()                     {	return mModel.hashCode();}
+		public String hashString()                {  return (new Integer(this.hashCode())).toString(); }
 
 		public int getPrediction(int instanceNum) {  return mPredictions[instanceNum];}
 		public Configuration getModel()           {	return mModel;}
