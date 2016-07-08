@@ -170,8 +170,8 @@ public class Util
 	}
 
 	 static public int randomizedIndexMin(int[] a){
-       int min = 0;
-       int index_min=Integer.MAX_VALUE;
+		 int min=Integer.MAX_VALUE;
+       int index_min = 0;
 
   		 int [] index_min_array = new int[a.length];
   		 int i,j;
@@ -183,7 +183,6 @@ public class Util
   				j++;
   			 }
   		 }
-
 		 if (j==1){
 			return index_min;
 		 }else{
