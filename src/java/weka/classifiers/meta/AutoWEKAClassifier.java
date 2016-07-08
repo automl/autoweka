@@ -383,7 +383,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
           List<Configuration> lc = e.hillclimb(true);
           System.out.println("@the ensemble \n\n");
           for (Configuration c: lc){
-            System.out.println("hash: "+c.hashCode()+"\nargs: "+c.getArgStrings());
+            //System.out.println("hash: "+c.hashCode()+"\nargs: "+c.getArgStrings());
           }
 			 long endTime = System.nanoTime();
 			 long totalTime = endTime-startTime;
