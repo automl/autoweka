@@ -134,10 +134,10 @@ public class Ensembler{
 		List<Configuration> configBatch = (ArrayList<Configuration>)((ArrayList<Configuration>) mCfgList).clone();
 
 		//Removing configurations not evaluated on all folds
-		System.out.print("\n");
+		//System.out.print("\n");
 		if(onlyFullyPredicted){
 			for(int i = configBatch.size()-1; i>=0 ; i--) if(configBatch.get(i).getAmtFolds()!=mAmtFolds){
-				System.out.print(", @removing: "+configBatch.get(i).hashCode());
+			//	System.out.print(", @removing: "+configBatch.get(i).hashCode());
 				configBatch.remove(i);
 			}
 		}
@@ -221,7 +221,7 @@ public class Ensembler{
 		}
 		//printArray(votes);
 		//return mInverseLabelMap.get(Util.indexMax(votes)); //TODO not randomized
-		return Util.indexMax(possibleChoicePerformances);//Util.randomizedIndexMax(votes);
+		return Util.indexMax(votes);//Util.randomizedIndexMax(votes);
 		//TODO treat duplicate max indexes differently than returning first one?
 	}
 
