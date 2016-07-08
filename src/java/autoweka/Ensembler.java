@@ -216,7 +216,7 @@ public class Ensembler{
 					possibleChoicePerformances[i]++;
 				}
 			}
-			currentPartialEnsemble.remove(eeBatch.get(i));
+			currentPartialEnsemble.remove(currentPartialEnsemble.size()-1);
 		}
 		System.out.println("@[choice performances], [best,index]\n");
 		printArray(possibleChoicePerformances);
