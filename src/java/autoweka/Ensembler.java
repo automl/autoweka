@@ -203,7 +203,7 @@ public class Ensembler{
 		}
 		System.out.println("@[choice performances], [best,index]\n");
 		printArray(possibleChoicePerformances);
-		int bestIndex = Util.randomizedIndexMin(possibleChoicePerformances);
+		int bestIndex = Util.indexMin(possibleChoicePerformances);//Util.randomizedIndexMin(possibleChoicePerformances);
 		int [] output = {possibleChoicePerformances[bestIndex],bestIndex};
 		printArray(output);
 		return output; //Curse java and it's lack of native tuples
@@ -221,7 +221,7 @@ public class Ensembler{
 		}
 		//printArray(votes);
 		//return mInverseLabelMap.get(Util.indexMax(votes)); //TODO not randomized
-		return Util.randomizedIndexMax(votes);
+		return Util.indexMax(possibleChoicePerformances);//Util.randomizedIndexMax(votes);
 		//TODO treat duplicate max indexes differently than returning first one?
 	}
 
