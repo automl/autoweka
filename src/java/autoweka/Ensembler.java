@@ -164,7 +164,7 @@ public class Ensembler{
 
 		println("@eebatch");
 		for( int i=0 ; i<eeBatch.size(); i++){
-			print(eeBatch.get(i).hashCode());
+			print(eeBatch.get(i).hashCode().toString());
 		}
 		for( int i=0 ; i<3 ; i++ ){
 			currentPartialEnsemble.add(eeBatch.get(i)); //They should be sorted, right?
