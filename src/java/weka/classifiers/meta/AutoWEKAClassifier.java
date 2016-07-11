@@ -358,6 +358,32 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         eval = new Evaluation(is);
         eval.evaluateModel(classifier, is);
+
+        System.out.println("On all instances: " + eval.toSummaryString());
+
+        InstanceGenerator ig = InstanceGenerator.create(exp.instanceGenerator, exp.datasetString);
+        Instances training = ig.getTrainingFromParams(exp.datasetString);
+
+        training = as.reduceDimensionality(training);
+        Classifier classifier1 = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
+        classifier1.buildClassifier(training);
+
+        Evaluation eval1 = new Evaluation(training);
+        eval1.evaluateModel(classifier1, training);
+
+        System.out.println("On training: " + eval1.toSummaryString());
+
+        // performance on validation set
+        Instances testing = ig.getTestingFromParams(exp.datasetString);
+
+        testing = as.reduceDimensionality(testing);
+        Classifier classifier2 = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
+        classifier2.buildClassifier(testing);
+
+        Evaluation eval2 = new Evaluation(testing);
+        eval2.evaluateModel(classifier2, testing);
+
+        System.out.println("On testing: " + eval2.toSummaryString());
     }
 
     /**
