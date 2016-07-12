@@ -123,8 +123,12 @@ public class Ensembler{
 	}
 
 	public void printArray(int [] array){
+		printArray(array,array.length);
+	}
+
+	public void printArray(int [] array,int limit){
 		String s =("\n[");
-		for(int i = 0; i < array.length; i++){
+		for(int i = 0; i < limit; i++){
 			s+=(array[i]+",");
 		}
 		s+=("]\n");
@@ -193,7 +197,9 @@ public class Ensembler{
 
 		} //TODO have something that evaluates that its likely not climbing anymore to stop earlier
 
+		println("@Full hillclimbing trajectory models:");
 		printList(currentPartialEnsemble);
+		println("@Full hillclimbing trajectory scores:");
 		printArray(hillclimbingStepPerformances);
 		//Slicing it at highest hillclimbing performance
 		int bestIndex = Util.indexMin(hillclimbingStepPerformances);
@@ -204,6 +210,13 @@ public class Ensembler{
 		for(EnsembleElement ee : currentPartialEnsemble){
 			rv.add(ee.getModel());
 		}
+
+		println("@Sliced hillclimbing trajectory scores:");
+		printList(rv);
+
+		println("@Sliced hillclimbing trajectory scores:");
+		printArray(hillclimbingStepPerformances,rv.size());
+
 		return rv;
 	}
 
@@ -226,11 +239,11 @@ public class Ensembler{
 			}
 			currentPartialEnsemble.remove(currentPartialEnsemble.size()-1);
 		}
-		System.out.println("@[choice performances], [best,index]\n");
+		//System.out.println("@[choice performances], [best,index]\n");
 		//printArray(possibleChoicePerformances);
 		int bestIndex = Util.randomizedIndexMin(possibleChoicePerformances);
 		int [] output = {possibleChoicePerformances[bestIndex],bestIndex};
-		printArray(output);
+		//printArray(output);
 		return output; //Curse java and it's lack of native tuples
 	}
 
