@@ -565,8 +565,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         //if (tmpStr.length() != 0) {
         //    extraArgs = tmpStr;
         //} else {
+		  //}
         //    extraArgs = DEFAULT_EXTRA_ARGS;
-        //}
 
         super.setOptions(options);
         Utils.checkForRemainingOptions(options);

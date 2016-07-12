@@ -131,6 +131,15 @@ public class Ensembler{
 		System.out.println(s);
 	}
 
+	public void printList(List list){
+		String s =("\n[");
+		for(int i = 0; i < list.size(); i++){
+			s+=(list.get(i).toString()+",");
+		}
+		s+=("]\n");
+		System.out.println(s);
+	}
+
 	//Greedy ensemble selection hillclimbing process
 	public List<Configuration> hillclimb(boolean onlyFullyPredicted) throws FileNotFoundException,IOException{ //Doing it the straightforward way. Gonna try a faster way later, just wanna get this working.
 		System.out.println("@mCorrectLabels");
@@ -152,7 +161,7 @@ public class Ensembler{
 
 		//Parsing the predictions made by each configuration
 		List<EnsembleElement> eeBatch = new ArrayList<EnsembleElement>();
-		for (Configuration c: configBatch){
+		for (Configuration c : configBatch){
 			EnsembleElement ee = new EnsembleElement(c);
 			ee.parseInstancewiseInfo(iwpPath); //TODO  maybe put a call to this in the EE constructor
 			eeBatch.add(ee);
@@ -163,10 +172,8 @@ public class Ensembler{
 		int [] hillclimbingStepPerformances = new int[ensemble_size]; //So far, error count TODO make it general
 
 		println("@eebatch");
-		for( int i=0 ; i<eeBatch.size(); i++){
-			print(eeBatch.get(i).hashString());
-		}
-		for( int i=0 ; i<3 ; i++ ){
+		printList(eeBatch);
+		for( int i=0 ; i<3 && i<eeBatch.size() ; i++ ){
 			currentPartialEnsemble.add(eeBatch.get(i)); //They should be sorted, right?
 		}
 
@@ -179,14 +186,15 @@ public class Ensembler{
 			//eeBatch.remove(ciChosenModel);
 			hillclimbingStepPerformances[i]=performanceAndIndex[0];
 
-			System.out.println("@currentPartialEnsemble on iteration i="+i);
-			System.out.println("score: "+hillclimbingStepPerformances[i]);
-			for(int k=0; k<currentPartialEnsemble.size();k++) System.out.print(","+currentPartialEnsemble.get(k).getModel().hashCode());
-			System.out.println("\n");
+			//System.out.println("@currentPartialEnsemble on iteration i="+i);
+			//System.out.println("score: "+hillclimbingStepPerformances[i]);
+			//for(int k=0; k<currentPartialEnsemble.size();k++) System.out.print(","+currentPartialEnsemble.get(k).getModel().hashCode());
+			//System.out.println("\n");
 
 		} //TODO have something that evaluates that its likely not climbing anymore to stop earlier
 
-
+		printList(currentPartialEnsemble);
+		printArray(hillclimbingStepPerformances);
 		//Slicing it at highest hillclimbing performance
 		int bestIndex = Util.indexMin(hillclimbingStepPerformances);
 		currentPartialEnsemble = Util.getSlicedList(currentPartialEnsemble,0,bestIndex);
@@ -219,7 +227,7 @@ public class Ensembler{
 			currentPartialEnsemble.remove(currentPartialEnsemble.size()-1);
 		}
 		System.out.println("@[choice performances], [best,index]\n");
-		printArray(possibleChoicePerformances);
+		//printArray(possibleChoicePerformances);
 		int bestIndex = Util.randomizedIndexMin(possibleChoicePerformances);
 		int [] output = {possibleChoicePerformances[bestIndex],bestIndex};
 		printArray(output);
@@ -301,12 +309,12 @@ public class Ensembler{
 			}
 		}
 
-		public String toString()                  {  return mModel.getArgStrings();}
-		public int hashCode()                     {	return mModel.hashCode();}
-		public String hashString()                {  return (new Integer(this.hashCode())).toString(); }
+		public String toString()                  {  return Integer.toString(this.hashCode());			 	}
+		public int hashCode()                     {	return mModel.hashCode();	    	}
+		public String getArgStrings()             {  return mModel.getArgStrings(); 	}
 
 		public int getPrediction(int instanceNum) {  return mPredictions[instanceNum];}
-		public Configuration getModel()           {	return mModel;}
+		public Configuration getModel()           {	return mModel;							}
 
 	}
 

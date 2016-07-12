@@ -56,13 +56,13 @@ public class Util
        for(int i = first-1;i>=0;i--){
          clone.remove(i);
        }
-       System.out.println("@origlist_size"+l.size());
-       for(T t : l){
-         System.out.println("@originallist "+t.hashCode());
-       }
-       for(T t : clone){
-         System.out.println("@slicedlist "+t.hashCode());
-       }
+      //  System.out.println("@origlist_size"+l.size());
+      //  for(T t : l){
+      //    System.out.println("@originallist "+t.hashCode());
+      //  }
+      //  for(T t : clone){
+      //    System.out.println("@slicedlist "+t.hashCode());
+      //  }
        return clone;
      }
 
