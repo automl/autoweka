@@ -126,7 +126,7 @@ public class Ensembler{
 		printArray(array,array.length);
 	}
 
-	public void printArray(int [] array,int limit){
+	public void printArray(int [] array, int limit){
 		String s =("\n[");
 		for(int i = 0; i < limit; i++){
 			s+=(array[i]+",");
@@ -211,7 +211,7 @@ public class Ensembler{
 			rv.add(ee.getModel());
 		}
 
-		println("@Sliced hillclimbing trajectory scores:");
+		println("@Sliced hillclimbing trajectory models:");
 		printList(rv);
 
 		println("@Sliced hillclimbing trajectory scores:");

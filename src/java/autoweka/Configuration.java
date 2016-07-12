@@ -142,12 +142,7 @@ public class Configuration extends XmlSerializable implements Comparable{
 	}
 
 	public String toString(){
-		String strFolds = "[";
-		for(String fold : mFolds){
-			strFolds+=(fold.toString()+"/");
-		}
-		strFolds+="]";
-		return (Integer.toString(this.hashCode())+","+Double.toString(mEvaluatedScore)+","+strFolds);
+		return Integer.toString(this.hashCode());
 	}
 
 	public int hashCode(){ //Useful for merging configuration objects that refer to the same set of parameters.
