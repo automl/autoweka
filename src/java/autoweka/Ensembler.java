@@ -22,30 +22,33 @@ public class Ensembler{
 
 	final static Logger log = LoggerFactory.getLogger(Ensembler.class);
 
-	private List<Configuration> mCfgList;   //List of configurations given as input via the configuration ranking
-	private Map<String,Integer> mLabelMap; //Maps labels to ints 0-n where n is the number of classes
-	private Map<Integer,String> mInverseLabelMap; //Maps ints 0-n to the labels
+	//Candidate Configurations
+	private List<Configuration> mCfgList;  //List of configurations read from the configuration ranking file at rPath
 
-	private int [] mCorrectLabels; //Correct labels as ints defined by mLabelMap
-	private int [] mFoldSizes;
+	//Data about the instances
+	private Map<String,Integer> mLabelMap; //Maps the existing labels in the dataset to ints [0:n-1] where n is the number of labels
+	private int [] mCorrectLabels; //Lists the correct label for each instance
+	private int [] mFoldSizes;		 //Lists the size of every fold created by autoweka
 	private int    mAmtFolds;
 	private int    mAmtInstances;
 	private int    mAmtLabels;
 
-	private String iwpPath; //Aliasing for readability
-	private String rPath;
+	//Global paths. Aliasing them for readability
+	private String iwpPath; //Instancewise Predictions Directory Path (a directory containing txt files)
+	private String rPath;   //Configuration Ranking Path (a xml file)
 
 	public Ensembler(String temporaryDirPath) throws FileNotFoundException,IOException{ //TODO make some sort of factory for the many options
 		this.iwpPath     = temporaryDirPath+instancewiseInfoDirPath;
 		this.rPath       = temporaryDirPath+configurationRankingPath;
 		mCfgList         = ConfigurationCollection.fromXML(rPath,ConfigurationCollection.class).asArrayList();
 		mLabelMap        = new HashMap<String,Integer>();
-		mInverseLabelMap = new HashMap<Integer,String>();
+		//mInverseLabelMap = new HashMap<Integer,String>();
 		mAmtFolds        = mCfgList.get(0).getAmtFolds(); //TODO compute it from some global
 		mFoldSizes       = new int[mAmtFolds];
 		parseFoldDataFromLogs();
 	}
 
+	//TODO make it a single loop, you´re doing something retarded 8D
 	private void parseFoldDataFromLogs() throws FileNotFoundException,IOException{
 
 		String winnerHash = Integer.toString(mCfgList.get(0).hashCode());
@@ -53,9 +56,8 @@ public class Ensembler{
 		FileReader     ciFR = null;
 		BufferedReader ciBR = null;
 
-		//Counting instances
+		//Counting the instances
 		for(i=0;i<mAmtFolds;i++){
-			//opening buffers
 			String path = iwpPath+"hash:"+winnerHash+"_fold:"+i+".txt";
 
 			try{
@@ -84,10 +86,10 @@ public class Ensembler{
 			ciBR.close();
 		}
 
-		//Parsing the actual labels for every instance
+		//Parsing the real labels for every instance
 		mCorrectLabels = new int[mAmtInstances];
-		for(i=0;i<mAmtFolds;i++){//iterating over folds
-			//Setting up the buffers
+		for(i=0;i<mAmtFolds;i++){
+
 			try{
 				ciFR = new FileReader(iwpPath+"hash:"+winnerHash+"_fold:"+i+".txt");
 				ciBR = new BufferedReader(ciFR);
@@ -103,7 +105,7 @@ public class Ensembler{
 				String correctLabel = Util.parseInstancewiseLine(currentLine,"ACTUAL_FULL");
 				if(!mLabelMap.containsKey(correctLabel)){ //Labels can have crazy formats and values, lets map that to tame sequential ints.
 					mLabelMap.put( correctLabel, labelCounter );
-					mInverseLabelMap.put( labelCounter , correctLabel );
+					//mInverseLabelMap.put( labelCounter , correctLabel );
 					labelCounter++;
 				}
 				mCorrectLabels[instanceCounter]=mLabelMap.get(correctLabel);
@@ -231,33 +233,35 @@ public class Ensembler{
 
 
 	private int[] chooseModel(List<EnsembleElement> eeBatch, List<EnsembleElement> currentPartialEnsemble){
+
 		int [] possibleChoicePerformances = new int[eeBatch.size()];
 
-		//Iterating over possible choices in the batch
+		//Iterating over possible choices in the batch, and evaluating each one.
 		for(int i = 0; i<eeBatch.size(); i++){
 			currentPartialEnsemble.add(eeBatch.get(i));
-
+			possibleChoicePerformances[i]=evaluateEnsemble(currentPartialEnsemble);
 			//Iterating over {CPE + i-th choice} to compute the CPE performance with this choice.
-			for (int j = 0; j < mAmtInstances ; j++){
-				int vote = _majorityVote(j, currentPartialEnsemble);
-				// System.out.print("@ vote,real: "+vote+","+mCorrectLabels[j]);
-				// System.out.println( (vote != mCorrectLabels[j])? "WRONG": "");
-				if( vote != mCorrectLabels[j]){
-					possibleChoicePerformances[i]++;
-				}
-			}
 			currentPartialEnsemble.remove(currentPartialEnsemble.size()-1);
 		}
-		//System.out.println("@[choice performances], [best,index]\n");
-		//printArray(possibleChoicePerformances);
+
 		int bestIndex = Util.randomizedIndexMin(possibleChoicePerformances);
 		int [] output = {possibleChoicePerformances[bestIndex],bestIndex};
-		//printArray(output);
 		return output; //Curse java and it's lack of native tuples
 	}
 
+	//Evaluates an Ensemble with regards to error amt. TODO make it general to other metrics
+	private int evaluateEnsemble(List<EnsembleElement> currentPartialEnsemble){
+		int errAmt=0;
+		for (int j = 0; j < mAmtInstances ; j++){
+			int vote = _majorityVote(j, currentPartialEnsemble);
+			if( vote != mCorrectLabels[j]){
+				errAmt++;
+			}
+		}
+		return errAmt;
+	}
 
-
+	//Returns label index with the maximum votes. If there´s more than 1 maximum, it picks a random one. TODO bias towards more prevalent class
 	private int _majorityVote(int instanceNum, List<EnsembleElement> currentPartialEnsemble){
 		int [] votes = new int[mAmtLabels];
 		for (EnsembleElement ee : currentPartialEnsemble){
