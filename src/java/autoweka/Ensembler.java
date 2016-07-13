@@ -177,21 +177,21 @@ public class Ensembler{
 
 		println("@eebatch");
 		printList(eeBatch);
-		for( int i=0 ; i<3 && i<eeBatch.size() ; i++ ){
-			currentPartialEnsemble.add(eeBatch.get(i)); //They should be sorted, right?
-			int errAmt=0;
-			for (int j = 0; j < mAmtInstances ; j++){
-				int vote = _majorityVote(j, currentPartialEnsemble);
-				if( vote != mCorrectLabels[j]){
-					errAmt++;
-				}
-			}
-			hillclimbingStepPerformances[i]=errAmt;
-		}
+		// for( int i=0 ; i<3 && i<eeBatch.size() ; i++ ){
+		// 	currentPartialEnsemble.add(eeBatch.get(i)); //They should be sorted, right?
+		// 	int errAmt=0;
+		// 	for (int j = 0; j < mAmtInstances ; j++){
+		// 		int vote = _majorityVote(j, currentPartialEnsemble);
+		// 		if( vote != mCorrectLabels[j]){
+		// 			errAmt++;
+		// 		}
+		// 	}
+		// 	hillclimbingStepPerformances[i]=errAmt;
+		// }
 
 		//Iterating over available ensemble slots. TODO make the initialization batch flexible.
 		int noImporovementCounter = 0;
-		for(int i = 3; i<ensemble_size ;i++){
+		for(int i = 0; i<ensemble_size ;i++){
 
 			int [] performanceAndIndex = chooseModel(eeBatch,currentPartialEnsemble); //this is a "tuple"
 			EnsembleElement ciChosenModel = eeBatch.get(performanceAndIndex[1]);
