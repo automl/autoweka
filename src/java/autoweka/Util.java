@@ -136,53 +136,36 @@ public class Util
        return index_max;
      }
 
-	  static public int randomizedIndexMax(int[] a){
-       int max = 0;
-       int index_max=0;
+	   static public int randomizedIndexMax(int[] a){
+			int maxValue=0;
+			List<Integer> maxValueIndexes = new ArrayList<Integer>();
 
-		 int [] index_max_array = new int[a.length];
-		 int i,j;
-		 for(i=0,j=0; i<a.length;i++){
-			 if(a[i]>=max){
-			 	max=a[i];
-				index_max_array[j]=i;
-				index_max=i;
-				j++;
-			 }
-		 }
-
-		 if (j==1){
-			 return index_max;
-		 }else{
-			 Random r = new Random();
-			 int return_index = r.nextInt(j);
-			 return index_max_array[return_index];
-		 }
-
-	 }
-
-	 static public int randomizedIndexMin(int[] a){
-		 int min=Integer.MAX_VALUE;
-       int index_min = 0;
-
-  		 int [] index_min_array = new int[a.length];
-  		 int i,j;
-  		 for(i=0,j=0; i<a.length;i++){
-  			 if(a[i]<=min){
-  			 	min=a[i];
-  				index_min_array[j]=i;
-  				index_min=i;
-  				j++;
-  			 }
-  		 }
-		 if (j==1){
-			return index_min;
-		 }else{
+			for(int i = 0; i< a.length; i++){
+				if(a[i]>maxValue) maxValue=a[i];
+			}
+			for(int i = 0; i< a.length; i++){
+				if(a[i]==maxValue) maxValueIndexes.add(new Integer(i));
+			}
 			Random r = new Random();
-			int return_index = r.nextInt(j);
-			return index_min_array[return_index];
-		 }
-	 }
+
+			return maxValueIndexes.get(r.nextInt(maxValueIndexes.size()));
+		}
+
+		static public int randomizedIndexMin(int[] a){
+			int minValue=Integer.MAX_VALUE;
+			List<Integer> minValueIndexes = new ArrayList<Integer>();
+
+			for(int i = 0; i< a.length; i++){
+				if(a[i]<minValue) minValue=a[i];
+			}
+			for(int i = 0; i< a.length; i++){
+				if(a[i]==minValue) minValueIndexes.add(new Integer(i));
+			}
+			Random r = new Random();
+
+			return minValueIndexes.get(r.nextInt(minValueIndexes.size()));
+		}
+
 
      static public int indexMax(double[] a){
        double max = 0;
