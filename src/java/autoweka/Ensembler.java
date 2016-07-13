@@ -148,17 +148,15 @@ public class Ensembler{
 	public List<Configuration> hillclimb(boolean onlyFullyPredicted) throws FileNotFoundException,IOException{ //Doing it the straightforward way. Gonna try a faster way later, just wanna get this working.
 		System.out.println("@mCorrectLabels");
 		printArray(mCorrectLabels);
-
-		int ensemble_size=50;
+		int noImprovementLimit = 5;
+		int ensemble_size = 50;
 
 		//Shallow copying mCfg list. Trick is ugly but works.
 		List<Configuration> configBatch = (ArrayList<Configuration>)((ArrayList<Configuration>) mCfgList).clone();
 
 		//Removing configurations not evaluated on all folds
-		//System.out.print("\n");
 		if(onlyFullyPredicted){
 			for(int i = configBatch.size()-1; i>=0 ; i--) if(configBatch.get(i).getAmtFolds()!=mAmtFolds){
-			//	System.out.print(", @removing: "+configBatch.get(i).hashCode());
 				configBatch.remove(i);
 			}
 		}
@@ -179,22 +177,33 @@ public class Ensembler{
 		printList(eeBatch);
 		for( int i=0 ; i<3 && i<eeBatch.size() ; i++ ){
 			currentPartialEnsemble.add(eeBatch.get(i)); //They should be sorted, right?
+			int errAmt=0;
+			for (int j = 0; j < mAmtInstances ; j++){
+				int vote = _majorityVote(j, currentPartialEnsemble);
+				if( vote != mCorrectLabels[j]){
+					errAmt++;
+				}
+			}
+			hillclimbingStepPerformances[i]=errAmt;
 		}
 
 		//Iterating over available ensemble slots. TODO make the initialization batch flexible.
-		for(int i = 0; i<ensemble_size ;i++){
+		int noImporovementCounter = 0;
+		for(int i = 3; i<ensemble_size ;i++){
 
 			int [] performanceAndIndex = chooseModel(eeBatch,currentPartialEnsemble); //this is a "tuple"
 			EnsembleElement ciChosenModel = eeBatch.get(performanceAndIndex[1]);
 			currentPartialEnsemble.add(ciChosenModel);
 			//eeBatch.remove(ciChosenModel);
 			hillclimbingStepPerformances[i]=performanceAndIndex[0];
-
-			//System.out.println("@currentPartialEnsemble on iteration i="+i);
-			//System.out.println("score: "+hillclimbingStepPerformances[i]);
-			//for(int k=0; k<currentPartialEnsemble.size();k++) System.out.print(","+currentPartialEnsemble.get(k).getModel().hashCode());
-			//System.out.println("\n");
-
+			// if(i!=0 && (hillclimbingStepPerformances[i]>hillclimbingStepPerformances[i-1])){
+			// 	noImporovementCounter=0;
+			// }else{
+			// 	noImporovementCounter++;
+			// }
+			// if(noImporovementCounter==noImprovementLimit) {
+			// 	break;
+			// }
 		} //TODO have something that evaluates that its likely not climbing anymore to stop earlier
 
 		println("@Full hillclimbing trajectory models:");
@@ -250,17 +259,12 @@ public class Ensembler{
 
 
 	private int _majorityVote(int instanceNum, List<EnsembleElement> currentPartialEnsemble){
-		int [] votes = new int [mAmtLabels];
+		int [] votes = new int[mAmtLabels];
 		for (EnsembleElement ee : currentPartialEnsemble){
 			int vote_index = ee.getPrediction(instanceNum);
-			//System.out.println(vote);
-		   //System.out.println("@wasmapped: instance:"+instanceNum+" vote:"+vote+ " to label index:"+ index);
 			votes[vote_index]++;
 		}
-		//printArray(votes);
-		//return mInverseLabelMap.get(Util.indexMax(votes)); //TODO not randomized
 		return Util.randomizedIndexMax(votes);
-		//TODO treat duplicate max indexes differently than returning first one?
 	}
 
 	private class EnsembleElement{
