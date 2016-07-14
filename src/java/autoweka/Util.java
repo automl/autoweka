@@ -136,20 +136,36 @@ public class Util
        return index_max;
      }
 
-	   static public int randomizedIndexMax(int[] a){
-			int maxValue=0;
-			List<Integer> maxValueIndexes = new ArrayList<Integer>();
+	  static public int indexMax(int[] a, String option){
+		  List<Integer> maxValueIndexes = getMaxValueIndexes(a);
 
-			for(int i = 0; i< a.length; i++){
-				if(a[i]>maxValue) maxValue=a[i];
-			}
-			for(int i = 0; i< a.length; i++){
-				if(a[i]==maxValue) maxValueIndexes.add(new Integer(i));
-			}
-			Random r = new Random();
+		  if(option.equals("RANDOM")){
+			  Random r = new Random();
+			  return maxValueIndexes.get(r.nextInt(maxValueIndexes.size()));
+		  }else if(option.equals("FIRST")){
+			  return maxValueIndexes.get(0);
+		  }else if(option.equals("LAST")){
+			  return maxValueIndexes.get(maxValueIndexes.size()-1);
+		  }else{
+			  throw new RuntimeException("Invalid Option");
+		  }
 
-			return maxValueIndexes.get(r.nextInt(maxValueIndexes.size()));
-		}
+	  }
+
+	  static public List<Integer> getMaxValueIndexes(int[] a){
+		  int maxValue=0;
+		  List<Integer> maxValueIndexes = new ArrayList<Integer>();
+
+		  for(int i = 0; i< a.length; i++){
+			  if(a[i]>maxValue) maxValue=a[i];
+		  }
+		  for(int i = 0; i< a.length; i++){
+			  if(a[i]==maxValue) maxValueIndexes.add(new Integer(i));
+		  }
+		  return maxValueIndexes;
+	  }
+
+
 
 		static public int randomizedIndexMin(int[] a){
 			int minValue=Integer.MAX_VALUE;

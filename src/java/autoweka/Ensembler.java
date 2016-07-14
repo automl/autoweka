@@ -26,7 +26,8 @@ public class Ensembler{
 	private List<Configuration> mCfgList;  //List of configurations read from the configuration ranking file at rPath
 
 	//Data about the instances
-	private Map<String,Integer> mLabelMap; //Maps the existing labels in the dataset to ints [0:n-1] where n is the number of labels
+	private Map<String,Integer> mLabelMap; //Maps the existing labels in the dataset to label indexes[0:n-1] where n is the number of labels
+	private Map<Integer,Integer> mLabelFrequencies; //Maps label indexes to the amount of instances with that label
 	private int [] mCorrectLabels; //Lists the correct label for each instance
 	private int [] mFoldSizes;		 //Lists the size of every fold created by autoweka
 	private int    mAmtFolds;
@@ -38,13 +39,13 @@ public class Ensembler{
 	private String rPath;   //Configuration Ranking Path (a xml file)
 
 	public Ensembler(String temporaryDirPath) throws FileNotFoundException,IOException{ //TODO make some sort of factory for the many options
-		this.iwpPath     = temporaryDirPath+instancewiseInfoDirPath;
-		this.rPath       = temporaryDirPath+configurationRankingPath;
-		mCfgList         = ConfigurationCollection.fromXML(rPath,ConfigurationCollection.class).asArrayList();
-		mLabelMap        = new HashMap<String,Integer>();
-		//mInverseLabelMap = new HashMap<Integer,String>();
-		mAmtFolds        = mCfgList.get(0).getAmtFolds(); //TODO compute it from some global
-		mFoldSizes       = new int[mAmtFolds];
+		this.iwpPath      = temporaryDirPath+instancewiseInfoDirPath;
+		this.rPath        = temporaryDirPath+configurationRankingPath;
+		mCfgList          = ConfigurationCollection.fromXML(rPath,ConfigurationCollection.class).asArrayList();
+		mLabelMap         = new HashMap<String,Integer>();
+		mLabelFrequencies = new HashMap<Integer,Integer>();
+		mAmtFolds         = mCfgList.get(0).getAmtFolds(); //TODO compute it from some global
+		mFoldSizes        = new int[mAmtFolds];
 		parseFoldDataFromLogs();
 	}
 
@@ -103,13 +104,27 @@ public class Ensembler{
 			ciBR.readLine();//skip first line
 			for(String currentLine = ciBR.readLine() ; currentLine!=null ; currentLine = ciBR.readLine()){
 				String correctLabel = Util.parseInstancewiseLine(currentLine,"ACTUAL_FULL");
-				if(!mLabelMap.containsKey(correctLabel)){ //Labels can have crazy formats and values, lets map that to tame sequential ints.
-					mLabelMap.put( correctLabel, labelCounter );
-					//mInverseLabelMap.put( labelCounter , correctLabel );
+				if(!mLabelMap.containsKey(correctLabel)){ //Labels can have crazy formats and values, lets map that to sequential ints.
+					mLabelMap.put( correctLabel, new Integer(labelCounter) );
+					mLabelFrequencies.put(new Integer(labelCounter),new Integer(1));
 					labelCounter++;
+				}else{
+					Integer labelIndex = mLabelMap.get(correctLabel);
+					Integer temp = mLabelFrequencies.get(labelIndex);
+					temp+=1;
+					mLabelFrequencies.put(labelIndex,temp);
 				}
 				mCorrectLabels[instanceCounter]=mLabelMap.get(correctLabel);
 				instanceCounter++;
+
+				//Treating the unlikely edge case in which theres a label in the dataset
+				//that's never assigned as the real one for any instance. Dont even know if thats possible. TODO check
+				String predictedLabel = Util.parseInstancewiseLine(currentLine,"PREDICT_FULL");
+				if(!mLabelMap.containsKey(predictedLabel)){ //Labels can have crazy formats and values, lets map that to tame sequential ints.
+				  mLabelMap.put( predictedLabel, labelCounter );
+				  mLabelFrequencies.put(new Integer(labelCounter),new Integer(0));
+				  labelCounter++;
+			  }
 			}
 			ciBR.close();
 		}
@@ -146,12 +161,31 @@ public class Ensembler{
 		System.out.println(s);
 	}
 
+	public void printListAliased(List list){
+
+		Map<Object,Integer> aliases = new HashMap<Object,Integer>();
+		int j=0;
+		for( Object s: list){
+			if(!aliases.containsKey(s)){
+				aliases.put(s,new Integer(j));
+				j++;
+			}
+		}
+
+		String s =("\n[");
+		for(int i = 0; i < list.size(); i++){
+			s+=(aliases.get(list.get(i))+",");
+		}
+		s+=("]\n");
+		System.out.println(s);
+	}
+
 	//Greedy ensemble selection hillclimbing process
 	public List<Configuration> hillclimb(boolean onlyFullyPredicted) throws FileNotFoundException,IOException{ //Doing it the straightforward way. Gonna try a faster way later, just wanna get this working.
 		System.out.println("@mCorrectLabels");
 		printArray(mCorrectLabels);
 		int noImprovementLimit = 5;
-		int ensemble_size = 50;
+		int ensemble_size = 200;
 
 		//Shallow copying mCfg list. Trick is ugly but works.
 		List<Configuration> configBatch = (ArrayList<Configuration>)((ArrayList<Configuration>) mCfgList).clone();
@@ -177,21 +211,21 @@ public class Ensembler{
 
 		println("@eebatch");
 		printList(eeBatch);
-		// for( int i=0 ; i<3 && i<eeBatch.size() ; i++ ){
-		// 	currentPartialEnsemble.add(eeBatch.get(i)); //They should be sorted, right?
-		// 	int errAmt=0;
-		// 	for (int j = 0; j < mAmtInstances ; j++){
-		// 		int vote = _majorityVote(j, currentPartialEnsemble);
-		// 		if( vote != mCorrectLabels[j]){
-		// 			errAmt++;
-		// 		}
-		// 	}
-		// 	hillclimbingStepPerformances[i]=errAmt;
-		// }
+		for( int i=0 ; i<3 && i<eeBatch.size() ; i++ ){
+			currentPartialEnsemble.add(eeBatch.get(i)); //They should be sorted, right?
+			int errAmt=0;
+			for (int j = 0; j < mAmtInstances ; j++){
+				int vote = _majorityVote(j, currentPartialEnsemble);
+				if( vote != mCorrectLabels[j]){
+					errAmt++;
+				}
+			}
+			hillclimbingStepPerformances[i]=errAmt;
+		}
 
 		//Iterating over available ensemble slots. TODO make the initialization batch flexible.
 		int noImporovementCounter = 0;
-		for(int i = 0; i<ensemble_size ;i++){
+		for(int i = 3; i<ensemble_size ;i++){
 
 			int [] performanceAndIndex = chooseModel(eeBatch,currentPartialEnsemble); //this is a "tuple"
 			EnsembleElement ciChosenModel = eeBatch.get(performanceAndIndex[1]);
@@ -208,8 +242,11 @@ public class Ensembler{
 			// }
 		} //TODO have something that evaluates that its likely not climbing anymore to stop earlier
 
+		println("@Label Frequencies:");
+		printList(new ArrayList(mLabelFrequencies.values()));
 		println("@Full hillclimbing trajectory models:");
 		printList(currentPartialEnsemble);
+		printListAliased(currentPartialEnsemble);
 		println("@Full hillclimbing trajectory scores:");
 		printArray(hillclimbingStepPerformances);
 		//Slicing it at highest hillclimbing performance
@@ -224,6 +261,7 @@ public class Ensembler{
 
 		println("@Sliced hillclimbing trajectory models:");
 		printList(rv);
+		printListAliased(rv);
 
 		println("@Sliced hillclimbing trajectory scores:");
 		printArray(hillclimbingStepPerformances,rv.size());
@@ -268,7 +306,16 @@ public class Ensembler{
 			int vote_index = ee.getPrediction(instanceNum);
 			votes[vote_index]++;
 		}
-		return Util.randomizedIndexMax(votes);
+
+		List<Integer> maxValueIndexes = Util.getMaxValueIndexes(votes);
+		int mostPrevalent=0;
+		for(int i=0;i<maxValueIndexes.size();i++){
+			if(mLabelFrequencies.get(maxValueIndexes.get(i))>mLabelFrequencies.get(mostPrevalent)){
+				mostPrevalent=maxValueIndexes.get(i);
+			}
+		}
+		return maxValueIndexes.get(mostPrevalent);
+		//return Util.indexMax(votes,"RANDOM");
 	}
 
 	private class EnsembleElement{
@@ -314,7 +361,9 @@ public class Ensembler{
 					//Iterating over lines
 					try{
 							ciBR.readLine(); //skipping first line of csv file
+
 						for( String currentLine = ciBR.readLine() ; currentLine!=null ; currentLine = ciBR.readLine()){ //iterating over lines
+
 							mPredictions[totalInstanceIndex]= mLabelMap.get(Util.parseInstancewiseLine(currentLine,"PREDICT_FULL"));
 							//			System.out.println("@prediction for hash "+mModel.hashCode()+" on instance "+totalInstanceIndex+" is "+mPredictions[totalInstanceIndex]);
 							totalInstanceIndex++;
