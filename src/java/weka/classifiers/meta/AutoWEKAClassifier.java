@@ -380,11 +380,10 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
 			 long startTime= System.nanoTime();
           Ensembler e = new Ensembler(msExperimentPath+expName+"/");
-          List<Configuration> lc = e.hillclimb(true);
-          System.out.println("@the ensemble \n\n");
-          for (Configuration c: lc){
-            //System.out.println("hash: "+c.hashCode()+"\nargs: "+c.getArgStrings());
-          }
+
+         //  List<Configuration> lc =
+			e.hillclimb();
+
 			 long endTime = System.nanoTime();
 			 long totalTime = endTime-startTime;
 			 long totalTimeSeconds = totalTime/1000000000;

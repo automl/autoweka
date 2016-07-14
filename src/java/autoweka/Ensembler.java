@@ -180,14 +180,16 @@ public class Ensembler{
 		System.out.println(s);
 	}
 
-	//Greedy ensemble selection hillclimbing process
-	public List<Configuration> hillclimb(boolean onlyFullyPredicted) throws FileNotFoundException,IOException{ //Doing it the straightforward way. Gonna try a faster way later, just wanna get this working.
-		System.out.println("@mCorrectLabels");
-		printArray(mCorrectLabels);
-		int noImprovementLimit = 5;
-		int ensemble_size = 200;
+	//You can call it with default values using this. Curse java and its lack of support for default parameter values.
+	public List<Configuration> hillclimb() throws FileNotFoundException,IOException{
+		return hillclimb(true,5,200);
+	}
 
-		//Shallow copying mCfg list. Trick is ugly but works.
+	//Greedy ensemble selection hillclimbing process
+	//Doing it the straightforward way. A faster way is feasible, but so far this one always takes less than a second anyway
+	public List<Configuration> hillclimb(boolean onlyFullyPredicted, int noImprovementLimit, int ensembleMaxSize) throws FileNotFoundException,IOException{
+
+		//Shallow copying mCfg list. Trick is ugly, but works ¯\_(ツ)_/¯
 		List<Configuration> configBatch = (ArrayList<Configuration>)((ArrayList<Configuration>) mCfgList).clone();
 
 		//Removing configurations not evaluated on all folds
@@ -201,43 +203,30 @@ public class Ensembler{
 		List<EnsembleElement> eeBatch = new ArrayList<EnsembleElement>();
 		for (Configuration c : configBatch){
 			EnsembleElement ee = new EnsembleElement(c);
-			ee.parseInstancewiseInfo(iwpPath); //TODO  maybe put a call to this in the EE constructor
 			eeBatch.add(ee);
 		}
+		println("@eebatch");
+		printList(eeBatch);
 
 		//Initializing the ensemble
 		List<EnsembleElement> currentPartialEnsemble = new ArrayList<EnsembleElement>();
-		int [] hillclimbingStepPerformances = new int[ensemble_size]; //So far, error count TODO make it general
-
-		println("@eebatch");
-		printList(eeBatch);
+		int [] hillclimbingStepPerformances = new int[ensembleMaxSize]; //So far, error count TODO make it general
 		for( int i=0 ; i<3 && i<eeBatch.size() ; i++ ){
 			currentPartialEnsemble.add(eeBatch.get(i)); //They should be sorted, right?
-			int errAmt=0;
-			for (int j = 0; j < mAmtInstances ; j++){
-				int vote = _majorityVote(j, currentPartialEnsemble);
-				if( vote != mCorrectLabels[j]){
-					errAmt++;
-				}
-			}
-			hillclimbingStepPerformances[i]=errAmt;
+			hillclimbingStepPerformances[i]=evaluateEnsemble(currentPartialEnsemble);
 		}
 
 		//Iterating over available ensemble slots. TODO make the initialization batch flexible.
-		int noImporovementCounter = 0;
-		for(int i = 3; i<ensemble_size ;i++){
+		int noImprovementCounter = 0;
+		for(int i = 3; i<ensembleMaxSize ;i++){
 
-			int [] performanceAndIndex = chooseModel(eeBatch,currentPartialEnsemble); //this is a "tuple"
-			EnsembleElement ciChosenModel = eeBatch.get(performanceAndIndex[1]);
-			currentPartialEnsemble.add(ciChosenModel);
-			//eeBatch.remove(ciChosenModel);
-			hillclimbingStepPerformances[i]=performanceAndIndex[0];
-			// if(i!=0 && (hillclimbingStepPerformances[i]>hillclimbingStepPerformances[i-1])){
-			// 	noImporovementCounter=0;
-			// }else{
-			// 	noImporovementCounter++;
+			hillclimbingStepPerformances[i]=takeStep(eeBatch,currentPartialEnsemble); //it returns the new ensembles performance
+			//  if(i!=0 && (hillclimbingStepPerformances[i]<hillclimbingStepPerformances[i-1])){ //TODO make it general when youre not only using errct
+			//  	noImprovementCounter=0;
+			// }else if(i!=0){
+			//  	noImprovementCounter++;
 			// }
-			// if(noImporovementCounter==noImprovementLimit) {
+			// if(noImprovementCounter==noImprovementLimit) {
 			// 	break;
 			// }
 		} //TODO have something that evaluates that its likely not climbing anymore to stop earlier
@@ -250,7 +239,7 @@ public class Ensembler{
 		println("@Full hillclimbing trajectory scores:");
 		printArray(hillclimbingStepPerformances);
 		//Slicing it at highest hillclimbing performance
-		int bestIndex = Util.indexMin(hillclimbingStepPerformances);
+		int bestIndex = Util.indexMin(hillclimbingStepPerformances); //TODO fix the array with 0s in the end thing
 		currentPartialEnsemble = Util.getSlicedList(currentPartialEnsemble,0,bestIndex);
 
 		//Setting up method output
@@ -270,28 +259,28 @@ public class Ensembler{
 	}
 
 
-	private int[] chooseModel(List<EnsembleElement> eeBatch, List<EnsembleElement> currentPartialEnsemble){
-
+	private int takeStep(List<EnsembleElement> eeBatch, List<EnsembleElement> currentPartialEnsemble){
 		int [] possibleChoicePerformances = new int[eeBatch.size()];
 
 		//Iterating over possible choices in the batch, and evaluating each one.
 		for(int i = 0; i<eeBatch.size(); i++){
 			currentPartialEnsemble.add(eeBatch.get(i));
 			possibleChoicePerformances[i]=evaluateEnsemble(currentPartialEnsemble);
-			//Iterating over {CPE + i-th choice} to compute the CPE performance with this choice.
 			currentPartialEnsemble.remove(currentPartialEnsemble.size()-1);
 		}
 
-		int bestIndex = Util.randomizedIndexMin(possibleChoicePerformances);
-		int [] output = {possibleChoicePerformances[bestIndex],bestIndex};
-		return output; //Curse java and it's lack of native tuples
+		//TODO count errors on EE construction and pick the leas error prone?
+		int bestIndex = Util.indexOptimum(possibleChoicePerformances,"RANDOM_MIN");
+		currentPartialEnsemble.add(eeBatch.get(bestIndex));
+		return possibleChoicePerformances[bestIndex]; //Returns performance of the ensemble with the new model
 	}
+
 
 	//Evaluates an Ensemble with regards to error amt. TODO make it general to other metrics
 	private int evaluateEnsemble(List<EnsembleElement> currentPartialEnsemble){
 		int errAmt=0;
 		for (int j = 0; j < mAmtInstances ; j++){
-			int vote = _majorityVote(j, currentPartialEnsemble);
+			int vote = majorityVote(j, currentPartialEnsemble);
 			if( vote != mCorrectLabels[j]){
 				errAmt++;
 			}
@@ -299,23 +288,30 @@ public class Ensembler{
 		return errAmt;
 	}
 
-	//Returns label index with the maximum votes. If there´s more than 1 maximum, it picks a random one. TODO bias towards more prevalent class
-	private int _majorityVote(int instanceNum, List<EnsembleElement> currentPartialEnsemble){
-		int [] votes = new int[mAmtLabels];
+	//Returns label index with the maximum votes. If there´s more than 1 maximum, it picks a random one.
+	private int majorityVote(int instanceNum, List<EnsembleElement> currentPartialEnsemble){
+
+		int [] labels = new int[mAmtLabels];
 		for (EnsembleElement ee : currentPartialEnsemble){
-			int vote_index = ee.getPrediction(instanceNum);
-			votes[vote_index]++;
+			int vote = ee.getPrediction(instanceNum);
+			labels[vote]++;
 		}
 
-		List<Integer> maxValueIndexes = Util.getMaxValueIndexes(votes);
-		int mostPrevalent=0;
-		for(int i=0;i<maxValueIndexes.size();i++){
-			if(mLabelFrequencies.get(maxValueIndexes.get(i))>mLabelFrequencies.get(mostPrevalent)){
-				mostPrevalent=maxValueIndexes.get(i);
+		List<Integer> maxValueIndexes = Util.getMaxValueIndexes(labels);
+		return mostPrevalentLabel(maxValueIndexes);
+	}
+
+	//Returns, from a selection of labels, the most prevalent one in the dataset
+	private int mostPrevalentLabel(List<Integer> labels){
+		int max = 0;
+		int vote = 0;
+		for(Integer i : labels){
+			if (mLabelFrequencies.get(i)>max){
+				max=mLabelFrequencies.get(i);
+				vote=i;
 			}
 		}
-		return maxValueIndexes.get(mostPrevalent);
-		//return Util.indexMax(votes,"RANDOM");
+		return vote;
 	}
 
 	private class EnsembleElement{
@@ -324,19 +320,19 @@ public class Ensembler{
 		private double mWeight;
 		private int [] mPredictions;
 
-		public EnsembleElement(Configuration model, double weight){
+		public EnsembleElement(Configuration model, double weight) throws FileNotFoundException,IOException{
 			this(model);
 			mWeight = weight;
 		}
 
-		public EnsembleElement(Configuration model){
+		public EnsembleElement(Configuration model) throws FileNotFoundException,IOException{
 			mModel = model;
 			mPredictions = new int[mAmtInstances];
 			mWeight=1;
+			this.parseInstancewiseInfo();
 		}
 
-		public void parseInstancewiseInfo(String iwpPath) throws FileNotFoundException,IOException{ //TODO get instancewiseLogPath from global, maybe have foldSizes globally too
-			//TODO change the way iwpPath is provided
+		public void parseInstancewiseInfo() throws FileNotFoundException,IOException{
 
 			//Iterating over folds
 			int totalInstanceIndex=0;
@@ -345,7 +341,6 @@ public class Ensembler{
 
 				String path = iwpPath+"hash:"+mModel.hashCode()+"_fold:"+i+".txt";
 				File ciFile = new File(path);
-
 				FileReader 	   ciFR = null;
 				BufferedReader ciBR = null ;
 
@@ -360,12 +355,9 @@ public class Ensembler{
 
 					//Iterating over lines
 					try{
-							ciBR.readLine(); //skipping first line of csv file
-
+						ciBR.readLine(); //skipping first line of csv file
 						for( String currentLine = ciBR.readLine() ; currentLine!=null ; currentLine = ciBR.readLine()){ //iterating over lines
-
 							mPredictions[totalInstanceIndex]= mLabelMap.get(Util.parseInstancewiseLine(currentLine,"PREDICT_FULL"));
-							//			System.out.println("@prediction for hash "+mModel.hashCode()+" on instance "+totalInstanceIndex+" is "+mPredictions[totalInstanceIndex]);
 							totalInstanceIndex++;
 						}
 					}catch(IOException e){

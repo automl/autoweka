@@ -45,48 +45,34 @@ public class Util
        return ((new Random()).nextInt(1+(start-end))+start);
      }
 
+	  /**
+      * Clones a list and slices it
+      */
      static public <T> List<T> getSlicedList(List<T> l, int first, int last){
        if(first>last || last>= l.size() || first>=l.size() || first<0 || last<0) throw new RuntimeException();
 
        List<T> clone = (List<T>) ((ArrayList<T>)l).clone(); //I know it's ugly, but it works ¯\_(ツ)_/¯
+       for(int i = clone.size()-1;i>last;i--) clone.remove(i);
+       for(int i = first-1;i>=0;i--)          clone.remove(i);
 
-       for(int i = clone.size()-1;i>last;i--){
-         clone.remove(i);
-       }
-       for(int i = first-1;i>=0;i--){
-         clone.remove(i);
-       }
-      //  System.out.println("@origlist_size"+l.size());
-      //  for(T t : l){
-      //    System.out.println("@originallist "+t.hashCode());
-      //  }
-      //  for(T t : clone){
-      //    System.out.println("@slicedlist "+t.hashCode());
-      //  }
        return clone;
      }
 
     static public String parseInstancewiseLine(String line, String info){
-        /* Yes, I know I should use regex for these things, and I know this method is overly specific.
-        * Thing is, the instancewise lines ALWAYS follow the pattern a,b:c,d:e,(other info) I'm parsing below.
-        * Therefore, this is a fast, efficient and simple solution, albeit not elegant nor generalized.
-        * So let's just leave the elegantization as a low priority task for later ^_^
-        */
-        //TODO Upgrade this to use regex whenever you see a blue moon.
+
+        //TODO Upgrade this to use regex later
 
         String [] separatedByComma = line.split(",");
 
         //Stupid java 6 without strings in switches
         if      (info.equals("INST_NUMBER")){
          return separatedByComma[0];              //instance number
-
 		  }else if(info.equals("ACTUAL_FULL")){
 			return separatedByComma[1];					//correct label   (full entry)
 		  }else if(info.equals("ACTUAL_CODE")){
           return separatedByComma[1].split(":")[0];//correct label   (label code)
         }else if(info.equals("ACTUAL_NAME")){
           return separatedByComma[1].split(":")[1];//correct label   (label name)
-
 		  }else if(info.equals("PREDICT_FULL")){
 		    return separatedByComma[2];					//predicted label (full entry)
         }else if(info.equals("PREDICT_CODE")){
@@ -99,7 +85,41 @@ public class Util
 
       }
 
-     static public int indexMin(int[] a){ //returns first one
+
+		/**
+		* Returns the index of the first occurence of the maximum value in an array of ints
+		*/
+		static public int indexMax(int[] a){
+			int max = 0;
+			int index_max=0;
+			for(int i=0; i<a.length ;i++){
+				if(a[i]>max){
+					max=a[i];
+					index_max=i;
+				}
+			}
+			return index_max;
+		}
+
+		/**
+		* Returns the index of the first occurrence of the maximum value in an array of doubles
+		*/
+		static public int indexMax(double[] a){
+			double max = 0;
+			int index_max=0;
+			for(int i=0; i<a.length ;i++){
+				if(a[i]>max){
+					max=a[i];
+					index_max=i;
+				}
+			}
+			return index_max;
+		}
+
+		/**
+		* Returns the index of the first occurence of the minimum value in an array of ints
+		*/
+     static public int indexMin(int[] a){
        int min = Integer.MAX_VALUE;
        int index_min=0;
        for(int i=0; i<a.length ;i++){
@@ -111,6 +131,9 @@ public class Util
        return index_min;
      }
 
+	  /**
+	  * Returns the index of the first occurence of the minimum value in an array of doubles
+	  */
      static public int indexMin(double[] a){
          double min = Double.MAX_VALUE;
          int index_min=0;
@@ -123,77 +146,68 @@ public class Util
          return index_min;
       }
 
+	/**
+	 * Slower but customizable, returns the first, the last or a random instance of the max value
+	 */
+	  static public int indexOptimum(int[] a, String option){
+		  List<Integer> maxValueIndexes=null,minValueIndexes=null;
+		  if(option.equals("RANDOM_MAX") || option.equals("FIRST_MAX") || option.equals("LAST_MAX")){
+			  maxValueIndexes = getMaxValueIndexes(a);
+		  }else if(option.equals("RANDOM_MIN") || option.equals("FIRST_MIN") || option.equals("LAST_MIN")){
+			  minValueIndexes = getMinValueIndexes(a);
+		  }
 
-     static public int indexMax(int[] a){
-       int max = 0;
-       int index_max=0;
-       for(int i=0; i<a.length ;i++){
-         if(a[i]>max){
-           max=a[i];
-           index_max=i;
-         }
-       }
-       return index_max;
-     }
-
-	  static public int indexMax(int[] a, String option){
-		  List<Integer> maxValueIndexes = getMaxValueIndexes(a);
-
-		  if(option.equals("RANDOM")){
+		  if(option.equals("RANDOM_MAX")){
 			  Random r = new Random();
 			  return maxValueIndexes.get(r.nextInt(maxValueIndexes.size()));
-		  }else if(option.equals("FIRST")){
+		  }else if(option.equals("FIRST_MAX")){
 			  return maxValueIndexes.get(0);
-		  }else if(option.equals("LAST")){
+		  }else if(option.equals("LAST_MAX")){
 			  return maxValueIndexes.get(maxValueIndexes.size()-1);
+		  }else if(option.equals("RANDOM_MIN")){
+			 Random r = new Random();
+			 return  minValueIndexes.get(r.nextInt(minValueIndexes.size()));
+		  }else if(option.equals("FIRST_MIN")){
+			  return minValueIndexes.get(0);
+		  }else if(option.equals("LAST_MIN")){
+			  return minValueIndexes.get(minValueIndexes.size()-1);
 		  }else{
 			  throw new RuntimeException("Invalid Option");
 		  }
 
 	  }
 
+   /**
+  	 * Returns a list with every index where theres a max value
+  	 */
 	  static public List<Integer> getMaxValueIndexes(int[] a){
 		  int maxValue=0;
 		  List<Integer> maxValueIndexes = new ArrayList<Integer>();
 
-		  for(int i = 0; i< a.length; i++){
+		  for(int i = 0; i< a.length; i++){ //Finding max
 			  if(a[i]>maxValue) maxValue=a[i];
 		  }
-		  for(int i = 0; i< a.length; i++){
+		  for(int i = 0; i< a.length; i++){ //Saving them all
 			  if(a[i]==maxValue) maxValueIndexes.add(new Integer(i));
 		  }
 		  return maxValueIndexes;
 	  }
 
+	  static public List<Integer> getMinValueIndexes(int[] a){
+		  int minValue=Integer.MAX_VALUE;
+		  List<Integer> minValueIndexes = new ArrayList<Integer>();
+
+		  for(int i = 0; i< a.length; i++){ //Finding max
+			  if(a[i]<minValue) minValue=a[i];
+		  }
+		  for(int i = 0; i< a.length; i++){ //Saving them all
+			  if(a[i]==minValue) minValueIndexes.add(new Integer(i));
+		  }
+		  return minValueIndexes;
+	  }
 
 
-		static public int randomizedIndexMin(int[] a){
-			int minValue=Integer.MAX_VALUE;
-			List<Integer> minValueIndexes = new ArrayList<Integer>();
 
-			for(int i = 0; i< a.length; i++){
-				if(a[i]<minValue) minValue=a[i];
-			}
-			for(int i = 0; i< a.length; i++){
-				if(a[i]==minValue) minValueIndexes.add(new Integer(i));
-			}
-			Random r = new Random();
-
-			return minValueIndexes.get(r.nextInt(minValueIndexes.size()));
-		}
-
-
-     static public int indexMax(double[] a){
-       double max = 0;
-       int index_max=0;
-       for(int i=0; i<a.length ;i++){
-         if(a[i]>max){
-           max=a[i];
-           index_max=i;
-         }
-       }
-       return index_max;
-     }
 
     /**
      * Given a property string (var1=val1:var2=val2:....) convert it to a property object.
