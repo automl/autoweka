@@ -123,8 +123,11 @@ public class Ensembler{
 		System.out.println(s);
 	}
 	public void printList(List list){
+		printList(list,list.size());
+	}
+	public void printList(List list,int limit){
 		String s =("\n[");
-		for(int i = 0; i < list.size(); i++){
+		for(int i = 0; i < limit; i++){
 			s+=(list.get(i).toString()+",");
 		}
 		s+=("]\n");
@@ -149,19 +152,19 @@ public class Ensembler{
 		System.out.println(s);
 	}
 
-	public void printBullshit(int opt, List<EnsembleElement> currentPartialEnsemble, int [] hillclimbingStepPerformances, List<Configuration> rv){
+	public void printBullshit(int opt, List<EnsembleElement> currentPartialEnsemble, List<Integer> hillclimbingStepPerformances, List<Configuration> rv){
 		if(opt==1){
 			System.out.println("@Full hillclimbing trajectory models:");
 			printList(currentPartialEnsemble);
 			printListAliased(currentPartialEnsemble);
 			System.out.println("@Full hillclimbing trajectory scores:");
-			printArray(hillclimbingStepPerformances);
+			printList(hillclimbingStepPerformances);
 		}else if (opt==2){
 			System.out.println("@Sliced hillclimbing trajectory models:");
 			printList(rv);
 			printListAliased(rv);
 			System.out.println("@Sliced hillclimbing trajectory scores:");
-			printArray(hillclimbingStepPerformances,rv.size());
+			printList(hillclimbingStepPerformances,rv.size());
 		}
 	}
 
@@ -200,31 +203,34 @@ public class Ensembler{
 
 		//Initializing the ensemble
 		List<EnsembleElement> currentPartialEnsemble = new ArrayList<EnsembleElement>();
-		int [] hillclimbingStepPerformances = new int[ensembleMaxSize]; //So far, error counts TODO make it general
+		List<Integer> hillclimbingStepPerformances = new ArrayList<Integer>(); //So far, error counts TODO make it general
 		for( int i=0 ; i<initialEnsembleSize && i<eeBatch.size(); i++ ){
-			currentPartialEnsemble.add(eeBatch.get(i)); //They should be sorted, right?
-			hillclimbingStepPerformances[i]=evaluateEnsemble(currentPartialEnsemble);
+			currentPartialEnsemble.add(eeBatch.get(i)); //Assumes theyre sorted
+			hillclimbingStepPerformances.add(evaluateEnsemble(currentPartialEnsemble));
 		}
 
 		//Iterating over available ensemble slots.
 		int noImprovementCounter = 0;
 		for(int i = currentPartialEnsemble.size(); i<ensembleMaxSize ;i++){
-			hillclimbingStepPerformances[i]=takeStep(eeBatch,currentPartialEnsemble); //it returns the new ensembles performance
-			// if(i>0){
-			// 	if(hillclimbingStepPerformances[i]<hillclimbingStepPerformances[i-1]){
-			// 	 noImprovementCounter=0;
-			//    }else{
-			// 	 noImprovementCounter++;
-			//    }
-			// }
-			// if(noImprovementCounter==noImprovementLimit){
-			// 	break;
-			// }
+			hillclimbingStepPerformances.add(takeStep(eeBatch,currentPartialEnsemble));
+			if(i>0){
+				if(hillclimbingStepPerformances.get(i)<hillclimbingStepPerformances.get(i-1)){
+				 noImprovementCounter=0;
+			   }else{
+				 noImprovementCounter++;
+			   }
+			}
+			if(noImprovementCounter==noImprovementLimit){
+				break;
+			}
 		}
 
 		printBullshit(1,currentPartialEnsemble,hillclimbingStepPerformances,null);
 
-		//Unwrapping the configurations
+		//Slicing from 0 to the first occurrence of the smallest error count
+		currentPartialEnsemble = Util.getSlicedList(currentPartialEnsemble,0,Util.indexMin(hillclimbingStepPerformances));
+
+		//Unwrapping the Configurations from the EnsembleElements
 		List<Configuration> rv = new ArrayList<Configuration>();
 		for(EnsembleElement ee : currentPartialEnsemble){
 			rv.add(ee.getModel());

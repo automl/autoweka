@@ -150,6 +150,17 @@ public class Util
        }
        return index_min;
      }
+	  static public int indexMin(List<Integer> a){
+       int min = Integer.MAX_VALUE;
+       int index_min=0;
+       for(int i=0; i<a.size() ;i++){
+         if(a.get(i)<min){
+           min=a.get(i);
+           index_min=i;
+         }
+       }
+       return index_min;
+     }
 
 	  /**
 	  * Returns the index of the first occurence of the minimum value in an array of doubles
