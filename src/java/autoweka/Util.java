@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.io.File;
 
+import java.io.FileReader;
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.net.URLDecoder;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
@@ -57,8 +60,25 @@ public class Util
 
        return clone;
      }
+	  /**
+	  	* Builds a BufferedReader from a file path
+		*/
+	  public static  BufferedReader getBufferedReaderFromPath(String path){
+		  FileReader 	   ciFR = null;
+		  BufferedReader  ciBR = null ; //hue
 
-    static public String parseInstancewiseLine(String line, String info){
+		  try{
+			  ciFR = new FileReader(path);
+			  ciBR = new BufferedReader(ciFR);
+		  }catch (FileNotFoundException e){
+			  log.debug("Couldn't initialize ciBR");
+		  }
+		  return ciBR;
+	  }
+	  /**
+	  	* Parses a line from an instancewise prediction file
+		*/
+	 static public String parseInstancewiseLine(String line, String info){
 
         //TODO Upgrade this to use regex later
 
