@@ -105,6 +105,68 @@ public class Util
 
       }
 
+		/**
+		* Slower but customizable, returns the first, the last or a random instance of the max value
+		*/
+		static public int indexOptimum(int[] a, String option){
+			List<Integer> maxValueIndexes=null,minValueIndexes=null;
+			if(option.equals("RANDOM_MAX") || option.equals("FIRST_MAX") || option.equals("LAST_MAX")){
+				maxValueIndexes = getMaxValueIndexes(a);
+			}else if(option.equals("RANDOM_MIN") || option.equals("FIRST_MIN") || option.equals("LAST_MIN")){
+				minValueIndexes = getMinValueIndexes(a);
+			}
+
+			if(option.equals("RANDOM_MAX")){
+				Random r = new Random();
+				return maxValueIndexes.get(r.nextInt(maxValueIndexes.size()));
+			}else if(option.equals("FIRST_MAX")){
+				return maxValueIndexes.get(0);
+			}else if(option.equals("LAST_MAX")){
+				return maxValueIndexes.get(maxValueIndexes.size()-1);
+			}else if(option.equals("RANDOM_MIN")){
+				Random r = new Random();
+				return  minValueIndexes.get(r.nextInt(minValueIndexes.size()));
+			}else if(option.equals("FIRST_MIN")){
+				return minValueIndexes.get(0);
+			}else if(option.equals("LAST_MIN")){
+				return minValueIndexes.get(minValueIndexes.size()-1);
+			}else{
+				throw new RuntimeException("Invalid Option");
+			}
+
+		}
+
+		/**
+		* Returns a list with every index where theres a max value
+		*/
+		static public List<Integer> getMaxValueIndexes(int[] a){
+			int maxValue=0;
+			List<Integer> maxValueIndexes = new ArrayList<Integer>();
+
+			for(int i = 0; i< a.length; i++){ //Finding max
+				if(a[i]>maxValue) maxValue=a[i];
+			}
+			for(int i = 0; i< a.length; i++){ //Saving them all
+				if(a[i]==maxValue) maxValueIndexes.add(new Integer(i));
+			}
+			return maxValueIndexes;
+		}
+
+		static public List<Integer> getMinValueIndexes(int[] a){
+			int minValue=Integer.MAX_VALUE;
+			List<Integer> minValueIndexes = new ArrayList<Integer>();
+
+			for(int i = 0; i< a.length; i++){ //Finding max
+				if(a[i]<minValue) minValue=a[i];
+			}
+			for(int i = 0; i< a.length; i++){ //Saving them all
+				if(a[i]==minValue) minValueIndexes.add(new Integer(i));
+			}
+			return minValueIndexes;
+		}
+
+		//Faster versions of indexOptimum for specific array types and options. Use these if you wanna optimize
+		//The polymorphysm looks pretty ugly, but that's Java for you
 
 		/**
 		* Returns the index of the first occurence of the maximum value in an array of ints
@@ -150,7 +212,11 @@ public class Util
        }
        return index_min;
      }
-	  static public int indexMin(List<Integer> a){
+
+	  /**
+	  * Returns the index of the first occurence of the minimum value in a list of Integers
+	  */
+	  static public int indexMin(List<Integer> a){ //TODO find a way to do this with Comparable.
        int min = Integer.MAX_VALUE;
        int index_min=0;
        for(int i=0; i<a.size() ;i++){
@@ -177,65 +243,6 @@ public class Util
          return index_min;
       }
 
-	/**
-	 * Slower but customizable, returns the first, the last or a random instance of the max value
-	 */
-	  static public int indexOptimum(int[] a, String option){
-		  List<Integer> maxValueIndexes=null,minValueIndexes=null;
-		  if(option.equals("RANDOM_MAX") || option.equals("FIRST_MAX") || option.equals("LAST_MAX")){
-			  maxValueIndexes = getMaxValueIndexes(a);
-		  }else if(option.equals("RANDOM_MIN") || option.equals("FIRST_MIN") || option.equals("LAST_MIN")){
-			  minValueIndexes = getMinValueIndexes(a);
-		  }
-
-		  if(option.equals("RANDOM_MAX")){
-			  Random r = new Random();
-			  return maxValueIndexes.get(r.nextInt(maxValueIndexes.size()));
-		  }else if(option.equals("FIRST_MAX")){
-			  return maxValueIndexes.get(0);
-		  }else if(option.equals("LAST_MAX")){
-			  return maxValueIndexes.get(maxValueIndexes.size()-1);
-		  }else if(option.equals("RANDOM_MIN")){
-			 Random r = new Random();
-			 return  minValueIndexes.get(r.nextInt(minValueIndexes.size()));
-		  }else if(option.equals("FIRST_MIN")){
-			  return minValueIndexes.get(0);
-		  }else if(option.equals("LAST_MIN")){
-			  return minValueIndexes.get(minValueIndexes.size()-1);
-		  }else{
-			  throw new RuntimeException("Invalid Option");
-		  }
-
-	  }
-
-   /**
-  	 * Returns a list with every index where theres a max value
-  	 */
-	  static public List<Integer> getMaxValueIndexes(int[] a){
-		  int maxValue=0;
-		  List<Integer> maxValueIndexes = new ArrayList<Integer>();
-
-		  for(int i = 0; i< a.length; i++){ //Finding max
-			  if(a[i]>maxValue) maxValue=a[i];
-		  }
-		  for(int i = 0; i< a.length; i++){ //Saving them all
-			  if(a[i]==maxValue) maxValueIndexes.add(new Integer(i));
-		  }
-		  return maxValueIndexes;
-	  }
-
-	  static public List<Integer> getMinValueIndexes(int[] a){
-		  int minValue=Integer.MAX_VALUE;
-		  List<Integer> minValueIndexes = new ArrayList<Integer>();
-
-		  for(int i = 0; i< a.length; i++){ //Finding max
-			  if(a[i]<minValue) minValue=a[i];
-		  }
-		  for(int i = 0; i< a.length; i++){ //Saving them all
-			  if(a[i]==minValue) minValueIndexes.add(new Integer(i));
-		  }
-		  return minValueIndexes;
-	  }
 
 
 

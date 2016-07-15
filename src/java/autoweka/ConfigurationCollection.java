@@ -8,8 +8,9 @@ import java.util.HashMap;
 import javax.xml.bind.annotation.*;
 
 /*
-Simply a wrapper for a list of configurations. Might seem silly and redundant, but the purpose of this is to work nicely with the XML Parser that already exists in AutoWeka.
-Also contains the static methods for organizing,sorting and spitting them out to an output file after autoweka is finished running
+Simply a wrapper for a list of configurations. Might seem silly and redundant, but the purpose of this is to
+work nicely with the XML Parser that already exists in Auto-WEKA.Also contains the static methods for organizing,
+sorting and spitting them out to an output file after autoweka is finished running
 */
 @XmlRootElement(name="configurationCollection")
 public class ConfigurationCollection extends XmlSerializable{

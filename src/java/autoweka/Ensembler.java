@@ -171,8 +171,6 @@ public class Ensembler{
 	//The hillclimb method contains an implemention of Rich Caruana's Ensemble Selection, a greedy hillclimbing algorithm.
 	//I'm doing it the straightforward way. A faster way is feasible, but so far this one always takes less than a second anyway
 
-
-
 	//You can call it with default values using this. Curse for its lack of support for default parameter values.
 	public List<Configuration> hillclimb() throws FileNotFoundException,IOException{
 		return hillclimb(true,5,200,3);
@@ -184,7 +182,7 @@ public class Ensembler{
 		//Shallow copying mCfg list. Trick is ugly, but works ¯\_(ツ)_/¯
 		List<Configuration> configBatch = (ArrayList<Configuration>)((ArrayList<Configuration>) mCfgList).clone();
 
-		//Removing configurations not evaluated on all folds
+		//If that's the case, removing configurations not evaluated on all folds
 		if(onlyFullyPredicted){
 			for(int i = configBatch.size()-1; i>=0 ; i--) if(configBatch.get(i).getAmtFolds()!=mAmtFolds){
 				configBatch.remove(i);
@@ -228,7 +226,8 @@ public class Ensembler{
 		printBullshit(1,currentPartialEnsemble,hillclimbingStepPerformances,null);
 
 		//Slicing from 0 to the first occurrence of the smallest error count
-		currentPartialEnsemble = Util.getSlicedList(currentPartialEnsemble,0,Util.indexMin(hillclimbingStepPerformances));
+		int sliceIndex = Util.indexMin(hillclimbingStepPerformances);
+		currentPartialEnsemble = Util.getSlicedList(currentPartialEnsemble,0,sliceIndex);
 
 		//Unwrapping the Configurations from the EnsembleElements
 		List<Configuration> rv = new ArrayList<Configuration>();
@@ -252,7 +251,7 @@ public class Ensembler{
 			currentPartialEnsemble.remove(currentPartialEnsemble.size()-1);
 		}
 
-		//TODO count errors on EE construction and pick the leas error prone?
+		//TODO count errors on EE construction and pick the least error prone?
 		int bestIndex = Util.indexOptimum(possibleChoicePerformances,"RANDOM_MIN");
 		currentPartialEnsemble.add(eeBatch.get(bestIndex));
 		return possibleChoicePerformances[bestIndex]; //Returns performance of the ensemble with the new model
@@ -260,7 +259,7 @@ public class Ensembler{
 
 
 	//Helper for hillclimb. Evaluates an Ensemble with regards to error amt.
-	private int evaluateEnsemble(List<EnsembleElement> currentPartialEnsemble){ //TODO make it general to other metrics
+	private int evaluateEnsemble(List<EnsembleElement> currentPartialEnsemble){ //TODO make it support other metrics
 		int errAmt=0;
 		for (int j = 0; j < mAmtInstances ; j++){
 			int vote = majorityVote(j, currentPartialEnsemble);
