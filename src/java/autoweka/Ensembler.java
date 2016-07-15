@@ -160,7 +160,6 @@ public class Ensembler{
 			System.out.println("@Sliced hillclimbing trajectory models:");
 			printList(rv);
 			printListAliased(rv);
-
 			System.out.println("@Sliced hillclimbing trajectory scores:");
 			printArray(hillclimbingStepPerformances,rv.size());
 		}
@@ -231,7 +230,7 @@ public class Ensembler{
 			rv.add(ee.getModel());
 		}
 
-		printBullshit(2,null,null,rv);
+		printBullshit(2,null,hillclimbingStepPerformances,rv);
 
 		return rv;
 	}
@@ -275,6 +274,7 @@ public class Ensembler{
 		}
 
 		List<Integer> maxValueIndexes = Util.getMaxValueIndexes(labels);
+		//return Util.indexOptimum(labels,"RANDOM_MAX");
 		if(maxValueIndexes.size()==1){
 			return maxValueIndexes.get(0);
 		}else{
