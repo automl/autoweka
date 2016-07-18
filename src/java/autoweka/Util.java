@@ -6,6 +6,8 @@ import java.io.File;
 
 import java.io.FileReader;
 import java.io.BufferedReader;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -87,7 +89,7 @@ public class Util
 		 try{
 			 ciFW = new FileWriter(path);
 			 ciBW = new BufferedWriter(ciFW);
-		 }catch (FileNotFoundException e){
+		 }catch (IOException e){
 			 log.debug("Couldn't initialize ciBW");
 		 }
 		 return ciBW;
