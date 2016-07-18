@@ -41,6 +41,7 @@ public class Ensembler{
 	public Ensembler(String temporaryDirPath){ //TODO make some sort of factory for the many options
 		iwpPath = temporaryDirPath+instancewiseInfoDirPath;
 		rPath   = temporaryDirPath+configurationRankingPath;
+		System.out.println("rpath:"+rPath);
 		mCfgList          = ConfigurationCollection.fromXML(rPath,ConfigurationCollection.class).asArrayList();
 		mLabelMap         = new HashMap<String,Integer>();
 		mLabelFrequencies = new HashMap<Integer,Integer>();
@@ -49,7 +50,7 @@ public class Ensembler{
 		try{
 			parseDatasetMetadata();
 		}catch(FileNotFoundException e){
-			log.debug("Couldn't find instnacewise predictions for some fold");
+			log.debug("Couldn't find instancewise predictions for some fold");
 		}catch(IOException e){
 			log.debug("Couldn't read a line in one of the instancewise prediction logs");
 		}
