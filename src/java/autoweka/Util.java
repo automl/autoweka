@@ -49,7 +49,7 @@ public class Util
      }
 
 	  /**
-      * Clones a list and slices it
+      * Shallow copies a list and slices it
       */
      static public <T> List<T> getSlicedList(List<T> l, int first, int last){
        if(first>last || last>= l.size() || first>=l.size() || first<0 || last<0) throw new RuntimeException();
@@ -60,6 +60,7 @@ public class Util
 
        return clone;
      }
+
 	  /**
 	  	* Builds a BufferedReader from a file path
 		*/
@@ -75,6 +76,23 @@ public class Util
 		  }
 		  return ciBR;
 	  }
+
+	  /**
+	  * Builds a BufferedWriter from a file path
+	  */
+	 public static  BufferedWriter getBufferedWriterFromPath(String path){
+		 FileWriter 	   ciFW = null;
+		 BufferedWriter  ciBW = null ; //hue
+
+		 try{
+			 ciFW = new FileWriter(path);
+			 ciBW = new BufferedWriter(ciFW);
+		 }catch (FileNotFoundException e){
+			 log.debug("Couldn't initialize ciBW");
+		 }
+		 return ciBW;
+	 }
+
 	  /**
 	  	* Parses a line from an instancewise prediction file
 		*/

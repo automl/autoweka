@@ -144,7 +144,7 @@ public class ConfigurationTester{
     }
 
 
-    ConfigurationRanker.rank(1000,"test/experiment_folder/Auto-WEKA",sortedTestLog,configIndex,"IGNORE");
+   // ConfigurationRanker.rank(1000,"test/experiment_folder/Auto-WEKA",sortedTestLog,configIndex,"IGNORE");
 
     ConfigurationCollection cc = ConfigurationCollection.fromXML(sortedTestLog, ConfigurationCollection.class);
     double bestScore = cc.get(0).getAverageScore();
