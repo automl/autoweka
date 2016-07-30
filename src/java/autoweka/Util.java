@@ -36,6 +36,8 @@ import weka.core.converters.Loader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static weka.classifiers.meta.AutoWEKAClassifier.configurationMapPath;
+
 /**
  * Bunches of random stuff that seems to be handy in all sorts of places
  */
@@ -82,12 +84,15 @@ public class Util
 	  /**
 	  * Builds a BufferedWriter from a file path
 	  */
-	 public static  BufferedWriter getBufferedWriterFromPath(String path){
+	 public static  BufferedWriter getBufferedWriterFromPath(String path,boolean append){
 		 FileWriter 	   ciFW = null;
 		 BufferedWriter  ciBW = null ; //hue
-
 		 try{
-			 ciFW = new FileWriter(path);
+			 if(append){
+				ciFW = new FileWriter(path,true);
+			 }else{
+				ciFW = new FileWriter(path);
+			 }
 			 ciBW = new BufferedWriter(ciFW);
 		 }catch (IOException e){
 			 log.debug("Couldn't initialize ciBW");
@@ -96,7 +101,7 @@ public class Util
 	 }
 
 	  /**
-	  	* Parses a line from an instancewise prediction file
+	  	* Parses a line from the instancewise prediction log generated on ClassifierRunner
 		*/
 	 static public String parseInstancewiseLine(String line, String info){
 
@@ -122,12 +127,104 @@ public class Util
         }else{
           return null;
         }
-
       }
 
 		/**
-		* Slower but customizable, returns the first, the last or a random instance of the max value
+ 	  	* Configuration Map (CM) management
+		*(Since we need to juggle between many java processes, we cant keep a list of the configurations smac evaluates as a global)
+		*(Therefore, we have to use some sort of external file as a log. So far we don't need to implement any synchronization, but please be careful)
+ 		*/
+
+		//Adds a new configuration to the CM if it isn't already there
+		static public Map<String,String> updateConfigurationMap(String argStrings){
+
+			Map<String,String> configurationMap = getConfigurationMap();
+			if(configurationMap.containsKey(argStrings)){
+				return configurationMap;
+			}else{
+				int id = configurationMap.size();
+				configurationMap.put(argStrings,Integer.toString(id));
+				try{
+					BufferedWriter bw = getBufferedWriterFromPath(configurationMapPath,true);
+					bw.write("\n"+argStrings+","+id);
+					bw.close();
+				}catch(IOException e){
+					log.debug("Couldn't update the configuration map");
+				}
+			}
+			return configurationMap;
+		}
+
+		//Reads the CM
+		static public Map<String,String> getConfigurationMap(){
+			return getConfigurationMap(configurationMapPath);
+		}
+		static public Map<String,String> getConfigurationMap(String path){
+			Map<String,String> output = new HashMap<String,String>();
+			List<String[]> lineElements = getLineElements(path,",");
+			for(int i =0; i<lineElements.size();i++){
+					output.put(lineElements.get(i)[0],lineElements.get(i)[1]);
+			}
+			return output;
+		}
+
+
+		//Parses a csv-ish (with a customizable separator) file and returns a list of String arrays, one for each line
+		static public List<String[]> getLineElements(String path, String separator){
+			BufferedReader ciBR = Util.getBufferedReaderFromPath(path);
+			List<String[]> lines = new ArrayList<String[]>();
+			try{
+				int i=0;
+				ciBR.readLine();
+				for (String ciLine = ciBR.readLine(); ciLine != null; ciLine = ciBR.readLine() ){
+					lines.add(ciLine.split(separator));
+				}
+			}catch(IOException e){
+				log.debug("Couldn't parse line elements in the file "+path);
+			}
+			try{
+				ciBR.close();
+			}catch(IOException e){
+				log.debug("Couldn't close the BufferedReader for the file "+path);
+			}
+			return lines;
+		}
+
+		/**
+		* Aglutinates Configuration ArgumentStrings in a single string, separated by spaces
+		* Older versions of java don't have the join method, so here we go.
 		*/
+		public static String joinStrings(List<String> strList, String separator){
+			return joinStrings(strList, separator, false);
+		}
+
+		public static String joinStrings(List<String> strList, String separator,boolean separatorOnEnd){
+			String output = "";
+			int last = strList.size()-1;
+			if(separatorOnEnd){
+				for (int i = 0; i<strList.size();i++){
+					output+=strList.get(i)+separator;
+				}
+			}else{
+				for (int i = 0; i<strList.size();i++){
+					output+=(i==last)?(strList.get(i)):(strList.get(i)+separator);
+				}
+			}
+			return output;
+		}
+
+		/**
+		* indexOptimum
+		* Methods for returning the index(es) of an array where the optima are located. Think of it as an argmax type of thing.
+		* Thank's to Java's wonderful way of handling basic types, we need to write the entire thing for ints and doubles alike.
+		* (Unless we convert all ints to doubles, feel free pick what is uglier and even switch the approach if you wish).
+		* TODO write unit tests for all of that
+		*/
+
+		/*
+		* For ints
+		*/
+		//Slower but general and customizable, returns the first, the last or a random instance of the max/min value
 		static public int indexOptimum(int[] a, String option){
 			List<Integer> maxValueIndexes=null,minValueIndexes=null;
 			if(option.equals("RANDOM_MAX") || option.equals("FIRST_MAX") || option.equals("LAST_MAX")){
@@ -136,6 +233,7 @@ public class Util
 				minValueIndexes = getMinValueIndexes(a);
 			}
 
+			//Older versions of java can't handle switches on strings ¯\_(ツ)_/¯
 			if(option.equals("RANDOM_MAX")){
 				Random r = new Random();
 				return maxValueIndexes.get(r.nextInt(maxValueIndexes.size()));
@@ -156,9 +254,7 @@ public class Util
 
 		}
 
-		/**
-		* Returns a list with every index where theres a max value
-		*/
+		//Returns a list with every index where theres a max value
 		static public List<Integer> getMaxValueIndexes(int[] a){
 			int maxValue=0;
 			List<Integer> maxValueIndexes = new ArrayList<Integer>();
@@ -172,11 +268,12 @@ public class Util
 			return maxValueIndexes;
 		}
 
+		//Returns a list with every index where theres a min value
 		static public List<Integer> getMinValueIndexes(int[] a){
 			int minValue=Integer.MAX_VALUE;
 			List<Integer> minValueIndexes = new ArrayList<Integer>();
 
-			for(int i = 0; i< a.length; i++){ //Finding max
+			for(int i = 0; i< a.length; i++){ //Finding min
 				if(a[i]<minValue) minValue=a[i];
 			}
 			for(int i = 0; i< a.length; i++){ //Saving them all
@@ -185,12 +282,74 @@ public class Util
 			return minValueIndexes;
 		}
 
-		//Faster versions of indexOptimum for specific array types and options. Use these if you wanna optimize
-		//The polymorphysm looks pretty ugly, but that's Java for you
-
-		/**
-		* Returns the index of the first occurence of the maximum value in an array of ints
+		/*
+		* For doubles
 		*/
+
+		//Slower but general and customizable, returns the first, the last or a random instance of the max/min value
+		static public int indexOptimum(double[] a, String option){
+			List<Integer> maxValueIndexes=null,minValueIndexes=null;
+			if(option.equals("RANDOM_MAX") || option.equals("FIRST_MAX") || option.equals("LAST_MAX")){
+				maxValueIndexes = getMaxValueIndexes(a);
+			}else if(option.equals("RANDOM_MIN") || option.equals("FIRST_MIN") || option.equals("LAST_MIN")){
+				minValueIndexes = getMinValueIndexes(a);
+			}
+
+			//Older versions of java can't handle switches on strings ¯\_(ツ)_/¯
+			if(option.equals("RANDOM_MAX")){
+				Random r = new Random();
+				return maxValueIndexes.get(r.nextInt(maxValueIndexes.size()));
+			}else if(option.equals("FIRST_MAX")){
+				return maxValueIndexes.get(0);
+			}else if(option.equals("LAST_MAX")){
+				return maxValueIndexes.get(maxValueIndexes.size()-1);
+			}else if(option.equals("RANDOM_MIN")){
+				Random r = new Random();
+				return  minValueIndexes.get(r.nextInt(minValueIndexes.size()));
+			}else if(option.equals("FIRST_MIN")){
+				return minValueIndexes.get(0);
+			}else if(option.equals("LAST_MIN")){
+				return minValueIndexes.get(minValueIndexes.size()-1);
+			}else{
+				throw new RuntimeException("Invalid Option");
+			}
+
+		}
+
+		//Returns a list with every index where theres a max value
+		static public List<Integer> getMaxValueIndexes(double[] a){
+			double maxValue=0;
+			List<Integer> maxValueIndexes = new ArrayList<Integer>();
+
+			for(int i = 0; i< a.length; i++){ //Finding max
+				if(a[i]>maxValue) maxValue=a[i];
+			}
+			for(int i = 0; i< a.length; i++){ //Saving them all
+				if(a[i]==maxValue) maxValueIndexes.add(new Integer(i));
+			}
+			return maxValueIndexes;
+		}
+
+		//Returns a list with every index where theres a min value
+		static public List<Integer> getMinValueIndexes(double[] a){
+			double minValue = Double.MAX_VALUE; // Not wrong. Read the entire thing.
+			List<Integer> minValueIndexes = new ArrayList<Integer>();
+
+			for(int i = 0; i< a.length; i++){ //Finding min
+				if(a[i]<minValue) minValue=a[i];
+			}
+			for(int i = 0; i< a.length; i++){ //Saving them all
+				if(a[i]==minValue) minValueIndexes.add(new Integer(i));
+			}
+			return minValueIndexes;
+		}
+
+		/*
+		*Finally, here are some optimized versions of indexOptimum for some specific array types and options.
+		*Use these if you're really keen on performance
+		*/
+
+		// Returns the index of the first occurence of the maximum value in an array of ints
 		static public int indexMax(int[] a){
 			int max = 0;
 			int index_max=0;
@@ -203,9 +362,7 @@ public class Util
 			return index_max;
 		}
 
-		/**
-		* Returns the index of the first occurrence of the maximum value in an array of doubles
-		*/
+		// Returns the index of the first occurrence of the maximum value in an array of doubles
 		static public int indexMax(double[] a){
 			double max = 0;
 			int index_max=0;
@@ -218,9 +375,7 @@ public class Util
 			return index_max;
 		}
 
-		/**
-		* Returns the index of the first occurence of the minimum value in an array of ints
-		*/
+	  // Returns the index of the first occurence of the minimum value in an array of ints
      static public int indexMin(int[] a){
        int min = Integer.MAX_VALUE;
        int index_min=0;
@@ -233,10 +388,23 @@ public class Util
        return index_min;
      }
 
-	  /**
-	  * Returns the index of the first occurence of the minimum value in a list of Integers
-	  */
-	  static public int indexMin(List<Integer> a){ //TODO find a way to do this with Comparable.
+
+	  // Returns the index of the first occurence of the minimum value in an array of doubles
+	  static public int indexMin(double[] a){
+		  double min = Double.MAX_VALUE;
+		  int index_min=0;
+		  for(int i=0; i<a.length ;i++){
+			  if(a[i]<min){
+				  min=a[i];
+				  index_min=i;
+			  }
+		  }
+		  return index_min;
+	  }
+
+
+	  // Returns the index of the first occurence of the minimum value in a list of Integers
+	  static public int indexMin(List<Integer> a){ //TODO find a way to make this general by using Comparable or smth
        int min = Integer.MAX_VALUE;
        int index_min=0;
        for(int i=0; i<a.size() ;i++){
@@ -247,24 +415,6 @@ public class Util
        }
        return index_min;
      }
-
-	  /**
-	  * Returns the index of the first occurence of the minimum value in an array of doubles
-	  */
-     static public int indexMin(double[] a){
-         double min = Double.MAX_VALUE;
-         int index_min=0;
-         for(int i=0; i<a.length ;i++){
-           if(a[i]<min){
-             min=a[i];
-             index_min=i;
-           }
-         }
-         return index_min;
-      }
-
-
-
 
 
     /**
@@ -368,7 +518,7 @@ public class Util
    				logFile.createNewFile();
    			}
    		}catch(Exception e){
-   			System.out.println("Couldn't initialize file at this path: "+aLogPath);
+   			log.debug("Couldn't initialize file at this path: "+aLogPath);
    		}
 
    	}

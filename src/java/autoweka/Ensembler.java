@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static weka.classifiers.meta.AutoWEKAClassifier.configurationRankingPath;
-import static weka.classifiers.meta.AutoWEKAClassifier.configurationInfoDirPath;
+import static weka.classifiers.meta.AutoWEKAClassifier.configurationMapPath;
 import static weka.classifiers.meta.AutoWEKAClassifier.instancewiseInfoDirPath;
 
 public class Ensembler{
@@ -24,6 +24,7 @@ public class Ensembler{
 
 	//Candidate Configurations
 	private List<Configuration> mCfgList;  //List of configurations read from the configuration ranking file at rPath
+	private Map<String,String> mCfgMap;
 
 	//Data about the instances
 	private Map<String,Integer> mLabelMap; //Maps the existing labels in the dataset to label indexes[0:n-1] where n is the number of labels
@@ -36,13 +37,23 @@ public class Ensembler{
 
 	//Global paths. Aliasing them for readability
 	private String iwpPath; //Instancewise Predictions Directory Path (a directory containing txt files)
+	private String cmPath;
 	private String rPath;   //Configuration Ranking Path (a xml file)
-
 	public Ensembler(String temporaryDirPath){ //TODO make some sort of factory for the many options
 		iwpPath = temporaryDirPath+instancewiseInfoDirPath;
 		rPath   = temporaryDirPath+configurationRankingPath;
+		cmPath  = temporaryDirPath+configurationMapPath;
+
 		System.out.println("rpath:"+rPath);
+
+			long startTime= System.nanoTime();
 		mCfgList          = ConfigurationCollection.fromXML(rPath,ConfigurationCollection.class).asArrayList();
+			long endTime = System.nanoTime();
+			long totalTime = endTime-startTime;
+			long totalTimeSeconds = totalTime/1000000000;
+			System.out.println("@time for CC input: "+totalTime+" ms/"+totalTimeSeconds+" s");
+
+		mCfgMap				= Util.getConfigurationMap(cmPath);
 		mLabelMap         = new HashMap<String,Integer>();
 		mLabelFrequencies = new HashMap<Integer,Integer>();
 		mAmtFolds         = mCfgList.get(0).getAmtFolds();
@@ -60,11 +71,12 @@ public class Ensembler{
 	//Parses mAmtFolds, mFoldSizes, mCorrectLabels, mLabelsMap and mLabelFrequencies from the IWP logs of the best Configuration
 	private void parseDatasetMetadata() throws FileNotFoundException,IOException{
 		List<Integer> correctLabelsTemp = new ArrayList<Integer>();
-		String winnerHash = Integer.toString(mCfgList.get(0).hashCode());
-
+		int winnerIdentifier = mCfgList.get(0).getIdentifier();
+		//TODO fail autoweka silently if cant find all folds?
 		//Iterating over folds
 		for(int i=0;i<mAmtFolds;i++){
-			String path = iwpPath+"hash:"+winnerHash+"_fold:"+i+".txt";
+			String path = iwpPath+"hash:"+winnerIdentifier+"_fold:"+i+".txt";
+			System.out.println(path);
 			BufferedReader ciBR = Util.getBufferedReaderFromPath(path);
 
 			int foldSize=0;
@@ -329,7 +341,7 @@ public class Ensembler{
 			int totalInstanceIndex=0;
 			//Iterating over folds
 			for(int i = 0; i<mFoldSizes.length;i++){
-				String path = iwpPath+"hash:"+mModel.hashCode()+"_fold:"+i+".txt";
+				String path = iwpPath+"hash:"+mModel.getIdentifier()+"_fold:"+i+".txt";
 				File ciFile = new File(path);
 				if(ciFile.exists()){
 					BufferedReader ciBR = Util.getBufferedReaderFromPath(path);

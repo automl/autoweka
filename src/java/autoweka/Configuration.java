@@ -1,6 +1,5 @@
 package autoweka;
 
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,12 +29,6 @@ public class Configuration extends XmlSerializable implements Comparable{
 	@XmlElement(name="argStrings")
 	private String mArgStrings;
 
-	@XmlElement(name="evaluatedScore")
-	private double mEvaluatedScore;
-
-	@XmlElement(name="evaluatedFold")
-	private int mEvaluatedFold;
-
 	@XmlElement(name="folds")
 	private ArrayList<String> mFolds;
 
@@ -53,6 +46,9 @@ public class Configuration extends XmlSerializable implements Comparable{
 
 	@XmlElement(name="avgFlag")
 	private boolean averagedFlag;
+
+	@XmlElement(name="identifier")
+	private int mIdentifier; //Assign those after the ranking process
 
 	public Configuration(){
 		this.mFolds  = new ArrayList<String>();
@@ -73,51 +69,23 @@ public class Configuration extends XmlSerializable implements Comparable{
 		this.mArgStrings=args;
 	}
 
-	//Merges two instances of the same configuration (i.e. same argument string), while keeping track of scores and folds id's. Merging is done on caller configuration only.
-	public void mergeWith(Configuration c){
-
-		if(c.hashCode()!=this.hashCode()){
-			throw new RuntimeException("Not equivalent configurations!");
-		}
-		//@TODO optimize those to Integer and Double later
-		if(c.mFolds!=null){
-			for(String fold : c.mFolds){
-				this.mFolds.add(fold);
-				this.mAmtFolds++;
-			}
-		}
-		if(c.mFolds!=null){
-			for(String score : c.mScores){
-				this.mScores.add(score);
-				averagedFlag=false;
-				this.mAmtScores++;
-			}
-		}
-
-	}
-
 	/*
 	Utilities
 	*/
 
 	public void lazyUpdateAverage(){ //If average score is not up to date, update it. Trying to make the update system as lazy as possible.
 		if(!averagedFlag){
-			mAverageScore=average(mScores);
-			averagedFlag=true;
+			doAverage();
 		}
 	}
 
-	public void forceUpdateAverage(){
-		mAverageScore=average(mScores);
-		averagedFlag=true;
-	}
-
-	private double average(List<String> l){ //Apparently theres no standard java method for that. @TODO Check if thats true
-		double sum = 0;
-		for (String d: l){
+	public void doAverage(){ //Apparently theres no standard java method for that. @TODO Check if thats true
+		double sum =0;
+		for (String d: mScores){
 			sum+=Double.parseDouble(d);
 		}
-		return (sum/l.size());
+		mAverageScore=sum/mScores.size();
+		averagedFlag=true;
 	}
 
 	public int compareTo(Object aTarget){ //Compares only the average score. If necessary, updates this metric before comparing
@@ -129,15 +97,15 @@ public class Configuration extends XmlSerializable implements Comparable{
 		this.lazyUpdateAverage();
 		cTarget.lazyUpdateAverage();
 
-			if (this.mFolds.size() > cTarget.mFolds.size()){
-				return 1;
-			}else if (this.mFolds.size() < cTarget.mFolds.size()){
-				return -1;
-			}else{
-				if      (this.mAverageScore < cTarget.mAverageScore ) return 1; //Assumes smaller score is better. If that isn't the case, change that.
-				else if (this.mAverageScore > cTarget.mAverageScore)  return -1; // @TODO make this class receive a Metric as input and do this change automatically
-				else return 0;
-			}
+		if (this.mAmtFolds > cTarget.mAmtFolds){
+			return 1;
+		}else if (this.mAmtFolds < cTarget.mAmtFolds){
+			return -1;
+		}else{
+			if      (this.mAverageScore < cTarget.mAverageScore ) return 1; //Assumes smaller score is better. If that isn't the case, change that.
+			else if (this.mAverageScore > cTarget.mAverageScore)  return -1; // @TODO make this class receive a Metric as input and do this change automatically
+			else return 0;
+		}
 
 	}
 
@@ -149,52 +117,26 @@ public class Configuration extends XmlSerializable implements Comparable{
 		return mArgStrings.hashCode();
 	}
 
+	public void update(int foldId,double score){//TODO is it in the scope of this method to check argstrings?
+		mFolds.add(Integer.toString(foldId));
+		mScores.add(Double.toString(score));
+		mAmtFolds++;
+		mAmtScores++;
+		doAverage();
+	}
+
 	/*
 	Getters and setters
 	*/
-	public void setEvaluationValues(double aScore, int aFoldId){ //These always go together anyway.
-		mEvaluatedScore = aScore;
-		mEvaluatedFold  = aFoldId;
-		if (mFolds==null){
-			mFolds = new ArrayList<String>();
-		}
-		if (mScores == null){
-			mScores = new ArrayList<String>();
-		}
-		mFolds.add(Integer.toString(aFoldId));
-		mScores.add(Double.toString(aScore));
-		mAmtFolds++;
-		mAmtScores++;
-		mAverageScore = average(mScores);
-	}
-
-	public void setScore(double aScore){
-		mEvaluatedScore = aScore;
-		if (mScores == null){
-			mScores = new ArrayList<String>();
-		}
-		mScores.add(Double.toString(aScore));
-		mAmtScores++;
-	}
-
-	public void setFoldId(int aFoldId){
-		mEvaluatedFold  = aFoldId;
-		if (mFolds==null){
-			mFolds = new ArrayList<String>();
-		}
-		mFolds.add(Integer.toString(aFoldId));
-		mAmtFolds++;
-	}
-
 	public double getAverageScore(){
 		lazyUpdateAverage();
 		return mAverageScore;
 	}
-	public int getEvaluatedFold()   	{ return mEvaluatedFold;}
-	public int getAmtFolds()          { return mAmtFolds;}
-	public double getEvaluatedScore() { return mEvaluatedScore;}
-	public String getArgStrings() 		{ return mArgStrings;}
-	public List<String> getFolds() 	  { return mFolds;}
-	public List<String> getScores()   { return mScores;}
+	public int getAmtFolds()          { return mAmtFolds;		}
+	public int getIdentifier()        { return mIdentifier;	}
+	public String getArgStrings() 	 { return mArgStrings;	}
+	public List<String> getFolds() 	 { return mFolds;			}
+	public List<String> getScores()   { return mScores;		}
+	public void setIdentifier(int id) { mIdentifier = id;		}
 
 }

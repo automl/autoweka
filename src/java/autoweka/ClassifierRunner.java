@@ -7,8 +7,9 @@ import weka.core.Instances;
 import weka.core.Instance;
 
 import java.io.File;
-import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.io.BufferedWriter;
+import java.io.PrintWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
@@ -23,8 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static weka.classifiers.meta.AutoWEKAClassifier.configurationRankingPath;
-import static weka.classifiers.meta.AutoWEKAClassifier.configurationInfoDirPath;
-import static weka.classifiers.meta.AutoWEKAClassifier.configurationHashSetPath;
+import static weka.classifiers.meta.AutoWEKAClassifier.configurationMapPath;
+import static weka.classifiers.meta.AutoWEKAClassifier.foldwiseLogPath;
 
 /**
  * Class that is responsible for actually running a WEKA classifier from start to finish using the Auto-WEKA argument format.
@@ -327,16 +328,31 @@ public class ClassifierRunner
     {
 
         Evaluation eval = null;
+		  System.out.println("@hue01");
         try
         {
-            Configuration tempConfig = new Configuration(args);
+			   //Updating Configuration Map
+				String ciArgStrings = Util.joinStrings(args, " ",true);
+				Map<String,String> configurationMap = Util.updateConfigurationMap(ciArgStrings);
+
+				//Parsing fold
+
             Properties pInstanceString = Util.parsePropertyString(instanceStr);
-            int ciFold = Integer.parseInt(pInstanceString.getProperty("fold", "-1"));
+				int ciFold = Integer.parseInt(pInstanceString.getProperty("fold", "-1"));
+				System.out.println("@meh :"+configurationMap.get(ciArgStrings)+"____"+ciArgStrings+"____,"+ciFold);
+				String ciPredictionsLog = "EnsemblerLogging/instancewisePredictions/hash:"+configurationMap.get(ciArgStrings)+"_fold:"+ciFold+".txt";
+				System.out.println(ciPredictionsLog);
 
-            String ciPredictionsLog = "EnsemblerLogging/instancewisePredictions/hash:"+tempConfig.hashCode()+"_fold:"+ciFold+".txt";
 
+				//Evaluating fold and updating instancewise log
+				long startTime= System.nanoTime();
             eval = new Evaluation(instances);
             EvaluatorThread evalThread = new EvaluatorThread(eval, classifier, instances, ciPredictionsLog );
+				long endTime = System.nanoTime();
+				long totalTime = endTime-startTime;
+				long totalTimeSeconds = totalTime/1000000000;
+				System.out.println("@time for 1 fold eval: "+totalTime+" ms/"+totalTimeSeconds+" s");
+
 
             disableOutput();
             float evalTime = evalThread.runWorker(timeout);
@@ -362,9 +378,9 @@ public class ClassifierRunner
             }
             else if(!evalThread.terminated())
             {
-                //We're good, we can safely report this value
+                //We're good, we can safely report this value and update the foldwise log.
                 res.setScoreFromEval(eval, instances);
-                saveConfiguration(res,args,instanceStr);
+                saveConfiguration(res,ciArgStrings,ciFold);
             }
         } catch(Exception e) {
             log.debug("Evaluating classifier failed: {}", e.getMessage(), e);
@@ -385,48 +401,31 @@ public class ClassifierRunner
         return true;
     }
 
-    protected void saveConfiguration(ClassifierResult res,List<String> args, String instanceStr){
-      //Checking if we're doing this logging for this run of autoweka TODO make this on the caller of this method?
-      File sortedLog = new File(configurationRankingPath);
-      if (!sortedLog.exists()){
-        return;
-      }
+    protected void saveConfiguration(ClassifierResult res, String ciArgStrings, int ciFold){
 
-      //Setting up some basic stuff
-      Configuration ciConfig = new Configuration(args);
-      int ciHash             = ciConfig.hashCode();
-
-      String ciConfigFilename = configurationInfoDirPath+ciHash+".xml";
-      File ciFile             = new File(ciConfigFilename);
-
-      //Computing Score and fold ID
-      Properties pInstanceString = Util.parsePropertyString(instanceStr);
-      int ciFold     = Integer.parseInt(pInstanceString.getProperty("fold", "-1"));
+      //Parsing score
       double ciScore = res.getScore();
 
-      //Updating the configuration data
-      ciConfig.setEvaluationValues(ciScore,ciFold);
+		//Updating the foldwise log
+		System.out.println("@srsly01");
+		BufferedWriter ciBW = Util.getBufferedWriterFromPath(foldwiseLogPath,true);
+		System.out.println("@srsly02");
+		try{
+			System.out.println("@srsly03");
+			ciBW.write("\n"+ciArgStrings+","+ciFold+","+ciScore);
+		}catch(IOException e){
+			System.out.println("@srsly04");
+			log.debug("Couldn't log a fold evaluation");
+		}
+		try{
+			System.out.println("@srsly05");
+			ciBW.close();
+		}catch(IOException e){
+			System.out.println("@srsly06");
+			log.debug("Couldn't close the BufferedWriter for the foldwise log");
+		}
 
-      if (ciFile.exists()){
-        Configuration ciConfigFull = Configuration.fromXML(ciConfigFilename,Configuration.class); //Find a faster way w/o IOs?
-        ciConfigFull.mergeWith(ciConfig);
-        ciConfigFull.toXML(ciConfigFilename);
-      }else{
-        Util.initializeFile(ciConfigFilename);
-        ciConfig.toXML(ciConfigFilename);
-      }
-
-      //Updating the configuration list
-      try{
-          System.out.println("@Hashsetpath:"+configurationHashSetPath);
-          BufferedWriter br = new BufferedWriter(new FileWriter(configurationHashSetPath,true));//true for appending
-          br.write(ciHash+",");
-          br.close();
-      }catch(IOException e){
-          throw new RuntimeException("Couldn't write to hash set");
-      }
-
-    }
+   }
 
 
     protected void disableOutput()

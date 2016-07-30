@@ -127,14 +127,12 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     /** Default additional arguments for Auto-WEKA. */
     static final String DEFAULT_EXTRA_ARGS = "initialIncumbent=RANDOM:acq-func=EI";
 
-    /** The full path for the temporary Auto-WEKA folder **/
-    //public static final String temporaryDirPath = msExperimentPath+expName+"/";
     /** The path for the sorted best configurations **/
     public static final String configurationRankingPath = "EnsemblerLogging/configuration_ranking.xml";
-    /** The path for the log with the hashcodes for the configs we have **/
-    public static final String configurationHashSetPath = "EnsemblerLogging/configuration_hashes.txt";
-    /** The path for the directory with the configuration data and score **/
-    public static final String configurationInfoDirPath  = "EnsemblerLogging/configurations/";
+	 /** The path for a map which assigns a number to every config evaluated by smac.**/
+	 public static final String configurationMapPath = "EnsemblerLogging/configuration_map.txt";
+	 /** The path for the log with the score for each fold of each configuration evaluated by SMAC **/
+    public static final String foldwiseLogPath = "EnsemblerLogging/foldwise_log.txt";
     /** The path for the directory with the instancewise predictions for each config **/
     public static final String instancewiseInfoDirPath  = "EnsemblerLogging/instancewisePredictions/";
 
@@ -263,16 +261,14 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         ExperimentConstructor.buildSingle("autoweka.smac.SMACExperimentConstructor", exp, args);
 
-        //Initializing logs
-        if(nBestConfigs>1){
-            String temporaryDirPath = msExperimentPath+expName+"/";
-          //  Util.makePath(temporaryDirPath+"EnsemblerLogging");
-            Util.makePath(temporaryDirPath+configurationInfoDirPath);
-            Util.makePath(temporaryDirPath+instancewiseInfoDirPath);
+        //Initializing logs for Ensemble Selection
+         String temporaryDirPath = msExperimentPath+expName+"/";
+         //Util.makePath(temporaryDirPath+configurationInfoDirPath);
+         Util.makePath(temporaryDirPath+instancewiseInfoDirPath);
+         Util.initializeFile(temporaryDirPath+configurationRankingPath);
+         Util.initializeFile(temporaryDirPath+foldwiseLogPath);
+			Util.initializeFile(temporaryDirPath+configurationMapPath);
 
-            Util.initializeFile(temporaryDirPath+configurationRankingPath);
-            Util.initializeFile(temporaryDirPath+configurationHashSetPath);
-        }
 
 
         // run experiment
@@ -375,8 +371,10 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         //Print log of best configurations
         if (nBestConfigs>1){
-          ConfigurationRanker cr = new ConfigurationRanker(msExperimentPath+expName+"/");
-          cr.rank( nBestConfigs , mBest.rawArgs);
+         //  ConfigurationRanker cr = new ConfigurationRanker(msExperimentPath+expName+"/");
+         //  cr.rank( nBestConfigs , mBest.rawArgs);
+			ConfigurationCollection cc = new ConfigurationCollection(msExperimentPath+expName+"/"+foldwiseLogPath);
+			cc.rank(nBestConfigs , mBest.rawArgs,msExperimentPath+expName);
 
 			 long startTime= System.nanoTime();
           Ensembler e = new Ensembler(msExperimentPath+expName+"/");
