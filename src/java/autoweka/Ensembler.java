@@ -44,8 +44,6 @@ public class Ensembler{
 		rPath   = temporaryDirPath+configurationRankingPath;
 		cmPath  = temporaryDirPath+configurationMapPath;
 
-		System.out.println("rpath:"+rPath);
-
 			long startTime= System.nanoTime();
 		mCfgList          = ConfigurationCollection.fromXML(rPath,ConfigurationCollection.class).asArrayList();
 			long endTime = System.nanoTime();
@@ -76,7 +74,6 @@ public class Ensembler{
 		//Iterating over folds
 		for(int i=0;i<mAmtFolds;i++){
 			String path = iwpPath+"hash:"+winnerIdentifier+"_fold:"+i+".txt";
-			System.out.println(path);
 			BufferedReader ciBR = Util.getBufferedReaderFromPath(path);
 
 			int foldSize=0;

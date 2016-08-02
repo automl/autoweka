@@ -51,7 +51,6 @@ public class ConfigurationCollection extends XmlSerializable{
 	public ConfigurationCollection(String csvLog){
 		this();
 		//Parsing the log
-		System.out.println(csvLog);
 		List<String[]> lines = Util.getLineElements(csvLog,",");
 		for(String[] sa:lines){
 			updateConfiguration(sa[0],Integer.parseInt(sa[1]),Double.parseDouble(sa[2]));

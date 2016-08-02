@@ -328,7 +328,6 @@ public class ClassifierRunner
     {
 
         Evaluation eval = null;
-		  System.out.println("@hue01");
         try
         {
 			   //Updating Configuration Map
@@ -336,12 +335,11 @@ public class ClassifierRunner
 				Map<String,String> configurationMap = Util.updateConfigurationMap(ciArgStrings);
 
 				//Parsing fold
+				//TODO sometimes first fold of a config is evaluated under previous identifier on the log wtf
 
             Properties pInstanceString = Util.parsePropertyString(instanceStr);
 				int ciFold = Integer.parseInt(pInstanceString.getProperty("fold", "-1"));
-				System.out.println("@meh :"+configurationMap.get(ciArgStrings)+"____"+ciArgStrings+"____,"+ciFold);
 				String ciPredictionsLog = "EnsemblerLogging/instancewisePredictions/hash:"+configurationMap.get(ciArgStrings)+"_fold:"+ciFold+".txt";
-				System.out.println(ciPredictionsLog);
 
 
 				//Evaluating fold and updating instancewise log
@@ -407,21 +405,15 @@ public class ClassifierRunner
       double ciScore = res.getScore();
 
 		//Updating the foldwise log
-		System.out.println("@srsly01");
 		BufferedWriter ciBW = Util.getBufferedWriterFromPath(foldwiseLogPath,true);
-		System.out.println("@srsly02");
 		try{
-			System.out.println("@srsly03");
 			ciBW.write("\n"+ciArgStrings+","+ciFold+","+ciScore);
 		}catch(IOException e){
-			System.out.println("@srsly04");
 			log.debug("Couldn't log a fold evaluation");
 		}
 		try{
-			System.out.println("@srsly05");
 			ciBW.close();
 		}catch(IOException e){
-			System.out.println("@srsly06");
 			log.debug("Couldn't close the BufferedWriter for the foldwise log");
 		}
 
