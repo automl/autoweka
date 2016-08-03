@@ -348,6 +348,12 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             log.debug("{}", t);
         }
 
+		  if((group.getTrajectories().isEmpty())){
+			  System.out.println("\n\namagad im emptyyy\n\n");
+		  }else{
+			  System.out.println("\n\nnot emptyyy\n\n"+group.getTrajectories().toString());
+		  }
+
         GetBestFromTrajectoryGroup mBest = new GetBestFromTrajectoryGroup(group);
 
         if(mBest.errorEstimate == autoweka.ClassifierResult.INFINITY) {
