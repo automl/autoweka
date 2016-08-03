@@ -110,7 +110,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         TerminationHoldout
     }
     /** Default evaluation method. */
-    static final Resampling DEFAULT_RESAMPLING = Resampling.TerminationHoldout;
+    static final Resampling DEFAULT_RESAMPLING = Resampling.CrossValidation;
 
     /** Default arguments for the different evaluation methods. */
     static final Map<Resampling, String> resamplingArgsMap;
@@ -374,6 +374,14 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         log.info("classifier: {}, arguments: {}, attribute search: {}, attribute search arguments: {}, attribute evaluation: {}, attribute evaluation arguments: {}",
             classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
 
+			System.out.println("\n\ncclass:"+classifierClass.toString());
+			System.out.println("\n\ncargs :"+classifierArgs.toString());
+			System.out.println("\n\resamplingArgs:"+resamplingArgs);
+			System.out.println("\n\nexp.instanceGenerator:"+exp.instanceGenerator);
+			System.out.println("\n\nexp.instanceGeneratorArgs:"+exp.instanceGeneratorArgs);
+			//Checking if autoweka was run for a long enough time
+		  ConfigurationCollection testerCC = new ConfigurationCollection(msExperimentPath+expName+"/"+foldwiseLogPath);
+		 // if (testerCC.get(0).getAmtFolds())
 
         //Print log of best configurations
         if (nBestConfigs>1){
