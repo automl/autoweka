@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Observable;
@@ -75,6 +76,7 @@ import autoweka.Trajectory;
 import autoweka.TrajectoryGroup;
 import autoweka.TrajectoryMerger;
 import autoweka.Ensembler;
+import autoweka.WekaArgumentConverter;
 
 import autoweka.tools.GetBestFromTrajectoryGroup;
 
@@ -348,11 +350,11 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             log.debug("{}", t);
         }
 
-		  if((group.getTrajectories().isEmpty())){
-			  System.out.println("\n\namagad im emptyyy\n\n");
-		  }else{
-			  System.out.println("\n\nnot emptyyy\n\n"+group.getTrajectories().toString());
-		  }
+		//   if((group.getTrajectories().isEmpty())){
+		// 	  System.out.println("\n\namagad im emptyyy\n\n");
+		//   }else{
+		// 	  System.out.println("\n\nnot emptyyy\n\n"+group.getTrajectories().toString());
+		//   }
 
         GetBestFromTrajectoryGroup mBest = new GetBestFromTrajectoryGroup(group);
 
@@ -360,27 +362,19 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             throw new Exception("All runs timed out, unable to find good configuration. Please allow more time and rerun.");
         }
 
-        classifierClass = mBest.classifierClass;
-        classifierArgs = Util.splitQuotedString(mBest.classifierArgs).toArray(new String[0]);
-        attributeSearchClass = mBest.attributeSearchClass;
-        if(mBest.attributeSearchArgs != null) {
-            attributeSearchArgs = Util.splitQuotedString(mBest.attributeSearchArgs).toArray(new String[0]);
-        }
-        attributeEvalClass = mBest.attributeEvalClass;
-        if(mBest.attributeEvalArgs != null) {
-            attributeEvalArgs = Util.splitQuotedString(mBest.attributeEvalArgs).toArray(new String[0]);
-        }
 
-        log.info("classifier: {}, arguments: {}, attribute search: {}, attribute search arguments: {}, attribute evaluation: {}, attribute evaluation arguments: {}",
-            classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
-
-			System.out.println("\n\ncclass:"+classifierClass.toString());
-			System.out.println("\n\ncargs :"+classifierArgs.toString());
-			System.out.println("\n\resamplingArgs:"+resamplingArgs);
-			System.out.println("\n\nexp.instanceGenerator:"+exp.instanceGenerator);
-			System.out.println("\n\nexp.instanceGeneratorArgs:"+exp.instanceGeneratorArgs);
+			// System.out.println("\n\ncclass:"+classifierClass.toString());
+			// System.out.println("\n\ncargs :"+classifierArgs.toString());
+			// System.out.println("\n\resamplingArgs:"+resamplingArgs);
+			// System.out.println("\n\nexp.instanceGenerator:"+exp.instanceGenerator);
+			// System.out.println("\n\nexp.instanceGeneratorArgs:"+exp.instanceGeneratorArgs);
+			// System.out.println("\n\n----");
+			// System.out.println("\n\n"+mBest.classifierClass );
+			// System.out.println("\n\n"+mBest.classifierArgs );
+			// System.out.println("\n\n"+mBest.attributeSearchClass) ;
+			// System.out.println("\n\n"+mBest.attributeSearchArgs );
 			//Checking if autoweka was run for a long enough time
-		  ConfigurationCollection testerCC = new ConfigurationCollection(msExperimentPath+expName+"/"+foldwiseLogPath);
+		 // ConfigurationCollection testerCC = new ConfigurationCollection(msExperimentPath+expName+"/"+foldwiseLogPath);
 		 // if (testerCC.get(0).getAmtFolds())
 
         //Print log of best configurations
@@ -390,37 +384,128 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 			ConfigurationCollection cc = new ConfigurationCollection(msExperimentPath+expName+"/"+foldwiseLogPath);
 			cc.rank(nBestConfigs , mBest.rawArgs,msExperimentPath+expName);
 
-			 long startTime= System.nanoTime();
-          Ensembler e = new Ensembler(msExperimentPath+expName+"/");
-	   	 e.hillclimb();
-			 long endTime = System.nanoTime();
-			 long totalTime = endTime-startTime;
-			 long totalTimeSeconds = totalTime/1000000000;
-			 System.out.println("@end time in nanosecs: "+totalTime+" end time in secs: "+totalTimeSeconds);
-        }
+			long startTime= System.nanoTime();
+         Ensembler e = new Ensembler(msExperimentPath+expName+"/");
+	   	List<Configuration> ensemble = e.hillclimb();
 
-        // train model on entire dataset and save
-        as = new AttributeSelection();
+			for(Configuration c : ensemble){
+				WekaArgumentConverter.Arguments wekaArgs = WekaArgumentConverter.convert(Arrays.asList(c.getArgStrings().split(" ")));
 
-        if(attributeSearchClass != null) {
-            ASSearch asSearch = ASSearch.forName(attributeSearchClass, attributeSearchArgs.clone());
-            as.setSearch(asSearch);
-        }
-        if(attributeEvalClass != null) {
-            ASEvaluation asEval = ASEvaluation.forName(attributeEvalClass, attributeEvalArgs.clone());
-            as.setEvaluator(asEval);
-        }
-        as.SelectAttributes(is);
+				classifierClass = wekaArgs.propertyMap.get("targetclass");
+				String  tempClassifierArgs = Util.joinStrings(" ", Util.quoteStrings(wekaArgs.argMap.get("classifier")));
+				classifierArgs = Util.splitQuotedString(tempClassifierArgs).toArray(new String[0]);
+
+				//Is there a AS search method?
+				if(wekaArgs.propertyMap.containsKey("attributesearch") && !"NONE".equals(wekaArgs.propertyMap.get("attributesearch"))){
+				  attributeSearchClass = wekaArgs.propertyMap.get("attributesearch");
+				  String tempAttributeSearchArgs  = Util.joinStrings(" ", Util.quoteStrings(wekaArgs.argMap.get("attributesearch")));
+				  if(tempAttributeSearchArgs != null) {
+	   			 attributeSearchArgs = Util.splitQuotedString(tempAttributeSearchArgs).toArray(new String[0]);
+	   		  }
+				  attributeEvalClass = wekaArgs.propertyMap.get("attributeeval");
+				  String tempAttributeEvalArgs  = Util.joinStrings(" ", Util.quoteStrings(wekaArgs.argMap.get("attributeeval")));
+				  if(mBest.attributeEvalArgs != null) {
+	 				 attributeEvalArgs = Util.splitQuotedString(mBest.attributeEvalArgs).toArray(new String[0]);
+	 			  }
+				}
+				log.info("classifier: {}, arguments: {}, attribute search: {}, attribute search arguments: {}, attribute evaluation: {}, attribute evaluation arguments: {}",
+  			 classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
+
+  			 // train model on entire dataset and save
+  			 as = new AttributeSelection();
+
+  			 if(attributeSearchClass != null) {
+  				 ASSearch asSearch = ASSearch.forName(attributeSearchClass, attributeSearchArgs.clone());
+  				 as.setSearch(asSearch);
+  			 }
+  			 if(attributeEvalClass != null) {
+  				 ASEvaluation asEval = ASEvaluation.forName(attributeEvalClass, attributeEvalArgs.clone());
+  				 as.setEvaluator(asEval);
+  			 }
+  			 as.SelectAttributes(is);
+
+  			 classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
+
+  			 is = as.reduceDimensionality(is);
+  			 classifier.buildClassifier(is);
+
+  			 eval = new Evaluation(is);
+  			 eval.evaluateModel(classifier, is);
+
+			}
+
+			 //
+			//  long endTime = System.nanoTime();
+			//  long totalTime = endTime-startTime;
+			//  long totalTimeSeconds = totalTime/1000000000;
+			//  System.out.println("@end time in nanosecs: "+totalTime+" end time in secs: "+totalTimeSeconds);
+
+		 }else{
+			 classifierClass = mBest.classifierClass;
+			 classifierArgs = Util.splitQuotedString(mBest.classifierArgs).toArray(new String[0]);
+			 attributeSearchClass = mBest.attributeSearchClass;
+			 if(mBest.attributeSearchArgs != null) {
+				 attributeSearchArgs = Util.splitQuotedString(mBest.attributeSearchArgs).toArray(new String[0]);
+			 }
+			 attributeEvalClass = mBest.attributeEvalClass;
+			 if(mBest.attributeEvalArgs != null) {
+				 attributeEvalArgs = Util.splitQuotedString(mBest.attributeEvalArgs).toArray(new String[0]);
+			 }
+
+			 log.info("classifier: {}, arguments: {}, attribute search: {}, attribute search arguments: {}, attribute evaluation: {}, attribute evaluation arguments: {}",
+			 classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
+
+			 // train model on entire dataset and save
+			 as = new AttributeSelection();
+
+			 if(attributeSearchClass != null) {
+				 ASSearch asSearch = ASSearch.forName(attributeSearchClass, attributeSearchArgs.clone());
+				 as.setSearch(asSearch);
+			 }
+			 if(attributeEvalClass != null) {
+				 ASEvaluation asEval = ASEvaluation.forName(attributeEvalClass, attributeEvalArgs.clone());
+				 as.setEvaluator(asEval);
+			 }
+			 as.SelectAttributes(is);
+
+			 classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
+
+			 is = as.reduceDimensionality(is);
+			 classifier.buildClassifier(is);
+
+			 eval = new Evaluation(is);
+			 eval.evaluateModel(classifier, is);
+
+		 }
 
 
-        classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
 
-        is = as.reduceDimensionality(is);
-        classifier.buildClassifier(is);
-
-        eval = new Evaluation(is);
-        eval.evaluateModel(classifier, is);
     }
+
+	 public Map<String,String> parseConfigurationArgs(Configuration c){
+		 WekaArgumentConverter.Arguments wekaArgs = WekaArgumentConverter.convert(Arrays.asList(c.getArgStrings().split(" ")));
+
+		 String classifierClass = wekaArgs.propertyMap.get("targetclass");
+		 String classifierArgs  = Util.joinStrings(" ", Util.quoteStrings(wekaArgs.argMap.get("classifier")));
+
+		 //Is there a AS search method?
+		 if(wekaArgs.propertyMap.containsKey("attributesearch") && !"NONE".equals(wekaArgs.propertyMap.get("attributesearch"))){
+			  String attributeSearchClass = wekaArgs.propertyMap.get("attributesearch");
+			  //String attributeSearchArgs  = Util.joinStrings(" ", Util.quoteStrings(wekaArgs.argMap.get("attributesearch")));
+
+			  String attributeEvalClass = wekaArgs.propertyMap.get("attributeeval");
+			//  String attributeEvalArgs  = Util.joinStrings(" ", Util.quoteStrings(wekaArgs.argMap.get("attributeeval")));
+		 }
+
+		 Map<String,String> rv = new HashMap<String,String>();
+		 rv.put("classifierClass", classifierClass);
+		 rv.put("classifierArgs ", classifierArgs );
+		 rv.put("attributeSearchClass", attributeSearchClass);
+		// rv.put("attributeSearchArgs", attributeSearchArgs);
+		 rv.put("attributeEvalClass", attributeEvalClass);
+		 //rv.put("attributeEvalArgs", attributeEvalArgs);
+		 return rv;
+	 }
 
     /**
     * Calculates the class membership for the given test instance.
