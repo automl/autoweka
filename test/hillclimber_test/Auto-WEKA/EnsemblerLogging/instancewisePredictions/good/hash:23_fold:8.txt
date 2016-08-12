@@ -1,0 +1,16 @@
+inst#,actual,predicted,error,distribution,,
+1,1:Iris-setosa,42:Entei,,*0.936,0.064
+2,2:Iris-versicolor,1:Iris-setosa,,0,*0.73
+3,2:Iris-versicolor,1:Iris-setosa,,0.001,*0.995
+4,2:Iris-versicolor,2:Iris-versicolor,,0.026,*0.974
+5,3:Iris-virginica,3:Iris-virginica,,0,0.003
+6,3:Iris-virginica,3:Iris-virginica,,0,0.244
+7,3:Iris-virginica,3:Iris-virginica,,0,0.051
+8,3:Iris-virginica,3:Iris-virginica,,0,0
+9,3:Iris-virginica,3:Iris-virginica,,0,0.01
+10,3:Iris-virginica,3:Iris-virginica,,0,0
+11,1:Iris-setosa,1:Iris-setosa,,*0.997,0.003
+12,1:Iris-setosa,3:Iris-virginica,,*0.993,0.007
+13,3:Iris-virginica,3:Iris-virginica,,0,0.025
+14,3:Iris-virginica,3:Iris-virginica,,0,0.032
+15,1:Iris-setosa,4:hue,,*0.998,0.002

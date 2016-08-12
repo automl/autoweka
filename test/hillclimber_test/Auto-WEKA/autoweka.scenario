@@ -1,0 +1,12 @@
+algo = "/usr/lib/jvm/java-7-openjdk-amd64/jre/bin/java" -Xmx1024m -cp "autoweka.jar:/home/oto/Dropbox/Faculdade/Research/Repo/autoweka/autoweka.jar" autoweka.smac.SMACWrapper -prop datasetString=testArff=__dummy____COLONESCAPE__:type=trainTestArff__COLONESCAPE__:trainArff=/tmp/autoweka6581083610882781504/Auto-WEKA/Auto-WEKA.arff:instanceGenerator=autoweka.instancegenerators.CrossValidation:resultMetric=errorRate -prop initialIncumbent=RANDOM:acq-func=EI -wrapper
+execdir = ./
+deterministic = 1
+run_obj = quality
+overall_obj = mean
+cutoff_time = 75
+target_run_cputime_limit = 75
+tunerTimeout = 750
+outdir = out
+paramfile = autoweka.params
+instance_file = autoweka.instances
+test_instance_file = autoweka.test.instances

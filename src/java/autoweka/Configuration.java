@@ -12,12 +12,6 @@ import javax.xml.bind.annotation.*;
 /*
 	Wraps a configuration and the evaluation(s) SMAC performed on it.
 */
-/*
-	The idea here is that, when a configuration is evaluated by smac, we record the corresponding score and the fold id for the evaluation. Therefore,
-	an instance of the Configuration class represents one evaluation, and contains a mEvaluatedScore and a mEvalautedFold.  When we are going over all of the
-	smac evaluations to sort the best configurations, we merge equivalent instances of Configuration into a single one, keeping track of the best score
-	and filling the mFolds list with each fold upon which it was evaluated.
-*/
 
 @XmlRootElement(name="configuration")
 public class Configuration extends XmlSerializable implements Comparable{

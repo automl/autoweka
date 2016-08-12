@@ -1,0 +1,16 @@
+inst#,actual,predicted,error,distribution,,
+1,2:Iris-versicolor,2:Iris-versicolor,,0,*0.911,0.089
+2,2:Iris-versicolor,2:Iris-versicolor,,0,*0.911,0.089
+3,1:Iris-setosa,1:Iris-setosa,,*1,0,0
+4,2:Iris-versicolor,2:Iris-versicolor,,0,*0.911,0.089
+5,2:Iris-versicolor,2:Iris-versicolor,,0,*0.911,0.089
+6,3:Iris-virginica,3:Iris-virginica,,0,0.022,*0.978
+7,1:Iris-setosa,1:Iris-setosa,,*1,0,0
+8,1:Iris-setosa,1:Iris-setosa,,*1,0,0
+9,1:Iris-setosa,1:Iris-setosa,,*1,0,0
+10,1:Iris-setosa,1:Iris-setosa,,*1,0,0
+11,2:Iris-versicolor,2:Iris-versicolor,,0,*0.911,0.089
+12,3:Iris-virginica,2:Iris-versicolor,+,0,*0.911,0.089
+13,2:Iris-versicolor,2:Iris-versicolor,,0,*0.911,0.089
+14,2:Iris-versicolor,2:Iris-versicolor,,0,*0.911,0.089
+15,2:Iris-versicolor,2:Iris-versicolor,,0,*0.911,0.089

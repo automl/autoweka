@@ -3,11 +3,11 @@
     <name>Auto-WEKA</name>
     <type>SMAC</type>
     <resultMetric>errorRate</resultMetric>
-    <instanceGenerator>autoweka.instancegenerators.TerminationHoldout</instanceGenerator>
-    <instanceGeneratorArgs>seed=123:terminationPercent=30[$]autoweka.instancegenerators.CrossValidation[$]numFolds=10:seed=123</instanceGeneratorArgs>
-    <datasetString>testArff=__dummy__:type=trainTestArff:trainArff=/tmp/autoweka6306700823476768264/Auto-WEKA/Auto-WEKA.arff</datasetString>
+    <instanceGenerator>autoweka.instancegenerators.CrossValidation</instanceGenerator>
+    <instanceGeneratorArgs>seed=1500:numFolds=10:seed=1500</instanceGeneratorArgs>
+    <datasetString>testArff=__dummy__:type=trainTestArff:trainArff=/tmp/autoweka608312195015708799/Auto-WEKA/Auto-WEKA.arff</datasetString>
     <attributeSelection>true</attributeSelection>
-    <attributeSelectionTimeout>5.0</attributeSelectionTimeout>
+    <attributeSelectionTimeout>20.0</attributeSelectionTimeout>
     <trajectoryParserClass>autoweka.smac.SMACTrajectoryParser</trajectoryParserClass>
     <callString>/home/oto/Dropbox/Faculdade/Research/Repo/autoweka/smac-v2.10.03-master-778/smac</callString>
     <callString>--seed</callString>
@@ -27,13 +27,13 @@
     <callString>--runGroupName</callString>
     <callString>autoweka</callString>
     <callString>--terminate-on-delete</callString>
-    <callString>/tmp/autoweka6306700823476768264/Auto-WEKA//out/runstamps/{SEED}.stamp</callString>
+    <callString>/tmp/autoweka608312195015708799/Auto-WEKA//out/runstamps/{SEED}.stamp</callString>
     <callString>--kill-runs-on-file-delete</callString>
-    <callString>/tmp/autoweka6306700823476768264/Auto-WEKA//out/runstamps/{SEED}.stamp</callString>
+    <callString>/tmp/autoweka608312195015708799/Auto-WEKA//out/runstamps/{SEED}.stamp</callString>
     <callString>--algo-cutoff-time</callString>
-    <callString>25.0</callString>
+    <callString>100.0</callString>
     <callString>--wallclock-limit</callString>
-    <callString>250</callString>
+    <callString>1000</callString>
     <callString>--transform-crashed-quality-value</callString>
     <callString>1.0E100</callString>
     <callString>--kill-run-exceeding-captime-factor</callString>
@@ -42,12 +42,13 @@
     <callString>RANDOM</callString>
     <callString>--acq-func</callString>
     <callString>EI</callString>
-    <tunerTimeout>250.0</tunerTimeout>
-    <trainTimeout>25.0</trainTimeout>
+    <tunerTimeout>1000.0</tunerTimeout>
+    <trainTimeout>100.0</trainTimeout>
     <memory>1024m</memory>
     <extraProps>initialIncumbent=RANDOM:acq-func=EI</extraProps>
     <allowedClassifiers>weka.classifiers.bayes.BayesNet</allowedClassifiers>
     <allowedClassifiers>weka.classifiers.bayes.NaiveBayes</allowedClassifiers>
+    <allowedClassifiers>weka.classifiers.bayes.NaiveBayesMultinomial</allowedClassifiers>
     <allowedClassifiers>weka.classifiers.functions.Logistic</allowedClassifiers>
     <allowedClassifiers>weka.classifiers.functions.MultilayerPerceptron</allowedClassifiers>
     <allowedClassifiers>weka.classifiers.functions.SMO</allowedClassifiers>
