@@ -27,6 +27,7 @@ import static weka.classifiers.meta.AutoWEKAClassifier.configurationRankingPath;
 import static weka.classifiers.meta.AutoWEKAClassifier.configurationMapPath;
 import static weka.classifiers.meta.AutoWEKAClassifier.foldwiseLogPath;
 
+
 /**
  * Class that is responsible for actually running a WEKA classifier from start to finish using the Auto-WEKA argument format.
  *
@@ -379,6 +380,7 @@ public class ClassifierRunner
                 //We're good, we can safely report this value and update the foldwise log.
                 res.setScoreFromEval(eval, instances);
                 saveConfiguration(res,ciArgStrings,ciFold);
+
             }
         } catch(Exception e) {
             log.debug("Evaluating classifier failed: {}", e.getMessage(), e);
@@ -399,6 +401,7 @@ public class ClassifierRunner
         return true;
     }
 
+
     protected void saveConfiguration(ClassifierResult res, String ciArgStrings, int ciFold){
 
       //Parsing score
@@ -418,6 +421,7 @@ public class ClassifierRunner
 		}
 
    }
+
 
 
     protected void disableOutput()

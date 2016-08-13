@@ -106,6 +106,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 	 /** Default */
     static final boolean DEFAULT_ENSEMBLE_SELECTION = false;
 
+
     /** Internal evaluation method. */
     static enum Resampling {
         CrossValidation,
@@ -140,6 +141,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     /** The path for the directory with the instancewise predictions for each config **/
     public static final String instancewiseInfoDirPath  = "EnsemblerLogging/instancewisePredictions/";
 
+
     /** The chosen classifier. */
     protected Classifier classifier;
     /** The chosen attribute selection method. */
@@ -172,6 +174,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     protected int nBestConfigs = DEFAULT_N_BEST;
 	 /** The amout of best configurations to return as output*/
 	 protected boolean ensembleSelection = DEFAULT_ENSEMBLE_SELECTION;
+
     /** The internal evaluation method. */
     protected Resampling resampling = DEFAULT_RESAMPLING;
     /** The arguments to the evaluation method. */
@@ -372,6 +375,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 		  cc.rank(msExperimentPath+expName,mBest.rawArgs);
 
 
+
 		  if (ensembleSelection){
 
 			long startTime= System.nanoTime();
@@ -544,6 +548,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 		  result.addElement(
            new Option("\tIf you want to use the ensemble selection feature.\n" + "\t(default: " + DEFAULT_ENSEMBLE_SELECTION + ")",
                "ensembleSelectioncr", 1, "-ensembleSelection <limit>"));
+
         //result.addElement(
         //    new Option("\tThe type of resampling used.\n" + "\t(default: " + String.valueOf(DEFAULT_RESAMPLING) + ")",
         //        "resampling", 1, "-resampling <resampling>"));
@@ -581,6 +586,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.add("" + nBestConfigs);
 		  result.add("-ensembleSelection");
 		  result.add("" + ensembleSelection);
+
         //result.add("-resampling");
         //result.add("" + resampling);
         //result.add("-resamplingArgs");
@@ -629,12 +635,14 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             nBestConfigs = DEFAULT_N_BEST;
         }
 
+
 		  tmpStr = Utils.getOption("ensembleSelection", options);
 		  if (tmpStr.length() != 0) {
 				ensembleSelection = Boolean.parseBoolean(tmpStr);
 		  } else {
 				ensembleSelection = DEFAULT_ENSEMBLE_SELECTION;
 		  }
+
 
         //tmpStr = Utils.getOption("resampling", options);
         //if (tmpStr.length() != 0) {
@@ -742,6 +750,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
    }
 
    /**
+
     * Get the maximum amount of configurations to be given as output
     * @return The amount of best configurations that will be given as output
     */
@@ -756,7 +765,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
    public String nBestConfigsTipText() {
        return "Maximum amount of the best configurations that should be returned as output";
    }
-
 
 
 	/**
@@ -782,6 +790,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
    public String ensembleSelectionTipText() {
        return "If you want to use the ensemble selection feature, toggle this as true";
    }
+
 
     //public void setResampling(Resampling r) {
     //    resampling = r;
@@ -907,19 +916,23 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             "attribute evaluation: " + attributeEvalClass + "\n" +
             "attribute evaluation arguments: " + (attributeEvalArgs != null ? Arrays.toString(attributeEvalArgs) : "[]") + "\n" +
             "estimated error: " + estimatedError + "\n\n"; //@TODO looks like this error might be printing the wrong value, or at least the right value in a cryptic scale.
+
         try {
             res += eval.toSummaryString();
             res += "\n";
             res += eval.toMatrixString();
             res += "\n";
             res += eval.toClassDetailsString();
+
         } catch(Exception e) { }
 
 		  if(nBestConfigs>1){
 
+
 			  ConfigurationCollection cc = ConfigurationCollection.fromXML(msExperimentPath+expName+"/"+configurationRankingPath,ConfigurationCollection.class);
 			  List<Configuration> ccAL = cc.asArrayList();
 			  int fullyEvaluatedAmt = cc.getFullyEvaluatedAmt();
+
 
 			  int smallest = (fullyEvaluatedAmt<nBestConfigs)?fullyEvaluatedAmt:nBestConfigs;
 			  res+= "\n\n------- "+smallest+" BEST CONFIGURATIONS -------";

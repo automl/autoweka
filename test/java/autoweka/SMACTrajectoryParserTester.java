@@ -23,9 +23,11 @@ public class SMACTrajectoryParserTester{
 
 
     SMACTrajectoryParser stp = new SMACTrajectoryParser();
+
     Trajectory t = stp.parseTrajectory(e, folderFile, String.valueOf(1500)); //1500 arbitrarily picked as a seed for the test case
 
     assertEquals(t.getPoints().size(),16);
+
 
   }
 

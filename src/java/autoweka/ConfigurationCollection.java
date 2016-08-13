@@ -19,6 +19,7 @@ Also contains method for ranking the configurations.
 @XmlRootElement(name="configurationCollection")
 public class ConfigurationCollection extends XmlSerializable{
 
+
 	//Indexes the existing Configurations by their ArgStrings for access purposes.
 	private Map<String, Configuration> mArgStringsMap;
 
@@ -90,6 +91,7 @@ public class ConfigurationCollection extends XmlSerializable{
 		if(!this.contains(c.getArgStrings())){
 			mArgStringsMap.put(c.getArgStrings(),c);
 		}
+
 	}
 
 	public Configuration get(int i){
@@ -99,6 +101,7 @@ public class ConfigurationCollection extends XmlSerializable{
 	public int size (){
 		return mConfigurations.size();
 	}
+
 
 	public ArrayList<Configuration> asArrayList(){
 		return mConfigurations;
@@ -192,6 +195,7 @@ public class ConfigurationCollection extends XmlSerializable{
 			}
 		}
 		throw new RuntimeException("Couldn't find final incumbent on the log");
+
 	}
 
 }

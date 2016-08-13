@@ -14,6 +14,7 @@ import autoweka.smac.SMACTrajectoryParserTester;
     ConfigurationTester.class,
     SMACTrajectoryParserTester.class,
 	 EnsemblerTester.class
+
 })
 
 public class AutoWEKATestSuite

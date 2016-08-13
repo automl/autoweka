@@ -1,5 +1,6 @@
 package autoweka;
 
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import javax.xml.bind.annotation.*;
 /*
 	Wraps a configuration and the evaluation(s) SMAC performed on it.
 */
+
 
 @XmlRootElement(name="configuration")
 public class Configuration extends XmlSerializable implements Comparable{
@@ -63,6 +65,7 @@ public class Configuration extends XmlSerializable implements Comparable{
 		this.mArgStrings=args;
 	}
 
+
 	/*
 	Utilities
 	*/
@@ -80,6 +83,7 @@ public class Configuration extends XmlSerializable implements Comparable{
 		}
 		mAverageScore=sum/mScores.size();
 		averagedFlag=true;
+
 	}
 
 	public int compareTo(Object aTarget){ //Compares only the average score. If necessary, updates this metric before comparing
@@ -126,11 +130,13 @@ public class Configuration extends XmlSerializable implements Comparable{
 		lazyUpdateAverage();
 		return mAverageScore;
 	}
+
 	public int getAmtFolds()          { return mAmtFolds;		}
 	public int getIdentifier()        { return mIdentifier;	}
 	public String getArgStrings() 	 { return mArgStrings;	}
 	public List<String> getFolds() 	 { return mFolds;			}
 	public List<String> getScores()   { return mScores;		}
 	public void setIdentifier(int id) { mIdentifier = id;		}
+
 
 }

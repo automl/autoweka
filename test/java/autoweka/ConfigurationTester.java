@@ -32,15 +32,18 @@ public class ConfigurationTester{
 
     //Tests priorization of configs evaluated over more folds
     Configuration c2 = new Configuration("args_placeholder");
+
     c1.update(0,10);
     c1.update(1,20);
     c1.update(2,10);
     c2.update(0,0);
     c2.update(1,0);
+
     assertTrue(c1.compareTo(c2)>0);
     assertFalse(c2.compareTo(c1)>0);
 
     //Tests comparison within same number of folds
+
     c2.update(2,0);
     assertTrue(c2.compareTo(c1)>0);
 
@@ -53,6 +56,7 @@ public class ConfigurationTester{
 
     c2.update(3,0);
     c3.update(3,1000);
+
     assertTrue(c2.compareTo(c3)>0);
   }
 
@@ -68,7 +72,9 @@ public class ConfigurationTester{
 
     for (int i = 0; i<amtIterations; i++){
       double score = rg.nextDouble()%20;
+
       c1.update(rg.nextInt(amtIterations),score); //its okay if we get two identical folds
+
       sum+=score;
     }
 
@@ -92,6 +98,7 @@ public class ConfigurationTester{
 
     ConfigurationCollection cc = ConfigurationCollection.fromXML(sortedTestLog, ConfigurationCollection.class);
 	 cc.rank("test/experiment_folder/Auto-WEKA");
+
     double bestScore = cc.get(0).getAverageScore();
     int    amtFolds  = cc.get(0).getFolds().size();
 
