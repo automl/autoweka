@@ -343,13 +343,13 @@ public class ClassifierRunner
 
 
 				//Evaluating fold and updating instancewise log
-				long startTime= System.nanoTime();
+				// long startTime= System.nanoTime();
             eval = new Evaluation(instances);
             EvaluatorThread evalThread = new EvaluatorThread(eval, classifier, instances, ciPredictionsLog );
-				long endTime = System.nanoTime();
-				long totalTime = endTime-startTime;
-				long totalTimeSeconds = totalTime/1000000000;
-				System.out.println("@time for 1 fold eval: "+totalTime+" ms/"+totalTimeSeconds+" s");
+				// long endTime = System.nanoTime();
+				// long totalTime = endTime-startTime;
+				// long totalTimeSeconds = totalTime/1000000000;
+				// System.out.println("@time for 1 fold eval: "+totalTime+" ms/"+totalTimeSeconds+" s");
 
 
             disableOutput();

@@ -104,6 +104,16 @@ public class ConfigurationCollection extends XmlSerializable{
 		return mConfigurations;
 	}
 
+	public int getFullyEvaluatedAmt(){
+		int rv=0;
+		for (Configuration c : mConfigurations){
+			if (c.getAmtFolds()==mConfigurations.get(0).getAmtFolds()){
+				rv++;
+			}
+		}
+		return rv;
+	}
+
 	/**
 	* Ranking and spitting to XML.
 	*/
@@ -112,11 +122,11 @@ public class ConfigurationCollection extends XmlSerializable{
 	//Note: You can spit to xml by using the toXML method from the superclass. For the current intents and purposes,
 	//we only ever spit a ConfigurationCollection when we rank it.
 	//Note2: Currently, the smaller the score is, the better (thats why we use reverse()). TODO make it polymorphic regarding the metrics
-	public List<Configuration> rank(int n,String temporaryDirPath){
-		return rank (n, "IGNORE", temporaryDirPath);
+	public List<Configuration> rank(String temporaryDirPath){
+		return rank (temporaryDirPath,"IGNORE");
 	}
 
-	public List<Configuration> rank(int n, String smacFinalIncumbent,String temporaryDirPath){
+	public List<Configuration> rank(String temporaryDirPath,String smacFinalIncumbent){
 		String rPath = temporaryDirPath+"/"+configurationRankingPath;
 		//Ranking
 		forceAverages();
@@ -132,15 +142,15 @@ public class ConfigurationCollection extends XmlSerializable{
 		assignIdentifiers(temporaryDirPath);
 
 		//If the list is larger than N, slicing it to size N
-		List<Configuration> slicedList = Util.getSlicedList(mConfigurations,0,(n<mConfigurations.size()-1)?(n):(mConfigurations.size()-1));//(ArrayList<Configuration>) mConfigurations.subList(0,  (n<mConfigurations.size())?(n):(mConfigurations.size())  );
-		ConfigurationCollection spitMe = new ConfigurationCollection(slicedList);
+		// List<Configuration> slicedList = Util.getSlicedList(mConfigurations,0,(n<mConfigurations.size()-1)?(n):(mConfigurations.size()-1));//(ArrayList<Configuration>) mConfigurations.subList(0,  (n<mConfigurations.size())?(n):(mConfigurations.size())  );
+		// ConfigurationCollection spitMe = new ConfigurationCollection(slicedList);
 
 		//Spitting to xml
 		Util.initializeFile(rPath);
-		spitMe.toXML(rPath); //Ba dum tss
+		this.toXML(rPath);
 
 		//Returns the list because why not
-		return slicedList;
+		return mConfigurations;
 	}
 
 	private void assignIdentifiers(String temporaryDirPath){

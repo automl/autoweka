@@ -185,6 +185,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     /** The evaluation for the best classifier. */
     protected Evaluation eval;
 
+	 private List<Configuration> finalEnsemble;
+
     private transient weka.gui.Logger wLog;
 
     /**
@@ -239,6 +241,11 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         } else if(classAttr.isNumeric()) {
             exp.resultMetric = "rmse";
         }
+
+		  //
+		  if(ensembleSelection && nBestConfigs>1){
+			  //Handle@
+		  }
 
         Properties props = Util.parsePropertyString("type=trainTestArff:testArff=__dummy__");
         ArffSaver saver = new ArffSaver();
@@ -361,16 +368,17 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         // I do realize it is silly to do an if/else statement like the one below, containing the same code for training the model etc
 		  //right now its written like this to avoid calling a function with far too many arguments and a weird output. Will try to fix.
 
-		  if (ensembleSelection){
+		  ConfigurationCollection cc = new ConfigurationCollection(msExperimentPath+expName+"/"+foldwiseLogPath);
+		  cc.rank(msExperimentPath+expName,mBest.rawArgs);
 
-			ConfigurationCollection cc = new ConfigurationCollection(msExperimentPath+expName+"/"+foldwiseLogPath);
-			cc.rank(nBestConfigs , mBest.rawArgs,msExperimentPath+expName);
+
+		  if (ensembleSelection){
 
 			long startTime= System.nanoTime();
          Ensembler e = new Ensembler(msExperimentPath+expName+"/");
-	   	List<Configuration> ensemble = e.hillclimb();
+	   	finalEnsemble = e.hillclimb();
 
-			for(Configuration c : ensemble){
+			for(Configuration c : finalEnsemble){
 				WekaArgumentConverter.Arguments wekaArgs = WekaArgumentConverter.convert(Arrays.asList(c.getArgStrings().split(" ")));
 
 				classifierClass = wekaArgs.propertyMap.get("targetclass");
@@ -906,6 +914,42 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             res += "\n";
             res += eval.toClassDetailsString();
         } catch(Exception e) { }
+
+		  if(nBestConfigs>1){
+
+			  ConfigurationCollection cc = ConfigurationCollection.fromXML(msExperimentPath+expName+"/"+configurationRankingPath,ConfigurationCollection.class);
+			  List<Configuration> ccAL = cc.asArrayList();
+			  int fullyEvaluatedAmt = cc.getFullyEvaluatedAmt();
+
+			  int smallest = (fullyEvaluatedAmt<nBestConfigs)?fullyEvaluatedAmt:nBestConfigs;
+			  res+= "\n\n------- "+smallest+" BEST CONFIGURATIONS -------";
+			  res+= "\n\nThese are  the "+smallest+" best configurations, as ranked by SMAC";
+			  res+= "\nPlease note that this list only contains fully evaluated configurations, i.e. those evaluated on every fold.";
+			  if(fullyEvaluatedAmt<nBestConfigs){
+				 res+="\nThis is less than the amount of classifiers you requested ("+nBestConfigs+") because Auto-WEKA didn't have";
+				 res+="\nenough time to fully evaluate the requested amount of configurations. If you need more than that, consider giving Auto-WEKA more time.";
+			  }
+
+			  for(int i = 0;i<fullyEvaluatedAmt && i<nBestConfigs ;i++){
+				 res+= "\n\nConfiguration #"+(i+1)+":\nSMAC Score: "+ccAL.get(i).getAverageScore()+"\nArgument String:\n"+ccAL.get(i).getArgStrings();
+			  }
+			  res+="\n\n----END OF CONFIGURATION RANKING----";
+		  }
+
+		  if(ensembleSelection){
+
+			  res+=  "\n\n------- ENSEMBLE OF MODELS -------";
+			  if(finalEnsemble.size()<=1){
+				  res+= "\nCouldn't build any ensemble with a better performance than the single best configuration found by Auto-WEKA.";
+				  res+= "\nThis is not necessarily a bad thing; the best configuration might just be so good that combining it with less efficient";
+				  res+= "\nmodels makes the predictions worse.";
+			  }else{
+				  for(int i = 0;i<finalEnsemble.size() ;i++){
+					  res+= "\n\nConfiguration #"+(i+1)+":\nSMAC Score: "+finalEnsemble.get(i).getAverageScore()+"\nArgument String:\n"+finalEnsemble.get(i).getArgStrings();
+				  }
+			  }
+			  res+="\n\n----END OF ENSEMBLE----";
+		  }
 
         res += "\n\nFor better performance, try giving Auto-WEKA more time.";
         return res;

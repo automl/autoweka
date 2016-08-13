@@ -91,7 +91,7 @@ public class ConfigurationTester{
 
 
     ConfigurationCollection cc = ConfigurationCollection.fromXML(sortedTestLog, ConfigurationCollection.class);
-	 cc.rank(1000,"test/experiment_folder/Auto-WEKA");
+	 cc.rank("test/experiment_folder/Auto-WEKA");
     double bestScore = cc.get(0).getAverageScore();
     int    amtFolds  = cc.get(0).getFolds().size();
 

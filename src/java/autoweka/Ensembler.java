@@ -44,12 +44,12 @@ public class Ensembler{
 		rPath   = temporaryDirPath+configurationRankingPath;
 		cmPath  = temporaryDirPath+configurationMapPath;
 
-			long startTime= System.nanoTime();
+			// long startTime= System.nanoTime();
 		mCfgList          = ConfigurationCollection.fromXML(rPath,ConfigurationCollection.class).asArrayList();
-			long endTime = System.nanoTime();
-			long totalTime = endTime-startTime;
-			long totalTimeSeconds = totalTime/1000000000;
-			System.out.println("@time for CC input: "+totalTime+" ms/"+totalTimeSeconds+" s");
+			// long endTime = System.nanoTime();
+			// long totalTime = endTime-startTime;
+			// long totalTimeSeconds = totalTime/1000000000;
+			// System.out.println("@time for CC input: "+totalTime+" ms/"+totalTimeSeconds+" s");
 
 		mCfgMap				= Util.getConfigurationMap(cmPath);
 		mLabelMap         = new HashMap<String,Integer>();
@@ -121,62 +121,7 @@ public class Ensembler{
 		mLabelFrequencies.put(labelIndex,temp);
 	}
 
-	public void printArray(int [] array){
-		printArray(array,array.length);
-	}
-	public void printArray(int [] array, int limit){
-		String s =("\n[");
-		for(int i = 0; i < limit; i++){
-			s+=(array[i]+",");
-		}
-		s+=("]\n");
-		System.out.println(s);
-	}
-	public void printList(List list){
-		printList(list,list.size());
-	}
-	public void printList(List list,int limit){
-		String s =("\n[");
-		for(int i = 0; i < limit; i++){
-			s+=(list.get(i).toString()+",");
-		}
-		s+=("]\n");
-		System.out.println(s);
-	}
-	public void printListAliased(List list){
 
-		Map<Object,Integer> aliases = new HashMap<Object,Integer>();
-		int j=0;
-		for( Object s: list){
-			if(!aliases.containsKey(s)){
-				aliases.put(s,new Integer(j));
-				j++;
-			}
-		}
-
-		String s =("\n[");
-		for(int i = 0; i < list.size(); i++){
-			s+=(aliases.get(list.get(i))+",");
-		}
-		s+=("]\n");
-		System.out.println(s);
-	}
-
-	public void printBullshit(int opt, List<EnsembleElement> currentPartialEnsemble, List<Integer> hillclimbingStepPerformances, List<Configuration> rv){
-		if(opt==1){
-			System.out.println("@Full hillclimbing trajectory models:");
-			printList(currentPartialEnsemble);
-			printListAliased(currentPartialEnsemble);
-			System.out.println("@Full hillclimbing trajectory scores:");
-			printList(hillclimbingStepPerformances);
-		}else if (opt==2){
-			System.out.println("@Sliced hillclimbing trajectory models:");
-			printList(rv);
-			printListAliased(rv);
-			System.out.println("@Sliced hillclimbing trajectory scores:");
-			printList(hillclimbingStepPerformances,rv.size());
-		}
-	}
 
 	//The hillclimb method contains an implemention of Rich Caruana's Ensemble Selection, a greedy hillclimbing algorithm.
 	//I'm doing it the straightforward way. A faster way is feasible, but so far this one always takes less than a second anyway
@@ -206,8 +151,6 @@ public class Ensembler{
 			eeBatch.add(ee);
 		}
 
-		System.out.println("@eebatch");
-		printList(eeBatch);
 
 		//Initializing the ensemble
 		List<EnsembleElement> currentPartialEnsemble = new ArrayList<EnsembleElement>();
@@ -233,8 +176,6 @@ public class Ensembler{
 			}
 		}
 
-		printBullshit(1,currentPartialEnsemble,hillclimbingStepPerformances,null);
-
 		//Slicing from 0 to the first occurrence of the smallest error count
 		int sliceIndex = Util.indexMin(hillclimbingStepPerformances);
 		currentPartialEnsemble = Util.getSlicedList(currentPartialEnsemble,0,sliceIndex);
@@ -244,8 +185,6 @@ public class Ensembler{
 		for(EnsembleElement ee : currentPartialEnsemble){
 			rv.add(ee.getModel());
 		}
-
-		printBullshit(2,null,hillclimbingStepPerformances,rv);
 
 		return rv;
 	}
@@ -258,6 +197,7 @@ public class Ensembler{
 		for(int i = 0; i<eeBatch.size(); i++){
 			currentPartialEnsemble.add(eeBatch.get(i));
 			possibleChoicePerformances[i]=evaluateEnsemble(currentPartialEnsemble);
+			eeBatch.get(i).setPerformance(possibleChoicePerformances[i]);
 			currentPartialEnsemble.remove(currentPartialEnsemble.size()-1);
 		}
 
@@ -314,6 +254,7 @@ public class Ensembler{
 
 		private Configuration mModel;
 		private double mWeight;
+		private int mPerformance;
 		private int [] mPredictions;
 
 		public EnsembleElement(Configuration model, double weight){
@@ -325,6 +266,7 @@ public class Ensembler{
 			mModel = model;
 			mPredictions = new int[mAmtInstances];
 			mWeight=1;
+			mPerformance = 0;
 			try{
 				this.parseInstancewiseInfo();
 			}catch(FileNotFoundException e){
@@ -354,10 +296,12 @@ public class Ensembler{
 		}
 
 		public String toString()                  {  return Integer.toString(this.hashCode());	}
-		public int hashCode()                     {	return mModel.hashCode();	    	}
-		public String getArgStrings()             {  return mModel.getArgStrings(); 	}
-		public int getPrediction(int instanceNum) {  return mPredictions[instanceNum];}
-		public Configuration getModel()           {	return mModel;							}
+		public int hashCode()                     {	return mModel.hashCode();	    	         }
+		public String getArgStrings()             {  return mModel.getArgStrings(); 	         }
+		public int getPrediction(int instanceNum) {  return mPredictions[instanceNum];         }
+		public Configuration getModel()           {	return mModel;							         }
+		public int getPerformance()               {	return mPerformance;					         }
+		public void setPerformance(int p)         {	mPerformance = p;   					         }
 
 	}
 
