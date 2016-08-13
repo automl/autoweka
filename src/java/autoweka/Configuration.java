@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.*;
 	Wraps a configuration and the evaluation(s) SMAC performed on it.
 */
 
-
+ 
 @XmlRootElement(name="configuration")
 public class Configuration extends XmlSerializable implements Comparable{
 
