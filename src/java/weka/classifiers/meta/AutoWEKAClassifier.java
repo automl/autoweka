@@ -42,13 +42,14 @@ import weka.core.Utils;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 
 import java.nio.file.Files;
-
+import java.text.DecimalFormat;
 import java.net.URLDecoder;
-
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -101,6 +102,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     static final int DEFAULT_MEM_LIMIT = 1024;
     /** Default */
     static final int DEFAULT_N_BEST = 1;
+    static final int DEFAULT_SHOW_DETAILED_RESULTS = 0;
+    
     /** Internal evaluation method. */
     static enum Resampling {
         CrossValidation,
@@ -179,6 +182,10 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     protected Evaluation eval;
 
     private transient weka.gui.Logger wLog;
+
+	private int nDetailedResults;
+
+	private String detailedResultString;
 
     /**
      * Main method for testing this class.
@@ -367,6 +374,42 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         log.info("classifier: {}, arguments: {}, attribute search: {}, attribute search arguments: {}, attribute evaluation: {}, attribute evaluation arguments: {}",
             classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
 
+        if (nDetailedResults > 0) {
+        	String indvResultsFile = "individual-results.tsv"; // TODO
+        	BufferedReader reader = new BufferedReader(new FileReader(new File(msExperimentPath + expName, indvResultsFile)));
+
+        	Map<String, ConfigurationStats> totals = new HashMap<>(); 
+        	for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+        		String[] parts = line.split("\t");
+        		String id = parts[0] + ":" + parts[1] + ", ";
+        		id += parts[2] + ": " + parts[3] + ", ";
+        		id += parts[4] + ": " + parts[5];
+        		ConfigurationStats stats = totals.get(id);
+        		if (stats == null) {
+        			stats = new ConfigurationStats(id);
+        			totals.put(id, stats);
+        		}
+        		stats.addValue(Double.parseDouble(parts[7]));
+        	}
+        	StringBuilder builder = new StringBuilder();
+        	builder.append("======= Detailed Results ======").append("\n");
+        	List<ConfigurationStats> sorted = new ArrayList<>(totals.values());
+        	Collections.sort(sorted);
+        	int remaining = Math.min(nDetailedResults, sorted.size());
+        	for (ConfigurationStats stats : sorted) {
+        		// TODO: Ignore config stats that do not have enough data to be meaningful
+        		builder.append(stats.toString()).append("\n");
+        		remaining--;
+        		if (remaining == 0) {
+        			break;
+        		}
+        	}
+        	if (remaining > 0)
+        		builder.append(remaining + " other results truncated");
+        	builder.append("\n");
+        	detailedResultString = builder.toString();
+        	reader.close();
+        }
 
         //Print log of best configurations
         if (nBestConfigs>1){
@@ -446,6 +489,9 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.addElement(
             new Option("\tThe amount of best configurations to return.\n" + "\t(default: " + DEFAULT_MEM_LIMIT + ")",
                 "nBestConfigs", 1, "-nBestConfigs <limit>"));
+        result.addElement(
+                new Option("\tThe number of detailed results that should be shown.\n" + "\t(default: " + DEFAULT_SHOW_DETAILED_RESULTS + ")",
+                    "nDetailedResults", 1, "-nDetailedResults <n>"));
         //result.addElement(
         //    new Option("\tThe type of resampling used.\n" + "\t(default: " + String.valueOf(DEFAULT_RESAMPLING) + ")",
         //        "resampling", 1, "-resampling <resampling>"));
@@ -527,6 +573,13 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             nBestConfigs = Integer.parseInt(tmpStr);
         } else {
             nBestConfigs = DEFAULT_N_BEST;
+        }
+        
+        tmpStr = Utils.getOption("nDetailedResults", options);
+        if (tmpStr.length() != 0) {
+            nDetailedResults = Integer.parseInt(tmpStr);
+        } else {
+        	nDetailedResults = DEFAULT_SHOW_DETAILED_RESULTS;
         }
 
 
@@ -784,6 +837,12 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             res += eval.toClassDetailsString();
         } catch(Exception e) { /*TODO treat*/ }
 
+          if (nDetailedResults > 0) {
+        	  res += "\n";
+        	  res += detailedResultString;
+        	  res += "\n";
+          }
+        
 		  if(nBestConfigs>1){
 			  
 			  ConfigurationCollection cc = ConfigurationCollection.fromXML(msExperimentPath+expName+"/"+configurationRankingPath,ConfigurationCollection.class);
@@ -835,5 +894,40 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             throw new IllegalArgumentException(additionalMeasureName
                     + " not supported (Auto-WEKA)");
         }
+  }
+    
+  private static class ConfigurationStats implements Comparable<ConfigurationStats> {
+	private static final DecimalFormat df = new DecimalFormat("0.00");
+	int n;
+	double total;
+	String id;
+	  
+	public ConfigurationStats(String id) {
+		this.id = id;
+	}
+	
+	public void addValue(double value) {
+		total += value;
+		// TODO: might be useful to hold on to the individual values and/or compute additional summary stats
+		n++;
+	}
+	
+	public double getTotalRuns() {
+		return total;
+	}
+	
+	public double getAverageScore() {
+		return total / n;
+	}
+	
+	@Override
+	public int compareTo(ConfigurationStats o) {
+		return Double.compare(this.getAverageScore(), o.getAverageScore());
+	}
+	
+	@Override
+	public String toString() {
+		return  df.format(total/n) + " (" + df.format(total) + " / " + n + "): " + id;
+	}
   }
 }

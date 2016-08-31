@@ -42,6 +42,7 @@ public class ClassifierRunner
     private boolean mDisableOutput = false;
     private java.io.PrintStream mSavedOutput = null;
     private String mPredictionsFileName = null;
+	private String mIndividualResultsFileName;
 
     /**
      * Prepares a runner with the specified properties.
@@ -58,6 +59,7 @@ public class ClassifierRunner
         mTestOnly = Boolean.valueOf(props.getProperty("onlyTest", "false"));
         mDisableOutput = Boolean.valueOf(props.getProperty("disableOutput", "false"));
         mPredictionsFileName = props.getProperty("predictionsFileName", null);
+        mIndividualResultsFileName = props.getProperty("individualResultsFile", "individual-results.tsv");
     }
 
     /**
@@ -313,6 +315,28 @@ public class ClassifierRunner
         attribEvalClassName, argMap.get("attributeeval"),
         attribSearchClassName, argMap.get("attributesearch"),
         instanceStr, res.getRawScore());
+        
+        try {
+        	FileWriter writer = new FileWriter(mIndividualResultsFileName, true);
+        	StringBuilder builder = new StringBuilder();
+        	String delim = "\t";
+			builder
+	        	.append(targetClassifierName).append(delim)
+	        	.append(Arrays.toString(argsArraySaved)).append(delim)
+	        	.append(attribEvalClassName).append(delim)
+	        	.append(argMap.get("attributeeval")).append(delim)
+	        	.append(attribSearchClassName).append(delim)
+	        	.append(argMap.get("attributesearch")).append(delim)
+	        	.append(instanceStr).append(delim)
+	        	.append(res.getRawScore()).append(delim)
+	        	.append("\n");
+        	writer.write(builder.toString());
+        	writer.flush();
+        	writer.close();
+        }
+        catch(IOException e) {
+        	log.error(e.toString());
+        }
 
         log.debug("Num Training: {}, num testing: {}", training.numInstances(), testing.numInstances());
         return res;

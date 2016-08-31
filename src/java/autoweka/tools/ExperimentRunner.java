@@ -2,6 +2,7 @@ package autoweka.tools;
 
 import java.io.File;
 import java.net.URLDecoder;
+import java.util.Arrays;
 
 import autoweka.Experiment;
 import autoweka.TrajectoryParser;
