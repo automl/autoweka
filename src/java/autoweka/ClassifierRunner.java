@@ -320,13 +320,20 @@ public class ClassifierRunner
         	FileWriter writer = new FileWriter(mIndividualResultsFileName, true);
         	StringBuilder builder = new StringBuilder();
         	String delim = "\t";
+
+        	List<String> attributeEvalArgs = argMap.get("attributeeval");
+			String strAttributeEvalArgs = attributeEvalArgs != null ? Util.joinStrings(" ",  attributeEvalArgs) : "";
+			
+			List<String> attributeSearchArgs = argMap.get("attributesearch");
+			String strAttributeSearchArgs = attributeSearchArgs != null ? Util.joinStrings(" ",  attributeSearchArgs) : "";
+			
 			builder
 	        	.append(targetClassifierName).append(delim)
 	        	.append(Util.joinStrings(" ",  argsArraySaved)).append(delim)
 	        	.append(attribEvalClassName).append(delim)
-	        	.append(Util.joinStrings(" ",  argMap.getOrDefault("attributeeval", Collections.EMPTY_LIST))).append(delim)
+	        	.append(strAttributeEvalArgs).append(delim)
 	        	.append(attribSearchClassName).append(delim)
-	        	.append(Util.joinStrings(" ",  argMap.getOrDefault("attributesearch", Collections.EMPTY_LIST))).append(delim)
+	        	.append(strAttributeSearchArgs).append(delim)
 	        	.append(instanceStr).append(delim)
 	        	.append(res.getRawScore()).append(delim)
 	        	.append("\n");
