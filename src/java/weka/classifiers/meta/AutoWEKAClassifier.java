@@ -168,6 +168,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     protected int memLimit = DEFAULT_MEM_LIMIT;
     /** The amout of best configurations to return as output*/
     protected int nBestConfigs = DEFAULT_N_BEST;
+    /** The number of detailed configurations to list in the output (SMAC score and options)*/
+    protected int nDetailedResults;
     /** The internal evaluation method. */
     protected Resampling resampling = DEFAULT_RESAMPLING;
     /** The arguments to the evaluation method. */
@@ -182,8 +184,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     protected Evaluation eval;
 
     private transient weka.gui.Logger wLog;
-
-	private int nDetailedResults;
 
 	private String detailedResultString;
 
@@ -378,12 +378,13 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         	String indvResultsFile = "individual-results.tsv"; // TODO
         	BufferedReader reader = new BufferedReader(new FileReader(new File(msExperimentPath + expName, indvResultsFile)));
 
-        	Map<String, ConfigurationStats> totals = new HashMap<>(); 
+        	Map<String, ConfigurationStats> totals = new HashMap<String, ConfigurationStats>(); 
         	for (String line = reader.readLine(); line != null; line = reader.readLine()) {
         		String[] parts = line.split("\t");
-        		String id = parts[0] + ":" + parts[1] + ", ";
-        		id += parts[2] + ": " + parts[3] + ", ";
-        		id += parts[4] + ": " + parts[5];
+        		String classifierName = parts[0];
+				String id = classifierName + " " + parts[1] + ", ";
+        		id += parts[2] + " " + parts[3] + ", ";
+        		id += parts[4] + " " + parts[5];
         		ConfigurationStats stats = totals.get(id);
         		if (stats == null) {
         			stats = new ConfigurationStats(id);
@@ -392,8 +393,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         		stats.addValue(Double.parseDouble(parts[7]));
         	}
         	StringBuilder builder = new StringBuilder();
-        	builder.append("======= Detailed Results ======").append("\n");
-        	List<ConfigurationStats> sorted = new ArrayList<>(totals.values());
+        	builder.append("\n======= Detailed Results ======").append("\n\n");
+        	List<ConfigurationStats> sorted = new ArrayList<ConfigurationStats>(totals.values());
         	Collections.sort(sorted);
         	int remaining = Math.min(nDetailedResults, sorted.size());
         	for (ConfigurationStats stats : sorted) {
@@ -527,6 +528,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.add("" + memLimit);
         result.add("-nBestConfigs");
         result.add("" + nBestConfigs);
+        result.add("-nDetailedResults");
+        result.add("" + nDetailedResults);
         //result.add("-resampling");
         //result.add("" + resampling);
         //result.add("-resamplingArgs");
@@ -697,6 +700,21 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
    }
 
    /**
+    * @return the number of detailed configs to show
+    */
+   public int getnDetailedResults() {
+	return nDetailedResults;
+   }
+   
+   /**
+    * Sets the number of detailed configs to show
+    * @param nDetailedResults the number of detailed configs to show
+ 	*/
+   public void setnDetailedResults(int nDetailedResults) {
+	this.nDetailedResults = nDetailedResults;
+   }
+
+   /**
     * Returns the tip text for this property.
     * @return tip text for this property
     */
@@ -704,7 +722,15 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
        return "How many of the best configurations should be returned as output";
    }
 
+   /**
+    * Returns the tip text for this property.
+    * @return tip text for this property
+    */
+   public String nDetailedResultsTipText() {
+       return "How many of the best individual runs should be show in the output";
+   }
 
+   
     //public void setResampling(Resampling r) {
     //    resampling = r;
     //    resamplingArgs = resamplingArgsMap.get(r);

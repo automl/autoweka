@@ -17,7 +17,7 @@ import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
 import java.util.Map;
 import java.util.Arrays;
-
+import java.util.Collections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -322,11 +322,11 @@ public class ClassifierRunner
         	String delim = "\t";
 			builder
 	        	.append(targetClassifierName).append(delim)
-	        	.append(Arrays.toString(argsArraySaved)).append(delim)
+	        	.append(Util.joinStrings(" ",  argsArraySaved)).append(delim)
 	        	.append(attribEvalClassName).append(delim)
-	        	.append(argMap.get("attributeeval")).append(delim)
+	        	.append(Util.joinStrings(" ",  argMap.getOrDefault("attributeeval", Collections.EMPTY_LIST))).append(delim)
 	        	.append(attribSearchClassName).append(delim)
-	        	.append(argMap.get("attributesearch")).append(delim)
+	        	.append(Util.joinStrings(" ",  argMap.getOrDefault("attributesearch", Collections.EMPTY_LIST))).append(delim)
 	        	.append(instanceStr).append(delim)
 	        	.append(res.getRawScore()).append(delim)
 	        	.append("\n");
