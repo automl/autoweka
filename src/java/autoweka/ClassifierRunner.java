@@ -17,7 +17,7 @@ import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
 import java.util.Map;
 import java.util.Arrays;
-
+import java.util.Collections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +42,7 @@ public class ClassifierRunner
     private boolean mDisableOutput = false;
     private java.io.PrintStream mSavedOutput = null;
     private String mPredictionsFileName = null;
+	private String mIndividualResultsFileName;
 
     /**
      * Prepares a runner with the specified properties.
@@ -58,6 +59,7 @@ public class ClassifierRunner
         mTestOnly = Boolean.valueOf(props.getProperty("onlyTest", "false"));
         mDisableOutput = Boolean.valueOf(props.getProperty("disableOutput", "false"));
         mPredictionsFileName = props.getProperty("predictionsFileName", null);
+        mIndividualResultsFileName = props.getProperty("individualResultsFile", "individual-results.tsv");
     }
 
     /**
@@ -313,6 +315,35 @@ public class ClassifierRunner
         attribEvalClassName, argMap.get("attributeeval"),
         attribSearchClassName, argMap.get("attributesearch"),
         instanceStr, res.getRawScore());
+        
+        try {
+        	FileWriter writer = new FileWriter(mIndividualResultsFileName, true);
+        	StringBuilder builder = new StringBuilder();
+        	String delim = "\t";
+
+        	List<String> attributeEvalArgs = argMap.get("attributeeval");
+			String strAttributeEvalArgs = attributeEvalArgs != null ? Util.joinStrings(" ",  attributeEvalArgs) : "";
+			
+			List<String> attributeSearchArgs = argMap.get("attributesearch");
+			String strAttributeSearchArgs = attributeSearchArgs != null ? Util.joinStrings(" ",  attributeSearchArgs) : "";
+			
+			builder
+	        	.append(targetClassifierName).append(delim)
+	        	.append(Util.joinStrings(" ",  argsArraySaved)).append(delim)
+	        	.append(attribEvalClassName).append(delim)
+	        	.append(strAttributeEvalArgs).append(delim)
+	        	.append(attribSearchClassName).append(delim)
+	        	.append(strAttributeSearchArgs).append(delim)
+	        	.append(instanceStr).append(delim)
+	        	.append(res.getRawScore()).append(delim)
+	        	.append("\n");
+        	writer.write(builder.toString());
+        	writer.flush();
+        	writer.close();
+        }
+        catch(IOException e) {
+        	log.error(e.toString());
+        }
 
         log.debug("Num Training: {}, num testing: {}", training.numInstances(), testing.numInstances());
         return res;
