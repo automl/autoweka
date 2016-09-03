@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersmetastacking_00_X 10 -_0__wekaclassifiersmetastacking_01_S 1 -_1_00_0_QUOTE_START_B weka.classifiers.trees.REPTree -_1_00_1__wekaclassifierstreesreptree_00_INT_M 17 -_1_00_1__wekaclassifierstreesreptree_01_V 0.023238280919087147 -_1_00_1__wekaclassifierstreesreptree_02_depth_HIDDEN 1 -_1_00_1__wekaclassifierstreesreptree_04_2_INT_L 13 -_1_00_1__wekaclassifierstreesreptree_05_P REMOVED -_1_00_2_QUOTE_END REMOVED -_HIDDEN_ensemble_depth 0 -aseval__wekaattributeselectioncfssubseteval_00_0_M REMOVE_PREV -aseval__wekaattributeselectioncfssubseteval_01_1_L REMOVED -assearch__wekaattributeselectionbestfirst_00_0_D 1 -assearch__wekaattributeselectionbestfirst_01_1_INT_N 10 -attributeeval weka.attributeSelection.CfsSubsetEval -attributesearch weka.attributeSelection.BestFirst -attributetime 15.0 -targetclass weka.classifiers.meta.Stacking </argStrings>
+    <evaluatedScore>7.575757575757578</evaluatedScore>
+    <evaluatedFold>5</evaluatedFold>
+    <folds>5</folds>
+    <scores>7.575757575757578</scores>
+    <avgScore>7.575757575757578</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

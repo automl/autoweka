@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.*;
 	Wraps a configuration and the evaluation(s) SMAC performed on it.
 */
 
- 
+ //deixar o head
 @XmlRootElement(name="configuration")
 public class Configuration extends XmlSerializable implements Comparable{
 
@@ -137,6 +137,5 @@ public class Configuration extends XmlSerializable implements Comparable{
 	public List<String> getFolds() 	 { return mFolds;			}
 	public List<String> getScores()   { return mScores;		}
 	public void setIdentifier(int id) { mIdentifier = id;		}
-
 
 }

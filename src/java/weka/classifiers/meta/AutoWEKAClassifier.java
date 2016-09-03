@@ -103,9 +103,9 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     static final int DEFAULT_MEM_LIMIT = 1024;
     /** Default */
     static final int DEFAULT_N_BEST = 1;
-	 /** Default */
-    static final boolean DEFAULT_ENSEMBLE_SELECTION = false;
 
+	 /** Default option for ensemble selection */
+    static final boolean DEFAULT_ENSEMBLE_SELECTION = false;
 
     /** Internal evaluation method. */
     static enum Resampling {
@@ -172,6 +172,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     protected int memLimit = DEFAULT_MEM_LIMIT;
     /** The amout of best configurations to return as output*/
     protected int nBestConfigs = DEFAULT_N_BEST;
+
 	 /** The amout of best configurations to return as output*/
 	 protected boolean ensembleSelection = DEFAULT_ENSEMBLE_SELECTION;
 
@@ -285,6 +286,15 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 		  Util.initializeFile(temporaryDirPath+configurationMapPath);
 
 
+        //Initializing logs
+        if(nBestConfigs>1){
+            String temporaryDirPath = msExperimentPath+expName+"/"; //TODO make this a global
+            Util.makePath(temporaryDirPath+configurationInfoDirPath);
+            Util.initializeFile(temporaryDirPath+configurationRankingPath);
+            Util.initializeFile(temporaryDirPath+configurationHashSetPath);
+        }
+
+
         // run experiment
         Thread worker = new Thread(new Runnable() {
             public void run() {
@@ -373,8 +383,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
 		  ConfigurationCollection cc = new ConfigurationCollection(msExperimentPath+expName+"/"+foldwiseLogPath);
 		  cc.rank(msExperimentPath+expName,mBest.rawArgs);
-
-
 
 		  if (ensembleSelection){
 
@@ -548,7 +556,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 		  result.addElement(
            new Option("\tIf you want to use the ensemble selection feature.\n" + "\t(default: " + DEFAULT_ENSEMBLE_SELECTION + ")",
                "ensembleSelectioncr", 1, "-ensembleSelection <limit>"));
-
         //result.addElement(
         //    new Option("\tThe type of resampling used.\n" + "\t(default: " + String.valueOf(DEFAULT_RESAMPLING) + ")",
         //        "resampling", 1, "-resampling <resampling>"));
@@ -586,7 +593,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.add("" + nBestConfigs);
 		  result.add("-ensembleSelection");
 		  result.add("" + ensembleSelection);
-
         //result.add("-resampling");
         //result.add("" + resampling);
         //result.add("-resamplingArgs");
@@ -642,7 +648,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 		  } else {
 				ensembleSelection = DEFAULT_ENSEMBLE_SELECTION;
 		  }
-
 
         //tmpStr = Utils.getOption("resampling", options);
         //if (tmpStr.length() != 0) {
@@ -750,7 +755,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
    }
 
    /**
-
     * Get the maximum amount of configurations to be given as output
     * @return The amount of best configurations that will be given as output
     */
@@ -929,10 +933,10 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 		  if(nBestConfigs>1){
 
 
+
 			  ConfigurationCollection cc = ConfigurationCollection.fromXML(msExperimentPath+expName+"/"+configurationRankingPath,ConfigurationCollection.class);
 			  List<Configuration> ccAL = cc.asArrayList();
 			  int fullyEvaluatedAmt = cc.getFullyEvaluatedAmt();
-
 
 			  int smallest = (fullyEvaluatedAmt<nBestConfigs)?fullyEvaluatedAmt:nBestConfigs;
 			  res+= "\n\n------- "+smallest+" BEST CONFIGURATIONS -------";

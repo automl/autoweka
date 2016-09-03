@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersbayesnaivebayes_00_K REMOVE_PREV -_0__wekaclassifiersbayesnaivebayes_01_D REMOVE_PREV -attributesearch NONE -attributetime 15.0 -targetclass weka.classifiers.bayes.NaiveBayes </argStrings>
+    <evaluatedScore>3.0188679245283083</evaluatedScore>
+    <evaluatedFold>1</evaluatedFold>
+    <folds>1</folds>
+    <scores>3.0188679245283083</scores>
+    <avgScore>3.0188679245283083</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

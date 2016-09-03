@@ -72,9 +72,7 @@ public class ConfigurationTester{
 
     for (int i = 0; i<amtIterations; i++){
       double score = rg.nextDouble()%20;
-
       c1.update(rg.nextInt(amtIterations),score); //its okay if we get two identical folds
-
       sum+=score;
     }
 
@@ -87,17 +85,15 @@ public class ConfigurationTester{
 
     String sortedTestLog = "test/experiment_folder/Auto-WEKA/EnsemblerLogging/configuration_ranking.xml" ;
 
-
     try{
       Util.initializeFile(sortedTestLog);
     }catch(Exception e){
       System.out.println("Couldn't initialize sortedTestLog.xml");
     }
 
-
-
     ConfigurationCollection cc = ConfigurationCollection.fromXML(sortedTestLog, ConfigurationCollection.class);
 	 cc.rank("test/experiment_folder/Auto-WEKA");
+
 
     double bestScore = cc.get(0).getAverageScore();
     int    amtFolds  = cc.get(0).getFolds().size();

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifierstreesj48_00_O REMOVE_PREV -_0__wekaclassifierstreesj48_02_B REMOVE_PREV -_0__wekaclassifierstreesj48_03_J REMOVED -_0__wekaclassifierstreesj48_04_A REMOVED -_0__wekaclassifierstreesj48_05_S REMOVED -_0__wekaclassifierstreesj48_06_INT_M 3 -_0__wekaclassifierstreesj48_07_C_HIDDEN 0 -attributesearch NONE -attributetime 15.0 -targetclass weka.classifiers.trees.J48 </argStrings>
+    <evaluatedScore>0.0</evaluatedScore>
+    <evaluatedFold>0</evaluatedFold>
+    <folds>0</folds>
+    <folds>5</folds>
+    <folds>1</folds>
+    <folds>7</folds>
+    <folds>9</folds>
+    <folds>3</folds>
+    <folds>6</folds>
+    <folds>4</folds>
+    <folds>8</folds>
+    <folds>2</folds>
+    <scores>0.0</scores>
+    <scores>1.1363636363636402</scores>
+    <scores>0.0</scores>
+    <scores>0.0</scores>
+    <scores>0.0</scores>
+    <scores>1.5151515151515156</scores>
+    <scores>0.0</scores>
+    <scores>0.7575757575757507</scores>
+    <scores>0.37878787878787534</scores>
+    <scores>0.37878787878787534</scores>
+    <avgScore>0.0</avgScore>
+    <amtScores>10</amtScores>
+    <amtFolds>10</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

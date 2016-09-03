@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifiersfunctionssimplelogistic_00_S REMOVED -_0__wekaclassifiersfunctionssimplelogistic_01_W_HIDDEN 0 -_0__wekaclassifiersfunctionssimplelogistic_02_1_W 0 -_0__wekaclassifiersfunctionssimplelogistic_04_A REMOVED -attributesearch NONE -attributetime 15.0 -targetclass weka.classifiers.functions.SimpleLogistic </argStrings>
+    <evaluatedScore>4.545454545454547</evaluatedScore>
+    <evaluatedFold>7</evaluatedFold>
+    <folds>7</folds>
+    <scores>4.545454545454547</scores>
+    <avgScore>4.545454545454547</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

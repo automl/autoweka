@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifierstreesj48_00_O REMOVED -_0__wekaclassifierstreesj48_02_B REMOVED -_0__wekaclassifierstreesj48_03_J REMOVED -_0__wekaclassifierstreesj48_04_A REMOVED -_0__wekaclassifierstreesj48_05_S REMOVED -_0__wekaclassifierstreesj48_06_INT_M 1 -_0__wekaclassifierstreesj48_07_C_HIDDEN 0 -aseval__wekaattributeselectioncfssubseteval_00_0_M REMOVE_PREV -aseval__wekaattributeselectioncfssubseteval_01_1_L REMOVE_PREV -assearch__wekaattributeselectionbestfirst_00_0_D 0 -assearch__wekaattributeselectionbestfirst_01_1_INT_N 6 -attributeeval weka.attributeSelection.CfsSubsetEval -attributesearch weka.attributeSelection.BestFirst -attributetime 15.0 -targetclass weka.classifiers.trees.J48 </argStrings>
+    <evaluatedScore>1.1363636363636402</evaluatedScore>
+    <evaluatedFold>8</evaluatedFold>
+    <folds>8</folds>
+    <scores>1.1363636363636402</scores>
+    <avgScore>1.1363636363636402</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

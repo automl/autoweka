@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <argStrings>-_0__wekaclassifierstreeslmt_00_B REMOVED -_0__wekaclassifierstreeslmt_01_R REMOVED -_0__wekaclassifierstreeslmt_02_C REMOVED -_0__wekaclassifierstreeslmt_03_P REMOVE_PREV -_0__wekaclassifierstreeslmt_04_INT_M 1 -_0__wekaclassifierstreeslmt_05_W_HIDDEN 1 -_0__wekaclassifierstreeslmt_07_2_W 0.5946906681938752 -_0__wekaclassifierstreeslmt_08_A REMOVE_PREV -attributesearch NONE -attributetime 15.0 -targetclass weka.classifiers.trees.LMT </argStrings>
+    <evaluatedScore>1.893939393939391</evaluatedScore>
+    <evaluatedFold>8</evaluatedFold>
+    <folds>8</folds>
+    <scores>1.893939393939391</scores>
+    <avgScore>1.893939393939391</avgScore>
+    <amtScores>1</amtScores>
+    <amtFolds>1</amtFolds>
+    <avgFlag>false</avgFlag>
+</configuration>

@@ -1,6 +1,7 @@
 
 package autoweka;
 
+<<<<<<< HEAD
 import java.util.Collections;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,6 @@ Also contains method for ranking the configurations.
 */
 @XmlRootElement(name="configurationCollection")
 public class ConfigurationCollection extends XmlSerializable{
-
 
 	//Indexes the existing Configurations by their ArgStrings for access purposes.
 	private Map<String, Configuration> mArgStringsMap;
@@ -101,7 +101,6 @@ public class ConfigurationCollection extends XmlSerializable{
 	public int size (){
 		return mConfigurations.size();
 	}
-
 
 	public ArrayList<Configuration> asArrayList(){
 		return mConfigurations;
