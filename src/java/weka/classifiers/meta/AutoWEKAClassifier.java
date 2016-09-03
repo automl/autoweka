@@ -286,15 +286,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 		  Util.initializeFile(temporaryDirPath+configurationMapPath);
 
 
-        //Initializing logs
-        if(nBestConfigs>1){
-            String temporaryDirPath = msExperimentPath+expName+"/"; //TODO make this a global
-            Util.makePath(temporaryDirPath+configurationInfoDirPath);
-            Util.initializeFile(temporaryDirPath+configurationRankingPath);
-            Util.initializeFile(temporaryDirPath+configurationHashSetPath);
-        }
-
-
+      
         // run experiment
         Thread worker = new Thread(new Runnable() {
             public void run() {

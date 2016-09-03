@@ -402,48 +402,52 @@ public class ClassifierRunner
         return true;
     }
 
-    protected void saveConfiguration(ClassifierResult res,List<String> args, String instanceStr){
-      //Checking if we're doing this logging for this run of autoweka
-      File sortedLog = new File(configurationRankingPath);
-      if (!sortedLog.exists()){
-        return;
-      }
 
-      //Setting up some basic stuff
-      Configuration ciConfig = new Configuration(args);
-      int ciHash             = ciConfig.hashCode();
-      String ciFilename      = configurationInfoDirPath+ciHash+".xml";
-      File ciFile            = new File(ciFilename);
-      String configIndex     = configurationHashSetPath;
+	 //This overloading is deprecated, but for some reason git threw it here. Leaving it here, but should probability
+	 // just delete it.
 
-      //Computing Score and fold ID
-      Properties pInstanceString = Util.parsePropertyString(instanceStr);
-      int ciFold     = Integer.parseInt(pInstanceString.getProperty("fold", "-1"));
-      double ciScore = res.getScore();
-
-      //Updating the configuration data
-      ciConfig.setEvaluationValues(ciScore,ciFold);
-
-      if (ciFile.exists()){
-        Configuration ciConfigFull = Configuration.fromXML(ciFilename,Configuration.class); //Find a faster way w/o IOs?
-        ciConfigFull.mergeWith(ciConfig);
-        ciConfigFull.toXML(ciFilename);
-      }else{
-        Util.initializeFile(ciFilename);
-        ciConfig.toXML(ciFilename);
-      }
-
-      //Updating the configuration list
-      try{
-          BufferedWriter fp = new BufferedWriter(new FileWriter(configurationHashSetPath,true));//true for appending
-          fp.write(ciHash+",");
-          fp.flush();
-          fp.close();
-      }catch(IOException e){
-          throw new RuntimeException("Couldn't write to configIndex");
-      }
-
-    }
+   //  protected void saveConfiguration(ClassifierResult res,List<String> args, String instanceStr){
+   //    //Checking if we're doing this logging for this run of autoweka
+   //    File sortedLog = new File(configurationRankingPath);
+   //    if (!sortedLog.exists()){
+   //      return;
+   //    }
+	 //
+   //    //Setting up some basic stuff
+   //    Configuration ciConfig = new Configuration(args);
+   //    //int ciHash             = ciConfig.hashCode();
+   //    //String ciFilename      = configurationInfoDirPath+ciHash+".xml";
+   //    //File ciFile            = new File(ciFilename);
+   //    //String configIndex     = configurationHashSetPath;
+	 //
+   //    //Computing Score and fold ID
+   //    Properties pInstanceString = Util.parsePropertyString(instanceStr);
+   //    int ciFold     = Integer.parseInt(pInstanceString.getProperty("fold", "-1"));
+   //    double ciScore = res.getScore();
+	 //
+   //    //Updating the configuration data
+   //    ciConfig.setEvaluationValues(ciScore,ciFold);
+	 //
+   //    if (ciFile.exists()){
+   //      Configuration ciConfigFull = Configuration.fromXML(ciFilename,Configuration.class); //Find a faster way w/o IOs?
+   //      ciConfigFull.mergeWith(ciConfig);
+   //      ciConfigFull.toXML(ciFilename);
+   //    }else{
+   //      Util.initializeFile(ciFilename);
+   //      ciConfig.toXML(ciFilename);
+   //    }
+	 //
+   //    //Updating the configuration list
+   //    try{
+   //        BufferedWriter fp = new BufferedWriter(new FileWriter(configurationHashSetPath,true));//true for appending
+   //        fp.write(ciHash+",");
+   //        fp.flush();
+   //        fp.close();
+   //    }catch(IOException e){
+   //        throw new RuntimeException("Couldn't write to configIndex");
+   //    }
+	 //
+   //  }
 
     protected void saveConfiguration(ClassifierResult res, String ciArgStrings, int ciFold){
 
@@ -483,9 +487,9 @@ public class ClassifierRunner
     class BuilderThread extends WorkerThread
     {
         private AbstractClassifier mClassifier;
+		  private Instances mTrainInstances;
 
         public BuilderThread(AbstractClassifier cls, Instances inst)
-		  private Instances mTrainInstances;
         {
             mClassifier = cls;
             mTrainInstances = inst;
