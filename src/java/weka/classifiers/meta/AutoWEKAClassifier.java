@@ -286,7 +286,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 		  Util.initializeFile(temporaryDirPath+configurationMapPath);
 
 
-      
+
         // run experiment
         Thread worker = new Thread(new Runnable() {
             public void run() {
@@ -376,7 +376,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 		  ConfigurationCollection cc = new ConfigurationCollection(msExperimentPath+expName+"/"+foldwiseLogPath);
 		  cc.rank(msExperimentPath+expName,mBest.rawArgs);
 
-		  if (ensembleSelection){
+		  if (ensembleSelection && (cc.asArrayList()).size() > 0 ){
 
 			long startTime= System.nanoTime();
          Ensembler e = new Ensembler(msExperimentPath+expName+"/");
