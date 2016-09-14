@@ -928,12 +928,13 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         //In case we get a RuntimeException here, Auto-WEKA was given so little time for the task (or the dataset is so huge) that it could
         //not analyze a single fold. Theres no point in adding anything else to the string, so let's just ask for more time and return.
-        ConfigurationCollection cc;
+        ConfigurationCollection cc=new;
         try{
          cc = ConfigurationCollection.fromXML(msExperimentPath+expName+"/"+configurationRankingPath,ConfigurationCollection.class);
         }catch( RuntimeException e){
           res+="\n\n Auto-WEKA didn't have enough time to evaluate any configuration fully. Therefore, your best option is to use the single classifier shown above.";
           res+= "\n\nFor a higher number of models, consider giving Auto-WEKA more time.";
+          return res;
         //  throw new NotEnoughTimeException();
         }
 
