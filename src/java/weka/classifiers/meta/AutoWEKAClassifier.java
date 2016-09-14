@@ -193,15 +193,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
     private transient weka.gui.Logger wLog;
 
-    //Exception to be thrown when Auto-WEKA hasn't been run yet when it is expected to have run.
-    //I've written this so that we fail by printing a string rather than throwing an uncatched exception.
-    private class NotEnoughTimeException extends RuntimeException{
-      public NotEnoughTimeException(){};
-      public NotEnoughTimeException(String input){
-        super(input);
-      }
-    }
-
     /**
      * Main method for testing this class.
      *
@@ -209,12 +200,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
      */
     public static void main(String[] argv) {
         // this always succeeds...
-
-         try{
           runClassifier(new AutoWEKAClassifier(), argv);
-         }catch(Exception e){
-           System.out.println("Unable to find a good configuration within the alloted time. Please allow more time and rerun. Caught in main");
-         }
     }
 
     /** Constructs a new AutoWEKAClassifier. */
@@ -461,7 +447,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
        eval.evaluateModel(classifier, is);
      }catch(NullPointerException e){
        System.out.println("---\n\n Auto-WEKA couldn't find any usable configuration within the alloted time.\n Please give Auto-WEKA more time.");
-       System.exit(1);//throw new NotEnoughTimeException();
+       System.exit(1);
      }
 
 
@@ -935,7 +921,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
           res+="\n\n Auto-WEKA didn't have enough time to evaluate any configuration fully. Therefore, your best option is to use the single classifier shown above.";
           res+= "\n\nFor a higher number of models, consider giving Auto-WEKA more time.";
           return res;
-        //  throw new NotEnoughTimeException();
         }
 
 			  List<Configuration> ccAL = cc.asArrayList();
