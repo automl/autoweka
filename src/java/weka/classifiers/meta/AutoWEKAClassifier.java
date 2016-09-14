@@ -934,7 +934,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         }catch( RuntimeException e){
           res+="\n\n Auto-WEKA didn't have enough time to evaluate any configuration fully. Therefore, your best option is to use the single classifier shown above.";
           res+= "\n\nFor a higher number of models, consider giving Auto-WEKA more time.";
-          throw new NotEnoughTimeException();
+        //  throw new NotEnoughTimeException();
         }
 
 			  List<Configuration> ccAL = cc.asArrayList();
