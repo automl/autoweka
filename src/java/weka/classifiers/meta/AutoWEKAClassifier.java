@@ -210,11 +210,11 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     public static void main(String[] argv) {
         // this always succeeds...
 
-        try{
+        // try{
           runClassifier(new AutoWEKAClassifier(), argv);
-        }catch(NotEnoughTimeException e){
-          System.out.println("Unable to find a good configuration within the alloted time. Please allow more time and rerun.");
-        }
+        // }catch(NotEnoughTimeException e){
+        //   System.out.println("Unable to find a good configuration within the alloted time. Please allow more time and rerun.");
+        // }
     }
 
     /** Constructs a new AutoWEKAClassifier. */
@@ -453,16 +453,17 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
      try{
        classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
+
+       is = as.reduceDimensionality(is);
+       classifier.buildClassifier(is);
+
+       eval = new Evaluation(is);
+       eval.evaluateModel(classifier, is);
      }catch(NullPointerException e){
        System.out.println("---\n\n Auto-WEKA couldn't find any usable configuration within the alloted time.\n Please give Auto-WEKA more time.");
-       throw new NotEnoughTimeException();
+       //throw new NotEnoughTimeException();
      }
 
-     is = as.reduceDimensionality(is);
-     classifier.buildClassifier(is);
-
-     eval = new Evaluation(is);
-     eval.evaluateModel(classifier, is);
 
 
     }
