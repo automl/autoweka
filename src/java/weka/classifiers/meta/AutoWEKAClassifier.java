@@ -441,6 +441,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
        classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
      }catch(NullPointerException e){
        System.out.println("---\n\n Auto-WEKA couldn't find any usable configuration within the alloted time.\n Please give Auto-WEKA more time.");
+       return;
      }
 
      is = as.reduceDimensionality(is);
