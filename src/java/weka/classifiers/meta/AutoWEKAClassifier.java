@@ -390,41 +390,21 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
 				    //Is there a AS search method?
 				    if(wekaArgs.propertyMap.containsKey("attributesearch") && !"NONE".equals(wekaArgs.propertyMap.get("attributesearch"))){
+
 				      attributeSearchClass = wekaArgs.propertyMap.get("attributesearch");
 				      String tempAttributeSearchArgs  = Util.joinStrings(" ", Util.quoteStrings(wekaArgs.argMap.get("attributesearch")));
 				      if(tempAttributeSearchArgs != null) {
 	   		    	 attributeSearchArgs = Util.splitQuotedString(tempAttributeSearchArgs).toArray(new String[0]);
 	   		      }
-				      attributeEvalClass = wekaArgs.propertyMap.get("attributeeval");
+
+              attributeEvalClass = wekaArgs.propertyMap.get("attributeeval");
 				      String tempAttributeEvalArgs  = Util.joinStrings(" ", Util.quoteStrings(wekaArgs.argMap.get("attributeeval")));
 				      if(mBest.attributeEvalArgs != null) {
-	 			  	   attributeEvalArgs = Util.splitQuotedString(mBest.attributeEvalArgs).toArray(new String[0]);
+	 			  	   attributeEvalArgs = Util.splitQuotedString(mBest.attributeEvalArgs).toArray(new String[0]); //TODO maybe I had to put "tempAttributeEvalArgs here?"
 	 			      }
-				    }
-				    log.info("classifier: {}, arguments: {}, attribute search: {}, attribute search arguments: {}, attribute evaluation: {}, attribute evaluation arguments: {}",
-              classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
 
-  			    // train model on entire dataset and save
-  			    as = new AttributeSelection();
+            }
 
-  			    if(attributeSearchClass != null) {
-  			      ASSearch asSearch = ASSearch.forName(attributeSearchClass, attributeSearchArgs.clone());
-  			      as.setSearch(asSearch);
-  			    }
-
-            if(attributeEvalClass != null) {
-  			      ASEvaluation asEval = ASEvaluation.forName(attributeEvalClass, attributeEvalArgs.clone());
-  			      as.setEvaluator(asEval);
-  			    }
-  			    as.SelectAttributes(is);
-
-  			    classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
-
-  			    is = as.reduceDimensionality(is);
-  			    classifier.buildClassifier(is);
-
-  			    eval = new Evaluation(is);
-  			    eval.evaluateModel(classifier, is);
 			  }
 
 		 }else{
@@ -439,32 +419,35 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 				 attributeEvalArgs = Util.splitQuotedString(mBest.attributeEvalArgs).toArray(new String[0]);
 			 }
 
-			 log.info("classifier: {}, arguments: {}, attribute search: {}, attribute search arguments: {}, attribute evaluation: {}, attribute evaluation arguments: {}",
-			    classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
-
-			 // train model on entire dataset and save
-			 as = new AttributeSelection();
-
-			 if(attributeSearchClass != null) {
-				 ASSearch asSearch = ASSearch.forName(attributeSearchClass, attributeSearchArgs.clone());
-				 as.setSearch(asSearch);
-			 }
-			 if(attributeEvalClass != null) {
-				 ASEvaluation asEval = ASEvaluation.forName(attributeEvalClass, attributeEvalArgs.clone());
-				 as.setEvaluator(asEval);
-			 }
-			 as.SelectAttributes(is);
-
-			 classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
-
-			 is = as.reduceDimensionality(is);
-			 classifier.buildClassifier(is);
-
-			 eval = new Evaluation(is);
-			 eval.evaluateModel(classifier, is);
-
 		 }
 
+     log.info("classifier: {}, arguments: {}, attribute search: {}, attribute search arguments: {}, attribute evaluation: {}, attribute evaluation arguments: {}",
+     classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
+
+     // train model on entire dataset and save
+     as = new AttributeSelection();
+
+     if(attributeSearchClass != null) {
+       ASSearch asSearch = ASSearch.forName(attributeSearchClass, attributeSearchArgs.clone());
+       as.setSearch(asSearch);
+     }
+     if(attributeEvalClass != null) {
+       ASEvaluation asEval = ASEvaluation.forName(attributeEvalClass, attributeEvalArgs.clone());
+       as.setEvaluator(asEval);
+     }
+     as.SelectAttributes(is);
+
+     try{
+       classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
+     }catch(NullPointerException e){
+       System.out.println("---\n\n Auto-WEKA couldn't find any usable configuration within the alloted time.\n Please give Auto-WEKA more time.");
+     }
+
+     is = as.reduceDimensionality(is);
+     classifier.buildClassifier(is);
+
+     eval = new Evaluation(is);
+     eval.evaluateModel(classifier, is);
 
 
     }
