@@ -210,11 +210,11 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     public static void main(String[] argv) {
         // this always succeeds...
 
-        // try{
+         try{
           runClassifier(new AutoWEKAClassifier(), argv);
-        // }catch(NotEnoughTimeException e){
-        //   System.out.println("Unable to find a good configuration within the alloted time. Please allow more time and rerun.");
-        // }
+         }catch(Exception e){
+           System.out.println("Unable to find a good configuration within the alloted time. Please allow more time and rerun. Caught in main");
+         }
     }
 
     /** Constructs a new AutoWEKAClassifier. */
