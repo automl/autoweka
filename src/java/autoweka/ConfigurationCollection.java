@@ -128,7 +128,16 @@ public class ConfigurationCollection extends XmlSerializable{
 	}
 
 	public List<Configuration> rank(String temporaryDirPath,String smacFinalIncumbent){
+
+		//If we have analyzed zero configurations in all folds throughout the run, just return it as it is ¯\_(ツ)_/¯
+		if(mConfigurations.size()==0){
+			return mConfigurations;
+		}
+
+		//Aliasing this:
 		String rPath = temporaryDirPath+"/"+configurationRankingPath;
+
+
 		//Ranking
 		forceAverages();
 		Collections.sort(mConfigurations);
