@@ -195,7 +195,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
     //Exception to be thrown when Auto-WEKA hasn't been run yet when it is expected to have run.
     //I've written this so that we fail by printing a string rather than throwing an uncatched exception.
-    private class NotEnoughTimeException extends Exception{
+    private class NotEnoughTimeException extends RuntimeException{
       public NotEnoughTimeException(){};
       public NotEnoughTimeException(String input){
         super(input);
