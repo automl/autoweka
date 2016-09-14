@@ -461,7 +461,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
        eval.evaluateModel(classifier, is);
      }catch(NullPointerException e){
        System.out.println("---\n\n Auto-WEKA couldn't find any usable configuration within the alloted time.\n Please give Auto-WEKA more time.");
-       //throw new NotEnoughTimeException();
+       System.exit();//throw new NotEnoughTimeException();
      }
 
 
