@@ -911,11 +911,12 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
       //if nBestConfigs>1, then we print in the output a section with min(nBestConfigs,fullyEvaluatedAmt) configurations.
 		  if(nBestConfigs>1){
 
+        //In case we get a RuntimeException here, Auto-WEKA was given so little time for the task (or the dataset is so huge) that it could
+        //not analyze a single fold. Theres no point in adding anything else to the string, so let's just ask for more time and return.
+        ConfigurationCollection cc;
         try{
-          ConfigurationCollection cc = ConfigurationCollection.fromXML(msExperimentPath+expName+"/"+configurationRankingPath,ConfigurationCollection.class);
+         cc = ConfigurationCollection.fromXML(msExperimentPath+expName+"/"+configurationRankingPath,ConfigurationCollection.class);
         }catch( RuntimeException e){
-          //In that case, Auto-WEKA was given so little time for the task (or the dataset is so huge) that it could not analyze a single fold.
-          //Theres no point in adding anything else to the string, so let's just ask for more time and return.
           res+="\n\n Auto-WEKA didn't have enough time to evaluate any configuration fully. Therefore, your best option is to use the single classifier shown above.";
           res+= "\n\nFor a higher number of models, consider giving Auto-WEKA more time.";
           return res;
