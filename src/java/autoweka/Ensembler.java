@@ -126,7 +126,7 @@ public class Ensembler{
 	//The hillclimb method contains an implemention of Rich Caruana's Ensemble Selection, a greedy hillclimbing algorithm.
 	//I'm doing it the straightforward way. A faster way is feasible, but so far this one always takes less than a second anyway
 
-	//You can call it with default values using this. Curse for its lack of support for default parameter values.
+	//You can call it with default values using this. Curse java for its lack of support for default parameter values.
 	public List<Configuration> hillclimb() throws FileNotFoundException,IOException{
 		return hillclimb(true,5,200,3);
 	}
