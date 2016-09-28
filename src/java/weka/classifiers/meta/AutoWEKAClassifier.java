@@ -232,8 +232,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     public void buildClassifier(Instances is) throws Exception {
 
         msExperimentPath = Files.createTempDirectory("autoweka").toString() + File.separator;
-	File tempdeleter = new File(msExperimentPath);
-	tempDeleter.deleteOnExit();
         getCapabilities().testWithFail(is);
 
         //Populate the experiment fields
