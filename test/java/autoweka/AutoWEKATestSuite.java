@@ -12,7 +12,9 @@ import autoweka.smac.SMACTrajectoryParserTester;
     MultiLevelTester.class,
     WekaArgumentConverterTester.class,
     ConfigurationTester.class,
-    SMACTrajectoryParserTester.class
+    SMACTrajectoryParserTester.class,
+	 EnsemblerTester.class
+
 })
 
 public class AutoWEKATestSuite

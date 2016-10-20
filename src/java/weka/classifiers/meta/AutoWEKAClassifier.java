@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Observable;
@@ -74,13 +75,14 @@ import autoweka.Util;
 import autoweka.Trajectory;
 import autoweka.TrajectoryGroup;
 import autoweka.TrajectoryMerger;
+import autoweka.Ensembler;
+import autoweka.WekaArgumentConverter;
 
 import autoweka.tools.GetBestFromTrajectoryGroup;
 
 
 import autoweka.Configuration;
 import autoweka.ConfigurationCollection;
-import autoweka.ConfigurationRanker;
 
 /**
  * Auto-WEKA interface for WEKA.
@@ -101,6 +103,10 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     static final int DEFAULT_MEM_LIMIT = 1024;
     /** Default */
     static final int DEFAULT_N_BEST = 1;
+
+	 /** Default option for ensemble selection */
+    static final boolean DEFAULT_ENSEMBLE_SELECTION = false;
+
     /** Internal evaluation method. */
     static enum Resampling {
         CrossValidation,
@@ -109,7 +115,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         TerminationHoldout
     }
     /** Default evaluation method. */
-    static final Resampling DEFAULT_RESAMPLING = Resampling.TerminationHoldout;
+    static final Resampling DEFAULT_RESAMPLING = Resampling.CrossValidation;
 
     /** Default arguments for the different evaluation methods. */
     static final Map<Resampling, String> resamplingArgsMap;
@@ -127,11 +133,13 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     static final String DEFAULT_EXTRA_ARGS = "initialIncumbent=RANDOM:acq-func=EI";
 
     /** The path for the sorted best configurations **/
-    public static final String configurationRankingPath = "ConfigurationLogging/configuration_ranking.xml";
-    /** The path for the log with the hashcodes for the configs we have **/
-    public static final String configurationHashSetPath = "ConfigurationLogging/configuration_hashes.txt";
-    /** The path for the directory with the configuration data and score **/
-    public static final String configurationInfoDirPath = "ConfigurationLogging/configurations/";
+    public static final String configurationRankingPath = "EnsemblerLogging/configuration_ranking.xml";
+	 /** The path for a map which assigns a number to every config evaluated by smac.**/
+	 public static final String configurationMapPath = "EnsemblerLogging/configuration_map.txt";
+	 /** The path for the log with the score for each fold of each configuration evaluated by SMAC **/
+    public static final String foldwiseLogPath = "EnsemblerLogging/foldwise_log.txt";
+    /** The path for the directory with the instancewise predictions for each config **/
+    public static final String instancewiseInfoDirPath  = "EnsemblerLogging/instancewisePredictions/";
 
 
     /** The chosen classifier. */
@@ -156,7 +164,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     protected static String msExperimentPath;
     /** The internal name of the experiment. */
     protected static String expName = "Auto-WEKA";
-
     /** The random seed. */
     protected int seed = 123;
     /** The time limit for running Auto-WEKA. */
@@ -165,6 +172,10 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     protected int memLimit = DEFAULT_MEM_LIMIT;
     /** The amout of best configurations to return as output*/
     protected int nBestConfigs = DEFAULT_N_BEST;
+
+	  /** The amout of best configurations to return as output*/
+	  protected boolean ensembleSelection = DEFAULT_ENSEMBLE_SELECTION;
+
     /** The internal evaluation method. */
     protected Resampling resampling = DEFAULT_RESAMPLING;
     /** The arguments to the evaluation method. */
@@ -178,6 +189,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     /** The evaluation for the best classifier. */
     protected Evaluation eval;
 
+	  private List<Configuration> finalEnsemble;
+
     private transient weka.gui.Logger wLog;
 
     /**
@@ -187,7 +200,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
      */
     public static void main(String[] argv) {
         // this always succeeds...
-        runClassifier(new AutoWEKAClassifier(), argv);
+          runClassifier(new AutoWEKAClassifier(), argv);
     }
 
     /** Constructs a new AutoWEKAClassifier. */
@@ -233,6 +246,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             exp.resultMetric = "rmse";
         }
 
+
+
         Properties props = Util.parsePropertyString("type=trainTestArff:testArff=__dummy__");
         ArffSaver saver = new ArffSaver();
         saver.setInstances(is);
@@ -260,14 +275,13 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         ExperimentConstructor.buildSingle("autoweka.smac.SMACExperimentConstructor", exp, args);
 
+        //Initializing logs for Ensemble Selection
+        String temporaryDirPath = msExperimentPath+expName+"/";
+        Util.makePath(temporaryDirPath+instancewiseInfoDirPath);
+        Util.initializeFile(temporaryDirPath+configurationRankingPath);
+        Util.initializeFile(temporaryDirPath+foldwiseLogPath);
+		    Util.initializeFile(temporaryDirPath+configurationMapPath);
 
-        //Initializing logs
-        if(nBestConfigs>1){
-            String temporaryDirPath = msExperimentPath+expName+"/"; //TODO make this a global
-            Util.makePath(temporaryDirPath+configurationInfoDirPath);
-            Util.initializeFile(temporaryDirPath+configurationRankingPath);
-            Util.initializeFile(temporaryDirPath+configurationHashSetPath);
-        }
 
 
         // run experiment
@@ -353,48 +367,117 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             throw new Exception("All runs timed out, unable to find good configuration. Please allow more time and rerun.");
         }
 
-        classifierClass = mBest.classifierClass;
-        classifierArgs = Util.splitQuotedString(mBest.classifierArgs).toArray(new String[0]);
-        attributeSearchClass = mBest.attributeSearchClass;
-        if(mBest.attributeSearchArgs != null) {
-            attributeSearchArgs = Util.splitQuotedString(mBest.attributeSearchArgs).toArray(new String[0]);
-        }
-        attributeEvalClass = mBest.attributeEvalClass;
-        if(mBest.attributeEvalArgs != null) {
-            attributeEvalArgs = Util.splitQuotedString(mBest.attributeEvalArgs).toArray(new String[0]);
-        }
+        // I do realize it is silly to do an if/else statement like the one below, containing the same code for training the model etc
+		    //right now its written like this to avoid calling a function with far too many arguments and a weird output. Will try to fix.
 
-        log.info("classifier: {}, arguments: {}, attribute search: {}, attribute search arguments: {}, attribute evaluation: {}, attribute evaluation arguments: {}",
-            classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
+		    ConfigurationCollection cc = new ConfigurationCollection(msExperimentPath+expName+"/"+foldwiseLogPath);
+
+        cc.rank(msExperimentPath+expName,mBest.rawArgs);
+
+		  if (ensembleSelection && (cc.asArrayList()).size() > 0){
+
+        long startTime= System.nanoTime();
+        Ensembler e = new Ensembler(msExperimentPath+expName+"/");
+	   	  finalEnsemble = e.hillclimb();
+
+			  for(Configuration c : finalEnsemble){
+
+  				  WekaArgumentConverter.Arguments wekaArgs = WekaArgumentConverter.convert(Arrays.asList(c.getArgStrings().split(" ")));
+
+				    classifierClass = wekaArgs.propertyMap.get("targetclass");
+				    String  tempClassifierArgs = Util.joinStrings(" ", Util.quoteStrings(wekaArgs.argMap.get("classifier")));
+				    classifierArgs = Util.splitQuotedString(tempClassifierArgs).toArray(new String[0]);
+
+				    //Is there a AS search method?
+				    if(wekaArgs.propertyMap.containsKey("attributesearch") && !"NONE".equals(wekaArgs.propertyMap.get("attributesearch"))){
+
+				      attributeSearchClass = wekaArgs.propertyMap.get("attributesearch");
+				      String tempAttributeSearchArgs  = Util.joinStrings(" ", Util.quoteStrings(wekaArgs.argMap.get("attributesearch")));
+				      if(tempAttributeSearchArgs != null) {
+	   		    	 attributeSearchArgs = Util.splitQuotedString(tempAttributeSearchArgs).toArray(new String[0]);
+	   		      }
+
+              attributeEvalClass = wekaArgs.propertyMap.get("attributeeval");
+				      String tempAttributeEvalArgs  = Util.joinStrings(" ", Util.quoteStrings(wekaArgs.argMap.get("attributeeval")));
+				      if(mBest.attributeEvalArgs != null) {
+	 			  	   attributeEvalArgs = Util.splitQuotedString(mBest.attributeEvalArgs).toArray(new String[0]); //TODO maybe I had to put "tempAttributeEvalArgs here?"
+	 			      }
+
+            }
+
+			  }
+
+		 }else{
+			 classifierClass = mBest.classifierClass;
+			 classifierArgs = Util.splitQuotedString(mBest.classifierArgs).toArray(new String[0]);
+			 attributeSearchClass = mBest.attributeSearchClass;
+			 if(mBest.attributeSearchArgs != null) {
+				 attributeSearchArgs = Util.splitQuotedString(mBest.attributeSearchArgs).toArray(new String[0]);
+			 }
+			 attributeEvalClass = mBest.attributeEvalClass;
+			 if(mBest.attributeEvalArgs != null) {
+				 attributeEvalArgs = Util.splitQuotedString(mBest.attributeEvalArgs).toArray(new String[0]);
+			 }
+
+		 }
+
+     log.info("classifier: {}, arguments: {}, attribute search: {}, attribute search arguments: {}, attribute evaluation: {}, attribute evaluation arguments: {}",
+     classifierClass, classifierArgs, attributeSearchClass, attributeSearchArgs, attributeEvalClass, attributeEvalArgs);
+
+     // train model on entire dataset and save
+     as = new AttributeSelection();
+
+     if(attributeSearchClass != null) {
+       ASSearch asSearch = ASSearch.forName(attributeSearchClass, attributeSearchArgs.clone());
+       as.setSearch(asSearch);
+     }
+     if(attributeEvalClass != null) {
+       ASEvaluation asEval = ASEvaluation.forName(attributeEvalClass, attributeEvalArgs.clone());
+       as.setEvaluator(asEval);
+     }
+     as.SelectAttributes(is);
+
+     try{
+       classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
+
+       is = as.reduceDimensionality(is);
+       classifier.buildClassifier(is);
+
+       eval = new Evaluation(is);
+       eval.evaluateModel(classifier, is);
+     }catch(NullPointerException e){
+       System.out.println("---\n\n Auto-WEKA couldn't find any usable configuration within the alloted time.\n Please give Auto-WEKA more time.");
+       System.exit(1);
+     }
 
 
-        //Print log of best configurations
-        if (nBestConfigs>1){
-          ConfigurationRanker.rank( nBestConfigs , msExperimentPath+expName+"/", mBest.rawArgs);
-        }
 
-
-        // train model on entire dataset and save
-        as = new AttributeSelection();
-
-        if(attributeSearchClass != null) {
-            ASSearch asSearch = ASSearch.forName(attributeSearchClass, attributeSearchArgs.clone());
-            as.setSearch(asSearch);
-        }
-        if(attributeEvalClass != null) {
-            ASEvaluation asEval = ASEvaluation.forName(attributeEvalClass, attributeEvalArgs.clone());
-            as.setEvaluator(asEval);
-        }
-        as.SelectAttributes(is);
-
-        classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
-
-        is = as.reduceDimensionality(is);
-        classifier.buildClassifier(is);
-
-        eval = new Evaluation(is);
-        eval.evaluateModel(classifier, is);
     }
+
+	 public Map<String,String> parseConfigurationArgs(Configuration c){
+		 WekaArgumentConverter.Arguments wekaArgs = WekaArgumentConverter.convert(Arrays.asList(c.getArgStrings().split(" ")));
+
+		 String classifierClass = wekaArgs.propertyMap.get("targetclass");
+		 String classifierArgs  = Util.joinStrings(" ", Util.quoteStrings(wekaArgs.argMap.get("classifier")));
+
+		 //Is there a AS search method?
+		 if(wekaArgs.propertyMap.containsKey("attributesearch") && !"NONE".equals(wekaArgs.propertyMap.get("attributesearch"))){
+			  String attributeSearchClass = wekaArgs.propertyMap.get("attributesearch");
+			  //String attributeSearchArgs  = Util.joinStrings(" ", Util.quoteStrings(wekaArgs.argMap.get("attributesearch")));
+
+			  String attributeEvalClass = wekaArgs.propertyMap.get("attributeeval");
+			//  String attributeEvalArgs  = Util.joinStrings(" ", Util.quoteStrings(wekaArgs.argMap.get("attributeeval")));
+		 }
+
+		 Map<String,String> rv = new HashMap<String,String>();
+		 rv.put("classifierClass", classifierClass);
+		 rv.put("classifierArgs ", classifierArgs );
+		 rv.put("attributeSearchClass", attributeSearchClass);
+		// rv.put("attributeSearchArgs", attributeSearchArgs);
+		 rv.put("attributeEvalClass", attributeEvalClass);
+		 //rv.put("attributeEvalArgs", attributeEvalArgs);
+		 return rv;
+	 }
 
     /**
     * Calculates the class membership for the given test instance.
@@ -446,6 +529,9 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.addElement(
             new Option("\tThe amount of best configurations to return.\n" + "\t(default: " + DEFAULT_MEM_LIMIT + ")",
                 "nBestConfigs", 1, "-nBestConfigs <limit>"));
+		  result.addElement(
+           new Option("\tIf you want to use the ensemble selection feature.\n" + "\t(default: " + DEFAULT_ENSEMBLE_SELECTION + ")",
+               "ensembleSelectioncr", 1, "-ensembleSelection <limit>"));
         //result.addElement(
         //    new Option("\tThe type of resampling used.\n" + "\t(default: " + String.valueOf(DEFAULT_RESAMPLING) + ")",
         //        "resampling", 1, "-resampling <resampling>"));
@@ -481,6 +567,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.add("" + memLimit);
         result.add("-nBestConfigs");
         result.add("" + nBestConfigs);
+		    result.add("-ensembleSelection");
+		    result.add("" + ensembleSelection);
         //result.add("-resampling");
         //result.add("" + resampling);
         //result.add("-resamplingArgs");
@@ -530,6 +618,13 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         }
 
 
+		  tmpStr = Utils.getOption("ensembleSelection", options);
+		  if (tmpStr.length() != 0) {
+				ensembleSelection = Boolean.parseBoolean(tmpStr);
+		  } else {
+				ensembleSelection = DEFAULT_ENSEMBLE_SELECTION;
+		  }
+
         //tmpStr = Utils.getOption("resampling", options);
         //if (tmpStr.length() != 0) {
         //    resampling = Resampling.valueOf(tmpStr);
@@ -547,8 +642,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         //if (tmpStr.length() != 0) {
         //    extraArgs = tmpStr;
         //} else {
+		  //}
         //    extraArgs = DEFAULT_EXTRA_ARGS;
-        //}
 
         super.setOptions(options);
         Utils.checkForRemainingOptions(options);
@@ -628,18 +723,18 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
 
    /**
-    * Set the amount of configurations that will be given as output
+    * Set the maximum (not the exact) amount of configurations that will be given as output
     * @param The amount of best configurations desired by the user
     */
-   public void setnBestConfigs(int nbc) {
+   public void setNBestConfigs(int nbc) {
        nBestConfigs = nbc;
    }
 
    /**
-    * Get the memory limit.
+    * Get the maximum amount of configurations to be given as output
     * @return The amount of best configurations that will be given as output
     */
-   public int getnBestConfigs() {
+   public int getNBestConfigs() {
        return nBestConfigs;
    }
 
@@ -648,7 +743,32 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     * @return tip text for this property
     */
    public String nBestConfigsTipText() {
-       return "How many of the best configurations should be returned as output";
+       return "Maximum amount of the best configurations that should be returned as output";
+   }
+
+
+	/**
+    * Toggles the usage of ensemble selection
+    * @param A boolean indicating if ensemble selection is desired for this run
+    */
+   public void setEnsembleSelection(boolean es) {
+       ensembleSelection = es;
+   }
+
+   /**
+    * Get the ensemble selection toggle value
+    * @return A boolean that determines if we're gonna use ensemble selection in this run
+    */
+   public boolean getEnsembleSelection() {
+       return ensembleSelection;
+   }
+
+   /**
+    * Returns the tip text for this property.
+    * @return tip text for this property
+    */
+   public String ensembleSelectionTipText() {
+       return "If you want to use the ensemble selection feature, toggle this as true";
    }
 
 
@@ -766,42 +886,99 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
     /**
      * This will return a string describing the classifier.
+     * If nBestConfigs>1, also returns a list with min(nBestConfigs, amount of fully evaluated configurations) classifiers.
+     * If ensembleSelection is toggled as true and the Ensembler managed to build an ensemble better than the best classifier, also returns this ensemble
      * @return The string.
      */
     public String toString() {
+
         String res = "best classifier: " + classifierClass + "\n" +
             "arguments: " + (classifierArgs != null ? Arrays.toString(classifierArgs) : "[]") + "\n" +
             "attribute search: " + attributeSearchClass + "\n" +
             "attribute search arguments: " + (attributeSearchArgs != null ? Arrays.toString(attributeSearchArgs) : "[]") + "\n" +
             "attribute evaluation: " + attributeEvalClass + "\n" +
             "attribute evaluation arguments: " + (attributeEvalArgs != null ? Arrays.toString(attributeEvalArgs) : "[]") + "\n" +
-            "estimated error: " + estimatedError + "\n\n";
+            "estimated error: " + estimatedError + "\n\n"; //@TODO looks like this error might be printing the wrong value, or at least the right value in a cryptic scale.
+
         try {
             res += eval.toSummaryString();
             res += "\n";
             res += eval.toMatrixString();
             res += "\n";
             res += eval.toClassDetailsString();
-        } catch(Exception e) { /*TODO treat*/ }
 
+        } catch(Exception e) { }
+
+      //if nBestConfigs>1, then we print in the output a section with min(nBestConfigs,fullyEvaluatedAmt) configurations.
 		  if(nBestConfigs>1){
-			  
-			  ConfigurationCollection cc = ConfigurationCollection.fromXML(msExperimentPath+expName+"/"+configurationRankingPath,ConfigurationCollection.class);
+
+        //In case we get a RuntimeException here, Auto-WEKA was given so little time for the task (or the dataset is so huge) that it could
+        //not analyze a single fold. Theres no point in adding anything else to the string, so let's just ask for more time and return.
+        ConfigurationCollection cc;
+        try{
+         cc = ConfigurationCollection.fromXML(msExperimentPath+expName+"/"+configurationRankingPath,ConfigurationCollection.class);
+        }catch( RuntimeException e){
+          res+="\n\n Auto-WEKA didn't have enough time to evaluate any configuration fully. Therefore, your best option is to use the single classifier shown above.";
+          res+= "\n\nFor a higher number of models, consider giving Auto-WEKA more time.";
+          return res;
+        }
+
 			  List<Configuration> ccAL = cc.asArrayList();
 			  int fullyEvaluatedAmt = cc.getFullyEvaluatedAmt();
 
-			  res+= "\n\n------- "+fullyEvaluatedAmt+" BEST CONFIGURATIONS -------";
-			  res+= "\n\nThese are the "+fullyEvaluatedAmt+" best configurations, as ranked by SMAC";
-			  res+= "\nPlease note that this list only contains configurations evaluated on every fold.";
-			  res+= "\nIf you need more configurations, consider running Auto-WEKA for a longer time.";
-			  for(int i = 0;i<fullyEvaluatedAmt ;i++){
-				 res+= "\n\nConfiguration #"+(i+1)+":\nSMAC Score: "+ccAL.get(i).getAverageScore()+"\nArgument String:\n"+ccAL.get(i).getArgStrings();
-			  }
-			  res+="\n\n----END OF CONFIGURATION RANKING----";
-		  }
+			  int smallest = (fullyEvaluatedAmt<nBestConfigs)?fullyEvaluatedAmt:nBestConfigs;
 
-        res += "\n\nFor better performance, try giving Auto-WEKA more time.";
-        return res;
+        res+= "\n\n------- "+smallest+" BEST CONFIGURATIONS -------";
+
+        if(fullyEvaluatedAmt==0){
+          res+="\n\n Auto-WEKA didn't have enough time to evaluate any configuration fully. Therefore, your best option is to use the single classifier shown above.";
+          res+= "\n\nFor a higher number of models, consider giving Auto-WEKA more time.";
+
+        }else{
+
+          res+= "\n\nThese are  the "+smallest+" best configurations, as ranked by SMAC";
+          res+= "\nPlease note that this list only contains fully evaluated configurations, i.e. those evaluated on every fold.";
+
+          if(fullyEvaluatedAmt<nBestConfigs){
+
+            res+="\nThis is less than the amount of classifiers you requested ("+nBestConfigs+") because Auto-WEKA didn't have";
+            res+="\nenough time to fully evaluate the requested amount of configurations. If you need more than that, consider giving Auto-WEKA more time.";
+
+          }
+
+          for(int i = 0;i<smallest ;i++){
+            res+= "\n\nConfiguration #"+(i+1)+":\nSMAC Score: "+ccAL.get(i).getAverageScore()+"\nArgument String:\n"+ccAL.get(i).getArgStrings();
+          }
+
+        }
+
+        res+="\n\n----END OF CONFIGURATION RANKING----";
+
+      }
+
+      //if ensembleSelection is toggled as true, we try to print an ensemble of models built by the Ensembler.
+		  if(ensembleSelection){
+
+			  res+=  "\n\n------- ENSEMBLE OF MODELS -------";
+
+        if(finalEnsemble!=null && finalEnsemble.size()<=1){ //If the ensembler couldnt build an ensemble better than the best scoring model, display the message below.
+				  res+= "\nCouldn't build any ensemble with a better performance than the single best configuration found by Auto-WEKA.";
+				  res+= "\nThis is not necessarily a bad thing; the best configuration might just be so good that combining it with less efficient";
+				  res+= "\nmodels makes the predictions worse.";
+			  }else{
+
+				  for(int i = 0;i<finalEnsemble.size() ;i++){
+					  res+= "\n\nConfiguration #"+(i+1)+":\nSMAC Score: "+finalEnsemble.get(i).getAverageScore()+"\nArgument String:\n"+finalEnsemble.get(i).getArgStrings();
+				  }
+
+			  }
+
+			  res+="\n\n----END OF ENSEMBLE----";
+
+      }
+
+      res += "\n\nFor better performance, try giving Auto-WEKA more time.";
+      return res;
     }
 
     /**

@@ -4,21 +4,28 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.io.File;
 
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.net.URLDecoder;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -29,12 +36,386 @@ import weka.core.converters.Loader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static weka.classifiers.meta.AutoWEKAClassifier.configurationMapPath;
+
 /**
  * Bunches of random stuff that seems to be handy in all sorts of places
  */
 public class Util
 {
     final static Logger log = LoggerFactory.getLogger(Util.class);
+
+    /**
+     *Returns random int between start and end, inclusive
+     */
+     static public int randomIntInRange(int start, int end){
+       return ((new Random()).nextInt(1+(start-end))+start);
+     }
+
+	  /**
+      * Shallow copies a list and slices it
+      */
+     static public <T> List<T> getSlicedList(List<T> l, int first, int last){
+       if(first>last || last>= l.size() || first>=l.size() || first<0 || last<0) throw new RuntimeException();
+
+       List<T> clone = (List<T>) ((ArrayList<T>)l).clone(); //I know it's ugly, but it works ¯\_(ツ)_/¯
+       for(int i = clone.size()-1;i>last;i--) clone.remove(i);
+       for(int i = first-1;i>=0;i--)          clone.remove(i);
+
+       return clone;
+     }
+
+	  /**
+	  	* Builds a BufferedReader from a file path
+		*/
+	  public static  BufferedReader getBufferedReaderFromPath(String path){
+		  FileReader 	   ciFR = null;
+		  BufferedReader  ciBR = null ; //hue
+
+		  try{
+			  ciFR = new FileReader(path);
+			  ciBR = new BufferedReader(ciFR);
+		  }catch (FileNotFoundException e){
+			  log.debug("Couldn't initialize ciBR");
+		  }
+		  return ciBR;
+	  }
+
+	  /**
+	  * Builds a BufferedWriter from a file path
+	  */
+	 public static  BufferedWriter getBufferedWriterFromPath(String path,boolean append){
+		 FileWriter 	   ciFW = null;
+		 BufferedWriter  ciBW = null ; //hue
+		 try{
+			 if(append){
+				ciFW = new FileWriter(path,true);
+			 }else{
+				ciFW = new FileWriter(path);
+			 }
+			 ciBW = new BufferedWriter(ciFW);
+		 }catch (IOException e){
+			 log.debug("Couldn't initialize ciBW");
+		 }
+		 return ciBW;
+	 }
+
+	  /**
+	  	* Parses a line from the instancewise prediction log generated on ClassifierRunner
+		*/
+	 static public String parseInstancewiseLine(String line, String info){
+
+        //TODO Upgrade this to use regex later
+
+        String [] separatedByComma = line.split(",");
+
+        //Stupid java 6 without strings in switches
+        if      (info.equals("INST_NUMBER")){
+         return separatedByComma[0];              //instance number
+		  }else if(info.equals("ACTUAL_FULL")){
+			return separatedByComma[1];					//correct label   (full entry)
+		  }else if(info.equals("ACTUAL_CODE")){
+          return separatedByComma[1].split(":")[0];//correct label   (label code)
+        }else if(info.equals("ACTUAL_NAME")){
+          return separatedByComma[1].split(":")[1];//correct label   (label name)
+		  }else if(info.equals("PREDICT_FULL")){
+		    return separatedByComma[2];					//predicted label (full entry)
+        }else if(info.equals("PREDICT_CODE")){
+          return separatedByComma[2].split(":")[0];//predicted label (label code)
+        }else if(info.equals("PREDICT_NAME")){
+          return separatedByComma[2].split(":")[1];//predicted label (label name)
+        }else{
+          return null;
+        }
+      }
+
+		/**
+ 	  	* Configuration Map (CM) management
+		*(Since we need to juggle between many java processes, we cant keep a list of the configurations smac evaluates as a global)
+		*(Therefore, we have to use some sort of external file as a log. So far we don't need to implement any synchronization, but please be careful)
+ 		*/
+
+		//Adds a new configuration to the CM if it isn't already there
+		static public Map<String,String> updateConfigurationMap(String argStrings){
+
+			Map<String,String> configurationMap = getConfigurationMap();
+			if(configurationMap.containsKey(argStrings)){
+				return configurationMap;
+			}else{
+				int id = configurationMap.size();
+				configurationMap.put(argStrings,Integer.toString(id));
+				try{
+					BufferedWriter bw = getBufferedWriterFromPath(configurationMapPath,true);
+					bw.write("\n"+argStrings+","+id);
+					bw.close();
+				}catch(IOException e){
+					log.debug("Couldn't update the configuration map");
+				}
+			}
+			return configurationMap;
+		}
+
+		//Reads the CM
+		static public Map<String,String> getConfigurationMap(){
+			return getConfigurationMap(configurationMapPath);
+		}
+		static public Map<String,String> getConfigurationMap(String path){
+			Map<String,String> output = new HashMap<String,String>();
+			List<String[]> lineElements = getLineElements(path,",");
+			for(int i =0; i<lineElements.size();i++){
+					output.put(lineElements.get(i)[0],lineElements.get(i)[1]);
+			}
+			return output;
+		}
+
+
+		//Parses a csv-ish (with a customizable separator) file and returns a list of String arrays, one for each line
+		static public List<String[]> getLineElements(String path, String separator){
+			BufferedReader ciBR = Util.getBufferedReaderFromPath(path);
+			List<String[]> lines = new ArrayList<String[]>();
+			try{
+				int i=0;
+				ciBR.readLine();
+				for (String ciLine = ciBR.readLine(); ciLine != null; ciLine = ciBR.readLine() ){
+					lines.add(ciLine.split(separator));
+				}
+			}catch(IOException e){
+				log.debug("Couldn't parse line elements in the file "+path);
+			}
+			try{
+				ciBR.close();
+			}catch(IOException e){
+				log.debug("Couldn't close the BufferedReader for the file "+path);
+			}
+			return lines;
+		}
+
+		/**
+		* Aglutinates Configuration ArgumentStrings in a single string, separated by spaces
+		* Older versions of java don't have the join method, so here we go.
+		*/
+		public static String joinStrings(List<String> strList, String separator){
+			return joinStrings(strList, separator, false);
+		}
+
+		public static String joinStrings(List<String> strList, String separator,boolean separatorOnEnd){
+			String output = "";
+			int last = strList.size()-1;
+			if(separatorOnEnd){
+				for (int i = 0; i<strList.size();i++){
+					output+=strList.get(i)+separator;
+				}
+			}else{
+				for (int i = 0; i<strList.size();i++){
+					output+=(i==last)?(strList.get(i)):(strList.get(i)+separator);
+				}
+			}
+			return output;
+		}
+
+		/**
+		* indexOptimum
+		* Methods for returning the index(es) of an array where the optima are located. Think of it as an argmax type of thing.
+		* Thank's to Java's wonderful way of handling basic types, we need to write the entire thing for ints and doubles alike.
+		* (Unless we convert all ints to doubles, feel free pick what is uglier and even switch the approach if you wish).
+		* TODO write unit tests for all of that
+		*/
+
+		/*
+		* For ints
+		*/
+		//Slower but general and customizable, returns the first, the last or a random instance of the max/min value
+		static public int indexOptimum(int[] a, String option){
+			List<Integer> maxValueIndexes=null,minValueIndexes=null;
+			if(option.equals("RANDOM_MAX") || option.equals("FIRST_MAX") || option.equals("LAST_MAX")){
+				maxValueIndexes = getMaxValueIndexes(a);
+			}else if(option.equals("RANDOM_MIN") || option.equals("FIRST_MIN") || option.equals("LAST_MIN")){
+				minValueIndexes = getMinValueIndexes(a);
+			}
+
+			//Older versions of java can't handle switches on strings ¯\_(ツ)_/¯
+			if(option.equals("RANDOM_MAX")){
+				Random r = new Random();
+				return maxValueIndexes.get(r.nextInt(maxValueIndexes.size()));
+			}else if(option.equals("FIRST_MAX")){
+				return maxValueIndexes.get(0);
+			}else if(option.equals("LAST_MAX")){
+				return maxValueIndexes.get(maxValueIndexes.size()-1);
+			}else if(option.equals("RANDOM_MIN")){
+				Random r = new Random();
+				return  minValueIndexes.get(r.nextInt(minValueIndexes.size()));
+			}else if(option.equals("FIRST_MIN")){
+				return minValueIndexes.get(0);
+			}else if(option.equals("LAST_MIN")){
+				return minValueIndexes.get(minValueIndexes.size()-1);
+			}else{
+				throw new RuntimeException("Invalid Option");
+			}
+
+		}
+
+		//Returns a list with every index where theres a max value
+		static public List<Integer> getMaxValueIndexes(int[] a){
+			int maxValue=0;
+			List<Integer> maxValueIndexes = new ArrayList<Integer>();
+
+			for(int i = 0; i< a.length; i++){ //Finding max
+				if(a[i]>maxValue) maxValue=a[i];
+			}
+			for(int i = 0; i< a.length; i++){ //Saving them all
+				if(a[i]==maxValue) maxValueIndexes.add(new Integer(i));
+			}
+			return maxValueIndexes;
+		}
+
+		//Returns a list with every index where theres a min value
+		static public List<Integer> getMinValueIndexes(int[] a){
+			int minValue=Integer.MAX_VALUE;
+			List<Integer> minValueIndexes = new ArrayList<Integer>();
+
+			for(int i = 0; i< a.length; i++){ //Finding min
+				if(a[i]<minValue) minValue=a[i];
+			}
+			for(int i = 0; i< a.length; i++){ //Saving them all
+				if(a[i]==minValue) minValueIndexes.add(new Integer(i));
+			}
+			return minValueIndexes;
+		}
+
+		/*
+		* For doubles
+		*/
+
+		//Slower but general and customizable, returns the first, the last or a random instance of the max/min value
+		static public int indexOptimum(double[] a, String option){
+			List<Integer> maxValueIndexes=null,minValueIndexes=null;
+			if(option.equals("RANDOM_MAX") || option.equals("FIRST_MAX") || option.equals("LAST_MAX")){
+				maxValueIndexes = getMaxValueIndexes(a);
+			}else if(option.equals("RANDOM_MIN") || option.equals("FIRST_MIN") || option.equals("LAST_MIN")){
+				minValueIndexes = getMinValueIndexes(a);
+			}
+
+			//Older versions of java can't handle switches on strings ¯\_(ツ)_/¯
+			if(option.equals("RANDOM_MAX")){
+				Random r = new Random();
+				return maxValueIndexes.get(r.nextInt(maxValueIndexes.size()));
+			}else if(option.equals("FIRST_MAX")){
+				return maxValueIndexes.get(0);
+			}else if(option.equals("LAST_MAX")){
+				return maxValueIndexes.get(maxValueIndexes.size()-1);
+			}else if(option.equals("RANDOM_MIN")){
+				Random r = new Random();
+				return  minValueIndexes.get(r.nextInt(minValueIndexes.size()));
+			}else if(option.equals("FIRST_MIN")){
+				return minValueIndexes.get(0);
+			}else if(option.equals("LAST_MIN")){
+				return minValueIndexes.get(minValueIndexes.size()-1);
+			}else{
+				throw new RuntimeException("Invalid Option");
+			}
+
+		}
+
+		//Returns a list with every index where theres a max value
+		static public List<Integer> getMaxValueIndexes(double[] a){
+			double maxValue=0;
+			List<Integer> maxValueIndexes = new ArrayList<Integer>();
+
+			for(int i = 0; i< a.length; i++){ //Finding max
+				if(a[i]>maxValue) maxValue=a[i];
+			}
+			for(int i = 0; i< a.length; i++){ //Saving them all
+				if(a[i]==maxValue) maxValueIndexes.add(new Integer(i));
+			}
+			return maxValueIndexes;
+		}
+
+		//Returns a list with every index where theres a min value
+		static public List<Integer> getMinValueIndexes(double[] a){
+			double minValue = Double.MAX_VALUE; // Not wrong. Read the entire thing.
+			List<Integer> minValueIndexes = new ArrayList<Integer>();
+
+			for(int i = 0; i< a.length; i++){ //Finding min
+				if(a[i]<minValue) minValue=a[i];
+			}
+			for(int i = 0; i< a.length; i++){ //Saving them all
+				if(a[i]==minValue) minValueIndexes.add(new Integer(i));
+			}
+			return minValueIndexes;
+		}
+
+		/*
+		*Finally, here are some optimized versions of indexOptimum for some specific array types and options.
+		*Use these if you're really keen on performance
+		*/
+
+		// Returns the index of the first occurence of the maximum value in an array of ints
+		static public int indexMax(int[] a){
+			int max = 0;
+			int index_max=0;
+			for(int i=0; i<a.length ;i++){
+				if(a[i]>max){
+					max=a[i];
+					index_max=i;
+				}
+			}
+			return index_max;
+		}
+
+		// Returns the index of the first occurrence of the maximum value in an array of doubles
+		static public int indexMax(double[] a){
+			double max = 0;
+			int index_max=0;
+			for(int i=0; i<a.length ;i++){
+				if(a[i]>max){
+					max=a[i];
+					index_max=i;
+				}
+			}
+			return index_max;
+		}
+
+	  // Returns the index of the first occurence of the minimum value in an array of ints
+     static public int indexMin(int[] a){
+       int min = Integer.MAX_VALUE;
+       int index_min=0;
+       for(int i=0; i<a.length ;i++){
+         if(a[i]<min){
+           min=a[i];
+           index_min=i;
+         }
+       }
+       return index_min;
+     }
+
+
+	  // Returns the index of the first occurence of the minimum value in an array of doubles
+	  static public int indexMin(double[] a){
+		  double min = Double.MAX_VALUE;
+		  int index_min=0;
+		  for(int i=0; i<a.length ;i++){
+			  if(a[i]<min){
+				  min=a[i];
+				  index_min=i;
+			  }
+		  }
+		  return index_min;
+	  }
+
+
+	  // Returns the index of the first occurence of the minimum value in a list of Integers
+	  static public int indexMin(List<Integer> a){ //TODO find a way to make this general by using Comparable or smth
+       int min = Integer.MAX_VALUE;
+       int index_min=0;
+       for(int i=0; i<a.size() ;i++){
+         if(a.get(i)<min){
+           min=a.get(i);
+           index_min=i;
+         }
+       }
+       return index_min;
+     }
+
 
     /**
      * Given a property string (var1=val1:var2=val2:....) convert it to a property object.
@@ -137,7 +518,7 @@ public class Util
    				logFile.createNewFile();
    			}
    		}catch(Exception e){
-   			System.out.println("Couldn't initialize file at this path: "+aLogPath);
+   			log.debug("Couldn't initialize file at this path: "+aLogPath);
    		}
 
    	}

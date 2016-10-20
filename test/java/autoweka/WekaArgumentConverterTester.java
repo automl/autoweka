@@ -6,9 +6,9 @@ import org.junit.Test;
 
 import autoweka.WekaArgumentConverter.Arguments;
 
-public class WekaArgumentConverterTester 
+public class WekaArgumentConverterTester
 {
-    
+
     @Test
     public void argumentConversionTest1() {
         List<String> args1 = Arrays.asList("-Key", "Value1", "-Key2", "Value2", "-Key3", "Value3", "-Key4", "Value4");
@@ -43,7 +43,7 @@ public class WekaArgumentConverterTester
         assertEquals("Value4", result2.propertyMap.get("attributesearch"));
         assertEquals("Value3", result2.propertyMap.get("targetclass"));
     }
-        
+
     @Test
     public void argumentConversionTest3() {
         List<String> args3 = Arrays.asList("REMOVED", "Value1", "-attributeeval", "Value2", "REMOVED", "Value3", "-HIDDEN", "Value4", "-classifier",
