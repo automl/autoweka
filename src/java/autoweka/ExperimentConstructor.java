@@ -443,7 +443,7 @@ public abstract class ExperimentConstructor
         }
 
         //Build the entire list of all classifiers as a parameter, and insert it
-        Parameter targetclass = new Parameter("targetclass", classifiers);
+        Parameter targetclass = new Parameter("targetclass", classifiers, "weka.classifiers.trees.RandomForest");
         paramGroup.add(targetclass);
 
         //Next, insert all the default parameters for each method (Just the flat level
@@ -493,7 +493,7 @@ public abstract class ExperimentConstructor
             for(int i = 0; i < mEnsembleMaxNum; i++)
             {
                 String prefix = "_1_" + String.format("%02d", i);
-                Parameter gateParam = new Parameter(prefix + "_0_QUOTE_START_B", baseClassifiers);
+                Parameter gateParam = new Parameter(prefix + "_0_QUOTE_START_B", baseClassifiers, "weka.classifiers.trees.RandomForest");
                 paramGroup.add(gateParam);
                 for(ClassParams clsParams: mBaseClassParams) {
                     addClassifierToParameterConditionalGroupForDAG(paramGroup, clsParams, prefix + "_1_", gateParam);
