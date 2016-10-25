@@ -42,6 +42,7 @@ import weka.gui.explorer.Explorer.LogHandler;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -112,6 +113,9 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
   /** Lets the user select the class column. */
   protected JComboBox m_ClassCombo = new JComboBox();
   
+  /** Click to download manual. */
+  protected JButton m_ManualBut = new JButton("Manual");
+
   /** Click to start running the experiment. */
   protected JButton m_StartBut = new JButton("Start");
 
@@ -160,7 +164,17 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
     m_StartBut.setEnabled(false);
     m_StartBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-    startAutoWEKA();
+        startAutoWEKA();
+      }
+    });
+
+    m_ManualBut.setToolTipText("Starts a browser to the Auto-WEKA manual");
+    m_ManualBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        try {
+            Desktop.getDesktop().browse(new java.net.URI("http://www.cs.ubc.ca/labs/beta/Projects/autoweka/manual.pdf"));
+        } catch(Exception ex) {
+        }
       }
     });
     
@@ -246,8 +260,13 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
     gbL.setConstraints(p3, gbC);
     mondo.add(p3);
 
+    JPanel top = new JPanel();
+    top.setLayout(new BorderLayout());
+    top.add(m_CEPanel, BorderLayout.NORTH);
+    top.add(m_ManualBut, BorderLayout.SOUTH);
+
     setLayout(new BorderLayout());
-    add(m_CEPanel, BorderLayout.NORTH);
+    add(top, BorderLayout.NORTH);
     add(mondo, BorderLayout.CENTER);
     Dimension pref = m_CEPanel.getPreferredSize();
     pref.height = pref.height + 5;

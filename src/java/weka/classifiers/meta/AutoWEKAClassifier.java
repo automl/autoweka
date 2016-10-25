@@ -77,7 +77,6 @@ import autoweka.TrajectoryMerger;
 
 import autoweka.tools.GetBestFromTrajectoryGroup;
 
-
 import autoweka.Configuration;
 import autoweka.ConfigurationCollection;
 import autoweka.ConfigurationRanker;
@@ -111,6 +110,41 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     /** Default evaluation method. */
     static final Resampling DEFAULT_RESAMPLING = Resampling.TerminationHoldout;
 
+    /** Available metrics. */
+    static enum Metric {
+        areaAboveROC,
+        areaUnderROC,
+        avgCost,
+        correct,
+        correlationCoefficient,
+        errorRate,
+        falseNegativeRate,
+        falsePositiveRate,
+        fMeasure,
+        incorrect,
+        kappa,
+        kBInformation,
+        kBMeanInformation,
+        kBRelativeInformation,
+        meanAbsoluteError,
+        pctCorrect,
+        pctIncorrect,
+        precision,
+        relativeAbsoluteError,
+        rootMeanSquaredError,
+        rootRelativeSquaredError,
+        weightedAreaUnderROC,
+        weightedFalseNegativeRate,
+        weightedFalsePositiveRate,
+        weightedFMeasure,
+        weightedPrecision,
+        weightedRecall,
+        weightedTrueNegativeRate,
+        weightedTruePositiveRate
+    }
+    /** Default evaluation metric. */
+    static final Metric DEFAULT_METRIC = Metric.errorRate;
+
     /** Default arguments for the different evaluation methods. */
     static final Map<Resampling, String> resamplingArgsMap;
     static {
@@ -124,7 +158,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     static final String DEFAULT_RESAMPLING_ARGS = resamplingArgsMap.get(DEFAULT_RESAMPLING);
 
     /** Default additional arguments for Auto-WEKA. */
-    static final String DEFAULT_EXTRA_ARGS = "initialIncumbent=RANDOM:acq-func=EI";
+    static final String DEFAULT_EXTRA_ARGS = "initialIncumbent=DEFAULT:acq-func=EI";
 
     /** The path for the sorted best configurations **/
     public static final String configurationRankingPath = "ConfigurationLogging/configuration_ranking.xml";
@@ -172,8 +206,11 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     /** The extra arguments for Auto-WEKA. */
     protected String extraArgs = DEFAULT_EXTRA_ARGS;
 
-    /** The estimated error of the chosen method. */
-    protected double estimatedError = -1;
+    /** The error metric. */
+    protected Metric metric = DEFAULT_METRIC;
+
+    /** The estimated metric value of the chosen method. */
+    protected double estimatedMetricValue = -1;
 
     /** The evaluation for the best classifier. */
     protected Evaluation eval;
@@ -225,13 +262,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         Experiment exp = new Experiment();
         exp.name = expName;
 
-        //Which result metric do we use?
-        Attribute classAttr = is.classAttribute();
-        if(classAttr.isNominal()){
-            exp.resultMetric = "errorRate";
-        } else if(classAttr.isNumeric()) {
-            exp.resultMetric = "rmse";
-        }
+        exp.resultMetric = metric.toString();
 
         Properties props = Util.parsePropertyString("type=trainTestArff:testArff=__dummy__");
         ArffSaver saver = new ArffSaver();
@@ -288,15 +319,15 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                     Pattern p = Pattern.compile(".*Estimated mean quality of final incumbent config .* on test set: ([0-9.]+).*");
                     Pattern pint = Pattern.compile(".*mean quality of.*: ([0-9E.]+);.*");
                     int tried = 0;
-                    double bestError = -1;
+                    double bestMetricValue = -1;
                     while((line = reader.readLine()) != null) {
                         Matcher m = p.matcher(line);
                         if(m.matches()) {
-                            estimatedError = Double.parseDouble(m.group(1));
+                            estimatedMetricValue = Double.parseDouble(m.group(1));
                         }
                         m = pint.matcher(line);
                         if(m.matches()) {
-                            bestError = Double.parseDouble(m.group(1));
+                            bestMetricValue = Double.parseDouble(m.group(1));
                         }
                         // fix nested logging...
                         if(line.matches(".*DEBUG.*") || line.matches(".*Variance is less than.*")) {
@@ -305,7 +336,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                             if(line.matches(".*ClassifierRunner - weka.classifiers.*")) {
                                 tried++;
                                 if(wLog != null) {
-                                    String msg = "Performed " + tried + " evaluations, estimated error " + bestError + "...";
+                                    String msg = "Performed " + tried + " evaluations, estimated metric value " + bestMetricValue + "...";
                                     wLog.statusMessage(msg);
                                     if(tried % 10 == 0)
                                         wLog.logMessage(msg);
@@ -446,6 +477,9 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.addElement(
             new Option("\tThe amount of best configurations to return.\n" + "\t(default: " + DEFAULT_MEM_LIMIT + ")",
                 "nBestConfigs", 1, "-nBestConfigs <limit>"));
+        result.addElement(
+            new Option("\tThe metric to optimise. If the value is to be maximised, it will be subtracted from the worst value for this metric.\n" + "\t(default: " + DEFAULT_METRIC + ")",
+                "metric", 1, "-metric <metric>"));
         //result.addElement(
         //    new Option("\tThe type of resampling used.\n" + "\t(default: " + String.valueOf(DEFAULT_RESAMPLING) + ")",
         //        "resampling", 1, "-resampling <resampling>"));
@@ -481,6 +515,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.add("" + memLimit);
         result.add("-nBestConfigs");
         result.add("" + nBestConfigs);
+        result.add("-metric");
+        result.add("" + metric);
         //result.add("-resampling");
         //result.add("" + resampling);
         //result.add("-resamplingArgs");
@@ -521,7 +557,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             memLimit = DEFAULT_MEM_LIMIT;
         }
 
-
         tmpStr = Utils.getOption("nBestConfigs", options);
         if (tmpStr.length() != 0) {
             nBestConfigs = Integer.parseInt(tmpStr);
@@ -529,6 +564,12 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             nBestConfigs = DEFAULT_N_BEST;
         }
 
+        tmpStr = Utils.getOption("metric", options);
+        if (tmpStr.length() != 0) {
+            metric = Metric.valueOf(tmpStr);
+        } else {
+            metric = DEFAULT_METRIC;
+        }
 
         //tmpStr = Utils.getOption("resampling", options);
         //if (tmpStr.length() != 0) {
@@ -579,6 +620,30 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     }
 
     /**
+     * Set the metric.
+     * @param m The metric.
+     */
+    public void setMetric(Metric m) {
+        metric = m;
+    }
+
+    /**
+     * Get the metric.
+     * @return The metric.
+     */
+    public Metric getMetric() {
+        return metric;
+    }
+
+    /**
+     * Returns the tip text for this property.
+     * @return tip text for this property
+     */
+    public String metricTipText() {
+        return "the metric to optimise";
+    }
+
+    /**
      * Set the time limit.
      * @param tl The time limit in minutes.
      */
@@ -626,31 +691,29 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         return "the memory limit for runs (in MiB)";
     }
 
+    /**
+     * Set the amount of configurations that will be given as output
+     * @param The amount of best configurations desired by the user
+     */
+    public void setnBestConfigs(int nbc) {
+        nBestConfigs = nbc;
+    }
 
-   /**
-    * Set the amount of configurations that will be given as output
-    * @param The amount of best configurations desired by the user
-    */
-   public void setnBestConfigs(int nbc) {
-       nBestConfigs = nbc;
-   }
+    /**
+     * Get the memory limit.
+     * @return The amount of best configurations that will be given as output
+     */
+    public int getnBestConfigs() {
+        return nBestConfigs;
+    }
 
-   /**
-    * Get the memory limit.
-    * @return The amount of best configurations that will be given as output
-    */
-   public int getnBestConfigs() {
-       return nBestConfigs;
-   }
-
-   /**
-    * Returns the tip text for this property.
-    * @return tip text for this property
-    */
-   public String nBestConfigsTipText() {
-       return "How many of the best configurations should be returned as output";
-   }
-
+    /**
+     * Returns the tip text for this property.
+     * @return tip text for this property
+     */
+    public String nBestConfigsTipText() {
+        return "How many of the best configurations should be returned as output";
+    }
 
     //public void setResampling(Resampling r) {
     //    resampling = r;
@@ -775,7 +838,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             "attribute search arguments: " + (attributeSearchArgs != null ? Arrays.toString(attributeSearchArgs) : "[]") + "\n" +
             "attribute evaluation: " + attributeEvalClass + "\n" +
             "attribute evaluation arguments: " + (attributeEvalArgs != null ? Arrays.toString(attributeEvalArgs) : "[]") + "\n" +
-            "estimated error: " + estimatedError + "\n\n";
+            "metric: " + metric + "\n" +
+            "estimated metric value: " + estimatedMetricValue + "\n\n";
         try {
             res += eval.toSummaryString();
             res += "\n";
@@ -805,11 +869,11 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     }
 
     /**
-     * Returns the error estimated during Auto-WEKA's internal evaluation.
-     * @return The estimated error.
+     * Returns the metric value estimated during Auto-WEKA's internal evaluation.
+     * @return The estimated metric value.
      */
-    public double measureEstimatedError() {
-        return estimatedError;
+    public double measureEstimatedMetricValue() {
+        return estimatedMetricValue;
     }
 
     /**
@@ -818,7 +882,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     */
     public Enumeration enumerateMeasures() {
         Vector newVector = new Vector(1);
-        newVector.addElement("measureEstimatedError");
+        newVector.addElement("measureEstimatedMetricValue");
         return newVector.elements();
     }
 
@@ -829,8 +893,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     * @throws IllegalArgumentException if the named measure is not supported
     */
     public double getMeasure(String additionalMeasureName) {
-        if (additionalMeasureName.compareToIgnoreCase("measureEstimatedError") == 0) {
-            return measureEstimatedError();
+        if (additionalMeasureName.compareToIgnoreCase("measureEstimatedMetricValue") == 0) {
+            return measureEstimatedMetricValue();
         } else {
             throw new IllegalArgumentException(additionalMeasureName
                     + " not supported (Auto-WEKA)");
