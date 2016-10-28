@@ -142,6 +142,25 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         weightedTrueNegativeRate,
         weightedTruePositiveRate
     }
+    /** Metrics to maximise. */
+    static final Metric[] metricsToMax = {
+        Metric.areaUnderROC,
+        Metric.correct,
+        Metric.correlationCoefficient,
+        Metric.fMeasure,
+        Metric.kappa,
+        Metric.kBInformation,
+        Metric.kBMeanInformation,
+        Metric.kBRelativeInformation,
+        Metric.pctCorrect,
+        Metric.precision,
+        Metric.weightedAreaUnderROC,
+        Metric.weightedFMeasure,
+        Metric.weightedPrecision,
+        Metric.weightedRecall,
+        Metric.weightedTrueNegativeRate,
+        Metric.weightedTruePositiveRate
+    };
     /** Default evaluation metric. */
     static final Metric DEFAULT_METRIC = Metric.errorRate;
 
@@ -254,7 +273,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     * @throws Exception if the classifier could not be built successfully.
     */
     public void buildClassifier(Instances is) throws Exception {
-
         msExperimentPath = Files.createTempDirectory("autoweka").toString() + File.separator;
         getCapabilities().testWithFail(is);
 
@@ -271,6 +289,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         saver.setFile(fp);
         saver.writeBatch();
         props.setProperty("trainArff", URLDecoder.decode(fp.getAbsolutePath()));
+        props.setProperty("classIndex", String.valueOf(is.classIndex()));
         exp.datasetString = Util.propertiesToString(props);
         exp.instanceGenerator = "autoweka.instancegenerators." + String.valueOf(resampling);
         exp.instanceGeneratorArgs = "seed=" + seed + ":" + resamplingArgs + ":seed=" + seed;
@@ -316,18 +335,24 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
                     BufferedReader reader = new BufferedReader(new InputStreamReader(mProc.getInputStream()));
                     String line;
-                    Pattern p = Pattern.compile(".*Estimated mean quality of final incumbent config .* on test set: ([0-9.]+).*");
-                    Pattern pint = Pattern.compile(".*mean quality of.*: ([0-9E.]+);.*");
+                    Pattern p = Pattern.compile(".*Estimated mean quality of final incumbent config .* on test set: (-?[0-9.]+).*");
+                    Pattern pint = Pattern.compile(".*mean quality of.*: (-?[0-9E.]+);.*");
                     int tried = 0;
                     double bestMetricValue = -1;
                     while((line = reader.readLine()) != null) {
                         Matcher m = p.matcher(line);
                         if(m.matches()) {
                             estimatedMetricValue = Double.parseDouble(m.group(1));
+                            if(Arrays.asList(metricsToMax).contains(metric)) {
+                                estimatedMetricValue *= -1;
+                            }
                         }
                         m = pint.matcher(line);
                         if(m.matches()) {
                             bestMetricValue = Double.parseDouble(m.group(1));
+                            if(Arrays.asList(metricsToMax).contains(metric)) {
+                                bestMetricValue *= -1;
+                            }
                         }
                         // fix nested logging...
                         if(line.matches(".*DEBUG.*") || line.matches(".*Variance is less than.*")) {
@@ -336,7 +361,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                             if(line.matches(".*ClassifierRunner - weka.classifiers.*")) {
                                 tried++;
                                 if(wLog != null) {
-                                    String msg = "Performed " + tried + " evaluations, estimated metric value " + bestMetricValue + "...";
+                                    String msg = "Performed " + tried + " evaluations, estimated " + metric + " " + bestMetricValue + "...";
                                     wLog.statusMessage(msg);
                                     if(tried % 10 == 0)
                                         wLog.logMessage(msg);
@@ -478,7 +503,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             new Option("\tThe amount of best configurations to return.\n" + "\t(default: " + DEFAULT_MEM_LIMIT + ")",
                 "nBestConfigs", 1, "-nBestConfigs <limit>"));
         result.addElement(
-            new Option("\tThe metric to optimise. If the value is to be maximised, it will be subtracted from the worst value for this metric.\n" + "\t(default: " + DEFAULT_METRIC + ")",
+            new Option("\tThe metric to optimise.\n" + "\t(default: " + DEFAULT_METRIC + ")",
                 "metric", 1, "-metric <metric>"));
         //result.addElement(
         //    new Option("\tThe type of resampling used.\n" + "\t(default: " + String.valueOf(DEFAULT_RESAMPLING) + ")",
@@ -839,7 +864,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             "attribute evaluation: " + attributeEvalClass + "\n" +
             "attribute evaluation arguments: " + (attributeEvalArgs != null ? Arrays.toString(attributeEvalArgs) : "[]") + "\n" +
             "metric: " + metric + "\n" +
-            "estimated metric value: " + estimatedMetricValue + "\n\n";
+            "estimated " + metric + ": " + estimatedMetricValue + "\n\n";
         try {
             res += eval.toSummaryString();
             res += "\n";

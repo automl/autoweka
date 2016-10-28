@@ -141,7 +141,6 @@ public class ClassifierRunner
         Instances training = mInstanceGenerator.getTrainingFromParams(instanceStr);
         Instances testing  = mInstanceGenerator.getTestingFromParams(instanceStr);
 
-
         //Next, start into the arguments that are for the actual classifier
         WekaArgumentConverter.Arguments wekaArgs = WekaArgumentConverter.convert(args);
         Map<String, String> propertyMap = wekaArgs.propertyMap;
@@ -217,7 +216,7 @@ public class ClassifierRunner
                     }
                     training = attribSelect.reduceDimensionality(training);
                     testing = attribSelect.reduceDimensionality(testing);
-                    log.debug("Target class: {}", training.classIndex());
+                    log.debug("Target class: {}", training.classAttribute());
                 }catch(Exception e){
                     throw new RuntimeException(e);
                 }

@@ -114,7 +114,7 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
   protected JComboBox m_ClassCombo = new JComboBox();
   
   /** Click to download manual. */
-  protected JButton m_ManualBut = new JButton("Manual");
+  protected JButton m_ManualBut = new JButton("Auto-WEKA Manual");
 
   /** Click to start running the experiment. */
   protected JButton m_StartBut = new JButton("Start");

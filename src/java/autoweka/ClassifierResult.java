@@ -69,7 +69,7 @@ public class ClassifierResult
     {
         public double getDefault() { return INFINITY; }
         public double getScore(Evaluation eval, Instances testingData) {
-            return (1.0d - eval.areaUnderROC(1));
+            return 1.0d - eval.areaUnderROC(1);
         }
     }
 
@@ -77,7 +77,7 @@ public class ClassifierResult
     {
         public double getDefault() { return INFINITY; }
         public double getScore(Evaluation eval, Instances testingData) {
-            return 1.0d - eval.areaUnderROC(1);
+            return -eval.areaUnderROC(1);
         }
     }
 
@@ -93,7 +93,7 @@ public class ClassifierResult
     {
         public double getDefault() { return INFINITY; }
         public double getScore(Evaluation eval, Instances testingData) {
-            return testingData.size() - eval.correct();
+            return -eval.correct();
         }
     }
 
@@ -110,7 +110,7 @@ public class ClassifierResult
         public double getDefault() { return INFINITY; }
         public double getScore(Evaluation eval, Instances testingData) {
             try {
-                return 1.0d - eval.correlationCoefficient();
+                return -eval.correlationCoefficient();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -137,7 +137,7 @@ public class ClassifierResult
     {
         public double getDefault() { return INFINITY; }
         public double getScore(Evaluation eval, Instances testingData) {
-            return 1.0d - eval.fMeasure(1);
+            return -eval.fMeasure(1);
         }
     }
 
@@ -145,7 +145,7 @@ public class ClassifierResult
     {
         public double getDefault() { return INFINITY; }
         public double getScore(Evaluation eval, Instances testingData) {
-            return 1.0d - eval.kappa();
+            return -eval.kappa();
         }
     }
 
@@ -154,7 +154,7 @@ public class ClassifierResult
         public double getDefault() { return INFINITY; }
         public double getScore(Evaluation eval, Instances testingData) {
             try {
-                return 1.0d - eval.KBInformation();
+                return -eval.KBInformation();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -166,7 +166,7 @@ public class ClassifierResult
         public double getDefault() { return INFINITY; }
         public double getScore(Evaluation eval, Instances testingData) {
             try {
-                return 1.0d - eval.KBMeanInformation();
+                return -eval.KBMeanInformation();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -178,7 +178,7 @@ public class ClassifierResult
         public double getDefault() { return INFINITY; }
         public double getScore(Evaluation eval, Instances testingData) {
             try {
-                return 1.0d - eval.KBRelativeInformation();
+                return -eval.KBRelativeInformation();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -189,7 +189,7 @@ public class ClassifierResult
     {
         public double getDefault() { return INFINITY; }
         public double getScore(Evaluation eval, Instances testingData) {
-            return 100.0d - eval.pctCorrect();
+            return -eval.pctCorrect();
         }
     }
 
@@ -205,7 +205,7 @@ public class ClassifierResult
     {
         public double getDefault() { return INFINITY; }
         public double getScore(Evaluation eval, Instances testingData) {
-            return 1.0d - eval.precision(1);
+            return -eval.precision(1);
         }
     }
 
@@ -213,7 +213,7 @@ public class ClassifierResult
     {
         public double getDefault() { return INFINITY; }
         public double getScore(Evaluation eval, Instances testingData) {
-            return 1.0d - eval.weightedAreaUnderROC();
+            return -eval.weightedAreaUnderROC();
         }
     }
 
@@ -237,7 +237,7 @@ public class ClassifierResult
     {
         public double getDefault() { return INFINITY; }
         public double getScore(Evaluation eval, Instances testingData) {
-            return 1.0d - eval.weightedFMeasure();
+            return -eval.weightedFMeasure();
         }
     }
 
@@ -245,7 +245,7 @@ public class ClassifierResult
     {
         public double getDefault() { return INFINITY; }
         public double getScore(Evaluation eval, Instances testingData) {
-            return 1.0d - eval.weightedPrecision();
+            return -eval.weightedPrecision();
         }
     }
 
@@ -253,7 +253,7 @@ public class ClassifierResult
     {
         public double getDefault() { return INFINITY; }
         public double getScore(Evaluation eval, Instances testingData) {
-            return 1.0d - eval.weightedRecall();
+            return -eval.weightedRecall();
         }
     }
 
@@ -261,7 +261,7 @@ public class ClassifierResult
     {
         public double getDefault() { return INFINITY; }
         public double getScore(Evaluation eval, Instances testingData) {
-            return 1.0d - eval.weightedTrueNegativeRate();
+            return -eval.weightedTrueNegativeRate();
         }
     }
 
@@ -269,7 +269,7 @@ public class ClassifierResult
     {
         public double getDefault() { return INFINITY; }
         public double getScore(Evaluation eval, Instances testingData) {
-            return 1.0d - eval.weightedTruePositiveRate();
+            return -eval.weightedTruePositiveRate();
         }
     }
 
