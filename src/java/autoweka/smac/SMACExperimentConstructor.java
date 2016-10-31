@@ -110,9 +110,6 @@ public class SMACExperimentConstructor extends ExperimentConstructor
         args.add("--algo-cutoff-time");
         args.add("" + mExperiment.trainTimeout);
 
-        args.add("--wallclock-limit");
-        args.add("" + Math.round(mExperiment.tunerTimeout));
-
         args.add("--transform-crashed-quality-value");
         args.add("" + autoweka.ClassifierResult.INFINITY);
 
@@ -247,7 +244,7 @@ public class SMACExperimentConstructor extends ExperimentConstructor
         out.println("overall_obj = mean");
         out.println("cutoff_time = " + (int)mExperiment.trainTimeout);
         out.println("target_run_cputime_limit = " + (int)mExperiment.trainTimeout);
-        out.println("tunerTimeout = " + (int)mExperiment.tunerTimeout);
+        out.println("wallclock_limit = " + (int)mExperiment.tunerTimeout);
         out.println("outdir = out");
         out.println("paramfile = autoweka.params");
         out.println("instance_file = autoweka.instances");
