@@ -30,7 +30,7 @@
         <delete file="autoweka.zip"/>
         <zip destfile="autoweka.zip"
              basedir="."
-             excludes=".git/, weka/, .travis.yml, *.sh, wizardexperiments/, scripts/, *.tar.gz, lib/*.jar">
+             excludes=".git/, .travis.yml, *.sh, wizardexperiments/, scripts/, *.tar.gz, lib/*.jar">
         </zip>
     </target>
     
