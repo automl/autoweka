@@ -19,6 +19,8 @@ public class ClassParams
 
     /**
      * Parses a given .param file to extract all the Parameter and Conditional objects
+     *
+     * @param fileName The file name.
      */
     public ClassParams(String fileName)
     {
@@ -85,7 +87,7 @@ public class ClassParams
      * Given a map of parameter,value pairs, only returns a new map that has only params that are active based on the conditional rules
      *
      * @param inputMap The map consisting of parameter name to values that need to be filtered
-     * @return Map with only hte active parameters in it
+     * @return Map with only the active parameters in it
      */
     public Map<String, String> filterParams(Map<String, String> inputMap){
         Map<String, String> argMap = new HashMap<String, String>(inputMap);
@@ -119,7 +121,8 @@ public class ClassParams
     }
 
     /**
-     * Gets the canonical name of the class that these parameters capture
+     * Gets the canonical name of the class that these parameters capture.
+     * @return The class name.
      */
     public String getTargetClass()
     {
@@ -127,7 +130,8 @@ public class ClassParams
     }
 
     /**
-     * Gets the list of all parameters for this class
+     * Gets the list of all parameters for this class.
+     * @return The list of all parameters.
      */
     public ArrayList<Parameter> getParameters()
     {
@@ -135,7 +139,8 @@ public class ClassParams
     }
 
     /**
-     * Gets the list of all conditionals for this class
+     * Gets the list of all conditionals for this class.
+     * @return The list of conditionals.
      */
     public ArrayList<Conditional> getConditionals()
     {
@@ -143,7 +148,8 @@ public class ClassParams
     }
 
     /**
-     * Gets a map between the parameter names and the actuall parameters for this class
+     * Gets a map between the parameter names and the actual parameters for this class
+     * @return The mapping of parameter name to actual parameter.
      */
     public HashMap<String, Parameter> getParameterMap()
     {

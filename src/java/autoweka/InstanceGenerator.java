@@ -32,6 +32,7 @@ public abstract class InstanceGenerator
 
     /**
      * Clones an InstanceGenerator from another
+     * @param generator The instance generator.
      */
     public InstanceGenerator(InstanceGenerator generator)
     {
@@ -41,6 +42,8 @@ public abstract class InstanceGenerator
 
     /**
      * Build an instance generator from the given training and testing data
+     * @param training The training instances.
+     * @param testing The testing instances.
      */
     public InstanceGenerator(Instances training, Instances testing)
     {
@@ -50,6 +53,7 @@ public abstract class InstanceGenerator
 
     /**
      * Builds an InstanceGenerator from a datasetFileName, ie a zip file containing exactly two files, 'train.arff' and 'test.arff'
+     * @param datasetString The string the describing the dataset.
      */
     public InstanceGenerator(String datasetString)
     {
@@ -82,7 +86,7 @@ public abstract class InstanceGenerator
         }
     }
 
-    /**
+    /*
      * Loads up the training and testing data from a zip file
      */
     private void loadZipFile(String zipFileName, String classIndex)
@@ -178,6 +182,8 @@ public abstract class InstanceGenerator
 
     /**
      * Given a parameter string (generally in the form of a property string), get the training data; if params is 'default', then this method returns the raw training data
+     * @param params The parameter string.
+     * @return The training instances.
      */
     public final Instances getTrainingFromParams(String params)
     {
@@ -188,6 +194,8 @@ public abstract class InstanceGenerator
 
     /**
      * Given a parameter string (generally in the form of a property string), get the testing data; if params is 'default', then this method returns the raw testing data
+     * @param params The parameter string.
+     * @return The testing instances.
      */
     public final Instances getTestingFromParams(String params)
     {
@@ -196,17 +204,18 @@ public abstract class InstanceGenerator
         return _getTestingFromParams(params);
     }
 
-    /**
+    /*
      * Subclass implementation for getting the training data given the param string
      */
     public abstract Instances _getTrainingFromParams(String params);
-    /**
+    /*
      * Subclass implementation for getting the testing data given the param string
      */
     public abstract Instances _getTestingFromParams(String params);
 
     /**
      * Gets a copy of the training data
+     * @return The training instances.
      */
     public Instances getTraining()
     {
@@ -215,6 +224,7 @@ public abstract class InstanceGenerator
 
     /**
      * Gets a copy of the testing data
+     * @return The testing instances.
      */
     public Instances getTesting()
     {
@@ -225,11 +235,15 @@ public abstract class InstanceGenerator
      * Gets a list of all the 'params' Strings that can be used with this InstanceGenerator.
      *
      * For example, the for 10-fold Cross Validation this method would return 10 Strings defining each fold
+     * @param params The parameters.
+     * @return The list of parameters.
      */
     public abstract List<String> getAllInstanceStrings(String params);
 
     /**
      * Some SMBO methods can leverage extra features about an Instance, this method should return a map of feature/value pairs for all instances
+     * @param params The parameters.
+     * @return The map of feature/value pairs.
      */
     public Map<String, Map<String, String>> getAllInstanceFeatures(String params)
     {
@@ -244,6 +258,9 @@ public abstract class InstanceGenerator
 
     /**
      * Creates an instance of an InstanceGenerator given a class name and the datasetFileName
+     * @param className The name of the class.
+     * @param datasetFileName The name of the dataset file.
+     * @return The instance generator.
      */
     static public InstanceGenerator create(String className, String datasetFileName)
     {
@@ -273,6 +290,10 @@ public abstract class InstanceGenerator
 
     /**
      * Creates an instance of an InstanceGenerator given a class name, training data and the testing data  
+     * @param className The name of the class.
+     * @param training The training instances.
+     * @param testing The testing instances.
+     * @return The instance generator.
      */
     static public InstanceGenerator create(String className, Instances training, Instances testing)
     {

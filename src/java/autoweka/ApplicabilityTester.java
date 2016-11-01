@@ -42,7 +42,9 @@ public class ApplicabilityTester
      * Looks inside a folder for .param files that are WEKA classifiers (base, meta and ensemble)
      *
      * @param instances The instances to test on
-     * @param paramDirName The path to the folder containing the .param files
+     * @param baseDir The path to the folder containing the .param files
+     * @param allowed Allowed files
+     * @return Applicable classifiers.
      */
     public static ApplicableClassifiers getApplicableClassifiers(Instances instances, String baseDir, List<String> allowed)
     {
@@ -78,6 +80,7 @@ public class ApplicabilityTester
      *
      * @param instances The instances to test on
      * @param paramDirName The path to the folder containing the .param files
+     * @return List of applicable class parameters.
      */
     public static List<ClassParams> getApplicableAttributeEvaluators(Instances instances, String paramDirName)
     {
@@ -89,6 +92,7 @@ public class ApplicabilityTester
      *
      * @param instances The instances to test on
      * @param paramDirName The path to the folder containing the .param files
+     * @return List of applicable class parameters.
      */
     public static List<ClassParams> getApplicableAttributeSearchers(Instances instances, String paramDirName)
     {

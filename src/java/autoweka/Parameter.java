@@ -14,6 +14,7 @@ public class Parameter
 {
     /**
      * Creates a Parameter from a given line in a .param file.
+     * @param line The line.
      */
     public Parameter(String line)
     {
@@ -187,6 +188,9 @@ public class Parameter
      * Creates a List of Strings that contain the discretization of this parameter. 
      *
      * Numeric parameters will have at most numPoints values, while Categorical parameters have all elements in their domain
+     *
+     * @param numPoints The number of points.
+     * @return The list of discretizations.
      */
     public List<String> getDiscretization(int numPoints){
         ArrayList<String> points = new ArrayList<String>();

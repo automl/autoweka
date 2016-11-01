@@ -79,6 +79,8 @@ public abstract class ExperimentConstructor
      * Main method that can either take stuff on the command line to build a single experiment, or points to an ExperimentBatch XML file.
      *
      * You can specify all the options that are in an XML file by using the same XML tag name preceeded with two dashes
+     *
+     * @param args Any arguments.
      */
     public static void main(String[] args)
     {
@@ -243,7 +245,7 @@ public abstract class ExperimentConstructor
         mExperiment.toXML(mExperimentPath + File.separator + mExperiment.name + File.separator + mExperiment.name + ".experiment");
     }
 
-    /**
+    /*
      * Useful for subclasses so that they can get some of the handy properties that they'll need to pass to their wrappers
      */
     protected String getWrapperPropString()
@@ -269,11 +271,14 @@ public abstract class ExperimentConstructor
 
     /**
      * Subclasses must provide this method which is responsible for
+     * @param path The path to the experiment.
      */
     public abstract void prepareExperiment(String path);
 
     /**
      * Process a constructor argument, and suck out stuff from the arg queue
+     * @param arg The argument.
+     * @param args The queue of arguments.
      */
     public void processArg(String arg, Queue<String> args){
         log.warn("Ignoring unknown argument {}", arg);
@@ -281,19 +286,26 @@ public abstract class ExperimentConstructor
 
     /**
      * Get a string indicating the type of this Experiment (namely the name of the SMBO method)
+     * @return The type of experiment.
      */
     protected abstract String getType();
+
     /**
      * Gets the name of the class that is used to parse the results of the SMBO method into a Trajectory
+     * @return The name of the trajectory parser class.
      */
     protected abstract String getTrajectoryParserClassName();
+
     /**
      * Gets the set of strings that are called on the command line to invoke the SMBO method
+     * @param experimentPath The path to the experiment.
+     * @return The list of call strings.
      */
     protected abstract List<String> getCallString(String experimentPath);
 
     /**
      * Gets a list of all the environment variables that need to be set for this experiment to run
+     * @return The list of environment variables.
      */
     protected List<String> getEnvVariables()
     {
@@ -354,6 +366,8 @@ public abstract class ExperimentConstructor
 
     /**
      * Gets a prefix out of the classifier name by stripping all the packages and capital letters - needed to ensure that parameters with the same WEKA name don't collide.
+     * @param classifierName The name of the classifier.
+     * @return The prefix.
      */
     public String getPrefix(String classifierName)
     {
@@ -364,6 +378,7 @@ public abstract class ExperimentConstructor
     /**
      * Populates a ParameterConditionalGroup with all the params/conditionals that are needed for
      * optimization methods that support a DAG structure
+     * @return The parameter-conditional group.
      */
     public ParameterConditionalGroup generateAlgorithmParameterConditionalGroupForDAG()
     {
@@ -515,7 +530,7 @@ public abstract class ExperimentConstructor
         return paramGroup;
     }
 
-    /** Internal helper method that adds a child classifier's params assuming a DAG structure */
+    /* Internal helper method that adds a child classifier's params assuming a DAG structure */
     private void addClassifierToParameterConditionalGroupForDAG(ParameterConditionalGroup paramGroup, ClassParams clsParams, String prefix, Parameter parent)
     {
         Map<Parameter, Parameter> paramMap = new HashMap<Parameter, Parameter>();

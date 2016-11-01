@@ -35,6 +35,7 @@ public class Wrapper
 
     /**
      * Runs the wrapper with the given command line arguments - see the class description for full details
+     * @param argsArray The list of arguments.
      */
     public void run(String[] argsArray)
     {
@@ -147,7 +148,7 @@ public class Wrapper
         _processResults(res);
     }
 
-    /**
+    /*
      * Actually does the run of the Classifier Runner.
      *
      * You should only override this if you need to do a number of different runs for each wrapper invocation
@@ -175,7 +176,7 @@ public class Wrapper
         return res;
     }
 
-    /**
+    /*
      * Override this when you want to get at parameters as soon as you hit the -wrapper.
      *
      * Consume any extra arguments from the Queue that should not be passed on to the ClassifierRunner
@@ -185,7 +186,7 @@ public class Wrapper
         //Just move this one along - we don't consume anything
     }
 
-    /**
+    /*
      * Override this when you want to get at parameters before the -wrapper.
      *
      * Consume any extra arguments from the Queue that you don't want to process again
@@ -195,21 +196,21 @@ public class Wrapper
         //Just move this one along
     }
 
-    /**
+    /*
      * Called just before _doRun();
      */
     protected void _preRun()
     {
     }
 
-    /**
+    /*
      * Called just after _doRun();
      */
     protected void _postRun()
     {
     }
 
-    /**
+    /*
      * Called once the run has completed (or been terminated), the results should be sent back to the SMBO method here
      */
     protected void _processResults(ClassifierResult res)

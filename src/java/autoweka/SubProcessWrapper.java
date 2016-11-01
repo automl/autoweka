@@ -25,6 +25,7 @@ public class SubProcessWrapper extends Wrapper
 
     /**
      * Calls the SubProcessWrapper using the given arguments 
+     * @param args Any arguments.
      */
     public static void main(String [] args)
     {
@@ -39,6 +40,9 @@ public class SubProcessWrapper extends Wrapper
 
     /**
      * The only two things that a SubProcessWrapper cares about are the timeouts and the seed
+     *
+     * @param arg The parameter.
+     * @param args The list of parameters.
      */
     @Override
     protected void _processParameter(String arg, Queue<String> args)
@@ -56,6 +60,7 @@ public class SubProcessWrapper extends Wrapper
 
     /**
      * We only have to set the instance string
+     * @param args The list of arguments.
      */
     @Override
     protected void _processWrapperParameterStart(Queue<String> args)
@@ -66,6 +71,7 @@ public class SubProcessWrapper extends Wrapper
 
     /**
      * Emit the result from a sub process wrapper back up to whoever called us
+     * @param res The classifier result.
      */
     @Override
     protected void _processResults(ClassifierResult res)
@@ -103,7 +109,7 @@ public class SubProcessWrapper extends Wrapper
         public float time;
     }
     
-    /**
+    /*
      * ErrorAndTime versions for ListExperiment
     */
     public static ErrorAndTime getErrorAndTime(File runDir, ListExperiment exp, String instance, String args, String autowekaSeed)
@@ -122,7 +128,7 @@ public class SubProcessWrapper extends Wrapper
         return getErrorAndTime(runDir, exp.memory, props, exp.trainTimeout, instance, args, autowekaSeed);
     }
     
-    /**
+    /*
      * ErrorAndTime versions for Experiment
     */
     public static ErrorAndTime getErrorAndTime(File runDir, Experiment exp, String instance, String args, String autowekaSeed)
@@ -146,6 +152,15 @@ public class SubProcessWrapper extends Wrapper
      *
      * This method is super useful to ensure that leaking doesn't happen/memory limits are enforced, since all the work is done in a subprocess - if anything
      * bad happens, it dies down there, letting your process carry on willy nilly
+     *
+     * @param runDir The run directory.
+     * @param memory The memory limit.
+     * @param props The properties.
+     * @param trainTimeout The timeout for training.
+     * @param instance The instance.
+     * @param args The arguments.
+     * @param autowekaSeed The seed.
+     * @return The error and time.
      */
     public static ErrorAndTime getErrorAndTime(File runDir, String memory, Properties props, float trainTimeout, String instance, String args, String autowekaSeed)
     {

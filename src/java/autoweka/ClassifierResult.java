@@ -352,7 +352,7 @@ public class ClassifierResult
         return mPercentEvaluated;
     }
 
-    /**
+    /*
      * Really shouldn't use this method
      */
     public void _setRawScore(double score) {
@@ -393,13 +393,15 @@ public class ClassifierResult
 
     /**
      * Gets the total time spent dealing with this classifier
+     * @return The total time.
      */
     public double getTime(){
         return mAttributeSelectionTime + mTrainingTime + mEvaluationTime;
     }
 
     /**
-     * Gets the 'score' for this result, which includes the regularization penalty plus the error rate
+     * Gets the 'score' for this result, which includes the regularization penalty plus the metric value
+     * @return The score.
      */
     public double getScore()
     {

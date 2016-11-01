@@ -63,6 +63,7 @@ public class ExperimentBatch extends XmlSerializable
 
         /**
          * Gets the dataset string out of this component
+         * @return The dataset string.
          */
         public String getDatasetString()
         {
@@ -215,6 +216,9 @@ public class ExperimentBatch extends XmlSerializable
 
     /** 
      * Builds an Experiment from an ExperimentComponent and a DatasetComponent
+     * @param expComp The experiment component.
+     * @param datasetComp The dataset component.
+     * @return The experiment.
      */
     public static Experiment createExperiment(ExperimentComponent expComp, DatasetComponent datasetComp)
     {
@@ -240,6 +244,7 @@ public class ExperimentBatch extends XmlSerializable
 
     /**
      * Makes an empty batch file that you can fill in with stuff
+     * @param args Any arguments.
      */
     public static void main(String[] args)
     {

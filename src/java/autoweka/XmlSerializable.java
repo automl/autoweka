@@ -34,6 +34,7 @@ public class XmlSerializable
 
     /**
      * Spits out the class to the given XML file
+     * @param filename The name of the file to write.
      */
     public void toXML(String filename)
     {
@@ -49,6 +50,7 @@ public class XmlSerializable
 
     /**
      * Spits out the class to the given XML file
+     * @param stream The stream to write to.
      */
     public void toXML(OutputStream stream)
     {
@@ -67,6 +69,10 @@ public class XmlSerializable
 
     /**
      * Spits out an object from the given XML file with the given class
+     * @param filename The name of the file to read.
+     * @param c The class.
+     * @param <T> The type of the class.
+     * @return The read object.
      */
     protected static <T extends XmlSerializable> T fromXML(String filename, Class<T> c)
     {
@@ -83,6 +89,10 @@ public class XmlSerializable
     
     /**
      * Spits out an object from the given XML file with the given class
+     * @param xml The input stream to read.
+     * @param c The class.
+     * @param <T> The type of the class.
+     * @return The read object.
      */
     public static <T extends XmlSerializable> T fromXML(InputStream xml, Class<T> c)
     {
@@ -100,6 +110,9 @@ public class XmlSerializable
 
     /**
      * Given a list of command line arguments which have the same name as the XML nodes, populate me an object with the values filled in
+     * @param obj The object to populate.
+     * @param args The arguments.
+     * @return The number of arguments.
      */
     public static int populateObjectFromCMDParams(Object obj, String[] args)
     {
@@ -110,6 +123,8 @@ public class XmlSerializable
     
     /**
      * Given a list of command line arguments which have the same name as the XML nodes, populate me an object with the values filled in
+     * @param obj The object to populate.
+     * @param args The arguments.
      */
     public static void populateObjectFromCMDParams(Object obj, Deque<String> args)
     {

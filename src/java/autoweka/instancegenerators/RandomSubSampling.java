@@ -51,7 +51,7 @@ public class RandomSubSampling extends InstanceGenerator
             return result;
         }
 
-        public void createSubsampleWithReplacement(Random random, int origSize, int sampleSize, int _, int[] classIndices) {
+        public void createSubsampleWithReplacement(Random random, int origSize, int sampleSize, int ignored, int[] classIndices) {
             throw new RuntimeException("This should not happen....");
             /*
             for (int i = 0; i < sampleSize; i++) {
@@ -60,7 +60,7 @@ public class RandomSubSampling extends InstanceGenerator
             }*/
         }
 
-        public void createSubsampleWithoutReplacement(Random random, int origSize, int sampleSize, int _, int[] classIndices) {
+        public void createSubsampleWithoutReplacement(Random random, int origSize, int sampleSize, int ignored, int[] classIndices) {
             if (sampleSize > origSize) {
                 sampleSize = origSize;
                 log.warn("Resampling without replacement can only use percentage <=100% - Using full dataset!");

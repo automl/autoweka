@@ -166,6 +166,8 @@ public class Experiment extends XmlSerializable
 
     /**
      * Static method to load up an experiment from XML.
+     * @param filename The name of the file.
+     * @return The experiment.
      */
     public static Experiment fromXML(String filename)
     {
@@ -173,6 +175,8 @@ public class Experiment extends XmlSerializable
     }
     /**
      * Static method to load up an experiment from XML.
+     * @param xml The input stream.
+     * @return The experiment.
      */
     public static Experiment fromXML(InputStream xml)
     {
@@ -186,6 +190,7 @@ public class Experiment extends XmlSerializable
      * and the seed on which you want to run this experiment. The seed is passed to the SMBO method to allow for easy paralellization of
      * each SMBO method.
      *
+     * @param args Any arguments.
      */
     public static void main(String[] args)
     {

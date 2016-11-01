@@ -37,6 +37,7 @@ abstract class WorkerThread extends Thread
 
     /**
      * Gets whatever exception was thrown by this thread
+     * @return The exception if it exists.
      */
     public Exception getException()
     {
@@ -45,16 +46,18 @@ abstract class WorkerThread extends Thread
 
     /**
      * Subclasses should do all their work in here
+     * @throws Exception if anything goes wrong.
      */
     abstract protected void doWork() throws Exception;
 
-    /**
+    /*
      * For diagnostics, return a string that says what you were trying to do here
      */
     abstract protected String getOpName();
 
     /**
      * True if the job finished before it was killed hard
+     * @return Whether the job completed.
      */
     public boolean completed()
     {
@@ -73,6 +76,7 @@ abstract class WorkerThread extends Thread
 
     /**
      * Checks to see if the job was killed hard
+     * @return Whether the job was killed.
      */
     public boolean terminated()
     {
@@ -80,7 +84,9 @@ abstract class WorkerThread extends Thread
     }
 
     /**
-     * Main way of using this class - you should tell it how long you want to run for, and it will return withing some multiplyer of that time
+     * Main way of using this class - you should tell it how long you want to run for, and it will return within some multiplier of that time
+     * @param timeoutSeconds The timeout in seconds.
+     * @return The actual time.
      */
     float runWorker(float timeoutSeconds)
     {

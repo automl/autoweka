@@ -47,6 +47,8 @@ public class ClassifierRunner
      * Prepares a runner with the specified properties.
      *
      * Importantly, you must define 'instanceGenerator' and 'datasetString', while optional properties are 'verbose', 'onlyTest' and 'disableOutput'
+     *
+     * @param props Properties to set.
      */
     public ClassifierRunner(Properties props)
     {
@@ -60,7 +62,7 @@ public class ClassifierRunner
         mPredictionsFileName = props.getProperty("predictionsFileName", null);
     }
 
-    /**
+    /*
      * Kind of a hack, since this lets us look at what instances we should be running
      */
     public InstanceGenerator getInstanceGenerator(){
@@ -98,6 +100,12 @@ public class ClassifierRunner
 
     /**
      * Public interface to running a classifier specified in the Auto-WEKA format of arguments to generate a classifier result
+     * @param instanceStr The string describing the instances.
+     * @param resultMetric The metric to use.
+     * @param timeout The timeout.
+     * @param mSeed The random seed.
+     * @param args The list of arguments.
+     * @return The evaluation result.
      */
     public ClassifierResult run(String instanceStr, String resultMetric, float timeout, String mSeed, List<String> args)
     {
@@ -118,7 +126,7 @@ public class ClassifierRunner
         return runner.result;
     }
 
-    /**
+    /*
      * Have a pre-trained classifier and want to get another set of testing data out of it? Use this
      */
     public ClassifierResult evaluateClassifierOnTesting(AbstractClassifier classifier, String instanceStr, String resultMetric, float evaluateClassifierOnInstances)
@@ -131,7 +139,7 @@ public class ClassifierRunner
         return res;
     }
 
-    /**
+    /*
      * Do the actual run of a classifier for AS, Training and Test
      */
     private ClassifierResult _run(String instanceStr, String resultMetric, float timeout, String mSeed, List<String> args)
@@ -317,7 +325,7 @@ public class ClassifierRunner
         return res;
     }
 
-    /**
+    /*
      * Internal method that performs the evaluation of a classifier on a bunch of instances
      *
      * If true, then the training was good, otherwise it failed
