@@ -947,6 +947,50 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             "attribute evaluation arguments: " + (attributeEvalArgs != null ? Arrays.toString(attributeEvalArgs) : "[]") + "\n" +
             "metric: " + metric + "\n" +
             "estimated " + metric + ": " + estimatedMetricValue + "\n\n";
+
+        res += "You can use the chosen classifier in your own code as follows:\n\n";
+        if(attributeSearchClass != null || attributeEvalClass != null) {
+            res += "AttributeSelection as = new AttributeSelection();\n";
+            if(attributeSearchClass != null) {
+                res += "ASSearch asSearch = ASSearch.forName(\"" + attributeSearchClass + "\", new String[]{";
+                if(attributeSearchArgs != null) {
+                    String[] args = attributeSearchArgs.clone();
+                    for(int i = 0; i < args.length; i++) {
+                        res += "\"" + args[i] + "\"";
+                        if(i < args.length - 1) res += ", ";
+                    }
+                }
+                res += "});\n";
+                res += "as.setSearch(asSearch);\n";
+            }
+
+            if(attributeEvalClass != null) {
+                res += "ASEvaluation asEval = ASEvaluation.forName(\"" + attributeEvalClass + "\", new String[]{";
+                if(attributeEvalArgs != null) {
+                    String[] args = attributeEvalArgs.clone();
+                    for(int i = 0; i < args.length; i++) {
+                        res += "\"" + args[i] + "\"";
+                        if(i < args.length - 1) res += ", ";
+                    }
+                }
+                res += "});\n";
+                res += "as.setEvaluator(asEval);\n";
+            }
+            res += "as.SelectAttributes(instances);\n";
+            res += "instances = as.reduceDimensionality(instances);\n";
+        }
+
+        res += "Classifier classifier = AbstractClassifier.forName(\"" + classifierClass + "\", new String[]{";
+        if(classifierArgs != null) {
+            String[] args = classifierArgs.clone();
+            for(int i = 0; i < args.length; i++) {
+                res += "\"" + args[i] + "\"";
+                if(i < args.length - 1) res += ", ";
+            }
+        }
+        res += "});\n";
+        res += "classifier.buildClassifier(instances);\n\n";
+
         try {
             res += eval.toSummaryString();
             res += "\n";
