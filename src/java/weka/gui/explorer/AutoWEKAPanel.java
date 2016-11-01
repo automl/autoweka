@@ -87,10 +87,10 @@ import javax.swing.event.ChangeListener;
 /** 
  * This class provides a special, simple panel for Auto-WEKA in the Explorer.
  *
- * @author EibeFrank
+ * @author EibeFrank and Lars Kotthoff
  * @version $Revision: 908 $
  */
-public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
+public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, LogHandler {
    
   /** for serialization. */
   private static final long serialVersionUID = 3089066653508312179L;
@@ -133,6 +133,9 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
   
   /** A thread that classification runs in. */
   protected Thread m_RunThread;
+
+  /** The Auto-WEKA classifier. */
+  protected AutoWEKAClassifier aw;
   
   /**
    * Creates the Auto-WEKA panel.
@@ -394,6 +397,18 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
     }
     resultListMenu.add(deleteOutput);
 
+    JMenuItem saveModel = new JMenuItem("Save model");
+    if(selectedName != null) {
+      saveModel.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        saveClassifier("Auto-WEKA", aw, m_Instances);
+      }
+    });
+    } else {
+      saveModel.setEnabled(false);
+    }
+    resultListMenu.add(saveModel);
+
     resultListMenu.show(m_History.getList(), x, y);
   }
 
@@ -424,7 +439,7 @@ public class AutoWEKAPanel extends JPanel implements ExplorerPanel, LogHandler {
         String name = "Auto-WEKA: " + m_Instances.relationName();
         SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
         name = df.format(new Date()) + " - " + name;
-        AutoWEKAClassifier aw = (AutoWEKAClassifier) AbstractClassifier.makeCopy((AutoWEKAClassifier)(m_ClassifierEditor.getValue()));
+        aw = (AutoWEKAClassifier) AbstractClassifier.makeCopy((AutoWEKAClassifier)(m_ClassifierEditor.getValue()));
         m_Instances.setClassIndex(m_ClassCombo.getSelectedIndex());
         aw.setLog(m_Log);
         aw.buildClassifier(m_Instances);

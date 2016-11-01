@@ -13,7 +13,7 @@ Title=Automatically find the best model and parameters for a dataset.
 Category=Classification, Regression, Attribute Selection
 
 # Author (required)
-Author=Lars Kotthoff, Oto Alves, Farooq Ahmed, Samantha Sanders, Chris Thornton, Frank Hutter, Holger Hoos, Kevin Leyton-Brown
+Author=Lars Kotthoff, Eibe Frank, Oto Alves, Farooq Ahmed, Samantha Sanders, Chris Thornton, Frank Hutter, Holger Hoos, Kevin Leyton-Brown
 
 # Maintainer (required)
 Maintainer=Lars Kotthoff <larsko@cs.ubc.ca>
