@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class TrajectoryParser
 {
-    /** Does the work for a specific trajectory */
+    /* Does the work for a specific trajectory */
     public abstract Trajectory parseTrajectory(Experiment experiment, File folder, String seed);
 
     final static Logger log = LoggerFactory.getLogger(TrajectoryParser.class);

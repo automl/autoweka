@@ -122,6 +122,7 @@ public class Trajectory
 
     /**
      * makes a new empty trajectory with the given seed
+     * @param seed The seed.
      */
     public Trajectory(String seed)
     {
@@ -131,6 +132,7 @@ public class Trajectory
 
     /**
      * Gets the seed for this trajectory
+     * @return The seed.
      */
     public String getSeed() {
         return mSeed;
@@ -147,6 +149,7 @@ public class Trajectory
 
     /**
      * Gets all the points inside this trajectory
+     * @return The list of points.
      */
     public List<Trajectory.Point> getPoints()
     {
@@ -155,6 +158,7 @@ public class Trajectory
 
     /**
      * Inserts a new point onto the end of this trajectory
+     * @param newPoint The new point.
      */
     public void addPoint(Point newPoint)
     {
@@ -169,6 +173,8 @@ public class Trajectory
 
     /**
      * Gets the point in the trajectory that's closest to this time
+     * @param time The time for the point.
+     * @return The point closest to the time.
      */
     public Point getPointAtTime(double time)
     {
@@ -184,6 +190,8 @@ public class Trajectory
 
     /**
      * Gets the next point in the trajectory after the given time
+     * @param time The time before the point.
+     * @return The point.
      */
     public Point getNextPoint(double time)
     {
@@ -199,6 +207,7 @@ public class Trajectory
 
     /**
      * Gets the last point in the trajectory, ie the best one
+     * @return The best point.
      */
     public Point getLastPoint() {
         if (mPoints.isEmpty())
@@ -219,6 +228,10 @@ public class Trajectory
 
     /**
      * Set all the statistics regarding the number of evaluations performed for this trajectory
+     * @param numTotalEvaluations The total number of evaluations.
+     * @param numMemOutEvaluations The number of evaluations with memout errors.
+     * @param numTimeOutEvaluations The number of evaluations with timeout
+     * errors.
      */
     public void setEvaluationCounts(int numTotalEvaluations, int numMemOutEvaluations, int numTimeOutEvaluations) {
         mNumEvaluations = numTotalEvaluations;
@@ -228,6 +241,7 @@ public class Trajectory
 
     /**
      * Gets the total number of evaluations that were performed
+     * @return The total number of evaluations.
      */
     public int getNumEvaluations() {
         return mNumEvaluations;
@@ -235,6 +249,7 @@ public class Trajectory
 
     /**
      * Gets the number of evaluations that hit the memory limit (-1 if not recorded)
+     * @return The number of evaluations that exceeded the memory limit.
      */
     public int getNumMemOutEvaluations() {
         return mNumMemOutEvaluations;
@@ -242,6 +257,7 @@ public class Trajectory
 
     /**
      * Gets the number of evaluations that timed out (-1 if not recorded)
+     * @return The number of evaluations that timed out.
      */
     public int getNumTimedOutEvaluations() {
         return mNumTimeOutEvaluations;
