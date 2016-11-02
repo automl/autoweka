@@ -17,6 +17,9 @@ public class WekaArgumentConverter
 
     /**
      * Converts arguments from the Auto-WEKA format into something that WEKA can actually understand.
+     *
+     * @param args The list of arguments.
+     * @return The WEKA arguments.
      */
     public static Arguments convert(List<String> args){
         List<ArgumentPair> sortedArgPairs = sortArgs(args);

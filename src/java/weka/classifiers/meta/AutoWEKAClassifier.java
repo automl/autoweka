@@ -280,7 +280,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     /**
     * Find the best classifier, arguments, and attribute selection for the data.
     *
-    * @param data the training data to be used for selecting and tuning the
+    * @param is the training data to be used for selecting and tuning the
     * classifier.
     * @throws Exception if the classifier could not be built successfully.
     */
@@ -501,7 +501,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     /**
     * Calculates the class membership for the given test instance.
     *
-    * @param instance the instance to be classified
+    * @param i the instance to be classified
     * @return predicted class
     * @throws Exception if instance could not be classified successfully
     */
@@ -516,7 +516,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     /**
     * Calculates the class membership probabilities for the given test instance.
     *
-    * @param instance the instance to be classified
+    * @param i the instance to be classified
     * @return predicted class probability distribution
     * @throws Exception if instance could not be classified successfully.
     */
@@ -800,7 +800,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
     /**
      * Set the amount of configurations that will be given as output
-     * @param The amount of best configurations desired by the user
+     * @param nbc The amount of best configurations desired by the user
      */
     public void setnBestConfigs(int nbc) {
         nBestConfigs = nbc;
@@ -873,6 +873,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
     /** Set the WEKA logger.
      * Used for providing feedback during execution.
+     *
+     * @param log The logger.
      */
     public void setLog(weka.gui.Logger log) {
         this.wLog = log;

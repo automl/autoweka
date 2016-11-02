@@ -16,7 +16,9 @@ public class GetBestFromTrajectoryGroup
     final static Logger log = LoggerFactory.getLogger(GetBestFromTrajectoryGroup.class);
 
     /**
-     * Point this main method at a .trajectory file, and be presented with what you should actually run your dataset on
+     * Point this main method at a .trajectory file, and be presented with what you should actually run your dataset on.
+     *
+     * @param args Any arguments.
      */
     public static void main(String[] args){
         GetBestFromTrajectoryGroup res = new GetBestFromTrajectoryGroup(args[0]);

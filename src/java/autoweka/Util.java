@@ -40,6 +40,9 @@ public class Util
      * Given a property string (var1=val1:var2=val2:....) convert it to a property object.
      *
      * Note that this honours escaped colons
+     *
+     * @param propStr The property string.
+     * @return The properties object.
      */
     static public Properties parsePropertyString(String propStr)
     {
@@ -56,6 +59,9 @@ public class Util
      * Given a property string (var1=val1:var2=val2:....) convert it to a property object.
      *
      * Note that this honours escaped colons
+     *
+     * @param props The properties object.
+     * @param propStr The property string.
      */
     static public void parsePropertyString(Properties props, String propStr)
     {
@@ -82,6 +88,9 @@ public class Util
 
     /**
      * Converts a Properties object to a property string, escaping ':' as needed
+     *
+     * @param props The properties object.
+     * @return The property string.
      */
     static public String propertiesToString(Properties props){
         StringBuilder sb = new StringBuilder();
@@ -105,6 +114,9 @@ public class Util
 
     /**
      * Looks for command line arguments of the form -prop PROPERTYSTRING and adds them to the given properties object
+     * 
+     * @param props The properties object.
+     * @param cmdLineArgs The arguments.
      */
     static public void parseCommandLineProperties(Properties props, String[] cmdLineArgs)
     {
@@ -113,6 +125,9 @@ public class Util
 
     /**
      * Looks for command line arguments of the form -prop PROPERTYSTRING and adds them to the given properties object
+     * 
+     * @param props The properties object.
+     * @param cmdLineArgs The arguments.
      */
     static public void parseCommandLineProperties(Properties props, List<String> cmdLineArgs)
     {
@@ -126,9 +141,10 @@ public class Util
     }
 
     /**
-     * Initializes an empty file at the given path if it doesnt already exists
+     * Initializes an empty file at the given path if it doesn't already exist.
+     *
+     * @param aLogPath The path to the file.
      */
-
    	public static void initializeFile(String aLogPath){
 
    		try{
@@ -143,7 +159,9 @@ public class Util
    	}
 
     /**
-     * Makes folders along the specified path
+     * Makes folders along the specified path.
+     *
+     * @param basePath The path.
      */
     static public void makePath(String basePath)
     {
@@ -175,7 +193,9 @@ public class Util
     }
 
     /**
-     * Tries to get the full path to the Java Executable that we're running
+     * Tries to get the full path to the Java Executable that we're running.
+     *
+     * @return The string describing the path to the executable.
      */
     public static String getJavaExecutable()
     {
@@ -183,7 +203,10 @@ public class Util
     }
 
     /**
-     * Tries to find the given executable on the path
+     * Tries to find the given executable on the path.
+     *
+     * @param executableName The executable to look for.
+     * @return The executable file.
      */
     public static File findExecutableOnPath(String executableName)
     {
@@ -217,6 +240,9 @@ public class Util
      * Tries to evaluate the environment variable into something useful.
      *
      * Note, this probably only works on posix systems now...
+     *
+     * @param var The environment variable to expand.
+     * @return The expanded environment variable.
      */
     public static String expandEnvironmentVariable(String var)
     {
@@ -283,7 +309,10 @@ public class Util
     }
 
     /**
-     * Tries to resolve any relative paths/symlinks on a given path
+     * Tries to resolve any relative paths/symlinks on a given path.
+     *
+     * @param path Th path to expand.
+     * @return The expanded path.
      */
     public static String expandPath(String path)
     {
@@ -341,7 +370,7 @@ public class Util
     }
 
     /**
-     * Utility to class to make a void print stream
+     * Utility to class to make a void print stream.
      */
     static public class NullPrintStream extends PrintStream {
         public NullPrintStream(){
@@ -353,7 +382,11 @@ public class Util
     }
 
     /**
-     * Have a list of list of strings and need the cartesian product? Look no further!
+     * Have a list of list of strings and need the Cartesian product? Look no further!
+     *
+     * @param sets The list of list of strings to compute the Cartesian product
+     * for.
+     * @return The Cartesian product.
      */
     public static List<List<String>> cartesianProduct(List<List<String>> sets) {
         if (sets.size() < 2)
@@ -379,7 +412,10 @@ public class Util
     }
 
     /**
-     * Returns a string containing the arguments sorted by their name and joined together
+     * Returns a string containing the arguments sorted by their name and joined together.
+     *
+     * @param argMap The map of arguments.
+     * @return The string representation of the arguments.
      */
     public static String argMapToString(Map<String, String> argMap){
         ArrayList<String> argKeys = new ArrayList<String>(argMap.keySet());
@@ -398,7 +434,10 @@ public class Util
     }
 
     /**
-     * Removes any arguments in the inputMap that happen to have a HIDDEN in their name
+     * Removes any arguments in the inputMap that happen to have a HIDDEN in their name.
+     *
+     * @param inputMap The input map of arguments.
+     * @return The output map of arguments with hidden arguments removed.
      */
     public static Map<String, String> removeHidden(Map<String, String> inputMap){
         Map<String, String> argMap = new HashMap<String, String>(inputMap);
@@ -413,7 +452,10 @@ public class Util
     }
 
     /**
-     * Gets the basename of a file
+     * Removes the extension from a file name string.
+     *
+     * @param s The file name string.
+     * @return The file name string without extension.
      */
     public static String removeExtension(String s)
     {
@@ -437,7 +479,11 @@ public class Util
     }
 
     /**
-     * Joins a list of strings together sepeated by a delim in the middle
+     * Joins a list of strings together separated by a delim in the middle.
+     *
+     * @param delim The delimiter used to join the strings.
+     * @param strs The strings to join.
+     * @return The joined string.
      */
     static public String joinStrings(String delim, String ... strs)
     {
@@ -451,7 +497,12 @@ public class Util
     }
 
     /**
-     * Joins a collection of strings together sepeated by a delim in the middle
+     * Joins a collection of strings together separated by a delim in the
+     * middle.
+     *
+     * @param delim The delimiter used to join the strings.
+     * @param strs The strings to join.
+     * @return The joined string.
      */
     static public String joinStrings(String delim, Collection<String> strs)
     {
@@ -469,7 +520,10 @@ public class Util
     }
 
     /**
-     * Looks for any strings that have spaces in them, and surrounds them with quotes
+     * Looks for any strings that have spaces in them, and surrounds them with quotes.
+     *
+     * @param oldStrs The strings with spaces to escape.
+     * @return The escaped strings.
      */
     static public List<String> quoteStrings(Collection<String> oldStrs)
     {
@@ -483,7 +537,13 @@ public class Util
     }
 
     /**
-     * Splits a string, returning the string separated by the delimiter, with only the numLeft and numRight taken from the appropriate sides
+     * Splits a string, returning the string separated by the delimiter, with only the numLeft and numRight taken from the appropriate sides.
+     *
+     * @param params The string to split.
+     * @param delimStr The delimiter to split at.
+     * @param numLeft Characters to the left to take.
+     * @param numRight Characters to the right to take.
+     * @return The list of split strings.
      */
     static public List<String> splitNestedString(String params, String delimStr, int numLeft, int numRight)
     {
@@ -530,6 +590,19 @@ public class Util
 
     /**
      * Makes a simple real valued dataset of a given size, with the class determined by index
+     *
+     * @param numInstances The number of instances.
+     * @param numClasses The number of classes.
+     * @param numUsefulNumeric The number of correlated numeric attributes.
+     * @param numUsefulCategorical The number of correlated categoric
+     * attributes.
+     * @param numRandomNumeric The number of uncorrelated numeric attributes.
+     * @param numRandomCategorical The number of uncorrelated categoric
+     * attributes.
+     * @param randomCategoricalSize The number of categories in the uncorrelated
+     * categoric attributes.
+     * @param seed The random seed.
+     * @return The instances.
      */
     static public Instances createDummyInstances(int numInstances, int numClasses, int numUsefulNumeric, int numUsefulCategorical, int numRandomNumeric, int numRandomCategorical, int randomCategoricalSize, int seed)
     {
@@ -622,7 +695,11 @@ public class Util
         return ".";
     }
 
-    /** Splits a string based on spaces, grouping atoms if they are inside non escaped double quotes.
+    /**
+     * Splits a string based on spaces, grouping atoms if they are inside non escaped double quotes.
+     *
+     * @param str The string to split.
+     * @return The list of split strings.
      */
     static public List<String> splitQuotedString(String str)
     {
