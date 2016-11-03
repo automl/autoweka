@@ -246,6 +246,9 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     /** The number of parallel threads. */
     protected int parallelRuns = DEFAULT_PARALLEL_RUNS;
 
+    /** The time it took to train the final classifier. */
+    protected double finalTrainTime = -1;
+
     private transient weka.gui.Logger wLog;
 
     /**
@@ -491,8 +494,11 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
 
+        long startTime = System.currentTimeMillis();
         is = as.reduceDimensionality(is);
         classifier.buildClassifier(is);
+        long stopTime = System.currentTimeMillis();
+        finalTrainTime = (stopTime - startTime) / 1000.0;
 
         eval = new Evaluation(is);
         eval.evaluateModel(classifier, is);
@@ -948,7 +954,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             "attribute evaluation: " + attributeEvalClass + "\n" +
             "attribute evaluation arguments: " + (attributeEvalArgs != null ? Arrays.toString(attributeEvalArgs) : "[]") + "\n" +
             "metric: " + metric + "\n" +
-            "estimated " + metric + ": " + estimatedMetricValue + "\n\n";
+            "estimated " + metric + ": " + estimatedMetricValue + "\n" +
+            "training time on evaluation dataset: " + finalTrainTime + " seconds\n\n";
 
         res += "You can use the chosen classifier in your own code as follows:\n\n";
         if(attributeSearchClass != null || attributeEvalClass != null) {
