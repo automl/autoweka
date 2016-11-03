@@ -7,6 +7,11 @@
 \usepackage{hyperref}
 \hypersetup{hidelinks}
 
+\usepackage{tabu}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{lscape}
+
 \def\version{2.1}
 
 \begin{document}
@@ -141,5 +146,138 @@ Auto-WEKA can be run from the CLI like any other WEKA classifier, for example:
 java -cp autoweka.jar weka.classifiers.meta.AutoWEKAClassifier \
     -t iris.arff -timeLimit 15 -no-cv
 \end{verbatim}
- 
+
+Running Auto-WEKA with the \verb=-h= flag or without any options lists the
+options that can be set by the user:
+\begin{verbatim}
+java -cp autoweka.jar weka.classifiers.meta.AutoWEKAClassifier -h
+
+Help requested.
+
+General options:
+
+-h or -help
+	Output help information.
+-synopsis or -info
+	Output synopsis for classifier (use in conjunction  with -h)
+-t <name of training file>
+	Sets training file.
+-T <name of test file>
+	Sets test file. If missing, a cross-validation will be performed
+	on the training data.
+-c <class index>
+	Sets index of class attribute (default: last).
+-x <number of folds>
+	Sets number of folds for cross-validation (default: 10).
+-no-cv
+	Do not perform any cross validation.
+-force-batch-training
+	Always train classifier in batch mode, never incrementally.
+-split-percentage <percentage>
+	Sets the percentage for the train/test set split, e.g., 66.
+-preserve-order
+	Preserves the order in the percentage split.
+-s <random number seed>
+	Sets random number seed for cross-validation or percentage split
+	(default: 1).
+-m <name of file with cost matrix>
+	Sets file with cost matrix.
+-toggle <comma-separated list of evaluation metric names>
+	Comma separated list of metric names to toggle in the output.
+	All metrics are output by default with the exception of 'Coverage' and 'Region size'.
+	Available metrics:
+	Correct,Incorrect,Kappa,Total cost,Average cost,KB relative,KB information,
+	Correlation,Complexity 0,Complexity scheme,Complexity improvement,
+	MAE,RMSE,RAE,RRSE,Coverage,Region size,TP rate,FP rate,Precision,Recall,
+	F-measure,MCC,ROC area,PRC area
+-l <name of input file>
+	Sets model input file. In case the filename ends with '.xml',
+	a PMML file is loaded or, if that fails, options are loaded
+	from the XML file.
+-d <name of output file>
+	Sets model output file. In case the filename ends with '.xml',
+	only the options are saved to the XML file, not the model.
+-v
+	Outputs no statistics for training data.
+-o
+	Outputs statistics only, not the classifier.
+-do-not-output-per-class-statistics
+	Do not output statistics for each class.
+-k
+	Outputs information-theoretic statistics.
+-classifications "weka.classifiers.evaluation.output.prediction.AbstractOutput + options"
+	Uses the specified class for generating the classification output.
+	E.g.: weka.classifiers.evaluation.output.prediction.PlainText
+-p range
+	Outputs predictions for test instances (or the train instances if
+	no test instances provided and -no-cv is used), along with the 
+	attributes in the specified range (and nothing else). 
+	Use '-p 0' if no attributes are desired.
+	Deprecated: use "-classifications ..." instead.
+-distribution
+	Outputs the distribution instead of only the prediction
+	in conjunction with the '-p' option (only nominal classes).
+	Deprecated: use "-classifications ..." instead.
+-r
+	Only outputs cumulative margin distribution.
+-xml filename | xml-string
+	Retrieves the options from the XML-data instead of the command line.
+-threshold-file <file>
+	The file to save the threshold data to.
+	The format is determined by the extensions, e.g., '.arff' for ARFF 
+	format or '.csv' for CSV.
+-threshold-label <label>
+	The class label to determine the threshold data for
+	(default is the first label)
+-no-predictions
+	Turns off the collection of predictions in order to conserve memory.
+
+Options specific to weka.classifiers.meta.AutoWEKAClassifier:
+
+-seed <seed>
+	The seed for the random number generator.
+	(default: 123)
+-timeLimit <limit>
+	The time limit for tuning in minutes (approximately).
+	(default: 15)
+-memLimit <limit>
+	The memory limit for runs in MiB.
+	(default: 1024)
+-nBestConfigs <limit>
+	The amount of best configurations to return.
+	(default: 1024)
+-metric <metric>
+	The metric to optimise.
+	(default: errorRate)
+-parallelRuns <runs>
+	The number of parallel runs. EXPERIMENTAL, BE CAREFUL WHEN SETTING.
+	(default: 1)
+-output-debug-info
+	If set, classifier is run in debug mode and
+	may output additional info to the console
+-do-not-check-capabilities
+	If set, classifier capabilities are not checked before classifier is built
+	(use with caution).
+-num-decimal-places
+	The number of decimal places for the output of numbers in the model (default 2).
+-batch-size
+	The desired batch size for batch prediction  (default 100).
+\end{verbatim}
+
+\subsection{Saving and Loading Models}
+
+Once Auto-WEKA has been run, you can save the trained model to get predictions
+on similar data. In the WEKA GUI, right-click on a run in the output list window
+and select `Save model'. On the CLI, use the \verb=-d= flag. More information on
+saving and loading models can be found on the WEKA wiki at
+\url{https://weka.wikispaces.com/Saving+and+loading+models}.
+
+The Auto-WEKA output also contains the Java code for creating an instance of the
+classifier and attribute selection method that it found. This allows to retrain
+the model on different data.
+
+\appendix
+
+\input{params}
+
 \end{document}
