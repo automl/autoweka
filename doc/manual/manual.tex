@@ -31,7 +31,7 @@ Lars Kotthoff, Chris Thornton, Frank Hutter\\
 \section{Introduction}\label{sec:intro}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Auto-WEKA is a tool that performs combined algorithm selection and hyperparmeter
+Auto-WEKA is a tool that performs combined algorithm selection and hyperparameter
 optimisation over the classification and regression algorithms implements in
 WEKA. More specifically, given a specific dataset, Auto-WEKA explores
 hyperparameter settings for many algorithms and recommends to a user which
@@ -64,7 +64,11 @@ run WEKA, you should be able to run Auto-WEKA.
 
 Auto-WEKA is used much like any other WEKA classifier. After loading a dataset
 into WEKA, it can be run on it to automatically determine the best WEKA model
-and its parameters.
+and its parameters. It does so by intelligently exploring the space of
+classifiers and parameters using the SMAC tool (\url{http://www.cs.ubc.ca/labs/beta/Projects/SMAC/}).
+
+A full list of all classifiers and attribute selectors along with their
+parameters can be found in the appendix.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \subsection{Using the GUI}\label{sec:gui}
