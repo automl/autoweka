@@ -59,7 +59,7 @@ Auto-WEKA does not have any additional requirements compared to WEKA. If you can
 run WEKA, you should be able to run Auto-WEKA.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Auto-WEKA Overview}\label{sec:overview}
+\section{User Documentation}\label{sec:overview}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Auto-WEKA is used much like any other WEKA classifier. After loading a dataset
@@ -279,6 +279,45 @@ saving and loading models can be found on the WEKA wiki at
 The Auto-WEKA output also contains the Java code for creating an instance of the
 classifier and attribute selection method that it found. This allows to retrain
 the model on different data.
+
+\section{Developer Documentation}
+
+Auto-WEKA's internal structure is complex and comprises more than 10,000
+lines of code. A detailed explanation is beyond the scope of this document; more
+details can be found in the Javadoc. A high-level overview of the internal
+structure of Auto-WEKA is shown in Figure~\ref{fig:devel-overview}.
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[angle=-90,width=\textwidth]{devel-overview-crop}
+\caption{High-level overview of Auto-WEKA internal structure.}
+\label{fig:devel-overview}
+\end{center}
+\end{figure}
+
+The user interface of Auto-WEKA is defined in the \verb=AutoWEKAClassifier= and
+\verb=AutoWEKAPanel= classes, where the latter defines the elements of the
+custom Auto-WEKA panel and calls \verb=AutoWEKAClassifier=. New user options and
+additional arguments should be specified there.
+
+The SMAC optimization tool is called through the
+\verb=SMACExperimentConstructor= and \verb=SubProcessWrapper= classes. The
+former prepares a set of files that contain the data, the definition of the
+parameter space, the training budget, and other information necessary for SMAC
+to run. These files are created in the system's temporary directory in a folder
+named \verb=autoweka<random number>=. The \verb=SubProcessWrapper= calls SMAC as
+an external process and points it to these files.
+
+SMAC then calls Auto-WEKA's \verb=SMACWrapper= class during the optimization
+process to evaluate the performance of a classifier and its parameters. The
+\verb=SMACWrapper= trains and evaluates the classifier with given parameters
+with the \verb=ClassifierRunner= class, which creates a \verb=ClassifierResult=.
+This information is passed back to SMAC.
+
+After SMAC's optimization completes, control is passed back to Auto-WEKA, which
+takes the information communicated directly from SMAC through its output and
+parses result files that SMAC generated. This information is used to determine
+the best classifier and its parameters, which is finally presented to the user.
 
 \appendix
 
