@@ -1,4 +1,0 @@
-alpha real [1, 1.4] [1.189] log
-rho real [0, 1] [0.5]
-ps real [0, 0.2] [0.1]
-wp real [0, 0.06] [0.03]

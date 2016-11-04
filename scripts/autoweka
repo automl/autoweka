@@ -1,5 +1,0 @@
-#!/bin/bash
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}/../" )" && pwd )"
-
-cmd="java -Xmx1024m -cp ${DIR}/build/classes:${DIR}/lib/weka.jar:${DIR}/lib/swingbuilder/* $@" 
-eval ${cmd}

@@ -1,9 +1,0 @@
-pcs-file = example_scenarios/spear/params.pcs
-runObj = RUNTIME
-cutoffTime = 1
-wallclock-limit = 30
-deterministic = 0
-feature_file = example_scenarios/spear/features.csv
-instance_file = example_scenarios/spear/instances-train.txt
-test_instance_file = example_scenarios/spear/instances-test.txt
-algo = example_scenarios/spear/wrapper.py

@@ -1,2 +1,0 @@
-S {weka.attributeSelection.BestFirst,weka.attributeSelection.GreedyStepwise}[weka.attributeSelection.BestFirst]
-E {weka.attributeSelection.CfsSubsetEval}[weka.attributeSelection.CfsSubsetEval]
