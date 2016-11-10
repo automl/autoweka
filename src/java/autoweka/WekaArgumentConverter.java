@@ -148,11 +148,11 @@ public class WekaArgumentConverter
             }
             else
             {
-                //Should we pop this qoute?
+                //Should we pop this quote?
                 if(arg.name.endsWith("QUOTE_END"))
                 {
                     quotedString = quotedString.trim();
-                    if(quoteDepth > 1) quotedString += "\"";
+                    if(quoteDepth > 1) quotedString += "\" ";
                     quoteDepth--;
                     if(quoteDepth == 0)
                     {

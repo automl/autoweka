@@ -251,6 +251,9 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
     private transient weka.gui.Logger wLog;
 
+    /* Don't ask. */
+    public int totalTried;
+
     /**
      * Main method for testing this class.
      *
@@ -271,6 +274,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         attributeEvalClass = null;
         attributeEvalArgs = new String[0];
         wLog = null;
+
+        totalTried = 0;
 
         // work around broken XML parsers
         Properties props = System.getProperties();
@@ -379,6 +384,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                             } else if(line.matches(".*INFO.*")) {
                                 if(line.matches(".*ClassifierRunner - weka.classifiers.*")) {
                                     tried++;
+                                    totalTried++;
                                     if(wLog != null) {
                                         String msg = "Thread " + index + ": performed " + tried + " evaluations, estimated " + metric + " " + bestMetricValue + "...";
                                         wLog.statusMessage(msg);
@@ -1022,7 +1028,10 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 		    res+="\n\n----END OF CONFIGURATION RANKING----";
 		}
 
-        res += "\n\nFor better performance, try giving Auto-WEKA more time.";
+        res += "\n\nFor better performance, try giving Auto-WEKA more time.\n";
+        if(totalTried < 1000) {
+            res += "Tried " + totalTried + " configurations; to get good results reliably you may need to allow for trying thousands of configurations.\n";
+        }
         return res;
     }
 
