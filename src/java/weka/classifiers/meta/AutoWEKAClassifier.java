@@ -21,6 +21,7 @@ import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
 
 import weka.classifiers.AbstractClassifier;
+import weka.classifiers.MultipleClassifiersCombiner;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 
@@ -50,6 +51,7 @@ import java.nio.file.Files;
 import java.net.URLDecoder;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -66,6 +68,8 @@ import java.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import autoweka.ApplicabilityTester;
+import autoweka.ClassParams;
 import autoweka.Experiment;
 import autoweka.ExperimentConstructor;
 import autoweka.InstanceGenerator;
@@ -86,7 +90,7 @@ import autoweka.ConfigurationRanker;
 
 * * @author Lars Kotthoff
  */
-public class AutoWEKAClassifier extends AbstractClassifier implements AdditionalMeasureProducer {
+public class AutoWEKAClassifier extends MultipleClassifiersCombiner implements AdditionalMeasureProducer {
 
     /** For serialization. */
     static final long serialVersionUID = 2907034203562786373L;
@@ -229,6 +233,9 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     /** The extra arguments for Auto-WEKA. */
     protected String extraArgs = DEFAULT_EXTRA_ARGS;
 
+	/** The classifiers chosen to be used. */
+    protected List<String> mAllowedClassifiers = new ArrayList<String>();
+
     /** The error metric. */
     protected Metric metric = DEFAULT_METRIC;
 
@@ -250,6 +257,29 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     protected double finalTrainTime = -1;
 
     private transient weka.gui.Logger wLog;
+
+	protected Classifier[] allClassifiers = {
+		new weka.classifiers.bayes.BayesNet(),
+		new weka.classifiers.bayes.NaiveBayes(),
+		new weka.classifiers.functions.Logistic(),
+		new weka.classifiers.functions.MultilayerPerceptron(),
+		new weka.classifiers.functions.SMO(),
+		new weka.classifiers.functions.SimpleLogistic(),
+		new weka.classifiers.lazy.IBk(),
+		new weka.classifiers.lazy.KStar(),
+		new weka.classifiers.rules.DecisionTable(),
+		new weka.classifiers.rules.JRip(),
+		new weka.classifiers.rules.OneR(),
+		new weka.classifiers.rules.PART(),
+		new weka.classifiers.rules.ZeroR(),
+		new weka.classifiers.trees.DecisionStump(),
+		new weka.classifiers.trees.J48(),
+		new weka.classifiers.trees.LMT(),
+		new weka.classifiers.trees.REPTree(),
+		new weka.classifiers.trees.RandomForest(),
+		new weka.classifiers.trees.RandomTree(),
+		new weka.classifiers.lazy.LWL()
+	};
 
     /* Don't ask. */
     public int totalTried;
@@ -274,7 +304,9 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         attributeEvalClass = null;
         attributeEvalArgs = new String[0];
         wLog = null;
-
+		
+		
+		setClassifiers(allClassifiers);
         totalTried = 0;
 
         // work around broken XML parsers
@@ -324,6 +356,9 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
             exp.memory = memLimit + "m";
             exp.extraPropsString = extraArgs;
+	
+			allowedClassifiesToString();		
+			exp.allowedClassifiers = mAllowedClassifiers;
 
             //Setup all the extra args
             List<String> args = new LinkedList<String>();
@@ -1067,4 +1102,19 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                     + " not supported (Auto-WEKA)");
         }
   }
+
+	/**
+	*Write all classifiers as strings in mAllowedClassifiers
+	*
+	*
+	*/
+	private void allowedClassifiesToString(){
+		String classifier = "";
+		String[] classifiersChosen = getOptions();		
+		for(int i = 0;i < classifiersChosen.length ;i++){
+			classifier = classifiersChosen[i];
+			classifier = classifier.split(" ")[0];
+			mAllowedClassifiers.add(classifier);
+		}		
+	}	
 }
