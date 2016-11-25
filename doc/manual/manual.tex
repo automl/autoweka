@@ -10,9 +10,8 @@
 \usepackage{tabu}
 \usepackage{longtable}
 \usepackage{booktabs}
-\usepackage{lscape}
 
-\def\version{2.1}
+\def\version{2.2}
 
 \begin{document}
 
@@ -35,14 +34,14 @@ Auto-WEKA is a tool that performs combined algorithm selection and hyperparamete
 optimisation over the classification and regression algorithms implements in
 WEKA. More specifically, given a specific dataset, Auto-WEKA explores
 hyperparameter settings for many algorithms and recommends to a user which
-method will likely have good generalization performance, using model based
+method will likely have good generalisation performance, using model based
 optimisation techniques.
 
 \subsection{Availability}
 
 Auto-WEKA is available as a WEKA package through the WEKA package manager (WEKA
 version 3.7.13 and later). The source code is available at
-\url{https://github.com/larskotthoff/autoweka}, where bugs can be reported as
+\url{https://github.com/automl/autoweka}, where bugs can be reported as
 well.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -51,7 +50,7 @@ well.
 
 Auto-WEKA is open source software issued under the
 \href{http://www.gnu.org/licenses/gpl.html}{GNU General Public License}. Note
-that the included SMAC optimisation method is licensed under the AGPLv3.
+that the included SMAC optimisation method is licensed under the AGPLv3 license.
 
 \subsection{Requirements}
 
@@ -67,8 +66,8 @@ into WEKA, it can be run on it to automatically determine the best WEKA model
 and its parameters. It does so by intelligently exploring the space of
 classifiers and parameters using the SMAC tool (\url{http://www.cs.ubc.ca/labs/beta/Projects/SMAC/}).
 
-A full list of all classifiers and attribute selectors along with their
-parameters can be found in the appendix.
+A full list of all classifiers and attribute selectors considered along with
+their hyperparameters can be found in the appendix.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \subsection{Using the GUI}\label{sec:gui}
@@ -100,8 +99,8 @@ selecting it from the list of classifiers (Figure~\ref{fig:classifier}).
 
 When using Auto-WEKA like a normal classifier, it is important to select the
 Test option ``Use training set''. Auto-WEKA performs a statistically rigorous
-evaluation internally and does not require an external split into training and
-test sets that WEKA provides. Not selecting this option will not improve the
+evaluation internally and does not require the external split into training and
+test sets that WEKA provides. Selecting another option will not improve the
 quality of the result and cause Auto-WEKA to take much longer.
 Figure~\ref{fig:train} shows the recommended setting.
 
@@ -120,7 +119,7 @@ relevant:
 \begin{description}
 \item[timeLimit] The time in minutes Auto-WEKA will take to determine the best
 classifier and configuration. If you get bad results, try increasing this value.
-\item[memLimit] The memory limit in Megabytes for running classifiers. If you
+\item[memLimit] The memory limit in megabytes for running classifiers. If you
 have a very large dataset, you may need to increase this value.
 \end{description}
 
@@ -132,9 +131,9 @@ have a very large dataset, you may need to increase this value.
 \end{center}
 \end{figure}
 
-While Auto-WEKA is running, it will provide the number of evaluated
-configurations and estimated error of the best configuration found so far in the
-status bar.
+While Auto-WEKA is running, it will provide the number of configurations
+evaluated so far and the estimated error of the best configuration in the status
+bar.
 
 \medskip
 
@@ -142,17 +141,18 @@ Note that the time limit is \emph{approximate} and Auto-WEKA may not take
 \emph{exactly} as long as requested.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-\subsection{Running Experiments Using the CLI}\label{sec:running}
+\subsection{Running Experiments Using the Command Line Interface (CLI)}\label{sec:running}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Auto-WEKA can be run from the CLI like any other WEKA classifier, for example:
+Auto-WEKA can be run from the CLI like any other WEKA classifier; for example:
 \begin{verbatim}
 java -cp autoweka.jar weka.classifiers.meta.AutoWEKAClassifier \
     -t iris.arff -timeLimit 15 -no-cv
 \end{verbatim}
 
 Running Auto-WEKA with the \verb=-h= flag or without any options lists the
-options that can be set by the user:
+options that can be set by the user. Note that the general WEKA options appear
+first, followed by Auto-WEKA-specific options.
 \begin{verbatim}
 java -cp autoweka.jar weka.classifiers.meta.AutoWEKAClassifier -h
 
@@ -248,13 +248,13 @@ Options specific to weka.classifiers.meta.AutoWEKAClassifier:
 	The memory limit for runs in MiB.
 	(default: 1024)
 -nBestConfigs <limit>
-	The amount of best configurations to return.
+	The amount of best configurations to output.
 	(default: 1024)
 -metric <metric>
 	The metric to optimise.
 	(default: errorRate)
 -parallelRuns <runs>
-	The number of parallel runs. EXPERIMENTAL, BE CAREFUL WHEN SETTING.
+	The number of parallel runs. EXPERIMENTAL.
 	(default: 1)
 -output-debug-info
 	If set, classifier is run in debug mode and
@@ -271,7 +271,7 @@ Options specific to weka.classifiers.meta.AutoWEKAClassifier:
 \subsection{Saving and Loading Models}
 
 Once Auto-WEKA has been run, you can save the trained model to get predictions
-on similar data. In the WEKA GUI, right-click on a run in the output list window
+on test data. In the WEKA GUI, right-click on a run in the output list window
 and select `Save model'. On the CLI, use the \verb=-d= flag. More information on
 saving and loading models can be found on the WEKA wiki at
 \url{https://weka.wikispaces.com/Saving+and+loading+models}.

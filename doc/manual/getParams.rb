@@ -20,8 +20,7 @@ puts '\section{Auto-WEKA Configuration Space}'
 
 puts '\subsection{Classifiers, Parameters, and Parameter Ranges}'
 
-puts '\begin{landscape}'
-puts '\begin{longtabu} to \linewidth {XXXX}'
+puts '\begin{longtabu} to 1.2\linewidth {XXXX}'
 puts '\toprule'
 puts '\rowfont\bfseries Classifier & Parameter & Value Range & Default\\\\'
 puts '\\\\\midrule'
@@ -68,12 +67,10 @@ classifdirs.each { |d|
 }
 
 puts '\end{longtabu}'
-puts '\end{landscape}'
 
 puts '\subsection{Attribute Searches, Parameters, and Parameter Ranges}'
 
-puts '\begin{landscape}'
-puts '\begin{longtabu} to \linewidth {XXXX}'
+puts '\begin{longtabu} to 1.2\linewidth {XXXX}'
 puts '\toprule'
 puts '\rowfont\bfseries Attribute Search & Parameter & Value Range & Default\\\\'
 puts '\\\\\midrule'
@@ -120,12 +117,10 @@ attribsearchdirs.each { |d|
 }
 
 puts '\end{longtabu}'
-puts '\end{landscape}'
 
 puts '\subsection{Attribute Evaluations, Parameters, and Parameter Ranges}'
 
-puts '\begin{landscape}'
-puts '\begin{longtabu} to \linewidth {XXXX}'
+puts '\begin{longtabu} to 1.2\linewidth {XXXX}'
 puts '\toprule'
 puts '\rowfont\bfseries Attribute Evaluation & Parameter & Value Range & Default\\\\'
 puts '\\\\\midrule'
@@ -172,4 +167,3 @@ attribevaldirs.each { |d|
 }
 
 puts '\end{longtabu}'
-puts '\end{landscape}'

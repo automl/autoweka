@@ -558,13 +558,13 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             new Option("\tThe memory limit for runs in MiB.\n" + "\t(default: " + DEFAULT_MEM_LIMIT + ")",
                 "memLimit", 1, "-memLimit <limit>"));
         result.addElement(
-            new Option("\tThe amount of best configurations to return.\n" + "\t(default: " + DEFAULT_MEM_LIMIT + ")",
+            new Option("\tThe amount of best configurations to output.\n" + "\t(default: " + DEFAULT_MEM_LIMIT + ")",
                 "nBestConfigs", 1, "-nBestConfigs <limit>"));
         result.addElement(
             new Option("\tThe metric to optimise.\n" + "\t(default: " + DEFAULT_METRIC + ")",
                 "metric", 1, "-metric <metric>"));
         result.addElement(
-            new Option("\tThe number of parallel runs. EXPERIMENTAL, BE CAREFUL WHEN SETTING.\n" + "\t(default: " + DEFAULT_PARALLEL_RUNS + ")",
+            new Option("\tThe number of parallel runs. EXPERIMENTAL.\n" + "\t(default: " + DEFAULT_PARALLEL_RUNS + ")",
                 "parallelRuns", 1, "-parallelRuns <runs>"));
         //result.addElement(
         //    new Option("\tThe type of resampling used.\n" + "\t(default: " + String.valueOf(DEFAULT_RESAMPLING) + ")",
