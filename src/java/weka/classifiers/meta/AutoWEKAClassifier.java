@@ -21,7 +21,6 @@ import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
 
 import weka.classifiers.AbstractClassifier;
-import weka.classifiers.MultipleClassifiersCombiner;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 
@@ -68,8 +67,6 @@ import java.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import autoweka.ApplicabilityTester;
-import autoweka.ClassParams;
 import autoweka.Experiment;
 import autoweka.ExperimentConstructor;
 import autoweka.InstanceGenerator;
@@ -90,7 +87,7 @@ import autoweka.ConfigurationRanker;
 
 * * @author Lars Kotthoff
  */
-public class AutoWEKAClassifier extends MultipleClassifiersCombiner implements AdditionalMeasureProducer {
+public class AutoWEKAClassifier extends AbstractClassifier	 implements AdditionalMeasureProducer {
 
     /** For serialization. */
     static final long serialVersionUID = 2907034203562786373L;
@@ -104,6 +101,8 @@ public class AutoWEKAClassifier extends MultipleClassifiersCombiner implements A
     static final int DEFAULT_MEM_LIMIT = 1024;
     /** Default */
     static final int DEFAULT_N_BEST = 1;
+	/** Default Classifiers */
+	static String DEFAULT_CLASSIFIERS = "weka.classifiers.trees.RandomForest";
     /** Internal evaluation method. */
     static enum Resampling {
         CrossValidation,
@@ -223,6 +222,8 @@ public class AutoWEKAClassifier extends MultipleClassifiersCombiner implements A
 
     /** The number of best configurations to return as output. */
     protected int nBestConfigs = DEFAULT_N_BEST;
+	/** The list of classifiers allowed */
+	protected String allowedClassifiers = DEFAULT_CLASSIFIERS;
     /** The best configurations. */
     protected ConfigurationCollection cc;
 
@@ -258,30 +259,7 @@ public class AutoWEKAClassifier extends MultipleClassifiersCombiner implements A
 
     private transient weka.gui.Logger wLog;
 
-	protected Classifier[] allClassifiers = {
-		new weka.classifiers.bayes.BayesNet(),
-		new weka.classifiers.bayes.NaiveBayes(),
-		new weka.classifiers.functions.Logistic(),
-		new weka.classifiers.functions.MultilayerPerceptron(),
-		new weka.classifiers.functions.SMO(),
-		new weka.classifiers.functions.SimpleLogistic(),
-		new weka.classifiers.lazy.IBk(),
-		new weka.classifiers.lazy.KStar(),
-		new weka.classifiers.rules.DecisionTable(),
-		new weka.classifiers.rules.JRip(),
-		new weka.classifiers.rules.OneR(),
-		new weka.classifiers.rules.PART(),
-		new weka.classifiers.rules.ZeroR(),
-		new weka.classifiers.trees.DecisionStump(),
-		new weka.classifiers.trees.J48(),
-		new weka.classifiers.trees.LMT(),
-		new weka.classifiers.trees.REPTree(),
-		new weka.classifiers.trees.RandomForest(),
-		new weka.classifiers.trees.RandomTree(),
-		new weka.classifiers.lazy.LWL()
-	};
-
-    /* Don't ask. */
+	/* Don't ask. */
     public int totalTried;
 
     /**
@@ -306,7 +284,6 @@ public class AutoWEKAClassifier extends MultipleClassifiersCombiner implements A
         wLog = null;
 		
 		
-		setClassifiers(allClassifiers);
         totalTried = 0;
 
         // work around broken XML parsers
@@ -357,9 +334,10 @@ public class AutoWEKAClassifier extends MultipleClassifiersCombiner implements A
             exp.memory = memLimit + "m";
             exp.extraPropsString = extraArgs;
 	
-			allowedClassifiesToString();		
-			exp.allowedClassifiers = mAllowedClassifiers;
-
+			allowedClassifiersToArray();
+			if(mAllowedClassifiers.size() > 0){
+				exp.allowedClassifiers = mAllowedClassifiers;
+			}
             //Setup all the extra args
             List<String> args = new LinkedList<String>();
             args.add("-experimentpath");
@@ -595,6 +573,9 @@ public class AutoWEKAClassifier extends MultipleClassifiersCombiner implements A
         result.addElement(
             new Option("\tThe amount of best configurations to return.\n" + "\t(default: " + DEFAULT_MEM_LIMIT + ")",
                 "nBestConfigs", 1, "-nBestConfigs <limit>"));
+		result.addElement(			
+			new Option("\tThe list of classifiers allowed. In case it is empty it will use all cassifiers\n" + "\t(default: " + DEFAULT_CLASSIFIERS + ")",
+                "allowedClassifiers", 1, "-allowedClas <classifiers>"));
         result.addElement(
             new Option("\tThe metric to optimise.\n" + "\t(default: " + DEFAULT_METRIC + ")",
                 "metric", 1, "-metric <metric>"));
@@ -636,6 +617,8 @@ public class AutoWEKAClassifier extends MultipleClassifiersCombiner implements A
         result.add("" + memLimit);
         result.add("-nBestConfigs");
         result.add("" + nBestConfigs);
+		result.add("-allowedClassifiers");
+        result.add("" + allowedClassifiers);
         result.add("-metric");
         result.add("" + metric);
         result.add("-parallelRuns");
@@ -867,6 +850,26 @@ public class AutoWEKAClassifier extends MultipleClassifiersCombiner implements A
      */
     public String nBestConfigsTipText() {
         return "How many of the best configurations should be returned as output";
+    }
+
+	public void setAllowedClassifiers(String ac) {
+        allowedClassifiers = ac;
+    }
+
+    /**
+     * Get the memory limit.
+     * @return The amount of best configurations that will be given as output
+     */
+    public String getAllowedClassifiers() {
+        return allowedClassifiers;
+    }
+
+    /**
+     * Returns the tip text for this property.
+     * @return tip text for this property
+     */
+    public String allowedClassifiersTipText() {
+        return "List of classifiers to be used by Autoweka";
     }
 
     //public void setResampling(Resampling r) {
@@ -1104,17 +1107,18 @@ public class AutoWEKAClassifier extends MultipleClassifiersCombiner implements A
   }
 
 	/**
-	*Write all classifiers as strings in mAllowedClassifiers
+	*Take the input string with all classifiers
+	* and write in mAllowedClassifiers array
 	*
 	*
 	*/
-	private void allowedClassifiesToString(){
+	private void allowedClassifiersToArray(){
 		String classifier = "";
-		String[] classifiersChosen = getOptions();		
-		for(int i = 0;i < classifiersChosen.length ;i++){
-			classifier = classifiersChosen[i];
-			classifier = classifier.split(" ")[0];
-			mAllowedClassifiers.add(classifier);
-		}		
+		String[] classifiersChosen = allowedClassifiers.split(",");
+		if(!allowedClassifiers.isEmpty()){
+			for(int i = 0;i < classifiersChosen.length ;i++){
+				mAllowedClassifiers.add(classifiersChosen[i]);
+			}		
+		}
 	}	
 }
