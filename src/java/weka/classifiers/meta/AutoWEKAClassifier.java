@@ -102,7 +102,7 @@ public class AutoWEKAClassifier extends AbstractClassifier	 implements Additiona
     /** Default */
     static final int DEFAULT_N_BEST = 1;
 	/** Default Classifiers */
-	static String DEFAULT_CLASSIFIERS = "weka.classifiers.trees.RandomForest";
+	static String DEFAULT_CLASSIFIERS = "weka.classifiers.trees.RandomForest,weka.classifiers.trees.RandomTree";
     /** Internal evaluation method. */
     static enum Resampling {
         CrossValidation,
@@ -334,10 +334,9 @@ public class AutoWEKAClassifier extends AbstractClassifier	 implements Additiona
             exp.memory = memLimit + "m";
             exp.extraPropsString = extraArgs;
 	
-			allowedClassifiersToArray();
-			if(mAllowedClassifiers.size() > 0){
-				exp.allowedClassifiers = mAllowedClassifiers;
-			}
+			allowedClassifiersToArray();			
+			exp.allowedClassifiers = mAllowedClassifiers;
+			
             //Setup all the extra args
             List<String> args = new LinkedList<String>();
             args.add("-experimentpath");
@@ -684,6 +683,13 @@ public class AutoWEKAClassifier extends AbstractClassifier	 implements Additiona
             parallelRuns = DEFAULT_PARALLEL_RUNS;
         }
 
+		tmpStr = Utils.getOption("allowedClassifiers", options);
+		if (tmpStr.length() != 0){
+			allowedClassifiers = "";
+		}else{
+			allowedClassifiers=tmpStr;
+		}
+
         //tmpStr = Utils.getOption("resampling", options);
         //if (tmpStr.length() != 0) {
         //    resampling = Resampling.valueOf(tmpStr);
@@ -869,7 +875,7 @@ public class AutoWEKAClassifier extends AbstractClassifier	 implements Additiona
      * @return tip text for this property
      */
     public String allowedClassifiersTipText() {
-        return "List of classifiers to be used by Autoweka";
+        return "List of classifiers to be used by Autoweka separated by comma. In case it is empty all classifiers will be used.";
     }
 
     //public void setResampling(Resampling r) {
@@ -1112,12 +1118,11 @@ public class AutoWEKAClassifier extends AbstractClassifier	 implements Additiona
 	*
 	*
 	*/
-	private void allowedClassifiersToArray(){
-		String classifier = "";
-		String[] classifiersChosen = allowedClassifiers.split(",");
-		if(!allowedClassifiers.isEmpty()){
-			for(int i = 0;i < classifiersChosen.length ;i++){
-				mAllowedClassifiers.add(classifiersChosen[i]);
+	private void allowedClassifiersToArray(){		
+		if(allowedClassifiers.length() > 0){
+			String[] classifiersChosen = allowedClassifiers.split(",");
+			for(String classifier: classifiersChosen){
+				mAllowedClassifiers.add(classifier);
 			}		
 		}
 	}	

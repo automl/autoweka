@@ -204,12 +204,13 @@ public abstract class ExperimentConstructor
         if(mExperiment.attributeSelection)
             loadAttributeSelectors();
 
-        mAllowedClassifiers = exp.allowedClassifiers;
-
+		mAllowedClassifiers = exp.allowedClassifiers;	
+		
         //Load up all the classifiers for the dataset we can
         loadClassifiers();
 
 		//Load all classifiers in mAllowedClassifiers
+		if(mAllowedClassifiers.isEmpty()){
             if(mIncludeBase){
                 for(ClassParams clsParams: mBaseClassParams){
                     mAllowedClassifiers.add(clsParams.getTargetClass());
@@ -225,11 +226,8 @@ public abstract class ExperimentConstructor
                     mAllowedClassifiers.add(clsParams.getTargetClass());
                 }
             }
-
-		//In case the list of selected classifiers is not empy
-		//It will check if all the names written in the list
-		//Are classifiers included in autoweka list
-        if(!exp.allowedClassifiers.isEmpty()){
+		}else
+		{
 			mAllowedClassifiers.retainAll(exp.allowedClassifiers);
         }
 
@@ -464,7 +462,7 @@ public abstract class ExperimentConstructor
         }
 
         //Build the entire list of all classifiers as a parameter, and insert it
-        Parameter targetclass = new Parameter("targetclass", classifiers, "weka.classifiers.trees.RandomForest");
+        Parameter targetclass = new Parameter("targetclass", classifiers, baseClassifiers.get(0));
         paramGroup.add(targetclass);
 
         //Next, insert all the default parameters for each method (Just the flat level
@@ -514,7 +512,7 @@ public abstract class ExperimentConstructor
             for(int i = 0; i < mEnsembleMaxNum; i++)
             {
                 String prefix = "_1_" + String.format("%02d", i);
-                Parameter gateParam = new Parameter(prefix + "_0_QUOTE_START_B", baseClassifiers, "weka.classifiers.trees.RandomForest");
+                Parameter gateParam = new Parameter(prefix + "_0_QUOTE_START_B", baseClassifiers, baseClassifiers.get(0));
                 paramGroup.add(gateParam);
                 for(ClassParams clsParams: mBaseClassParams) {
                     addClassifierToParameterConditionalGroupForDAG(paramGroup, clsParams, prefix + "_1_", gateParam);
