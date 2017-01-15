@@ -69,7 +69,7 @@ classifiers and parameters using the SMAC tool (\url{http://www.cs.ubc.ca/labs/b
 A full list of all classifiers and attribute selectors considered along with
 their hyperparameters can be found in the appendix.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Using the GUI}\label{sec:gui}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -140,7 +140,7 @@ bar.
 Note that the time limit is \emph{approximate} and Auto-WEKA may not take
 \emph{exactly} as long as requested.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Running Experiments Using the Command Line Interface (CLI)}\label{sec:running}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -214,8 +214,8 @@ General options:
 	E.g.: weka.classifiers.evaluation.output.prediction.PlainText
 -p range
 	Outputs predictions for test instances (or the train instances if
-	no test instances provided and -no-cv is used), along with the 
-	attributes in the specified range (and nothing else). 
+	no test instances provided and -no-cv is used), along with the
+	attributes in the specified range (and nothing else).
 	Use '-p 0' if no attributes are desired.
 	Deprecated: use "-classifications ..." instead.
 -distribution
@@ -228,7 +228,7 @@ General options:
 	Retrieves the options from the XML-data instead of the command line.
 -threshold-file <file>
 	The file to save the threshold data to.
-	The format is determined by the extensions, e.g., '.arff' for ARFF 
+	The format is determined by the extensions, e.g., '.arff' for ARFF
 	format or '.csv' for CSV.
 -threshold-label <label>
 	The class label to determine the threshold data for
@@ -249,7 +249,7 @@ Options specific to weka.classifiers.meta.AutoWEKAClassifier:
 	(default: 1024)
 -nBestConfigs <limit>
 	The amount of best configurations to output.
-	(default: 1024)
+	(default: 1)
 -metric <metric>
 	The metric to optimise.
 	(default: errorRate)

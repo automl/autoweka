@@ -558,7 +558,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             new Option("\tThe memory limit for runs in MiB.\n" + "\t(default: " + DEFAULT_MEM_LIMIT + ")",
                 "memLimit", 1, "-memLimit <limit>"));
         result.addElement(
-            new Option("\tThe amount of best configurations to output.\n" + "\t(default: " + DEFAULT_MEM_LIMIT + ")",
+            new Option("\tThe amount of best configurations to output.\n" + "\t(default: " + DEFAULT_N_BEST + ")",
                 "nBestConfigs", 1, "-nBestConfigs <limit>"));
         result.addElement(
             new Option("\tThe metric to optimise.\n" + "\t(default: " + DEFAULT_METRIC + ")",
