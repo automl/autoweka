@@ -39,6 +39,8 @@ import weka.gui.SysErrLog;
 import weka.gui.TaskLogger;
 import weka.gui.explorer.Explorer.ExplorerPanel;
 import weka.gui.explorer.Explorer.LogHandler;
+import weka.gui.explorer.ClassifierPanel;
+import weka.gui.explorer.Explorer;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -397,11 +399,15 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
     }
     resultListMenu.add(deleteOutput);
 
+    final Classifier classifier = aw;
+    final Instances trainHeader = m_Instances;
+
     JMenuItem saveModel = new JMenuItem("Save model");
     if(selectedName != null) {
       saveModel.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
-          saveClassifier("Auto-WEKA", aw, m_Instances);
+          saveClassifier("Auto-WEKA", classifier, trainHeader);
         }
       });
     } else {
