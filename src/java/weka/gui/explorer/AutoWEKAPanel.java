@@ -84,20 +84,20 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-/** 
+/**
  * This class provides a special, simple panel for Auto-WEKA in the Explorer.
  *
  * @author EibeFrank and Lars Kotthoff
  * @version $Revision: 908 $
  */
 public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, LogHandler {
-   
+
   /** for serialization. */
   private static final long serialVersionUID = 3089066653508312179L;
 
   /** the parent frame. */
   protected Explorer m_Explorer = null;
-  
+
   /** The output area for classification results. */
   protected JTextArea m_OutText = new JTextArea(20, 40);
 
@@ -112,7 +112,7 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
 
   /** Lets the user select the class column. */
   protected JComboBox m_ClassCombo = new JComboBox();
-  
+
   /** Click to download manual. */
   protected JButton m_ManualBut = new JButton("Auto-WEKA Manual");
 
@@ -130,13 +130,13 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
 
   /** The main set of instances we're playing with. */
   protected Instances m_Instances;
-  
+
   /** A thread that classification runs in. */
   protected Thread m_RunThread;
 
   /** The Auto-WEKA classifier. */
   protected AutoWEKAClassifier aw;
-  
+
   /**
    * Creates the Auto-WEKA panel.
    */
@@ -152,7 +152,7 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
     }
       }
     });
-    
+
     m_History.setBorder(BorderFactory.createTitledBorder("Result list (right-click for options)"));
 
     m_ClassifierEditor.setClassType(Classifier.class);
@@ -180,7 +180,7 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
         }
       }
     });
-    
+
     m_StopBut.setToolTipText("Stops Auto-WEKA");
     m_StopBut.setEnabled(false);
     m_StopBut.addActionListener(new ActionListener() {
@@ -188,7 +188,7 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
     stopAutoWEKA();
       }
     });
-   
+
     m_History.setHandleRightClicks(false);
     // see if we can popup a menu for the selected result
     m_History.getList().addMouseListener(new MouseAdapter() {
@@ -209,7 +209,7 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
     // Layout the GUI
     GridBagConstraints gbC;
     JLabel label;
-    
+
     JPanel buttons = new JPanel();
     buttons.setLayout(new BorderLayout());
     buttons.add(m_ClassCombo, BorderLayout.NORTH);
@@ -222,7 +222,7 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
     ssButs.add(m_StopBut);
 
     buttons.add(ssButs, BorderLayout.SOUTH);
-    
+
     JPanel p3 = new JPanel();
     p3.setBorder(BorderFactory.createTitledBorder("Auto-WEKA output"));
     p3.setLayout(new BorderLayout());
@@ -232,7 +232,7 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
       private int lastHeight;
       public void stateChanged(ChangeEvent e) {
     JViewport vp = (JViewport)e.getSource();
-    int h = vp.getViewSize().height; 
+    int h = vp.getViewSize().height;
     if (h != lastHeight) { // i.e. an addition not just a user scrolling
       lastHeight = h;
       int x = h - vp.getExtentSize().height;
@@ -240,7 +240,7 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
     }
       }
     });
-    
+
     JPanel mondo = new JPanel();
     GridBagLayout gbL = new GridBagLayout();
     mondo.setLayout(gbL);
@@ -335,7 +335,7 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
 
   /**
    * Handles constructing a popup menu with visualization options.
-   * 
+   *
    * @param name    the name of the result history list entry clicked on by
    *            the user
    * @param x       the x coordinate for popping up the menu
@@ -344,7 +344,7 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
   protected void showPopup(String name, int x, int y) {
     final String selectedName = name;
     JPopupMenu resultListMenu = new JPopupMenu();
-    
+
     JMenuItem viewMainBuffer = new JMenuItem("View in main window");
     if (selectedName != null) {
       viewMainBuffer.addActionListener(new ActionListener() {
@@ -400,10 +400,10 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
     JMenuItem saveModel = new JMenuItem("Save model");
     if(selectedName != null) {
       saveModel.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        saveClassifier("Auto-WEKA", aw, m_Instances);
-      }
-    });
+        public void actionPerformed(ActionEvent e) {
+          saveClassifier("Auto-WEKA", aw, m_Instances);
+        }
+      });
     } else {
       saveModel.setEnabled(false);
     }
@@ -413,8 +413,8 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
   }
 
   /**
-   * Starts Auto-WEKA. This is run in a separate thread, and will 
-   * only start if there is no Auto-WEKA thread already running. The 
+   * Starts Auto-WEKA. This is run in a separate thread, and will
+   * only start if there is no Auto-WEKA thread already running. The
    * output is sent to the results history panel.
    */
   protected void startAutoWEKA() {
@@ -423,7 +423,7 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
     m_StartBut.setEnabled(false);
     m_StopBut.setEnabled(true);
       }
-      
+
       m_RunThread = new Thread() {
     public void run() {
       // set up everything:
@@ -470,7 +470,7 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
           m_StopBut.setEnabled(false);
           m_RunThread = null;
         }
-        
+
         if (m_Log instanceof TaskLogger)
               ((TaskLogger)m_Log).taskFinished();
       }
@@ -483,7 +483,7 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
 
   /**
    * Save the currently selected experiment output to a file.
-   * 
+   *
    * @param name    the name of the buffer to save
    */
   protected void saveBuffer(String name) {
@@ -500,49 +500,49 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
   protected void stopAutoWEKA() {
     if (m_RunThread != null) {
       m_RunThread.interrupt();
-      
+
       // This is deprecated (and theoretically the interrupt should do).
       m_RunThread.stop();
     }
   }
-  
+
   /**
    * Sets the Explorer to use as parent frame (used for sending notifications
    * about changes in the data).
-   * 
+   *
    * @param parent  the parent frame
    */
   public void setExplorer(Explorer parent) {
     m_Explorer = parent;
   }
-  
+
   /**
    * returns the parent Explorer frame.
-   * 
+   *
    * @return        the parent
    */
   public Explorer getExplorer() {
     return m_Explorer;
   }
-  
+
   /**
    * Returns the title for the tab in the Explorer.
-   * 
+   *
    * @return        the title of this tab
    */
   public String getTabTitle() {
     return "Auto-WEKA";
   }
-  
+
   /**
    * Returns the tooltip for the tab in the Explorer.
-   * 
+   *
    * @return        the tooltip of this tab
    */
   public String getTabTitleToolTip() {
     return "Run Auto-WEKA";
   }
-  
+
   /**
    * Tests out the Auto-WEKA panel from the command line.
    *

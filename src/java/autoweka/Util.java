@@ -25,6 +25,7 @@ import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
 import weka.core.converters.Loader;
+import weka.core.WekaPackageManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,7 +115,7 @@ public class Util
 
     /**
      * Looks for command line arguments of the form -prop PROPERTYSTRING and adds them to the given properties object
-     * 
+     *
      * @param props The properties object.
      * @param cmdLineArgs The arguments.
      */
@@ -125,7 +126,7 @@ public class Util
 
     /**
      * Looks for command line arguments of the form -prop PROPERTYSTRING and adds them to the given properties object
-     * 
+     *
      * @param props The properties object.
      * @param cmdLineArgs The arguments.
      */
@@ -665,34 +666,9 @@ public class Util
      *
      * Prints an error message if it fails
      */
-    private static boolean msFailedToFindDistributionOnce = false;
     public static String getAutoWekaDistributionPath()
     {
-        String locStr = URLDecoder.decode(Util.class.getClassLoader().getResource(Util.class.getCanonicalName().replaceAll("\\.", "/") + ".class").toString());
-
-        File dir;
-        if(locStr.startsWith("jar")){
-            dir = new File(locStr.substring(9,locStr.lastIndexOf("!")));
-        }else{
-            dir = new File(locStr);
-        }
-
-        //Walk up the path of the directory file hunting this one down
-        while(dir != null){
-            File paramDir = new File(URLDecoder.decode(dir.getAbsolutePath()) + File.separator + "params");
-            if(paramDir.exists() && paramDir.isDirectory())
-            {
-                log.trace("Found install dir: {}", URLDecoder.decode(dir.getAbsolutePath()));
-                return URLDecoder.decode(dir.getAbsolutePath());
-            }
-
-            dir = dir.getParentFile();
-        }
-        if(!msFailedToFindDistributionOnce){
-            log.warn("Could not auto-detect the location of your Auto-WEKA install - have you moved the classes away from the 'params' diectory?");
-            msFailedToFindDistributionOnce = true;
-        }
-        return ".";
+        return WekaPackageManager.PACKAGES_DIR.getAbsolutePath() + File.separator + "Auto-WEKA";
     }
 
     /**
