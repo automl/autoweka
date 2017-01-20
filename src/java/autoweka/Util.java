@@ -114,7 +114,7 @@ public class Util
 
     /**
      * Looks for command line arguments of the form -prop PROPERTYSTRING and adds them to the given properties object
-     * 
+     *
      * @param props The properties object.
      * @param cmdLineArgs The arguments.
      */
@@ -125,7 +125,7 @@ public class Util
 
     /**
      * Looks for command line arguments of the form -prop PROPERTYSTRING and adds them to the given properties object
-     * 
+     *
      * @param props The properties object.
      * @param cmdLineArgs The arguments.
      */

@@ -320,6 +320,20 @@ takes the information communicated directly from SMAC through its output and
 parses result files that SMAC generated. This information is used to determine
 the best classifier and its parameters, which is finally presented to the user.
 
+\section{Known Issues}
+
+In order to use Auto-WEKA through the Weka GUI on OSX, Weka must be run from the
+command line instead of the Mac application. For example,
+
+\begin{verbatim}
+cd /Applications/weka-3-8-1-oracle-jvm.app/Contents/Java/
+java -jar weka.jar
+\end{verbatim}
+
+Note that Java needs to be installed on your system for this to work. This is because
+Weka needs a \verb=java= executable to spawn worker processes, and the JRE bundled
+with the Mac application does not contain one.
+
 \appendix
 
 \input{params}
