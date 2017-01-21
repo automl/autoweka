@@ -51,6 +51,7 @@ import java.nio.file.Paths;
 import java.net.URLDecoder;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -87,7 +88,7 @@ import autoweka.ConfigurationRanker;
 
 * * @author Lars Kotthoff
  */
-public class AutoWEKAClassifier extends AbstractClassifier implements AdditionalMeasureProducer {
+public class AutoWEKAClassifier extends AbstractClassifier	 implements AdditionalMeasureProducer {
 
     /** For serialization. */
     static final long serialVersionUID = 2907034203562786373L;
@@ -101,6 +102,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     static final int DEFAULT_MEM_LIMIT = 1024;
     /** Default */
     static final int DEFAULT_N_BEST = 1;
+	/** Default Classifiers */
+	static String DEFAULT_CLASSIFIERS = "weka.classifiers.trees.RandomForest,weka.classifiers.trees.RandomTree";
     /** Internal evaluation method. */
     static enum Resampling {
         CrossValidation,
@@ -220,6 +223,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
     /** The number of best configurations to return as output. */
     protected int nBestConfigs = DEFAULT_N_BEST;
+	/** The list of classifiers allowed */
+	protected String allowedClassifiers = DEFAULT_CLASSIFIERS;
     /** The best configurations. */
     protected ConfigurationCollection cc;
 
@@ -229,6 +234,9 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     protected String resamplingArgs = DEFAULT_RESAMPLING_ARGS;
     /** The extra arguments for Auto-WEKA. */
     protected String extraArgs = DEFAULT_EXTRA_ARGS;
+
+	/** The classifiers chosen to be used. */
+    protected List<String> mAllowedClassifiers = new ArrayList<String>();
 
     /** The error metric. */
     protected Metric metric = DEFAULT_METRIC;
@@ -252,7 +260,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
     private transient weka.gui.Logger wLog;
 
-    /* Don't ask. */
+	/* Don't ask. */
     public int totalTried;
 
     /**
@@ -275,7 +283,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         attributeEvalClass = null;
         attributeEvalArgs = new String[0];
         wLog = null;
-
+		
+		
         totalTried = 0;
 
         // work around broken XML parsers
@@ -325,7 +334,10 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
             exp.memory = memLimit + "m";
             exp.extraPropsString = extraArgs;
-
+	
+			allowedClassifiersToArray();			
+			exp.allowedClassifiers = mAllowedClassifiers;
+			
             //Setup all the extra args
             List<String> args = new LinkedList<String>();
             args.add("-experimentpath");
@@ -564,6 +576,9 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.addElement(
             new Option("\tThe amount of best configurations to output.\n" + "\t(default: " + DEFAULT_N_BEST + ")",
                 "nBestConfigs", 1, "-nBestConfigs <limit>"));
+		result.addElement(			
+			new Option("\tThe list of classifiers allowed. In case it is empty it will use all cassifiers\n" + "\t(default: " + DEFAULT_CLASSIFIERS + ")",
+                "allowedClassifiers", 1, "-allowedClas <classifiers>"));
         result.addElement(
             new Option("\tThe metric to optimise.\n" + "\t(default: " + DEFAULT_METRIC + ")",
                 "metric", 1, "-metric <metric>"));
@@ -605,6 +620,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.add("" + memLimit);
         result.add("-nBestConfigs");
         result.add("" + nBestConfigs);
+		result.add("-allowedClassifiers");
+        result.add("" + allowedClassifiers);
         result.add("-metric");
         result.add("" + metric);
         result.add("-parallelRuns");
@@ -669,6 +686,13 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         } else {
             parallelRuns = DEFAULT_PARALLEL_RUNS;
         }
+
+		tmpStr = Utils.getOption("allowedClassifiers", options);
+		if (tmpStr.length() != 0){
+			allowedClassifiers = "";
+		}else{
+			allowedClassifiers=tmpStr;
+		}
 
         //tmpStr = Utils.getOption("resampling", options);
         //if (tmpStr.length() != 0) {
@@ -836,6 +860,26 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
      */
     public String nBestConfigsTipText() {
         return "How many of the best configurations should be returned as output";
+    }
+
+	public void setAllowedClassifiers(String ac) {
+        allowedClassifiers = ac;
+    }
+
+    /**
+     * Get the memory limit.
+     * @return The amount of best configurations that will be given as output
+     */
+    public String getAllowedClassifiers() {
+        return allowedClassifiers;
+    }
+
+    /**
+     * Returns the tip text for this property.
+     * @return tip text for this property
+     */
+    public String allowedClassifiersTipText() {
+        return "List of classifiers to be used by Autoweka separated by comma. In case it is empty all classifiers will be used.";
     }
 
     //public void setResampling(Resampling r) {
@@ -1071,4 +1115,19 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                     + " not supported (Auto-WEKA)");
         }
   }
+
+	/**
+	*Take the input string with all classifiers
+	* and write in mAllowedClassifiers array
+	*
+	*
+	*/
+	private void allowedClassifiersToArray(){		
+		if(allowedClassifiers.length() > 0){
+			String[] classifiersChosen = allowedClassifiers.split(",");
+			for(String classifier: classifiersChosen){
+				mAllowedClassifiers.add(classifier);
+			}		
+		}
+	}	
 }
