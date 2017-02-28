@@ -12,6 +12,14 @@ public class ClassifierResult
 {
     public final static double INFINITY = 1e100d;
 
+    public static double getInfinity() {
+        if(System.getProperty("autoweka.infinity") != null) {
+            return Double.parseDouble(System.getProperty("autoweka.infinity"));
+        } else {
+            return INFINITY;
+        }
+    }
+
     /**
      * Generic interface for different Metrics
      *
@@ -24,7 +32,7 @@ public class ClassifierResult
 
     public static class ErrorRateMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData){
             return eval.errorRate();
         }
@@ -32,7 +40,7 @@ public class ClassifierResult
 
     public static class MeanAbsoluteErrorMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData){
             return eval.meanAbsoluteError();
         }
@@ -40,7 +48,7 @@ public class ClassifierResult
 
     public static class RootMeanSquaredErrorMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData){
             return eval.rootMeanSquaredError();
         }
@@ -48,7 +56,7 @@ public class ClassifierResult
 
     public static class RelativeAbsoluteErrorMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             try {
                 return eval.relativeAbsoluteError();
@@ -59,7 +67,7 @@ public class ClassifierResult
     }
     public static class RootRelativeSquaredErrorMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return eval.rootRelativeSquaredError();
         }
@@ -67,7 +75,7 @@ public class ClassifierResult
 
     public static class AreaAboveROCMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return 1.0d - eval.areaUnderROC(1);
         }
@@ -75,7 +83,7 @@ public class ClassifierResult
 
     public static class AreaUnderROCMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return -eval.areaUnderROC(1);
         }
@@ -83,7 +91,7 @@ public class ClassifierResult
 
     public static class AvgCostMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return eval.avgCost();
         }
@@ -91,7 +99,7 @@ public class ClassifierResult
 
     public static class CorrectMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return -eval.correct();
         }
@@ -99,7 +107,7 @@ public class ClassifierResult
 
     public static class IncorrectMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return eval.incorrect();
         }
@@ -107,7 +115,7 @@ public class ClassifierResult
 
     public static class CorrelationCoefficientMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             try {
                 return -eval.correlationCoefficient();
@@ -119,7 +127,7 @@ public class ClassifierResult
 
     public static class FalseNegativeRateMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return eval.falseNegativeRate(1);
         }
@@ -127,7 +135,7 @@ public class ClassifierResult
 
     public static class FalsePositiveRateMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return eval.falsePositiveRate(1);
         }
@@ -135,7 +143,7 @@ public class ClassifierResult
 
     public static class FMeasureMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return -eval.fMeasure(1);
         }
@@ -143,7 +151,7 @@ public class ClassifierResult
 
     public static class KappaMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return -eval.kappa();
         }
@@ -151,7 +159,7 @@ public class ClassifierResult
 
     public static class KBInformationMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             try {
                 return -eval.KBInformation();
@@ -163,7 +171,7 @@ public class ClassifierResult
 
     public static class KBMeanInformationMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             try {
                 return -eval.KBMeanInformation();
@@ -175,7 +183,7 @@ public class ClassifierResult
 
     public static class KBRelativeInformationMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             try {
                 return -eval.KBRelativeInformation();
@@ -187,7 +195,7 @@ public class ClassifierResult
 
     public static class PctCorrectMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return -eval.pctCorrect();
         }
@@ -195,7 +203,7 @@ public class ClassifierResult
 
     public static class PctIncorrectMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return eval.pctIncorrect();
         }
@@ -203,7 +211,7 @@ public class ClassifierResult
 
     public static class PrecisionMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return -eval.precision(1);
         }
@@ -211,7 +219,7 @@ public class ClassifierResult
 
     public static class WeightedAreaUnderROCMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return -eval.weightedAreaUnderROC();
         }
@@ -219,7 +227,7 @@ public class ClassifierResult
 
     public static class WeightedFalseNegativeRateMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return eval.weightedFalseNegativeRate();
         }
@@ -227,7 +235,7 @@ public class ClassifierResult
 
     public static class WeightedFalsePositiveRateMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return eval.weightedFalsePositiveRate();
         }
@@ -235,7 +243,7 @@ public class ClassifierResult
 
     public static class WeightedFMeasureMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return -eval.weightedFMeasure();
         }
@@ -243,7 +251,7 @@ public class ClassifierResult
 
     public static class WeightedPrecisionMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return -eval.weightedPrecision();
         }
@@ -251,7 +259,7 @@ public class ClassifierResult
 
     public static class WeightedRecallMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return -eval.weightedRecall();
         }
@@ -259,7 +267,7 @@ public class ClassifierResult
 
     public static class WeightedTrueNegativeRateMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return -eval.weightedTrueNegativeRate();
         }
@@ -267,7 +275,7 @@ public class ClassifierResult
 
     public static class WeightedTruePositiveRateMetric implements Metric
     {
-        public double getDefault() { return INFINITY; }
+        public double getDefault() { return getInfinity(); }
         public double getScore(Evaluation eval, Instances testingData) {
             return -eval.weightedTruePositiveRate();
         }
@@ -332,11 +340,11 @@ public class ClassifierResult
         mRawScore = mMetric.getScore(eval, testingData);
 
         if(Double.isInfinite(mRawScore)) {
-            mRawScore = INFINITY;
+            mRawScore = getInfinity();
         }
-        if(mRawScore > INFINITY) {
+        if(mRawScore > getInfinity()) {
             System.err.println("Score larger than our definition of infinity, adjusting.");
-            mRawScore = INFINITY - 1;
+            mRawScore = getInfinity() - 1;
         }
         setPercentEvaluated(eval);
     }

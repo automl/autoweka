@@ -444,7 +444,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         boolean allFailed = true;
         for(int i = 0; i < parallelRuns; i++) {
-            allFailed &= bests[i].errorEstimate == autoweka.ClassifierResult.INFINITY;
+            allFailed &= bests[i].errorEstimate == autoweka.ClassifierResult.getInfinity();
         }
         if(allFailed) {
             throw new Exception("All runs timed out, unable to find good configuration. Please allow more time and rerun.");
