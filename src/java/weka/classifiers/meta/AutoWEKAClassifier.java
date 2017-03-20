@@ -46,7 +46,6 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 
 import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import java.net.URLDecoder;
 
@@ -343,7 +342,11 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         }
 
         final String javaExecutable = autoweka.Util.getJavaExecutable();
-        if (!Files.exists(Paths.get(javaExecutable))) throw new Exception("Java executable could not be found. Please refer to \"Known Issues\" in the Auto-WEKA manual.");
+
+        if(!(new File(javaExecutable)).isFile() && // Windows...
+          !(new File(javaExecutable + ".exe")).isFile()) {
+            throw new Exception("Java executable could not be found. Please refer to \"Known Issues\" in the Auto-WEKA manual.");
+        }
 
         Thread[] workers = new Thread[parallelRuns];
 
