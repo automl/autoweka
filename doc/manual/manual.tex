@@ -99,10 +99,10 @@ selecting it from the list of classifiers (Figure~\ref{fig:classifier}).
 
 When using Auto-WEKA like a normal classifier, it is important to select the
 Test option ``Use training set''. Auto-WEKA performs a statistically rigorous
-evaluation internally and does not require the external split into training and
-test sets that WEKA provides. Selecting another option will not improve the
-quality of the result and cause Auto-WEKA to take much longer.
-Figure~\ref{fig:train} shows the recommended setting.
+evaluation internally (10 fold cross-validation) and does not require the
+external split into training and test sets that WEKA provides. Selecting another
+option will not improve the quality of the result and cause Auto-WEKA to take
+much longer. Figure~\ref{fig:train} shows the recommended setting.
 
 \begin{figure}[!ht]
 \begin{center}
@@ -149,6 +149,9 @@ Auto-WEKA can be run from the CLI like any other WEKA classifier; for example:
 java -cp autoweka.jar weka.classifiers.meta.AutoWEKAClassifier \
     -t iris.arff -timeLimit 15 -no-cv
 \end{verbatim}
+
+Note that we specify the flag \verb=-no-cv= to prevent WEKA from splitting the
+data into training and test sets in addition to what Auto-WEKA does internally.
 
 Running Auto-WEKA with the \verb=-h= flag or without any options lists the
 options that can be set by the user. Note that the general WEKA options appear

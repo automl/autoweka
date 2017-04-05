@@ -108,7 +108,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         TerminationHoldout
     }
     /** Default evaluation method. */
-    static final Resampling DEFAULT_RESAMPLING = Resampling.TerminationHoldout;
+    static final Resampling DEFAULT_RESAMPLING = Resampling.CrossValidation;
 
     /** Available metrics. */
     static enum Metric {
@@ -171,7 +171,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         resamplingArgsMap.put(Resampling.CrossValidation, "numFolds=10");
         resamplingArgsMap.put(Resampling.MultiLevel, "numLevels=2[$]autoweka.instancegenerators.CrossValidation[$]numFolds=10");
         resamplingArgsMap.put(Resampling.RandomSubSampling, "numSamples=10:percent=66");
-        resamplingArgsMap.put(Resampling.TerminationHoldout, "terminationPercent=30[$]autoweka.instancegenerators.CrossValidation[$]numFolds=10");
     }
     /** Arguments for the default evaluation method. */
     static final String DEFAULT_RESAMPLING_ARGS = resamplingArgsMap.get(DEFAULT_RESAMPLING);
