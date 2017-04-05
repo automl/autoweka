@@ -1035,6 +1035,11 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 		    res+="\n\n----END OF CONFIGURATION RANKING----";
 		}
 
+        res += "Temporary run directories:\n";
+        for(int i = 0; i < msExperimentPaths.length; i++) {
+            res += msExperimentPaths[i] + "\n";
+        }
+
         res += "\n\nFor better performance, try giving Auto-WEKA more time.\n";
         if(totalTried < 1000) {
             res += "Tried " + totalTried + " configurations; to get good results reliably you may need to allow for trying thousands of configurations.\n";
