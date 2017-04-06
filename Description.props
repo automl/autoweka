@@ -2,10 +2,10 @@
 PackageName=Auto-WEKA
 
 # Version (required)
-Version=2.4
+Version=2.5
 
 #Date
-Date=2017-03-20
+Date=2017-04-06
 
 # Title (required)
 Title=Automatically find the best model and parameters for a dataset.
@@ -25,7 +25,7 @@ License=GPL 3.0
 Description=Automatically finds the best model with its best parameter settings for a given classification or regression task.<br/><br/>For more information see:<br/><br/>Chris Thornton, Frank Hutter, Holger Hoos, and Kevin Leyton-Brown (2013). Auto-WEKA: Combined Selection and Hyperparameter Optimization of Classification Algorithms. In Proc. of KDD 2013.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.ubc.ca/labs/beta/Projects/autoweka/autoweka-2.4.zip
+PackageURL=http://www.cs.ubc.ca/labs/beta/Projects/autoweka/autoweka-2.5.zip
 
 # URL for further information
 URL=https://github.com/automl/autoweka
