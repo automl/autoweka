@@ -1,0 +1,5 @@
+in src/java/weka/classifiers/meta/AutoWEKAClassifier.java:
+
+resamplingArgsMap.put(Resampling.CrossValidation, "numFolds=10");
+
+change numFolds to desired #
