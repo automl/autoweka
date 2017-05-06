@@ -572,15 +572,15 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.addElement(
             new Option("\tThe number of parallel runs. EXPERIMENTAL.\n" + "\t(default: " + DEFAULT_PARALLEL_RUNS + ")",
                 "parallelRuns", 1, "-parallelRuns <runs>"));
-        //result.addElement(
-        //    new Option("\tThe type of resampling used.\n" + "\t(default: " + String.valueOf(DEFAULT_RESAMPLING) + ")",
-        //        "resampling", 1, "-resampling <resampling>"));
-        //result.addElement(
-        //    new Option("\tResampling arguments.\n" + "\t(default: " + DEFAULT_RESAMPLING_ARGS + ")",
-        //        "resamplingArgs", 1, "-resamplingArgs <args>"));
-        //result.addElement(
-        //    new Option("\tExtra arguments.\n" + "\t(default: " + DEFAULT_EXTRA_ARGS + ")",
-        //        "extraArgs", 1, "-extraArgs <args>"));
+        result.addElement(
+            new Option("\tThe type of resampling used.\n" + "\t(default: " + String.valueOf(DEFAULT_RESAMPLING) + ")",
+                "resampling", 1, "-resampling <resampling>"));
+        result.addElement(
+            new Option("\tResampling arguments.\n" + "\t(default: " + DEFAULT_RESAMPLING_ARGS + ")",
+                "resamplingArgs", 1, "-resamplingArgs <args>"));
+        result.addElement(
+            new Option("\tExtra arguments.\n" + "\t(default: " + DEFAULT_EXTRA_ARGS + ")",
+                "extraArgs", 1, "-extraArgs <args>"));
 
         Enumeration<Option> enu = super.listOptions();
         while (enu.hasMoreElements()) {
@@ -611,12 +611,12 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.add("" + metric);
         result.add("-parallelRuns");
         result.add("" + parallelRuns);
-        //result.add("-resampling");
-        //result.add("" + resampling);
-        //result.add("-resamplingArgs");
-        //result.add("" + resamplingArgs);
-        //result.add("-extraArgs");
-        //result.add("" + extraArgs);
+        result.add("-resampling");
+        result.add("" + resampling);
+        result.add("-resamplingArgs");
+        result.add("" + resamplingArgs);
+        result.add("-extraArgs");
+        result.add("" + extraArgs);
 
         Collections.addAll(result, super.getOptions());
         return result.toArray(new String[result.size()]);
@@ -672,25 +672,25 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             parallelRuns = DEFAULT_PARALLEL_RUNS;
         }
 
-        //tmpStr = Utils.getOption("resampling", options);
-        //if (tmpStr.length() != 0) {
-        //    resampling = Resampling.valueOf(tmpStr);
-        //} else {
-        //    resampling = DEFAULT_RESAMPLING;
-        //}
-        //resamplingArgs = resamplingArgsMap.get(resampling);
+        tmpStr = Utils.getOption("resampling", options);
+        if (tmpStr.length() != 0) {
+            resampling = Resampling.valueOf(tmpStr);
+        } else {
+            resampling = DEFAULT_RESAMPLING;
+        }
+        resamplingArgs = resamplingArgsMap.get(resampling);
 
-        //tmpStr = Utils.getOption("resamplingArgs", options);
-        //if (tmpStr.length() != 0) {
-        //    resamplingArgs = tmpStr;
-        //}
+        tmpStr = Utils.getOption("resamplingArgs", options);
+        if (tmpStr.length() != 0) {
+            resamplingArgs = tmpStr;
+        }
 
-        //tmpStr = Utils.getOption("extraArgs", options);
-        //if (tmpStr.length() != 0) {
-        //    extraArgs = tmpStr;
-        //} else {
-        //    extraArgs = DEFAULT_EXTRA_ARGS;
-        //}
+        tmpStr = Utils.getOption("extraArgs", options);
+        if (tmpStr.length() != 0) {
+            extraArgs = tmpStr;
+        } else {
+            extraArgs = DEFAULT_EXTRA_ARGS;
+        }
 
         super.setOptions(options);
         Utils.checkForRemainingOptions(options);
@@ -840,54 +840,54 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         return "How many of the best configurations should be returned as output";
     }
 
-    //public void setResampling(Resampling r) {
-    //    resampling = r;
-    //    resamplingArgs = resamplingArgsMap.get(r);
-    //}
+    public void setResampling(Resampling r) {
+        resampling = r;
+        resamplingArgs = resamplingArgsMap.get(r);
+    }
 
-    //public Resampling getResampling() {
-    //    return resampling;
-    //}
+    public Resampling getResampling() {
+        return resampling;
+    }
 
-    ///**
-    // * Returns the tip text for this property.
-    // * @return tip text for this property
-    // */
-    //public String ResamplingTipText() {
-    //    return "the type of resampling";
-    //}
+    /**
+     * Returns the tip text for this property.
+     * @return tip text for this property
+     */
+    public String ResamplingTipText() {
+        return "the type of resampling";
+    }
 
-    //public void setResamplingArgs(String args) {
-    //    resamplingArgs = args;
-    //}
+    public void setResamplingArgs(String args) {
+        resamplingArgs = args;
+    }
 
-    //public String getResamplingArgs() {
-    //    return resamplingArgs;
-    //}
+    public String getResamplingArgs() {
+        return resamplingArgs;
+    }
 
-    ///**
-    // * Returns the tip text for this property.
-    // * @return tip text for this property
-    // */
-    //public String resamplingArgsTipText() {
-    //    return "resampling arguments";
-    //}
+    /**
+     * Returns the tip text for this property.
+     * @return tip text for this property
+     */
+    public String resamplingArgsTipText() {
+        return "resampling arguments";
+    }
 
-    //public void setExtraArgs(String args) {
-    //    extraArgs = args;
-    //}
+    public void setExtraArgs(String args) {
+        extraArgs = args;
+    }
 
-    //public String getExtraArgs() {
-    //    return extraArgs;
-    //}
+    public String getExtraArgs() {
+        return extraArgs;
+    }
 
-    ///**
-    // * Returns the tip text for this property.
-    // * @return tip text for this property
-    // */
-    //public String extraArgsTipText() {
-    //    return "extra arguments";
-    //}
+    /**
+     * Returns the tip text for this property.
+     * @return tip text for this property
+     */
+    public String extraArgsTipText() {
+        return "extra arguments";
+    }
 
     /** Set the WEKA logger.
      * Used for providing feedback during execution.
