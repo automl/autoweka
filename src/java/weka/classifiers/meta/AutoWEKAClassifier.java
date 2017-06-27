@@ -419,7 +419,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                     }
                 } });
             workers[i].start();
-            workers[i].start();
         }
         try {
             for(int i = 0; i < parallelRuns; i++) {
