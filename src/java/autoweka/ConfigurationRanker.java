@@ -2,7 +2,13 @@ package autoweka;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Collections;
+import java.util.List;
 
 import static weka.classifiers.meta.AutoWEKAClassifier.configurationRankingPath;
 import static weka.classifiers.meta.AutoWEKAClassifier.configurationInfoDirPath;
