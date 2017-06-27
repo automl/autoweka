@@ -40,28 +40,15 @@ import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
-import java.io.Serializable;
+import java.io.*;
 
 import java.nio.file.Files;
 
 import java.net.URLDecoder;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Properties;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -219,7 +206,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     /** The number of best configurations to return as output. */
     protected int nBestConfigs = DEFAULT_N_BEST;
     /** The best configurations. */
-    protected ConfigurationCollection cc;
+    protected ConfigurationCollection bestConfigsCollection;
 
     /** The internal evaluation method. */
     protected Resampling resampling = DEFAULT_RESAMPLING;
@@ -473,8 +460,16 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         //Print log of best configurations
         if(nBestConfigs > 1) {
-          ConfigurationRanker.rank(nBestConfigs, msExperimentPaths[bestIndex] + expName + File.separator, mBest.rawArgs);
-		    cc = ConfigurationCollection.fromXML(msExperimentPaths[bestIndex] + expName + File.separator + configurationRankingPath,ConfigurationCollection.class);
+            try{
+                ConfigurationRanker.rank(nBestConfigs, msExperimentPaths[bestIndex] + expName + File.separator, mBest.rawArgs);
+                bestConfigsCollection = ConfigurationCollection.fromXML(msExperimentPaths[bestIndex] + expName + File.separator + configurationRankingPath,ConfigurationCollection.class);
+            }catch(Exception e){
+                if (e instanceof FileNotFoundException || e instanceof NoSuchElementException){
+                    System.out.println("Could not find any configuration fully evaluated on all 10 folds. Please provide Auto-WEKA with more run time");
+                    bestConfigsCollection = null; //Redundant but just to be sure
+                }
+            }
+
         }
 
         classifierClass = mBest.classifierClass;
@@ -1020,21 +1015,36 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             res += eval.toClassDetailsString();
         } catch(Exception e) { /*TODO treat*/ }
 
-		if(nBestConfigs > 1) {
-		    List<Configuration> ccAL = cc.asArrayList();
-		    int fullyEvaluatedAmt = cc.getFullyEvaluatedAmt();
 
-		    res += "\n\n------- " + fullyEvaluatedAmt + " BEST CONFIGURATIONS -------";
-		    res += "\n\nThese are the " + fullyEvaluatedAmt + " best configurations, as ranked by SMAC";
-		    res += "\nPlease note that this list only contains configurations evaluated on every fold.";
-		    res += "\nIf you need more configurations, consider running Auto-WEKA for a longer time.";
-		    for(int i = 0; i < fullyEvaluatedAmt; i++){
-		  	 res += "\n\nConfiguration #" + (i + 1) + ":\nSMAC Score: " + ccAL.get(i).getAverageScore() + "\nArgument String:\n" + ccAL.get(i).getArgStrings();
-		    }
-		    res+="\n\n----END OF CONFIGURATION RANKING----";
-		}
+        if(nBestConfigs > 1) {
 
-        res += "Temporary run directories:\n";
+            if(bestConfigsCollection==null){
+                res += "\n\n------- BEST CONFIGURATIONS -------";
+                res+= "\nEither your dataset is so large or the runtime is so short that we couldn't evaluate even a single fold";
+                res+= "\nof your dataset within the given time constraints. Please, consider running Auto-WEKA for a longer time.";
+            }else{
+                List<Configuration> bccAL = bestConfigsCollection.asArrayList();
+                int fullyEvaluatedAmt = bestConfigsCollection.getFullyEvaluatedAmt();
+                int maxFoldEvaluationAmt = bccAL.get(0).getEvaluationAmount();
+
+                res += "\n\n------- " + fullyEvaluatedAmt + " BEST CONFIGURATIONS -------";
+                res += "\n\nThese are the " + fullyEvaluatedAmt + " best configurations, as ranked by SMAC";
+                res += "\nPlease note that this list only contains configurations evaluated on at least "+maxFoldEvaluationAmt+" folds,";
+                if(maxFoldEvaluationAmt<10){
+                    res+= "\nWhich is less than 10 because that was the largest amount of folds we could evaluate for a single configuration";
+                    res+= "\nunder the given time constraints. If you want us to evaluate more folds (recommended), or if you need more configurations,";
+                    res +="\nplease consider running Auto-WEKA for a longer time.";
+                }else{
+                    res += "\nIf you need more configurations, please consider running Auto-WEKA for a longer time.";
+                }
+                for(int i = 0; i < fullyEvaluatedAmt; i++){
+                    res += "\n\nConfiguration #" + (i + 1) + ":\nSMAC Score: " + bccAL.get(i).getAverageScore() + "\nArgument String:\n" + bccAL.get(i).getArgStrings();
+                }
+            }
+            res+="\n\n----END OF CONFIGURATION RANKING----\n";
+        }
+
+        res += "\nTemporary run directories:\n";
         for(int i = 0; i < msExperimentPaths.length; i++) {
             res += msExperimentPaths[i] + "\n";
         }

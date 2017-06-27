@@ -23,9 +23,6 @@ import javax.xml.bind.annotation.*;
 @XmlRootElement(name="configuration")
 public class Configuration extends XmlSerializable implements Comparable{
 
-	//@TODO Use Doubles and Integers for scores and folds
-	//@TODO make this have a Metric attribute and use it to be more generic
-	//@TODO perhaps define > and < in terms of the score
 
 	@XmlElement(name="argStrings")
 	private String mArgStrings;
@@ -197,7 +194,10 @@ public class Configuration extends XmlSerializable implements Comparable{
 	}
 	
 
-	//@TODO I think im not longer using those, check this later.
+	public int getEvaluationAmount(){
+		return this.mScores.size();
+	}
+
 	public double getEvaluatedScore() { return mEvaluatedScore;}
 	public int getEvaluatedFold()     { return mEvaluatedFold;}
 	public int getAmtFolds()          { return mAmtFolds;}

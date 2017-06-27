@@ -2,25 +2,19 @@ package autoweka;
 
 import java.io.File;
 
-import java.util.Arrays;
-import java.util.Scanner;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+//import java.io.FileNotFoundException;
+import java.io.FileNotFoundException;
+import java.util.*;
 
 import static weka.classifiers.meta.AutoWEKAClassifier.configurationRankingPath;
 import static weka.classifiers.meta.AutoWEKAClassifier.configurationInfoDirPath;
 import static weka.classifiers.meta.AutoWEKAClassifier.configurationHashSetPath;
 
 public class ConfigurationRanker{
-	//@TODO maybe integrate this class to ConfigurationCollection
 
 	//Loads configurations from temporary log, merges identical while merging the folds in which they were analyzed, sorts them and spits n of them to a xml
 
-	public static void rank(int n, String temporaryDirPath, String smacBest){
+	public static void rank(int n, String temporaryDirPath, String smacBest) throws FileNotFoundException, NoSuchElementException{
 
 		//Declaring some basic stuff
 		String hsPath = temporaryDirPath+configurationHashSetPath;
@@ -33,13 +27,12 @@ public class ConfigurationRanker{
 		Set<String> configHashes;
 
 		//Reading the hashes and removing duplicates
-		try{
-			redundantConfigHashes = (new Scanner(hashSetFile)).nextLine().split(",");
-			configHashes = new HashSet<String>(Arrays.asList(redundantConfigHashes));
-		}catch(Exception e){
-			System.out.println("Couldn't find config hash list file");
-			return;
-		}
+
+		redundantConfigHashes = (new Scanner(hashSetFile)).nextLine().split(",");
+		configHashes = new HashSet<String>(Arrays.asList(redundantConfigHashes));
+
+//
+
 		for(String hash : configHashes){
 			configs.add(Configuration.fromXML(cdPath+hash+".xml",Configuration.class));
 		}
@@ -49,7 +42,7 @@ public class ConfigurationRanker{
 			c.forceUpdateAverage();
 		}
 		Collections.sort(configs);
-		Collections.reverse(configs); //TODO invert definition in compareto rather than using this?
+		Collections.reverse(configs);
 
 		//Forcing the last incumbent to be the best configuration, in case of a tie
 		if (!smacBest.equals("IGNORE")){
