@@ -1,12 +1,8 @@
 package autoweka;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-
-import java.util.Random;
+import java.io.FileNotFoundException;
+import java.util.*;
 
 import org.junit.Test;
 import org.junit.Ignore;
@@ -143,8 +139,14 @@ public class ConfigurationTester{
       System.out.println("Couldn't initialize rankFilename.xml");
     }
 
+    try{
+      ConfigurationRanker.rank(1000,"test/experiment_folder/Auto-WEKA","IGNORE");
+    }catch(FileNotFoundException e){
+      System.out.println("caught a FileNotFoundException!");
+    }catch(NoSuchElementException e){
+      System.out.println("caught a NoSuchElementException!");
+    }
 
-    ConfigurationRanker.rank(1000,"test/experiment_folder/Auto-WEKA","IGNORE");
 
     ConfigurationCollection cc = ConfigurationCollection.fromXML(rankFilename, ConfigurationCollection.class);
     double bestScore = cc.get(0).getAverageScore();
