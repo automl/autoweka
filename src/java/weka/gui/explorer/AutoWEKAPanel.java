@@ -187,7 +187,7 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
     m_StopBut.setEnabled(false);
     m_StopBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-    stopAutoWEKA();
+        stopAutoWEKA();
       }
     });
 
@@ -426,8 +426,8 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
   protected void startAutoWEKA() {
     if (m_RunThread == null) {
       synchronized (this) {
-    m_StartBut.setEnabled(false);
-    m_StopBut.setEnabled(true);
+        m_StartBut.setEnabled(false);
+        m_StopBut.setEnabled(true);
       }
 
       m_RunThread = new Thread() {
@@ -506,9 +506,6 @@ public class AutoWEKAPanel extends ClassifierPanel implements ExplorerPanel, Log
   protected void stopAutoWEKA() {
     if (m_RunThread != null) {
       m_RunThread.interrupt();
-
-      // This is deprecated (and theoretically the interrupt should do).
-      m_RunThread.stop();
     }
   }
 

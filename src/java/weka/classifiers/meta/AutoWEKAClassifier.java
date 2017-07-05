@@ -430,6 +430,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             for(int i = 0; i < parallelRuns; i++) {
                 workers[i].interrupt();
             }
+            throw new InterruptedException("Auto-WEKA run interrupted!");
         }
 
         // get results
