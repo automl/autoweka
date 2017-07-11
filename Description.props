@@ -3,6 +3,7 @@ PackageName=Auto-WEKA
 
 # Version (required)
 Version=2.6
+Changes=Bugfixes.
 
 #Date
 Date=2017-07-11
