@@ -126,15 +126,15 @@ public class Configuration extends XmlSerializable implements Comparable{
 		this.lazyUpdateAverage();
 		cTarget.lazyUpdateAverage();
 
-			if (this.mFolds.size() > cTarget.mFolds.size()){
-				return 1;
-			}else if (this.mFolds.size() < cTarget.mFolds.size()){
-				return -1;
-			}else{
-				if      (this.mAverageScore < cTarget.mAverageScore ) return 1; //Assumes smaller score is better. If that isn't the case, change that.
-				else if (this.mAverageScore > cTarget.mAverageScore)  return -1; // @TODO make this class receive a Metric as input and do this change automatically
-				else return 0;
-			}
+		if (this.mFolds.size() > cTarget.mFolds.size()){
+			return 1;
+		}else if (this.mFolds.size() < cTarget.mFolds.size()){
+			return -1;
+		}else{
+			if      (this.mAverageScore < cTarget.mAverageScore ) return 1; //Assumes smaller score is better. If that isn't the case, change that.
+			else if (this.mAverageScore > cTarget.mAverageScore)  return -1; // @TODO make this class receive a Metric as input and do this change automatically
+			else return 0;
+		}
 
 	}
 
@@ -192,7 +192,7 @@ public class Configuration extends XmlSerializable implements Comparable{
 		lazyUpdateAverage();
 		return mAverageScore;
 	}
-	
+
 
 	public int getEvaluationAmount(){
 		return this.mScores.size();

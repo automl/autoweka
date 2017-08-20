@@ -145,18 +145,18 @@ public class Util
      *
      * @param aLogPath The path to the file.
      */
-   	public static void initializeFile(String aLogPath){
+    public static void initializeFile(String aLogPath){
 
-   		try{
-   			File logFile = new File(aLogPath);
-   			if(!logFile.exists()){
-   				logFile.createNewFile();
-   			}
-   		}catch(Exception e){
-   			System.out.println("Couldn't initialize file at this path: "+aLogPath);
-   		}
+        try{
+            File logFile = new File(aLogPath);
+            if(!logFile.exists()){
+                logFile.createNewFile();
+            }
+        }catch(Exception e){
+            System.out.println("Couldn't initialize file at this path: "+aLogPath);
+        }
 
-   	}
+    }
 
     /**
      * Makes folders along the specified path.
@@ -259,9 +259,9 @@ public class Util
                     String res = reader.readLine();
                     if (res != null)
                     {
-                       expanded += res;
-                       if(i < splitVar.length-1)
-                           expanded += java.io.File.pathSeparator;
+                        expanded += res;
+                        if(i < splitVar.length-1)
+                            expanded += java.io.File.pathSeparator;
                     }
                 }
 
@@ -290,9 +290,9 @@ public class Util
                     String res = reader.readLine();
                     if (res != null)
                     {
-                       expanded += res;
-                       if(i < splitVar.length-1)
-                           expanded += java.io.File.pathSeparator;
+                        expanded += res;
+                        if(i < splitVar.length-1)
+                            expanded += java.io.File.pathSeparator;
                     }
                 }
 
@@ -391,7 +391,7 @@ public class Util
     public static List<List<String>> cartesianProduct(List<List<String>> sets) {
         if (sets.size() < 2)
             return sets;
-            //throw new IllegalArgumentException("Can't have a product of fewer than two sets (got " + sets.size() + ")");
+        //throw new IllegalArgumentException("Can't have a product of fewer than two sets (got " + sets.size() + ")");
 
         return _cartesianProduct(sets.size()-1, sets);
     }

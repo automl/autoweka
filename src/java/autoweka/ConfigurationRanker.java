@@ -33,11 +33,11 @@ public class ConfigurationRanker{
 		Set<String> configHashes;
 
 		//Reading the hashes and removing duplicates
+		//TODO improve hashing
 
 		redundantConfigHashes = (new Scanner(hashSetFile)).nextLine().split(",");
 		configHashes = new HashSet<String>(Arrays.asList(redundantConfigHashes));
 
-//
 
 		for(String hash : configHashes){
 			configs.add(Configuration.fromXML(cdPath+hash+".xml",Configuration.class));

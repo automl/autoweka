@@ -45,8 +45,8 @@ public class ConfigurationCollection extends XmlSerializable{
 		for (Configuration c : mConfigurations){
 			if(c.getAmtFolds()==largestFoldAmt) counter++;
 		}
-		 return counter;
-	 }
+		return counter;
+	}
 
 	public ArrayList<Configuration> asArrayList(){
 		return mConfigurations;
