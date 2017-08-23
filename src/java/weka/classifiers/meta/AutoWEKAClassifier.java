@@ -208,7 +208,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     protected String[] attributeEvalArgs;
 
     /** The paths to the internal Auto-WEKA files.*/
-    protected static String[] msExperimentPaths;
+    protected String[] msExperimentPaths;
     /** The internal name of the experiment. */
     protected static String expName = "Auto-WEKA";
 
@@ -1061,9 +1061,11 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             res+="\n\n----END OF CONFIGURATION RANKING----\n";
         }
 
-        res += "\nTemporary run directories:\n";
-        for(int i = 0; i < msExperimentPaths.length; i++) {
-            res += msExperimentPaths[i] + "\n";
+        if(msExperimentPaths != null) {
+            res += "\nTemporary run directories:\n";
+            for(int i = 0; i < msExperimentPaths.length; i++) {
+                res += msExperimentPaths[i] + "\n";
+            }
         }
 
         res += "\n\nFor better performance, try giving Auto-WEKA more time.\n";
