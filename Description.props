@@ -17,7 +17,7 @@ Category=Classification, Regression, Attribute Selection
 Author=Lars Kotthoff, Simon Zhu, Eibe Frank, Oto Alves, Farooq Ahmed, Samantha Sanders, Chris Thornton, Frank Hutter, Holger Hoos, Kevin Leyton-Brown
 
 # Maintainer (required)
-Maintainer=Lars Kotthoff <larsko@cs.ubc.ca>
+Maintainer=Lars Kotthoff <larsko@uwyo.edu>
 
 # License (required)
 License=GPL 3.0
