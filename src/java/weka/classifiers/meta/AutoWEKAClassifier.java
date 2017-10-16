@@ -16,6 +16,7 @@
 
 package weka.classifiers.meta;
 
+import autoweka.ClassifierResult;
 import autoweka.Ensembler;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
@@ -103,8 +104,10 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     static final int DEFAULT_TIME_LIMIT = 15;
     /** Default memory limit for classifiers. */
     static final int DEFAULT_MEM_LIMIT = 1024;
-    /** Default */
+    /** Default amount of configurations to show as output*/
     static final int DEFAULT_N_BEST = 1;
+    /** Default value of the Ensemble Selection toggle*/
+    static final boolean DEFAULT_ENSEMBLE_SELECTION = true;
     /** Internal evaluation method. */
     static enum Resampling {
         CrossValidation,
@@ -223,6 +226,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
     /** The number of best configurations to return as output. */
     protected int nBestConfigs = DEFAULT_N_BEST;
+    /** Whether to use Ensemble Selection or not. */
+    protected boolean ensembleSelection = DEFAULT_ENSEMBLE_SELECTION;
     /** The best configurations. */
     protected ConfigurationCollection bestConfigsCollection;
 
@@ -297,13 +302,13 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         Instances validationSet = new Instances(is,is.numInstances());
 
-
         for(int i = 0; i<validationAmt; i++){
             Instance temp = is.instance(0);
             validationSet.add(temp);
             is.remove(0);
         }
 
+        //TODO for debugging, remove later
         System.out.println("is: "+is.toString());
         System.out.println("vs: "+validationSet.toString());
 
@@ -320,12 +325,18 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
      */
     public void buildClassifier(Instances is) throws Exception {
 
-        System.out.println("size:"+is.numInstances());
-        Instances[] isSplit = splitForEnsembleSelection(is,0.5);
-        System.out.println("size:"+is.numInstances());
+        Instances esValidationSet = null;
+        if(ensembleSelection){
 
-        is = isSplit[0];
-        Instances esValidationSet = isSplit[1];
+            nBestConfigs = (int) ClassifierResult.getInfinity();
+
+            System.out.println("size:"+is.numInstances()); //TODO for debugging, remove later
+            Instances[] isSplit = splitForEnsembleSelection(is,0.3);
+            System.out.println("size:"+is.numInstances()); //TODO for debugging, remove later
+
+            is = isSplit[0];
+            esValidationSet = isSplit[1];
+        }
 
         getCapabilities().testWithFail(is);
 
@@ -519,15 +530,30 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                     bestConfigsCollection = null; //Redundant but just to be sure
                 }
             }
-
         }
 
-        if(nBestConfigs>1){// && useEnsembleSelection){
+        if(nBestConfigs>1){
             if(bestConfigsCollection==null){
                 System.out.println("Since we could not find any configuration fully evaluated on all 10 folds, we can't build an Ensemble either. Please provide Auto-WEKA with more run time");
             }
-            Ensembler e = new Ensembler(is,esValidationSet,bestConfigsCollection);//TODO check if with sorted initialization theres enough for that
-            e.hillclimb(Metric.errorRate,true,5);
+
+//            try{
+//                Ensembler e = new Ensembler(is,esValidationSet,bestConfigsCollection);
+//                e.hillclimb(Metric.errorRate,true,5);
+//            }catch(RuntimeException re){
+//                System.out.println("WARNING: The Ensemble Selection process was halted due to the following exception:\n"+re.toString());
+//            }
+
+        }
+
+        //TODO maybe have a visible nBC thing too to avoid confusion.
+        if(ensembleSelection){
+            try{
+                Ensembler e = new Ensembler(is,esValidationSet,bestConfigsCollection);
+                e.hillclimb(Metric.errorRate,true,5);
+            }catch(RuntimeException re){
+                System.out.println("WARNING: The Ensemble Selection process was halted due to the following exception:\n"+re.toString());
+            }
         }
 
         classifierClass = mBest.classifierClass;
@@ -620,6 +646,9 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                 new Option("\tThe amount of best configurations to output.\n" + "\t(default: " + DEFAULT_N_BEST + ")",
                         "nBestConfigs", 1, "-nBestConfigs <limit>"));
         result.addElement(
+                new Option("\tWhether to use Ensemble Selection.\n" + "\t(default: " + DEFAULT_ENSEMBLE_SELECTION + ")",
+                        "ensembleSelection", 1, "-ensembleSelection <choice>"));
+        result.addElement(
                 new Option("\tThe metric to optimise.\n" + "\t(default: " + DEFAULT_METRIC + ")",
                         "metric", 1, "-metric <metric>"));
         result.addElement(
@@ -660,6 +689,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         result.add("" + memLimit);
         result.add("-nBestConfigs");
         result.add("" + nBestConfigs);
+        result.add("-ensembleSelection");
+        result.add("" + ensembleSelection);
         result.add("-metric");
         result.add("" + metric);
         result.add("-parallelRuns");
@@ -709,6 +740,13 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             nBestConfigs = Integer.parseInt(tmpStr);
         } else {
             nBestConfigs = DEFAULT_N_BEST;
+        }
+
+        tmpStr = Utils.getOption("ensembleSelection", options);
+        if (tmpStr.length() != 0) {
+            ensembleSelection = Boolean.parseBoolean(tmpStr);
+        } else {
+            ensembleSelection = DEFAULT_ENSEMBLE_SELECTION;
         }
 
         tmpStr = Utils.getOption("metric", options);
@@ -892,6 +930,27 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     public String nBestConfigsTipText() {
         return "How many of the best configurations should be returned as output";
     }
+
+    /**
+     * Set whether we're gonna use Ensemble Selection
+     * @param es boolean that determines if we're gonna use Ensemble Selection
+     */
+    public void setEnsembleSelection(boolean es) { ensembleSelection = es; }
+
+    /**
+     * Get the Ensemble Selection toggle
+     * @return A boolean saying whether we're gonna use EnsembleSelection
+     */
+    public boolean getEnsembleSelection() {
+        return ensembleSelection;
+    }
+
+    /**
+     * Returns the tip text for this property.
+     * @return tip text for this property
+     */
+    public String ensembleSelectionTipText() { return "Whether you want to use Ensemble Selection with the models Auto-WEKA finds along the run"; }
+
 
     //public void setResampling(Resampling r) {
     //    resampling = r;
@@ -1078,20 +1137,21 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
             if(bestConfigsCollection==null){
                 res += "\n\n------- BEST CONFIGURATIONS -------";
-                res+= "\nEither your dataset is so large or the runtime is so short that we couldn't evaluate even a single fold";
-                res+= "\nof your dataset within the given time constraints. Please, consider running Auto-WEKA for a longer time.";
+                res += "\nEither your dataset is so large or the runtime is so short that we couldn't evaluate even a single fold";
+                res += "\nof your dataset within the given time constraints. Please, consider running Auto-WEKA for a longer time.";
             }else{
-                List<Configuration> bccAL = bestConfigsCollection.asArrayList();
-                int fullyEvaluatedAmt = bestConfigsCollection.getFullyEvaluatedAmt();
-                int maxFoldEvaluationAmt = bccAL.get(0).getEvaluationAmount();
+                ConfigurationCollection fullyEvaluatedConfigs = bestConfigsCollection.getFullyEvaluatedCollection();
+                int highestEvaluationAmt = fullyEvaluatedConfigs.getHighestEvaluationAmt();
+                int fullyEvaluatedAmt = fullyEvaluatedConfigs.getFullyEvaluatedAmt();
+                List<Configuration> bccAL = fullyEvaluatedConfigs.asArrayList();
 
                 res += "\n\n------- " + fullyEvaluatedAmt + " BEST CONFIGURATIONS -------";
                 res += "\n\nThese are the " + fullyEvaluatedAmt + " best configurations, as ranked by SMAC";
-                res += "\nPlease note that this list only contains configurations evaluated on at least "+maxFoldEvaluationAmt+" folds,";
-                if(maxFoldEvaluationAmt<10){
-                    res+= "\nWhich is less than 10 because that was the largest amount of folds we could evaluate for a single configuration";
-                    res+= "\nunder the given time constraints. If you want us to evaluate more folds (recommended), or if you need more configurations,";
-                    res +="\nplease consider running Auto-WEKA for a longer time.";
+                res += "\nPlease note that this list only contains configurations evaluated on at least "+highestEvaluationAmt+" folds,";
+                if(highestEvaluationAmt<10){
+                    res += "\nWhich is less than 10 because that was the largest amount of folds we could evaluate for a single configuration";
+                    res += "\nunder the given time constraints. If you want us to evaluate more folds (recommended), or if you need more configurations,";
+                    res += "\nplease consider running Auto-WEKA for a longer time.";
                 }else{
                     res += "\nIf you need more configurations, please consider running Auto-WEKA for a longer time.";
                 }

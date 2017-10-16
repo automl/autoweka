@@ -27,6 +27,7 @@ public class Ensembler {
     final static Logger log = LoggerFactory.getLogger(Ensembler.class);
 
 
+    private ConfigurationCollection cc;
     private List<Configuration> cfgList;  //List of configurations read from the configuration ranking file at rPath
     private List<EnsembleElement> availableEnsembleElements;
 
@@ -40,19 +41,36 @@ public class Ensembler {
     static final String DEFAULT_STOP_CRITERION = "ENSEMBLE_SIZE";
     static final int    DEFAULT_NO_IMPROVEMENT_LIMIT = 3;
     static final int    DEFAULT_MAX_ENSEMBLE_SIZE = 10;
+    static final int    DEFAULT_MIN_ENSEMBLE_WITH_REPETITIONS_SIZE = 5;
 
     static final String DEFAULT_HILLCLIMB_ALGORITHM = "BASIC";
     static final String DEFAULT_ENSEMBLE_EVALUATION_ALGORITHM = "MAJORITY_VOTING";
-
+    static final boolean DEFAULT_USE_ONLY_FULLY_EVALUATED_CONFIGS = true;
 
     private String currentStopCriterion;
     private int maxEnsembleSize;
     private int noImprovementLimit;
+    private int minEnsembleWithRepetitionsSize;
     private String currentHillclimbAlgorithm;
     private String currentEnsembleEvaluationAlgorithm;
+    private boolean useOnlyFullyEvaluatedConfigs;
 
 
+    public int getMinEnsembleWithRepetitionsSize() {
+        return minEnsembleWithRepetitionsSize;
+    }
 
+    public void setMinEnsembleWithRepetitionsSize(int minEnsembleWithRepetitionsSize) {
+        this.minEnsembleWithRepetitionsSize = minEnsembleWithRepetitionsSize;
+    }
+
+    public boolean getUseOnlyFullyEvaluatedConfigs() {
+        return useOnlyFullyEvaluatedConfigs;
+    }
+
+    public void setUseOnlyFullyEvaluatedConfigs(boolean useOnlyFullyEvaluatedConfigs) {
+        this.useOnlyFullyEvaluatedConfigs = useOnlyFullyEvaluatedConfigs;
+    }
     public int getMaxEnsembleSize() {
         return maxEnsembleSize;
     }
@@ -81,9 +99,7 @@ public class Ensembler {
         return currentHillclimbAlgorithm;
     }
 
-    public void setHillclimbAlgorithm(String currentHillclimbAlgorithm) {
-        this.currentHillclimbAlgorithm = currentHillclimbAlgorithm;
-    }
+    public void setHillclimbAlgorithm(String currentHillclimbAlgorithm) { this.currentHillclimbAlgorithm = currentHillclimbAlgorithm; }
 
     public String getEnsembleEvaluationAlgorithm() {
         return currentEnsembleEvaluationAlgorithm;
@@ -97,11 +113,9 @@ public class Ensembler {
     //TODO allow for embedded CV
     //TODO allow for backtracking
     //TODO allow for disk storage
-    //TODO write the remaining stop criteria
+    //TODO make configuration metric-generic
 
     //TODO some constraints:
-    // If no repetition allowed, max ensemble size has to be size of list
-    // Cant do sorted initialization with more elements than we have in list
     // No improvement can't be longer than list length if no repetitions are allowed
 
 
@@ -112,8 +126,8 @@ public class Ensembler {
         this.currentStopCriterion = DEFAULT_STOP_CRITERION;
         this.maxEnsembleSize = DEFAULT_MAX_ENSEMBLE_SIZE;
         this.noImprovementLimit = DEFAULT_NO_IMPROVEMENT_LIMIT;
-
-
+        this.useOnlyFullyEvaluatedConfigs = DEFAULT_USE_ONLY_FULLY_EVALUATED_CONFIGS;
+        this.minEnsembleWithRepetitionsSize = DEFAULT_MIN_ENSEMBLE_WITH_REPETITIONS_SIZE;
 
         this.partialEnsembleTrajectory = new ArrayList<Ensemble>();
         this.partialEnsembleTrajectoryScores = new ArrayList<Double>();
@@ -121,11 +135,7 @@ public class Ensembler {
 
         this.trainingSet = trainingSet;
         this.validationSet = validationSet;
-        this.cfgList = cc.asArrayList(); //TODO we assume cc is sorted, since in AutoWEKAClassifier we use ConfigurationRanker before the Ensembler. Fix it so that we don't assume anything.
-
-        //TODO temp
-        this.maxEnsembleSize = (cfgList.size()>5)?cfgList.size():5;// this.cfgList.size()-1;
-        //TODO write a toString for the weka output
+        this.cc = cc;
     }
 
     private EnsembleElement setUpEnsembleElement(Configuration c){
@@ -141,50 +151,96 @@ public class Ensembler {
         return Arrays.asList(metricsToMax).contains(metric);
     }
 
-    public Ensemble hillclimb(Metric metric, boolean repetitionsAllowed, int sortInitialization){
+    public Ensemble hillclimb(Metric metric, boolean repetitionsAllowed, int sortInitialization) throws RuntimeException {
+
+        if(this.useOnlyFullyEvaluatedConfigs){
+            this.cc = this.cc.getFullyEvaluatedCollection();
+        }
+        this.cfgList = this.cc.asArrayList();
+        int configAmount = this.cfgList.size();
+
+        //Checking if the requested metric has an implementation available
+        if(metric!=Metric.errorRate){
+            throw new RuntimeException("Trying to use a metric not yet supported by Ensemble Selection");
+        }
+
+        //If sortInitialization is higher than the amount of configs, this defeats the purpose of ensemble selection
+        if(sortInitialization>configAmount ){
+            System.out.println("WARNING: Trying to use sorted initialization with more configurations than we have available. Sorted Initialization will be canceled.");
+            sortInitialization = 0;
+        }
+
+        //If we have no repetitions and maxEnsembleSize is higher than the amount of configs, we have to reduce it.
+        if ((this.currentStopCriterion.equals("ENSEMBLE_SIZE") || this.currentStopCriterion.equals("SIZE_AND_IMPROVEMENT"))
+                && (!repetitionsAllowed && maxEnsembleSize>configAmount)){
+            System.out.println("WARNING: Trying to use a maximum ensemble size which can't be reached. "+
+                               "Reducing from "+maxEnsembleSize+"to"+configAmount);
+            this.maxEnsembleSize = configAmount;
+        }
+
+        //If the no improvement limit is higher than the amount of configs, the process can't be finished.
+        if((this.currentStopCriterion.equals("NO_IMPROVEMENT") || this.currentStopCriterion.equals("SIZE_AND_IMPROVEMENT"))
+                && noImprovementLimit>=configAmount){
+            System.out.println("WARNING: Trying to use a no improvement limit which can't be reached. "+
+                    "Reducing from "+noImprovementLimit+"to"+(configAmount-1));
+            this.noImprovementLimit = configAmount-1;
+        }
+
+        //Running the hillclimb
         if(currentHillclimbAlgorithm.equals("BASIC")){
-            return this.basicHillclimb(metric, repetitionsAllowed, sortInitialization);
-        }else if (currentHillclimbAlgorithm.equals("BAGGING")){
-            return null; //TODO
+            long startTime = System.currentTimeMillis();
+
+            Ensemble rv = this.basicHillclimb(metric, repetitionsAllowed, sortInitialization);
+
+            long stopTime = System.currentTimeMillis();
+            double finalTrainTime = (stopTime - startTime) / 1000.0;
+            System.out.println("final train time for entire ensemble: "+finalTrainTime+" s");
+
+            return rv;
         }else{
             throw new RuntimeException("Using an unknown hillclimb algorithm in hillclimb()");
         }
+
     }
 
     private boolean reachedStopCriterion(Metric metric){
-        boolean metricToMax = isMetricToMax(metric);
+
         if(currentStopCriterion.equals("ENSEMBLE_SIZE")){
-
-            //checks if ensemble has at least N elements, where N == value
-            return (partialEnsembleTrajectory.size()>=maxEnsembleSize);
-
+            return reachedStopCriterionByEnsembleSize();
         }else if (currentStopCriterion.equals("NO_IMPROVEMENT")){
-
-            //checks if current max/min is in the last N elements, where N == value
-            if(metricToMax){
-                Double currentMax = Collections.max(partialEnsembleTrajectoryScores);
-                for(int i=1; i<=noImprovementLimit;i++){
-                    if(partialEnsembleTrajectoryScores.get(partialEnsembleTrajectoryScores.size()-i).equals(currentMax)){
-                        return false;
-                    }
-                }
-                return true;
-            }else{
-                Double currentMin = Collections.min(partialEnsembleTrajectoryScores);
-                for(int i=1; i<=noImprovementLimit;i++){
-                    if(partialEnsembleTrajectoryScores.get(partialEnsembleTrajectoryScores.size()-i).equals(currentMin)){
-                        return false;
-                    }
-                }
-                return true;
-            }
-
+            return reachedStopCriterionByNoImprovement(metric);
         }else if (currentStopCriterion.equals("SIZE_AND_IMPROVEMENT")){
-            return false; //TODO
+            return ( reachedStopCriterionByEnsembleSize() && reachedStopCriterionByNoImprovement(metric) );
         }else{
-
             throw new RuntimeException("Invalid Stop Criterion type");
+        }
 
+    }
+
+    private boolean reachedStopCriterionByEnsembleSize(){
+        //checks if ensemble has at least N elements, where N == value
+        return (partialEnsembleTrajectory.size()>=maxEnsembleSize);
+    }
+
+    private boolean reachedStopCriterionByNoImprovement(Metric metric){
+        //checks if current max/min is in the last N elements, where N == value
+        boolean metricToMax = isMetricToMax(metric);
+        if(metricToMax){
+            Double currentMax = Collections.max(partialEnsembleTrajectoryScores);
+            for(int i=1; i<=noImprovementLimit;i++){
+                if(partialEnsembleTrajectoryScores.get(partialEnsembleTrajectoryScores.size()-i).equals(currentMax)){
+                    return false;
+                }
+            }
+            return true;
+        }else{
+            Double currentMin = Collections.min(partialEnsembleTrajectoryScores);
+            for(int i=1; i<=noImprovementLimit;i++){
+                if(partialEnsembleTrajectoryScores.get(partialEnsembleTrajectoryScores.size()-i).equals(currentMin)){
+                    return false;
+                }
+            }
+            return true;
         }
     }
 
@@ -194,7 +250,6 @@ public class Ensembler {
         Ensemble incumbent = partialEnsembleTrajectory.get(0);
 
         for (Ensemble e : partialEnsembleTrajectory) {
-            //TODO have a metric-generic compareTo in Ensemble
             Double incumbentPerformance = incumbent.getLastMeasuredPerformance(metric);
             Double ePerformance = e.getLastMeasuredPerformance(metric);
             if ((metricToMax && ePerformance > incumbentPerformance) || (!metricToMax && ePerformance < incumbentPerformance)) {
@@ -212,13 +267,15 @@ public class Ensembler {
 
         Ensemble currentPartialEnsemble = new Ensemble();
         List<EnsembleElement> localAvailableElements = new ArrayList<EnsembleElement>(availableEnsembleElements); //shallow copying
+
+        //For debugging TODO remove later
         System.out.println("LAE:"+localAvailableElements.toString());
-        System.out.println("LAE length:"+localAvailableElements.toString());
+        System.out.println("LAE length:"+localAvailableElements.size());
+
         //Sorted initialization
         if(sortInitialization>0){
-//
-            for(int i = 0; i < sortInitialization ; i++){
-                //TODO check if it makes sense to repeat models here in case repetition is allowed
+
+            for(int i = 0; i < sortInitialization && i<localAvailableElements.size(); i++){
                 currentPartialEnsemble.appendElement(localAvailableElements.get(i));
                 partialEnsembleTrajectory.add(currentPartialEnsemble);
                 partialEnsembleTrajectoryScores.add(currentPartialEnsemble.measureEnsemblePerformance(this.validationSet,metric,"MAJORITY_VOTING"));
@@ -230,7 +287,7 @@ public class Ensembler {
                 }
             }
 
-        } //leave this here unless youre sure it applies to any hillclimb in the same fashion
+        }
 
         //Taking steps in the hillclimbing
         while(!reachedStopCriterion(metric)){
@@ -241,6 +298,8 @@ public class Ensembler {
                 localAvailableElements.remove(nextStep.getElements().get(nextStep.getElements().size()-1));
             }
         }
+
+        //For debugging TODO remove later
         System.out.println("\nHillclimbing output:\n"+partialEnsembleTrajectory.toString()+"\n"+partialEnsembleTrajectoryScores.toString()+"\n-----\n");
 
         //Returning the output of the ES hillclimbing process
@@ -252,7 +311,9 @@ public class Ensembler {
     }
 
     private Ensemble basicTakeStep(Ensemble currentPartialEnsemble, List<EnsembleElement> localAvailableElements, Metric metric){
+        //For debugging TODO remove later
         System.out.println("Starting step");
+
         boolean metricToMax = isMetricToMax(metric);
         Map<EnsembleElement,Double> optionScores = new HashMap<EnsembleElement,Double>();
 
@@ -277,17 +338,24 @@ public class Ensembler {
         //Shallow copies the input step, adds new element and returns the next step
         Ensemble rv = currentPartialEnsemble.shallowCopy();
         rv.appendElement(incumbentElement);
+
+        //For debugging TODO remove later
         System.out.println("Finishing step");
+
         return rv;
     }
 
-    //TODO option for ES with bagging
+
 
     private class Ensemble{
 
         private List<EnsembleElement> elements;
         private Map<Metric,Double> lastMeasuredPerformances;
 
+        @Override
+        public String toString(){
+            return elements.toString();
+        }
 
 
         public Ensemble(){
@@ -298,7 +366,8 @@ public class Ensembler {
         public Ensemble(List<EnsembleElement> elements){
             this.elements = new ArrayList<EnsembleElement>(elements); //shallow copying
             this.lastMeasuredPerformances = new HashMap<Metric, Double>();
-//            System.out.println("elements: "+this.elements.toString()); //TODO delete later
+            //  //For debugging TODO remove later
+            //  //System.out.println("elements: "+this.elements.toString());
         }
 
         public Ensemble shallowCopy(){
@@ -318,7 +387,7 @@ public class Ensembler {
         }
 
         public Double measureEnsemblePerformance(Instances validationSet, Metric metric, String evaluateAlgorithm){
-            //TODO so far it doesn't support multiple metrics. Only supports errorRate
+            //TODO implement the computation for other metrics we might want. So far it only supports error rate
             double incorrectAmount = 0;
 
             for(int i = 0; i<validationSet.numInstances(); i++){
@@ -328,7 +397,9 @@ public class Ensembler {
                 }
             }
             double errorRate = (incorrectAmount/(double)validationSet.numInstances());
-            System.out.println("eR:"+errorRate);
+
+//            For debugging TODO remove later
+//            System.out.println("eR:"+errorRate);
             this.lastMeasuredPerformances.put(metric,errorRate);
             return errorRate;
         }
@@ -409,6 +480,10 @@ public class Ensembler {
 
         private Map<Instance,Double> cachedPredictions;
 
+        public String toString(){
+            return "Classifier Class: "+classifierClass+"\nArgs:[+\n"+String.join(",",classifierArgs)+"]\n";
+        }
+
         public EnsembleElement(Configuration configuration){
             this.configuration = configuration;
             this.cachedPredictions = new HashMap<Instance, Double>();
@@ -451,11 +526,19 @@ public class Ensembler {
 
                 classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
 
+                //For debugging TODO remove later
                 long startTime = System.currentTimeMillis();
+
                 trainingInstances = as.reduceDimensionality(trainingInstances);
                 classifier.buildClassifier(trainingInstances);
+
+                //For debugging TODO remove later
                 long stopTime = System.currentTimeMillis();
                 double finalTrainTime = (stopTime - startTime) / 1000.0;
+                System.out.println("Trained Element!:[\n"+(String.join(" ",this.classifierArgs))+"\n]");
+                System.out.println("Element had been trained in "+this.configuration.getAmtFolds()+" folds");
+                System.out.println("final train time for this element: "+finalTrainTime+" s");
+
             }catch (Exception e){
                 throw new RuntimeException("Caught an exception while trying to train an EnsembleElement with argstrings:"+ configuration.getArgStrings());
             }
@@ -470,8 +553,7 @@ public class Ensembler {
                     Instance inst_withReduction = as.reduceDimensionality(inst);
                     cachedPredictions.put(inst,classifier.classifyInstance(inst_withReduction));
                 }catch(Exception e){
-//                    System.out.println(e.toString());
-                    throw new RuntimeException("Caught an exception while trying to cache predictions for the EnsembleElement with argstrings:"+configuration.getArgStrings());
+                    throw new RuntimeException("Caught an exception while trying to cache predictions for the EnsembleElement with argstrings:"+configuration.getArgStrings()+"\nError message:"+e.toString());
                 }
             }
 

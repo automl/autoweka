@@ -20,12 +20,11 @@ public class ConfigurationCollection extends XmlSerializable{
 	public ConfigurationCollection(){
 		mConfigurations = new ArrayList<Configuration>();
 	}
+
 	public ConfigurationCollection(List<Configuration> aConfigurations){
 		mConfigurations = new ArrayList<Configuration> (aConfigurations);
 	}
-	public ConfigurationCollection(ArrayList<Configuration> aConfigurations){
-		mConfigurations = aConfigurations;
-	}
+
 	public void add(Configuration c){
 		mConfigurations.add(c);
 	}
@@ -38,19 +37,56 @@ public class ConfigurationCollection extends XmlSerializable{
 		return mConfigurations.size();
 	}
 
-	//Returns the amount of configurations evaluated on all folds. Assumes the thing is sorted. TODO check if it is
-	public int getFullyEvaluatedAmt() {
-		int largestFoldAmt = mConfigurations.get(0).getAmtFolds();
+	//Gets the highest amount of fold evaluations from all the configurations within the collection
+	public int getHighestEvaluationAmt(){
+		int highest = 0;
+		for (Configuration c : mConfigurations){
+			if(c.getAmtFolds()>highest){
+				highest = c.getAmtFolds();
+			}
+		}
+		return highest;
+	}
+
+	//Returns the amount of configurations evaluated on all folds. The input integer is the maximum amount of folds possible according to user's CV options.
+	public int getFullyEvaluatedAmt(int maxAmt){
 		int counter = 0;
 		for (Configuration c : mConfigurations){
-			if(c.getAmtFolds()==largestFoldAmt) counter++;
+			if(c.getAmtFolds()==maxAmt) counter++;
 		}
 		return counter;
 	}
 
+	//Optional version of the method that assumes the configuration with the most evaluations has the highest possible amount
+	public int getFullyEvaluatedAmt() {
+		int maxAmt = this.getHighestEvaluationAmt();
+		return this.getFullyEvaluatedAmt(maxAmt);
+	}
+
+	//Returns a new ConfigurationCollection containing only the fully evaluated configurations
+	public ConfigurationCollection getFullyEvaluatedCollection(int maxAmt){
+		List<Configuration> rvConfigurations = new ArrayList<Configuration>();
+		for(Configuration c : mConfigurations){
+			if (c.getAmtFolds() == maxAmt){
+				rvConfigurations.add(c);
+			}
+		}
+		ConfigurationCollection rv = new ConfigurationCollection(rvConfigurations);
+		return rv;
+	}
+
+	//Optional version of the method that assumes the configuration with the most evaluations has the highest possible amount
+	public ConfigurationCollection getFullyEvaluatedCollection(){
+		int maxAmt = this.getHighestEvaluationAmt();
+		return this.getFullyEvaluatedCollection(maxAmt);
+	}
+
+
+
 	public ArrayList<Configuration> asArrayList(){
 		return mConfigurations;
 	}
+
 	public static <T extends XmlSerializable> T fromXML(String filename, Class<T> c){ //Original is protected so we're overriding to make it public.
 		return XmlSerializable.fromXML(filename,c);
 	}
