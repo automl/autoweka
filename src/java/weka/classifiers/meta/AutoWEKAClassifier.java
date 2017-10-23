@@ -86,6 +86,8 @@ import autoweka.tools.GetBestFromTrajectoryGroup;
 import autoweka.Configuration;
 import autoweka.ConfigurationCollection;
 import autoweka.ConfigurationRanker;
+import autoweka.Ensembler.Ensemble;
+import autoweka.Ensembler.EnsembleElement;
 
 /**
  * Auto-WEKA interface for WEKA.
@@ -226,10 +228,14 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
     /** The number of best configurations to return as output. */
     protected int nBestConfigs = DEFAULT_N_BEST;
+    /** The same as above, for specific cases in which we also use Ensemble Selection */
+    protected int visibleNBestConfigs = DEFAULT_N_BEST; // The user might request very few configs, which hinders the ES process
     /** Whether to use Ensemble Selection or not. */
     protected boolean ensembleSelection = DEFAULT_ENSEMBLE_SELECTION;
     /** The best configurations. */
     protected ConfigurationCollection bestConfigsCollection;
+    /** The output of the ensemble selection process. */
+    protected Ensemble ensembleSelectionOutput;
 
     /** The internal evaluation method. */
     protected Resampling resampling = DEFAULT_RESAMPLING;
@@ -309,8 +315,8 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         }
 
         //TODO for debugging, remove later
-        System.out.println("is: "+is.toString());
-        System.out.println("vs: "+validationSet.toString());
+//        System.out.println("is: "+is.toString());
+//        System.out.println("vs: "+validationSet.toString());
 
         //TODO Maybe shallow copy before changing is
         return new Instances[]{is,validationSet};
@@ -326,6 +332,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
     public void buildClassifier(Instances is) throws Exception {
 
         Instances esValidationSet = null;
+        visibleNBestConfigs = nBestConfigs;
         if(ensembleSelection){
 
             nBestConfigs = (int) ClassifierResult.getInfinity();
@@ -536,21 +543,13 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             if(bestConfigsCollection==null){
                 System.out.println("Since we could not find any configuration fully evaluated on all 10 folds, we can't build an Ensemble either. Please provide Auto-WEKA with more run time");
             }
-
-//            try{
-//                Ensembler e = new Ensembler(is,esValidationSet,bestConfigsCollection);
-//                e.hillclimb(Metric.errorRate,true,5);
-//            }catch(RuntimeException re){
-//                System.out.println("WARNING: The Ensemble Selection process was halted due to the following exception:\n"+re.toString());
-//            }
-
         }
 
-        //TODO maybe have a visible nBC thing too to avoid confusion.
+
         if(ensembleSelection){
             try{
                 Ensembler e = new Ensembler(is,esValidationSet,bestConfigsCollection);
-                e.hillclimb(Metric.errorRate,true,5);
+                ensembleSelectionOutput = e.hillclimb(Metric.errorRate,true,3);
             }catch(RuntimeException re){
                 System.out.println("WARNING: The Ensemble Selection process was halted due to the following exception:\n"+re.toString());
             }
@@ -1133,14 +1132,27 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         } catch(Exception e) { /*TODO treat*/ }
 
 
-        if(nBestConfigs > 1) {
+        if(visibleNBestConfigs > 1) {
 
             if(bestConfigsCollection==null){
                 res += "\n\n------- BEST CONFIGURATIONS -------";
                 res += "\nEither your dataset is so large or the runtime is so short that we couldn't evaluate even a single fold";
                 res += "\nof your dataset within the given time constraints. Please, consider running Auto-WEKA for a longer time.";
             }else{
-                ConfigurationCollection fullyEvaluatedConfigs = bestConfigsCollection.getFullyEvaluatedCollection();
+                ConfigurationCollection fullyEvaluatedConfigs;
+                if(nBestConfigs!=visibleNBestConfigs){
+                    List<Configuration> fullList = bestConfigsCollection.getFullyEvaluatedCollection().asArrayList();
+                    List<Configuration> subList;
+                    if(fullList.size()>visibleNBestConfigs){
+                        subList = bestConfigsCollection.getFullyEvaluatedCollection().asArrayList().subList(0,visibleNBestConfigs);
+                    }else{
+                        subList = fullList;
+                    }
+
+                    fullyEvaluatedConfigs = new ConfigurationCollection(subList);
+                }else{
+                    fullyEvaluatedConfigs = bestConfigsCollection.getFullyEvaluatedCollection();
+                }
                 int highestEvaluationAmt = fullyEvaluatedConfigs.getHighestEvaluationAmt();
                 int fullyEvaluatedAmt = fullyEvaluatedConfigs.getFullyEvaluatedAmt();
                 List<Configuration> bccAL = fullyEvaluatedConfigs.asArrayList();
@@ -1160,6 +1172,27 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                 }
             }
             res+="\n\n----END OF CONFIGURATION RANKING----\n";
+        }
+
+        if(ensembleSelection){
+            if(ensembleSelectionOutput == null){
+                res += "\n\n------- ENSEMBLE SELECTION -------";
+                res += "\nThe result of the ensemble selection process is a null object. This is most likely a bug from the source code";
+            }else if(ensembleSelectionOutput.getElements().size()<=1){
+                res += "\n\n------- ENSEMBLE SELECTION -------";
+                res += "\nAuto-WEKA was unable to build an ensemble with a better performance than the standard incumbent.";
+                res += "\nThis might be due to a small amount of evaluated configurations.";
+                res += "\nIf you think that's the case, please consider running Auto-WEKA for a longer time.";
+            }else{
+                res += "\n\n------- ENSEMBLE SELECTION -------";
+                res += "\n\nThe Ensemble Selection process has built the following ensemble:";
+                int counter = 1;
+                for(EnsembleElement ee: ensembleSelectionOutput.getElements()){
+                    res += "\n\nConfiguration #" + counter + ":\nClassifier: " + ee.getClassifierClass() + "\nArgument String:\n" + ee.getConfiguration().getArgStrings();
+                    counter++;
+                }
+                res+="\n\n---- END OF ENSEMBLE ----\n";
+            }
         }
 
         if(msExperimentPaths != null) {

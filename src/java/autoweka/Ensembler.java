@@ -265,6 +265,10 @@ public class Ensembler {
             availableEnsembleElements.add(this.setUpEnsembleElement(c));
         } //Already sorted in the constructor so we should be fine
 
+        if(availableEnsembleElements.size()==0){
+            return new Ensemble();
+        }
+
         Ensemble currentPartialEnsemble = new Ensemble();
         List<EnsembleElement> localAvailableElements = new ArrayList<EnsembleElement>(availableEnsembleElements); //shallow copying
 
@@ -305,7 +309,11 @@ public class Ensembler {
         //Returning the output of the ES hillclimbing process
         this.incumbentEnsemble = this.getBestFromTrajectory(metric);
 
+        //For debugging TODO remove later
+        System.out.println("\nChopped hillclimbing output:\n");
+
         System.out.println(incumbentEnsemble.getElements().toString());
+        System.out.println(partialEnsembleTrajectoryScores.subList(0,incumbentEnsemble.getElements().size()));
 
         return incumbentEnsemble;
     }
@@ -347,7 +355,7 @@ public class Ensembler {
 
 
 
-    private class Ensemble{
+    public class Ensemble{
 
         private List<EnsembleElement> elements;
         private Map<Metric,Double> lastMeasuredPerformances;
@@ -452,7 +460,7 @@ public class Ensembler {
         }
     }
 
-    private class EnsembleElement{
+    public class EnsembleElement{
 
 
         private Configuration configuration;
@@ -482,6 +490,12 @@ public class Ensembler {
 
         public String toString(){
             return "Classifier Class: "+classifierClass+"\nArgs:[+\n"+String.join(",",classifierArgs)+"]\n";
+        }
+
+        public Configuration getConfiguration(){ return this.configuration; }
+
+        public String getClassifierClass(){
+            return this.classifierClass;
         }
 
         public EnsembleElement(Configuration configuration){
