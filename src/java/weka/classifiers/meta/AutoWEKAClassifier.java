@@ -17,7 +17,7 @@
 package weka.classifiers.meta;
 
 import autoweka.ClassifierResult;
-import autoweka.Ensembler;
+import autoweka.EnsembleSelector;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
@@ -26,26 +26,21 @@ import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 
-import weka.core.Attribute;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.converters.ArffSaver;
-import weka.core.Drawable;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
-import java.io.Serializable;
 import java.io.FileNotFoundException;
 
 
@@ -60,8 +55,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Properties;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -74,8 +67,6 @@ import org.slf4j.LoggerFactory;
 
 import autoweka.Experiment;
 import autoweka.ExperimentConstructor;
-import autoweka.InstanceGenerator;
-import autoweka.instancegenerators.CrossValidation;
 import autoweka.Util;
 import autoweka.Trajectory;
 import autoweka.TrajectoryGroup;
@@ -548,7 +539,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
         if(ensembleSelection){
             try{
-                Ensembler e = new Ensembler(is,esValidationSet,bestConfigsCollection);
+                EnsembleSelector e = new EnsembleSelector(is,esValidationSet,bestConfigsCollection);
                 ensembleSelectionOutput = e.hillclimb(Metric.errorRate,true,3);
             }catch(RuntimeException re){
                 System.out.println("WARNING: The Ensemble Selection process was halted due to the following exception:\n"+re.toString());
