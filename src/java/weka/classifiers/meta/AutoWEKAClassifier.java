@@ -86,8 +86,8 @@ import autoweka.tools.GetBestFromTrajectoryGroup;
 import autoweka.Configuration;
 import autoweka.ConfigurationCollection;
 import autoweka.ConfigurationRanker;
-import autoweka.Ensembler.Ensemble;
-import autoweka.Ensembler.EnsembleElement;
+import autoweka.Ensemble;
+import autoweka.EnsembleElement;
 
 /**
  * Auto-WEKA interface for WEKA.
