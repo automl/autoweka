@@ -2,11 +2,11 @@
 PackageName=Auto-WEKA
 
 # Version (required)
-Version=2.6
-Changes=Bugfixes.
+Version=2.6.1
+Changes=Fix deserialization bug.
 
 #Date
-Date=2017-07-11
+Date=2017-08-23
 
 # Title (required)
 Title=Automatically find the best model and parameters for a dataset.
@@ -17,7 +17,7 @@ Category=Classification, Regression, Attribute Selection
 Author=Lars Kotthoff, Simon Zhu, Eibe Frank, Oto Alves, Farooq Ahmed, Samantha Sanders, Chris Thornton, Frank Hutter, Holger Hoos, Kevin Leyton-Brown
 
 # Maintainer (required)
-Maintainer=Lars Kotthoff <larsko@cs.ubc.ca>
+Maintainer=Lars Kotthoff <larsko@uwyo.edu>
 
 # License (required)
 License=GPL 3.0
@@ -26,7 +26,7 @@ License=GPL 3.0
 Description=Automatically finds the best model with its best parameter settings for a given classification or regression task.<br/><br/>For more information see:<br/><br/>Chris Thornton, Frank Hutter, Holger Hoos, and Kevin Leyton-Brown (2013). Auto-WEKA: Combined Selection and Hyperparameter Optimization of Classification Algorithms. In Proc. of KDD 2013.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.ubc.ca/labs/beta/Projects/autoweka/autoweka-2.6.zip
+PackageURL=http://www.cs.ubc.ca/labs/beta/Projects/autoweka/autoweka-2.6.1.zip
 
 # URL for further information
 URL=https://github.com/automl/autoweka

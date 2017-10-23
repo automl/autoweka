@@ -1158,6 +1158,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             res+="\n\n----END OF CONFIGURATION RANKING----\n";
         }
 
+
         if(ensembleSelection){
             if(ensembleSelectionOutput == null){
                 res += "\n\n------- ENSEMBLE SELECTION -------";
@@ -1178,6 +1179,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                 res+="\n\n---- END OF ENSEMBLE ----\n";
             }
         }
+
 
         if(msExperimentPaths != null) {
             res += "\nTemporary run directories:\n";
