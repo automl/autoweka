@@ -305,11 +305,6 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
             is.remove(0);
         }
 
-        //TODO for debugging, remove later
-//        System.out.println("is: "+is.toString());
-//        System.out.println("vs: "+validationSet.toString());
-
-        //TODO Maybe shallow copy before changing is
         return new Instances[]{is,validationSet};
     }
 
@@ -328,9 +323,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
 
             nBestConfigs = (int) ClassifierResult.getInfinity();
 
-            System.out.println("size:"+is.numInstances()); //TODO for debugging, remove later
             Instances[] isSplit = splitForEnsembleSelection(is,0.3);
-            System.out.println("size:"+is.numInstances()); //TODO for debugging, remove later
 
             is = isSplit[0];
             esValidationSet = isSplit[1];

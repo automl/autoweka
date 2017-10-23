@@ -28,8 +28,6 @@ public class Ensemble {
     public Ensemble(List<EnsembleElement> elements){
         this.elements = new ArrayList<EnsembleElement>(elements); //shallow copying
         this.lastMeasuredPerformances = new HashMap<AutoWEKAClassifier.Metric, Double>();
-        //  //For debugging TODO remove later
-        //  //System.out.println("elements: "+this.elements.toString());
     }
 
     public Ensemble shallowCopy(){
@@ -60,8 +58,6 @@ public class Ensemble {
         }
         double errorRate = (incorrectAmount/(double)validationSet.numInstances());
 
-//            For debugging TODO remove later
-//            System.out.println("eR:"+errorRate);
         this.lastMeasuredPerformances.put(metric,errorRate);
         return errorRate;
     }

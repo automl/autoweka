@@ -103,15 +103,6 @@ public class EnsembleSelector {
         this.currentEnsembleEvaluationAlgorithm = currentEnsembleEvaluationAlgorithm;
     }
 
-    //TODO make factory DP for hillclimbing options
-    //TODO allow for embedded CV
-    //TODO allow for backtracking
-    //TODO allow for disk storage
-    //TODO make configuration metric-generic
-
-    //TODO some constraints:
-    // No improvement can't be longer than list length if no repetitions are allowed
-
 
     public EnsembleSelector(Instances trainingSet, Instances validationSet, ConfigurationCollection cc){
 
@@ -266,10 +257,6 @@ public class EnsembleSelector {
         Ensemble currentPartialEnsemble = new Ensemble();
         List<EnsembleElement> localAvailableElements = new ArrayList<EnsembleElement>(availableEnsembleElements); //shallow copying
 
-        //For debugging TODO remove later
-        System.out.println("LAE:"+localAvailableElements.toString());
-        System.out.println("LAE length:"+localAvailableElements.size());
-
         //Sorted initialization
         if(sortInitialization>0){
 
@@ -297,24 +284,13 @@ public class EnsembleSelector {
             }
         }
 
-        //For debugging TODO remove later
-        System.out.println("\nHillclimbing output:\n"+partialEnsembleTrajectory.toString()+"\n"+partialEnsembleTrajectoryScores.toString()+"\n-----\n");
-
         //Returning the output of the ES hillclimbing process
         this.incumbentEnsemble = this.getBestFromTrajectory(metric);
-
-        //For debugging TODO remove later
-        System.out.println("\nChopped hillclimbing output:\n");
-
-        System.out.println(incumbentEnsemble.getElements().toString());
-        System.out.println(partialEnsembleTrajectoryScores.subList(0,incumbentEnsemble.getElements().size()));
 
         return incumbentEnsemble;
     }
 
     private Ensemble basicTakeStep(Ensemble currentPartialEnsemble, List<EnsembleElement> localAvailableElements, Metric metric){
-        //For debugging TODO remove later
-        System.out.println("Starting step");
 
         boolean metricToMax = isMetricToMax(metric);
         Map<EnsembleElement,Double> optionScores = new HashMap<EnsembleElement,Double>();
@@ -341,17 +317,8 @@ public class EnsembleSelector {
         Ensemble rv = currentPartialEnsemble.shallowCopy();
         rv.appendElement(incumbentElement);
 
-        //For debugging TODO remove later
-        System.out.println("Finishing step");
-
         return rv;
     }
-
-
-
-
-
-
 
 }
 

@@ -92,18 +92,8 @@ public class EnsembleElement{
 
             classifier = AbstractClassifier.forName(classifierClass, classifierArgs.clone());
 
-            //For debugging TODO remove later
-            long startTime = System.currentTimeMillis();
-
             trainingInstances = as.reduceDimensionality(trainingInstances);
             classifier.buildClassifier(trainingInstances);
-
-            //For debugging TODO remove later
-            long stopTime = System.currentTimeMillis();
-            double finalTrainTime = (stopTime - startTime) / 1000.0;
-            System.out.println("Trained Element!:[\n"+(String.join(" ",this.classifierArgs))+"\n]");
-            System.out.println("Element had been trained in "+this.configuration.getAmtFolds()+" folds");
-            System.out.println("final train time for this element: "+finalTrainTime+" s");
 
         }catch (Exception e){
             throw new RuntimeException("Caught an exception while trying to train an EnsembleElement with argstrings:"+ configuration.getArgStrings());
