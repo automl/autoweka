@@ -17,6 +17,7 @@
     </path>
     <path id="test.classpath">
         <fileset dir="." includes="autoweka.jar"/>
+        <fileset dir="${lib.dir}" includes="weka.jar"/>
         <fileset dir="${lib.dir}/test" includes="*.jar"/>
         <pathelement path="${testclass.dir}" /> 
     </path>
@@ -64,7 +65,7 @@
     <target name="jar" depends='compile'>
         <jar destfile="autoweka.jar" basedir="${class.dir}">
             <zipfileset dir="lib" includes="*.properties" />
-            <zipgroupfileset dir="lib" includes="*.jar" />
+            <zipgroupfileset dir="lib" includes="*.jar" excludes="weka.jar"/>
         </jar>
     </target>
     
