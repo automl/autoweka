@@ -2,7 +2,7 @@
 
 **Fork of the original Auto-WEKA**
 
-Official documentation:
+Official links and documentation:
 
 * Repository for [Auto-WEKA](http://www.cs.ubc.ca/labs/beta/Projects/autoweka/),
   wich provides automatic selection of models and hyperparameters for
