@@ -146,18 +146,20 @@ Note that the time limit is \emph{approximate} and Auto-WEKA may not take
 
 Auto-WEKA can be run from the CLI like any other WEKA classifier; for example:
 \begin{verbatim}
-java -cp autoweka.jar weka.classifiers.meta.AutoWEKAClassifier \
+java -cp weka.jar:autoweka.jar weka.classifiers.meta.AutoWEKAClassifier \
     -t iris.arff -timeLimit 15 -no-cv
 \end{verbatim}
 
 Note that we specify the flag \verb=-no-cv= to prevent WEKA from splitting the
 data into training and test sets in addition to what Auto-WEKA does internally.
+Windows users need to replace the \verb=:= with \verb=;=. The paths to the jar
+files may need to be adjusted.
 
 Running Auto-WEKA with the \verb=-h= flag or without any options lists the
 options that can be set by the user. Note that the general WEKA options appear
 first, followed by Auto-WEKA-specific options.
 \begin{verbatim}
-java -cp autoweka.jar weka.classifiers.meta.AutoWEKAClassifier -h
+java -cp weka.jar:autoweka.jar weka.classifiers.meta.AutoWEKAClassifier -h
 
 Help requested.
 
@@ -276,7 +278,7 @@ worst possible metric result. In specific cases, the value does not need to be
 this high; for example when optimizing accuracy for a classification problem.
 The value can be changed through the \verb=autoweka.infinity= system property:
 \begin{verbatim}
-java -Dautoweka.infinity=2 -cp autoweka.jar \
+java -Dautoweka.infinity=2 -cp weka.jar:autoweka.jar \
   weka.classifiers.meta.AutoWEKAClassifier -t iris.arff \
   -timeLimit 15 -no-cv
 \end{verbatim}
