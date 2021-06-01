@@ -41,6 +41,7 @@
         <copy todir="${class.dir}">
             <fileset dir="src/java" includes="**/*.yml"/>
             <fileset dir="src/java" includes="**/*.png"/>
+            <fileset dir="src/java" includes="**/*.properties"/>
         </copy>
     </target>
     
