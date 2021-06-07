@@ -17,16 +17,26 @@
     </path>
     <path id="test.classpath">
         <fileset dir="." includes="autoweka.jar"/>
+        <fileset dir="${lib.dir}" includes="weka.jar"/>
         <fileset dir="${lib.dir}/test" includes="*.jar"/>
         <pathelement path="${testclass.dir}" /> 
     </path>
 
     <!-- Clean target -->
-    <target name="clean">
+    <target name="clean" description="Removes all build files">
         <delete dir="${build.dir}"/>
+        <delete file="autoweka.zip"/>
+        <delete file="autoweka.jar"/>
+        <delete>
+            <fileset dir="${man.dir}" includes="*.pdf"/>
+            <fileset dir="${man.dir}" includes="*.aux"/>
+            <fileset dir="${man.dir}" includes="*.log"/>
+            <fileset dir="${man.dir}" includes="*.out"/>
+            <fileset dir="${man.dir}" includes="*.toc"/>
+        </delete>
     </target>
 
-    <target name="weka-package" depends='doc,manual,jar'>
+    <target name="weka-package" depends='doc,manual,jar' description="Builds the Weka package">
         <delete file="autoweka.zip"/>
         <zip destfile="autoweka.zip"
              basedir="."
@@ -35,7 +45,7 @@
     </target>
     
     <!-- Compile all the Autoweka code -->
-    <target name="compile">
+    <target name="compile" description="Compiles the source code">
         <mkdir dir="${class.dir}"/>
         <javac srcdir="src/java" destdir="${class.dir}" classpathref="classpath" includeantruntime="false" target="1.6" source="1.6" debug="true" />
         <copy todir="${class.dir}">
@@ -46,13 +56,22 @@
     </target>
     
     <!-- Build some javadoc -->
-    <target name="doc" description="generate documentation">
+    <target name="doc" description="Generates the javadoc">
         <mkdir dir="${javadoc.dir}"/>
         <javadoc sourcepath="src/java" classpathref="classpath" destdir="${javadoc.dir}"/>
     </target>
 
     <!-- Build User guide from Tex sources -->
-	<target name="manual" description="generate user manual">
+    <target name="manual" description="Generate the user manual (LaTeX -> PDF)">
+        <exec executable="ruby" dir='${man.dir}' output="${man.dir}/params.tex">
+            <arg value="getParams.rb"/>
+            <arg value="../../params"/>
+        </exec>
+        <exec executable="dia" dir='${man.dir}'>
+            <arg value="--export"/>
+            <arg value="devel-overview-crop.pdf"/>
+            <arg value="devel-overview.dia"/>
+        </exec>
         <exec executable="xelatex" dir='${man.dir}'>
             <arg value="manual.tex"/>
         </exec>
@@ -62,14 +81,14 @@
     </target>
 
     <!-- Build the actual jar -->
-    <target name="jar" depends='compile'>
+    <target name="jar" depends='compile' description="Builds the jar file">
         <jar destfile="autoweka.jar" basedir="${class.dir}">
             <zipfileset dir="lib" includes="*.properties" />
-            <zipgroupfileset dir="lib" includes="*.jar" />
+            <zipgroupfileset dir="lib" includes="*.jar" excludes="weka.jar"/>
         </jar>
     </target>
     
-    <target name="dist" depends="doc,manual,jar">
+    <target name="dist" depends="doc,manual,jar" description="Generates the distribution tar ball">
         <tar destfile="autoweka-dist.tar.gz" compression="gzip">
             <tarfileset dir="${jar.dir}" includes="*.jar" />
             <tarfileset dir="${lib.dir}" includes="*.jar" prefix="lib" />
@@ -87,13 +106,13 @@
     </target>
 
     <!-- Run some tests -->
-    <target name="compile-tests" depends="jar">
+    <target name="compile-tests" depends="jar" description="Compiles the unit tests">
         <mkdir dir="${testclass.dir}"/>
-        <javac srcdir="test/java" destdir="${testclass.dir}" classpathref="test.classpath" includeantruntime="false" target="1.6"  source="1.6" debug="true"/>
+        <javac srcdir="test/java" destdir="${testclass.dir}" classpathref="test.classpath" includeantruntime="false" target="1.8"  source="1.8" debug="true"/>
     </target>
 
     <!-- Run some tests -->
-    <target name="test" depends="compile-tests">
+    <target name="test" depends="compile-tests" description="Executes the unit tests">
         <junit haltonfailure="yes" fork="yes" showoutput="true">
             <classpath refid="test.classpath"/>
             <test name="autoweka.AutoWEKATestSuite"/>
@@ -102,3 +121,4 @@
         </junit>
     </target>
 </project>
+

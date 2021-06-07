@@ -7,3 +7,11 @@ doc/manual/manual.log
 doc/manual/manual.out
 doc/manual/manual.pdf
 doc/manual/manual.toc
+doc/manual/devel-overview-crop.*
+doc/manual/params.tex
+*~
+*.swp
+*.bak
+*.iml
+.idea/
+
