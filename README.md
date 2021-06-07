@@ -5,3 +5,6 @@ wich provides automatic selection of models and hyperparameters for
 [WEKA](http://www.cs.waikato.ac.nz/ml/weka/).
 
 You can find the manual [here](http://www.cs.ubc.ca/labs/beta/Projects/autoweka/manual.pdf). Javadoc is available [here](https://automl.github.io/autoweka/).
+
+This project will not be updated anymore. We may make exceptions for pull
+requests.
