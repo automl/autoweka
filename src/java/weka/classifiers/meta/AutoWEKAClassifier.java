@@ -174,6 +174,12 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
         resamplingArgsMap.put(Resampling.CrossValidation, "numFolds=10");
         resamplingArgsMap.put(Resampling.MultiLevel, "numLevels=2[$]autoweka.instancegenerators.CrossValidation[$]numFolds=10");
         resamplingArgsMap.put(Resampling.RandomSubSampling, "numSamples=10:percent=66");
+        try {
+            Class.forName("autoweka.SetEnvironmentVariablesForAutoWeka");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
     }
     /** Arguments for the default evaluation method. */
     static final String DEFAULT_RESAMPLING_ARGS = resamplingArgsMap.get(DEFAULT_RESAMPLING);

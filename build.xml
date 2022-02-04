@@ -114,6 +114,7 @@
     <!-- Run some tests -->
     <target name="test" depends="compile-tests" description="Executes the unit tests">
         <junit haltonfailure="yes" fork="yes" showoutput="true">
+            <jvmarg line="--add-opens=java.base/java.lang=ALL-UNNAMED"/>
             <classpath refid="test.classpath"/>
             <test name="autoweka.AutoWEKATestSuite"/>
             <test name="weka.classifiers.meta.AutoWEKAClassifierTest"/>
