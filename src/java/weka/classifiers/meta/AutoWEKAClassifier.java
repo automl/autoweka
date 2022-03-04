@@ -410,7 +410,7 @@ public class AutoWEKAClassifier extends AbstractClassifier implements Additional
                                 //log.info(line);
                             } else if(line.matches(".*WARN.*")) {
                                 // filter out noisy warning message
-                                if (line.matches(".*Picked up _JAVA_OPTIONS: --add-opens=java.base/java.lang=ALL-UNNAMED.*")) {
+                                if (line.matches(".*Picked up _JAVA_OPTIONS:.*")) {
                                     continue;
                                 }
                                 log.warn(line);
