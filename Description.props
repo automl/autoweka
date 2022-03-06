@@ -2,11 +2,11 @@
 PackageName=Auto-WEKA
 
 # Version (required)
-Version=2.6.3
-Changes=Updated Weka to 3.8.5; no longer bundling weka.jar; fix some XML dependencies
+Version=2.6.4
+Changes=Updated Weka to 3.8.6; Use the JVM that comes with WEKA
 
 #Date
-Date=2021-06-07
+Date=2022-03-07
 
 # Title (required)
 Title=Automatically find the best model and parameters for a dataset.
@@ -26,7 +26,7 @@ License=GPL 3.0
 Description=Automatically finds the best model with its best parameter settings for a given classification or regression task.<br/><br/>For more information see:<br/><br/>Chris Thornton, Frank Hutter, Holger Hoos, and Kevin Leyton-Brown (2013). Auto-WEKA: Combined Selection and Hyperparameter Optimization of Classification Algorithms. In Proc. of KDD 2013.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=https://github.com/automl/autoweka/releases/download/v2.6.3/autoweka.zip
+PackageURL=https://github.com/automl/autoweka/releases/download/v2.6.4/autoweka.zip
 
 # URL for further information
 URL=https://github.com/automl/autoweka
